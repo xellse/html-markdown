@@ -1,0 +1,26 @@
+{
+  "name": "html-markdown",
+  "version": "0.1.0",
+  "description": "一键将网页保存为 Markdown 的 Chrome 扩展",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": [
+    "chrome-extension",
+    "markdown",
+    "html-to-markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "rollup-plugin-chrome-extension": "^7.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  },
+  "dependencies": {
+    "turndown": "^7.1.2"
+  }
+}
