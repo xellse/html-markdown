@@ -4,10 +4,11 @@
   "version": "0.1.0",
   "description": "一键将网页保存为 Markdown",
   "action": {
+    "default_popup": "src/options/options.html",
     "default_icon": {
-      "16": "assets/icon16.png",
-      "48": "assets/icon48.png",
-      "128": "assets/icon128.png"
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
     }
   },
   "permissions": [
@@ -17,25 +18,31 @@
     "storage"
   ],
   "background": {
-    "service_worker": "worker.js",
+    "service_worker": "src/worker.js",
     "type": "module"
   },
   "options_ui": {
-    "page": "options/options.html",
-    "open_in_tab": false
+    "page": "src/options/options.html",
+    "open_in_tab": true
   },
   "icons": {
-    "16": "assets/icon16.png",
-    "48": "assets/icon48.png",
-    "128": "assets/icon128.png"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"]
+    }
+  ],
   "web_accessible_resources": [
     {
       "resources": [
         "src/turndown.js",
-        "assets/icon16.png",
-        "assets/icon48.png",
-        "assets/icon128.png"
+        "icon16.png",
+        "icon48.png",
+        "icon128.png"
       ],
       "matches": ["<all_urls>"]
     }

@@ -1,5 +1,6 @@
 // content.js - 在页面中执行的脚本，负责将 HTML 转换为 Markdown
 
+import './content.css';
 import TurndownService from './turndown.js';
 
 /**

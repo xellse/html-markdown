@@ -1,26 +1,25 @@
 // vite.config.js
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
-import { resolve } from 'path';
-import manifest from './src/manifest.json';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import manifestData from './src/manifest.json';
+
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
+  // publicDir: 'public', // Removed explicit public directory setting
   build: {
     outDir: 'dist',
+    manifest: false, // Disable Vite's manifest generation
     rollupOptions: {
-      input: {
-        worker: resolve(__dirname, 'src/worker.js'),
-        content: resolve(__dirname, 'src/content.js'),
-        options: resolve(__dirname, 'src/options/options.html'),
-      },
-      output: {
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-      },
+      input: {}, 
     },
   },
   plugins: [
-    crx({ manifest }),
+    crx({ manifest: manifestData }),
   ],
   resolve: {
     alias: {
