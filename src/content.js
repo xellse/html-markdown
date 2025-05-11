@@ -1,17 +1,12 @@
 // content.js - 在页面中执行的脚本，负责将 HTML 转换为 Markdown
 
+import TurndownService from './turndown.js';
+
 /**
  * 初始化 TurndownService 并添加自定义规则
  * @returns {object} - 配置好的 TurndownService 实例
  */
 const initTurndownService = () => {
-  // 动态导入 turndown（通过 chrome.scripting.executeScript 注入的脚本使用）
-  const TurndownService = window.TurndownService;
-  if (!TurndownService) {
-    console.error('TurndownService 未能加载');
-    return null;
-  }
-
   // 创建 turndown 实例
   const turndownService = new TurndownService({
     headingStyle: 'atx',      // 使用 # 样式的标题
