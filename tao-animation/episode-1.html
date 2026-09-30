@@ -1369,6 +1369,7 @@ const SFX = (() => {
     buzz() { tone('square', 150, 140, 0.28, 0.08); },
     tada() { [523, 659, 784, 1047].forEach((f, i) => tone('triangle', f, f, 0.22, 0.14, null, i * 0.09)); },
     paper() { noise('bandpass', 900, 0.6, 0.3, 0.12, 2400); },
+    tap() { tone('sine', 900, 520, 0.035, 0.12); },
   };
   return {
     unlock: AUD.ensure,

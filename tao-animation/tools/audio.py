@@ -102,7 +102,12 @@ def main():
     # --- music beds
     mdir = os.path.join(ROOT, 'audio', 'music'); os.makedirs(mdir, exist_ok=True)
     music = {}
+    used = set(cfg.get('music', {}).values())
+    if cfg.get('think') and any(sc['pauses'] for sc in scenes):
+        used.add(cfg['think'])
     for key, tr in cfg['tracks'].items():
+        if key not in used:
+            continue
         out = os.path.join(mdir, tr['file'])
         if not os.path.exists(out):
             src = os.path.join(a.music_src or '', tr['file'])
@@ -114,7 +119,7 @@ def main():
                                    '-ac', '2', '-ar', '44100', '-b:a', '64k', out])
         music[key] = {'d': round(mp3_len(out), 3), 'b': b64(out), 'title': tr['title']}
 
-    titles = ' · '.join(dict.fromkeys(t['title'] for t in cfg['tracks'].values()))
+    titles = ' · '.join(dict.fromkeys(m['title'] for m in music.values()))
     pack = {'voice': voice, 'music': music,
             'credits': f'配乐：Kevin MacLeod（incompetech.com）《{titles}》，CC BY 4.0 授权。配音：微软 Edge 神经网络语音（云希、云夏）。'}
     out_js = os.path.join(ROOT, meta['out'].replace('.html', '.audio.js'))
