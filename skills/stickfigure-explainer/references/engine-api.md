@@ -11,8 +11,10 @@ project/
 │   ├── shell.html            页面外壳（字体、CSS、播放条）
 │   └── ep1/                  一集 = 一个文件夹
 │       ├── meta.json         页面文字、封面帧、配音声音、每个场景的配乐
+│       ├── _xx_shared.js     （可选）几个场景共用的道具和函数：下划线开头，总会被构建带上，并且排在最前
 │       └── 00_title.js …     场景文件，按文件名顺序播放
-├── tools/audio.py            生成配音 + 配乐包 → episode-1.audio.js
+├── tools/audio.py            生成配音 + 配乐包 → episode-1.audio.js，然后自动重新构建页面
+├── tools/check_timing.py     生成配音前检查字幕长度和时长
 ├── tools/dump_lines.cjs      （audio.py 内部使用）导出每句字幕
 └── audio/{voice,music}/      配音缓存、配乐素材
 ```
@@ -38,6 +40,13 @@ project/
 - 没有"上一帧的状态"，不用 `Math.random()`，抖动也由时间决定。
 - 所以拖动进度条、截图检查、从任意时刻开始播放都完全可靠。
 - 每一帧，所有图元（带稳定 key 的 path、circle、text）放进一个列表（DL），再按 key 与 SVG 做增量同步。**key 必须稳定且唯一**，推荐用组件 id 作前缀：`fx.id + '.body'`。
+
+### 坐标和时间的约定
+- 舞台坐标 1600 × 900，原点在左上角，y 向下。
+- **`write` 的 y 是字的顶端**：字高等于 size，数字写在 y 到 y + size 之间。**`text`、`scribe`、`title`、`speech`、`label` 的 y 是文字的垂直中心**。
+- 组件里的 `t0`、`t1` 和轨道时间都是**场景内时间**，`targets(F)` 里的 `F.t` 也一样；`F.T` 是整集时间。**meta.json 的 `poster` 是整集时间**。
+- 字体常量：`CFG.FONT_ZH`（站酷快乐体，中文默认）、`CFG.FONT_MIX`（Patrick Hand 优先，适合英文和数字标签）、`CFG.FONT_MONO`（VT323，代码和屏幕）。
+- 等宽代码字体每个字符宽 `CFG.MONO_ADV × size`（0.4）。`textWidth(str, size, CFG.FONT_MONO)` 会按这个值估算。
 
 ## 2. 场景（defineScene）
 每个场景文件调用一次 `defineScene`，外面包一层立即执行的函数，避免变量互相污染。
@@ -161,15 +170,40 @@ project/
 | `thought` | `at`、`rx`、`ry`、`from: {char, part}` | 思考云泡泡 |
 | `prop` | `kind`（PROPS 里的名字）、`at` 或 `pos` 轨道、`rot`、`scale`、`drawDur`、`sfxAt` 以及自定义字段 | 画一个自定义道具，可以移动、旋转 |
 | `qm` | `pos` 轨道、`size`（200 为标准）、`mood`、`act`、`sign`（分步轨道，null 表示不举牌）、`gaze`、`burst`、`silent` | 小问号 |
-| `factCard` | `box: [x0, y0, x1, y1]`、`topic`、`rules: [y…]` | "数学小知识"卡片（改 topic 即可复用） |
+| `factCard` | `box: [x0, y0, x1, y1]`、`topic`（标题）、`stamp`（印章文字，默认"数学小知识"，可改成"编程小知识"等）、`rules: [y…]` | 小知识卡 |
+| `codeBlock` | `x`（左边）、`y`（第 0 行中心）、`size: 56`、`lh`、`cps: 14`、`lines: [{text, t0}]`（开头的空格就是缩进）、`pc: [[t, 行号]]`、`pcT1`、`out: {text, t0, size, dx, dy}` | 代码逐字打出，红色行指针，输出行 |
+| `varBox` | `name`、`cx`、`cy`、`w: 160`、`h: 110`、`size: 70`、`vals: [[t, '值']]`、`t0` | 变量盒子：新值写进去，旧值被红笔划掉并飘走；非数字的值会打字显示 |
+| `band` | `rect`、`t0`、`t1`、`dur`、`pad` | 黄色荧光笔，可以画在任意矩形上 |
+| `strike` | `rect`、`t0`、`dur` | 红笔划掉任意矩形 |
+| `ringRect` | `rect`、`t0`、`pad` | 红笔圈出任意矩形 |
+| `numberLine` | `from`、`to`、`x0`、`y`、`dx: 90`、`size: 60`、`t0`、`token: [[t, 值]]`、`tokenText: 'i'`、`fence: [[t, 位置]]`（9.5 表示 9 和 10 之间）、`hi: [[t, [lo, hi]]]` | 数轴：小人在格子间跳，栅栏，高亮范围 |
 | `speedLines` | `char`、`part`（例如 'handR'） | 手部速度线 |
 | `swingMarks` | `char` | 晃腿的弧线 |
+
+**`rect`（矩形）** 可以写成：
+- `[x, y, w, h]`；
+- `{ code: 'cb', line: 1, from: 9, to: 21 }`：codeBlock 第 1 行第 9–21 个字符；
+- `{ write: 'eq', from: 0, to: 3 }`：手写行的第 0–3 个字符；
+- `{ target: 'cb.out', w: 70, h: 70 }`：以某个命名点为中心；
+- `F => [x, y, w, h]`：函数。
+
+组件会发布一些命名点：
+- codeBlock：`'<id>.pc'`（行指针）、`'<id>.out'`（输出）；
+- numberLine：`'<id>.token'`、`'<id>.v<值>'`。
+
+**`write` 的其他参数**：
+- `anchor: 'middle' | 'end'`：x 是这一行的中心或右端；
+- `writeWidth(text, size)`：返回手写一行的实际宽度；
+- 布局好的写块也有 `fx.width`。
+
+**小问号举牌的方向**：牌子默认在右边，约占 70 + 牌宽一半（按 size / 200 缩放）。靠近舞台右边缘时，用 `signSide: 'left'` 把牌子举到左边。
 
 标签和箭头的 `target` 可以写成：
 - `[x, y]`；
 - `{ char: 'kid', part: 'headTop', dx, dy }`；
 - `{ write: 'eq', glyph: 2, dy }`（指向某个手写字符的下方）；
-- `{ target: 'rows' }`（`scene.targets` 里的名字）。
+- `{ target: 'rows' }`（`scene.targets` 里的名字，或组件发布的命名点）；
+- `{ code: 'cb', line: 1, col: 19 }`（指向代码第 1 行第 19 个字符的下方）。
 
 系列名和字幕由渲染器自动绘制，不用放进 fx。
 
@@ -220,7 +254,7 @@ COMP.dm_grid = {
 ```
 - **命名都加文件前缀**，例如 `dm_`、`h2_`，否则并行写场景时会互相覆盖。
 - 要被别人指向的点，写进 `F.targets[名字]`；角色类的组件写进 `F.anchors[id]`。
-- 需要在多个场景之间共享的道具或函数，放在编号靠前的文件里，挂到 `window.前缀Shared`，并在报告里写明依赖关系。
+- 需要在多个场景之间共享的道具或函数，放进 `src/epN/_前缀_shared.js`（下划线开头）。构建时它总是排在最前，`--only` 单独测试某个场景时也会带上。不要写在某个场景文件里再让别的场景去用。
 
 ## 9. 字幕、配音、音效
 ```js
@@ -233,7 +267,7 @@ subs: [
 ]
 ```
 - `say: false` 表示不念。声音在 meta.json 的 `audio.voices` 里定义（narr、kid、qm，可以再加）。
-- 时长规则：`t1 - t0 ≥ 0.27 × 字数 + 0.3`，行间隔 ≥ 0.1 秒（见 narrative.md 第 6 节）。
+- 时长规则：`t1 - t0 ≥ 0.2 × 字数 + 0.8`（主角声音 0.19 × 字数 + 0.95），行间隔 ≥ 0.1 秒。`python3 tools/check_timing.py ep1` 会逐句检查；也可以在 meta.json 的 `audio.voices.<声音>.pace: [a, b]` 里改系数（见 narrative.md 第 6 节）。
 - 音效用 `sfx` 或组件的 `cues`。新音效：`SFX.define('前缀_名字', (tone, noise) => { tone('sine', 880, 440, 0.1, 0.2); })`。
 
 ## 10. meta.json
@@ -248,29 +282,37 @@ subs: [
     "music": { "场景id": "main", … },
     "think": "think",
     "credits": "（可选）覆盖自动生成的署名"
-  }
+  },
+  "legend": { "hi": "黄色荧光笔 = 关键代码" }
 }
 ```
-- `poster`：封面帧的时间，选最能代表本集的一帧。
+- `poster`：封面帧的时间（整集时间），选最能代表本集的一帧。
+- `legend`：页面底部颜色图例的文字，可选 `ink`、`red`、`hi` 三项，默认是"故事 / 旁白批注 / 关键知识"。
+- 声音可以加 `pace: [a, b]`，覆盖 check_timing 用的时长系数。
+- `new_project.py` 生成的简介和读屏描述带有【待填写】，发布前要改掉。
 - `secs`：配乐截取多长（带 2.5 秒淡出，循环播放）。只打包本集真正用到的曲子。
 
 ## 11. 构建、检查、生成音频
 ```bash
 python3 build.py ep1                                   # → episode-1.html（有 episode-1.audio.js 就自动带上）
 python3 build.py ep1 --only 10_,20_ -o /tmp/t.html     # 只构建部分场景（测试单个场景时，它们从 t = 0 开始）
-python3 tools/audio.py ep1                             # 生成配音和配乐包，并列出超出时长的句子
-NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280   # 每 5 秒截一帧
+python3 tools/check_timing.py ep1                      # 生成配音前检查字幕
+python3 tools/audio.py ep1                             # 生成配音和配乐包，列出超出时长的句子，并自动重新构建页面
+NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280   # 每 5 秒一段、取每段中点截一帧（2.5, 7.5, …）
 python3 <skill>/scripts/sheet.py frames sheet.png 4 480                                          # 拼成一张缩略图，用 Read 看
 NODE_PATH=$(npm root -g) node <skill>/scripts/playtest.cjs episode-1.html out                    # 真实播放器测试
 python3 <skill>/scripts/gif.py frames_fps gif.gif 12 640                                         # 需要时出 GIF（配合 "fps:12"）
 ```
 - 页面提供的测试接口：`window.__seek(t)`、`__duration`、`__scenes`、`__audio()`。
 - `frames/console.txt` 必须为空。里面出现 "no web font loaded" 时，见 environment.md。
+- 页面加载就出错时，capture.cjs 会直接打印控制台内容并退出。常见原因是场景代码报错，或者 `--only` 漏掉了依赖。
 
 ## 12. 常见坑
 - **key 不稳定或重复**，会导致图元闪烁或串位。key 要带组件 id；循环里带上下标。
-- **`highlight` 和 `ring` 只能作用于 `write`**。要给其他东西加荧光，自己画一个 `C.hi` 填充的块（`blend: true`）。
-- **中文不能一笔笔写**（GLYPH 里没有），用 `scribe` 逐字出现。
+- **`highlight` 和 `ring` 只能作用于 `write`**。代码、打字文字、任意区域，用 `band`、`strike`、`ringRect` 配合 `rect`。
+- **中文和英文字母不能一笔笔写**（GLYPH 里只有数字和数学符号），用 `scribe` 逐字出现；代码用 `codeBlock`。
+- **SVG 会吞掉连续空格**：引擎的 `text` 已经加了 `white-space: pre`，缩进可以直接写成空格。
+- **共享代码**：写进 `_xx_shared.js`。不要让后面的场景依赖前面场景文件里的全局变量，否则 `--only` 单独测试时会报错。
 - **孩子举手、挠头时手被头挡住**：用 `armScale` 1.5–1.75 的姿势（kidCheer、scratchStand）。
 - **全屏道具盖住了高层级的东西**：盖住画面的道具放在 z 55；要露在上面的东西（例如人物）设 `def.z`。
 - **项目的 package.json 里有 `"type": "module"` 时**，node 脚本要用 `.cjs` 扩展名。

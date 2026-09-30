@@ -8,7 +8,7 @@ const CFG = {
   C: { paper: '#FBF8F1', ink: '#1E1E1E', red: '#D23A3F', pencil: '#9B9B9B', hi: '#FFE066' },
   FONT_ZH: "'ZCOOL KuaiLe','Patrick Hand',sans-serif",
   FONT_MIX: "'Patrick Hand','ZCOOL KuaiLe',sans-serif",
-  FONT_MONO: "'VT323','Courier New',monospace",
+  FONT_MONO: "'VT323','Courier New',monospace", MONO_ADV: 0.4,
   SIZE: { sub: 52, label: 40, speech: 84, mark: 84, series: 32 },
 };
 const C = CFG.C;
@@ -165,14 +165,16 @@ function text(key, str, x, y, o = {}) {
   if (o.rot) tf += ` rotate(${o.rot})`;
   if (o.scale !== undefined && o.scale !== 1) tf += ` scale(${+o.scale.toFixed(4)})`;
   const a = { transform: tf, x: 0, y: 0, 'font-size': o.size || 40, 'font-family': o.font || CFG.FONT_ZH,
-    fill: o.color || C.ink, 'text-anchor': o.anchor || 'middle', 'dominant-baseline': 'central' };
+    fill: o.color || C.ink, 'text-anchor': o.anchor || 'middle', 'dominant-baseline': 'central', style: 'white-space:pre' };
   if (o.opacity !== undefined && o.opacity < 1) a.opacity = +o.opacity.toFixed(3);
   if (o.halo) { a.stroke = C.paper; a['stroke-width'] = o.halo; a['stroke-linejoin'] = 'round'; a['paint-order'] = 'stroke'; }
   DL.add(o.z ?? Z.annot, key, 'text', a, str);
 }
-function textWidth(str, size) {
+/** Rough rendered width. CJK = 1 em; Latin ≈ 0.5 em (space 0.3); in the monospace code font every Latin char = MONO_ADV em. */
+function textWidth(str, size, font) {
+  const mono = font === CFG.FONT_MONO;
   let w = 0;
-  for (const ch of str) w += ch.charCodeAt(0) > 0x2E80 ? size : (ch === ' ' ? 0.3 : 0.5) * size;
+  for (const ch of str) w += ch.charCodeAt(0) > 0x2E80 ? size : (mono ? CFG.MONO_ADV : ch === ' ' ? 0.3 : 0.5) * size;
   return w;
 }
 /** Pencil-scribble ground shadow. */
@@ -265,8 +267,19 @@ function layoutWriting(fx) {
     cx += (g.w + (fx.track ?? 0.1)) * size;
   });
   fx.strokes = strokes; fx.boxes = boxes; fx.tEnd = tt; fx.xEnd = cx;
+  // visual width (xEnd also carries one trailing letter gap)
+  const last = boxes[boxes.length - 1];
+  fx.width = last ? last.x + last.w - fx.x : 0;
+  if (fx.anchor === 'middle' || fx.anchor === 'end') { // x is the centre (or right end) of the written line
+    const dx = -fx.width * (fx.anchor === 'middle' ? 0.5 : 1);
+    strokes.forEach(s => { s.pts = s.pts.map(p => [p[0] + dx, p[1], p[2]]); });
+    boxes.forEach(b => { b.x += dx; });
+    fx.x += dx; fx.xEnd += dx; fx.anchor = 'start';
+  }
   return fx;
 }
+/** Visual width of a handwritten line (no trailing gap). */
+function writeWidth(text, size, track = 0.1) { return layoutWriting({ text, x: 0, y: 0, size, t0: 0, speed: 1, track }).width; }
 function penAt(fx, t) {
   let s = fx.strokes[0]; if (!s) return null;
   for (const k of fx.strokes) if (k.t0 <= t) s = k;
@@ -1066,7 +1079,8 @@ COMP.qm = {
     stroke(k + '.fill', hook.slice(0, 8).concat([[-10, -120]]), { z, closed: true, fill: C.paper, noStroke: true, w: 1 });
     stroke(k + '.hook', hook, { z, w: w + 1.5, color: col });
     const waving = !sign && act === 'wave';
-    const handL = [-40, -44 + wave * 4], handR = sign ? [66, -92] : (waving ? [100 + wave * 12, -156] : [38, -46]);
+    const sL = !!sign && fx.signSide === 'left';
+    const handL = sL ? [-66, -92] : [-40, -44 + wave * 4], handR = sign && !sL ? [66, -92] : (waving ? [100 + wave * 12, -156] : [38, -46]);
     stroke(k + '.armL', [[0, -70], [-22, -58], handL], { z, w: w - 1, color: col });
     stroke(k + '.armR', [[0, -70], waving ? [52, -90] : [30, -74], handR], { z, w: w - 1, color: col });
     if (waving) [0, 1].forEach(j => { // little wave arcs beside the hand (ink)
@@ -1094,8 +1108,8 @@ COMP.qm = {
     // the sign, popping up on its stick
     if (sign) {
       const sp = EASE.back(clamp((t - sT) / 0.25));
-      const size = fx.signSize || 40, tw = textWidth(sign, size) + 40, cx = 70, cy = -262 + (1 - sp) * 40;
-      stroke(k + '.stick', [handR, [68, cy + 32]], { z, w: 5, color: col });
+      const size = fx.signSize || 40, tw = textWidth(sign, size) + 40, cx = sL ? -70 : 70, cy = -262 + (1 - sp) * 40;
+      stroke(k + '.stick', [sL ? handL : handR, [sL ? -68 : 68, cy + 32]], { z, w: 5, color: col });
       DL.about(cx, cy + 32, () => DL.scale(lerp(0.5, 1, sp)));
       stroke(k + '.board', [[cx - tw / 2, cy - 34], [cx + tw / 2, cy - 34, 1], [cx + tw / 2, cy + 32, 1], [cx - tw / 2, cy + 32, 1], [cx - tw / 2, cy - 34, 1]], { z, w: 5, color: col, fill: C.paper });
       text(k + '.sign', sign, cx, cy, { size, color: col, z: z + 0.5 });
@@ -1120,21 +1134,173 @@ COMP.factCard = {
     const hy = y0 + 150;
     stroke(k + '.hr', [[x0 + 18, hy], [x1 - 18, hy - 2]], { z: z + 0.2, w: 3.5, color: C.red, draw: EASE.out(clamp((lt - 0.25) / 0.4)), boil: 0.5 });
     (fx.rules || []).forEach((y, i) => stroke(k + '.rl' + i, [[x0 + 18, y], [x1 - 18, y + 1]], { z: z + 0.1, w: 2, color: C.pencil, opacity: 0.45, draw: EASE.out(clamp((lt - 0.3 - i * 0.05) / 0.4)), boil: 0.4 }));
-    // rubber stamp "数学小知识"
-    const sp = clamp((lt - 0.35) / 0.18);
+    // rubber stamp ("数学小知识" by default; fx.stamp = "编程小知识", "诗词小知识" …)
+    const sp = clamp((lt - 0.35) / 0.18), stampText = fx.stamp || '数学小知识', W = Math.max(128, textWidth(stampText, 46) / 2 + 13), H = 44;
     if (sp > 0) {
-      const sx = x0 + 190, sy = y0 + 76, sc = lerp(1.7, 1, EASE.out(sp));
+      const sx = x0 + 62 + W, sy = y0 + 76, sc = lerp(1.7, 1, EASE.out(sp));
       DL.save(); DL.translate(sx, sy); DL.scale(sc); DL.rotate(-5);
-      const W = 128, H = 44;
       stroke(k + '.st1', [[-W, -H], [W, -H, 1], [W, H, 1], [-W, H, 1], [-W, -H, 1]], { z: Z.stamp, w: 5, color: C.red, opacity: sp, boil: 0.6 });
       stroke(k + '.st2', [[-W + 9, -H + 9], [W - 9, -H + 9, 1], [W - 9, H - 9, 1], [-W + 9, H - 9, 1], [-W + 9, -H + 9, 1]], { z: Z.stamp, w: 2.4, color: C.red, opacity: sp, boil: 0.6 });
-      text(k + '.stt', '数学小知识', 0, 2, { size: 46, color: C.red, z: Z.stamp, opacity: sp });
+      text(k + '.stt', stampText, 0, 2, { size: 46, color: C.red, z: Z.stamp, opacity: sp });
       DL.restore();
     }
     const tp = clamp((lt - 0.7) / 0.25);
-    if (tp > 0) text(k + '.topic', fx.topic, x0 + 360, y0 + 78, { size: 78, anchor: 'start', z: Z.annot, opacity: clamp(tp * 3), scale: lerp(0.7, 1, EASE.back(tp)) });
+    if (tp > 0) text(k + '.topic', fx.topic, x0 + 104 + 2 * W, y0 + 78, { size: 78, anchor: 'start', z: Z.annot, opacity: clamp(tp * 3), scale: lerp(0.7, 1, EASE.back(tp)) });
   },
   cues: fx => [[fx.t0, 'paper'], [fx.t0 + 0.4, 'stamp'], [fx.t0 + 0.72, 'pop']],
+};
+/* ---------- programming & general explainer components ---------- */
+/** Monospace code typed in line by line (indentation kept), with an optional red line pointer and an output line.
+ *  {id, x (left edge), y (centre of line 0), size=56, lh, cps=14, lines:[{text, t0} | 'text'], pc:[[t, line]], pcT1,
+ *   out:{text, t0, size, dx, dy}, color, z}. Character boxes: rectOf({code: id, line, from, to}); points: {code: id, line, col}. */
+COMP.codeBlock = {
+  init(fx) {
+    fx.size = fx.size || 56; fx.lh = fx.lh || fx.size * 1.12; fx.cps = fx.cps || 14; fx.adv = CFG.MONO_ADV * fx.size;
+    fx.lines = fx.lines.map((L, i) => (typeof L === 'string' ? { text: L, t0: (fx.t0 || 0) + i } : L));
+    return fx;
+  },
+  draw(fx, t, F) {
+    if (fx.t1 !== undefined && t >= fx.t1) return;
+    const col = fx.color === 'red' ? C.red : C.ink, z = fx.z ?? Z.board;
+    fx.lines.forEach((L, i) => {
+      if (t < L.t0) return;
+      const n = clamp(Math.floor((t - L.t0) * fx.cps) + 1, 0, L.text.length);
+      if (n > 0) text(fx.id + '.l' + i, L.text.slice(0, n), fx.x, fx.y + i * fx.lh, { size: fx.size, font: CFG.FONT_MONO, anchor: 'start', color: col, z });
+    });
+    if (fx.pc && t >= fx.pc[0][0] && t < (fx.pcT1 ?? 1e9)) {
+      const y = evalTrack(fx.pc.map(([k, l]) => [k, fx.y + l * fx.lh, 0.14, 'out']), t);
+      arrow(fx.id + '.pc', [fx.x - 62, y], [fx.x - 14, y], { p: EASE.back(clamp((t - fx.pc[0][0]) / 0.2)), bend: 0, color: C.red, w: 5.5, head: 16 });
+      F.targets[fx.id + '.pc'] = [fx.x - 40, y];
+    }
+    if (fx.out && t >= fx.out.t0) {
+      const o = fx.out, oy = fx.y + (o.dy ?? (fx.lines.length + 0.7) * fx.lh);
+      text(fx.id + '.out', o.text, fx.x + (o.dx || 0), oy, { size: o.size || fx.size * 1.3, font: CFG.FONT_MONO, anchor: 'start', color: col, z });
+      F.targets[fx.id + '.out'] = [fx.x + (o.dx || 0) + textWidth(o.text, o.size || fx.size * 1.3, CFG.FONT_MONO) / 2, oy];
+    }
+  },
+  cues: fx => {
+    const c = [];
+    fx.lines.forEach(L => { for (let k = 0; k < L.text.length; k += 2) if (L.text[k] !== ' ') c.push([L.t0 + k / fx.cps, 'key']); });
+    (fx.pc || []).forEach(([k]) => c.push([k, 'tap']));
+    if (fx.out) c.push([fx.out.t0, 'beep']);
+    return c.filter(([k]) => k >= 0);
+  },
+};
+/** A named box whose value changes over time; the old value is struck out in red and floats away.
+ *  {id, name, cx, cy, w=160, h=110, size=70, vals:[[t, '12'], …], t0}. Values made of GLYPH characters are hand-written, others typed. */
+COMP.varBox = {
+  init(fx) {
+    fx.w = fx.w || 160; fx.h = fx.h || 110; const size = fx.size || 70;
+    fx.lays = fx.vals.map(([vt, v]) => ([...v].every(ch => GLYPH[ch])
+      ? layoutWriting({ text: v, x: fx.cx, y: fx.cy - size * 0.5, size, t0: vt, speed: 3400, gap: 0.01, glyphGap: 0.01, anchor: 'middle' })
+      : { text: v, t0: vt, typed: true, x: fx.cx - textWidth(v, size, CFG.FONT_MIX) / 2, xEnd: fx.cx + textWidth(v, size, CFG.FONT_MIX) / 2 }));
+    return fx;
+  },
+  draw(fx, t) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const lt = t - fx.t0, p = EASE.out(clamp(lt / 0.35)), { cx, cy, w, h } = fx, size = fx.size || 70;
+    const x0 = cx - w / 2, x1 = cx + w / 2, y0 = cy - h / 2, y1 = cy + h / 2;
+    stroke(fx.id + '.box', [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]], { z: Z.set + 1, w: 5, fill: C.paper, draw: p });
+    text(fx.id + '.name', fx.name, cx, y0 - 34, { size: fx.nameSize || 54, font: CFG.FONT_MONO, z: Z.set + 2, opacity: clamp((lt - 0.2) / 0.2) });
+    let cur = -1; fx.vals.forEach(([vt], i) => { if (vt <= t) cur = i; });
+    if (cur < 0) return;
+    const drawVal = (i, op, full) => {
+      const L = fx.lays[i];
+      if (L.typed) { text(`${fx.id}.v${i}`, L.text, cx, cy, { size, font: CFG.FONT_MIX, z: Z.front, opacity: op * (full ? 1 : clamp((t - L.t0) / 0.15)) }); return; }
+      L.strokes.forEach((st, j) => { const q = full ? 1 : clamp((t - st.t0) / st.dur); if (q > 0) stroke(`${fx.id}.v${i}.s${j}`, st.pts, { z: Z.front, w: 6, draw: q, boil: 0.55, opacity: op }); });
+    };
+    drawVal(cur, 1, false);
+    const u = cur > 0 ? (t - fx.vals[cur][0]) / 0.32 : 1;
+    if (u < 1) { // previous value: red strike, then it floats up and fades
+      const L = fx.lays[cur - 1];
+      DL.save(); DL.translate(0, -34 * EASE.out(u));
+      drawVal(cur - 1, 1 - u, true);
+      stroke(fx.id + '.strike', [[L.x - 8, cy + 4], [L.xEnd - 2, cy - 10]], { z: Z.annot, w: 5, color: C.red, opacity: 1 - u, draw: clamp(u * 4) });
+      DL.restore();
+    }
+  },
+  cues: fx => fx.vals.slice(1).map(([vt]) => [vt, 'plip']),
+};
+/** Rectangle of something on stage: [x, y, w, h] | {code, line, from, to} | {write, from, to} | {target, w, h} | fn(F) → rect. */
+function rectOf(spec, F) {
+  if (!spec) return null;
+  if (typeof spec === 'function') return spec(F);
+  if (Array.isArray(spec)) return spec;
+  if (spec.code) { const c = FXBY[spec.code]; if (!c) return null; return [c.x + spec.from * c.adv, c.y + spec.line * c.lh - c.size * 0.55, (spec.to - spec.from) * c.adv, c.size * 1.1]; }
+  if (spec.write) {
+    const w = FXBY[spec.write]; if (!w) return null;
+    const bs = w.boxes.slice(spec.from ?? 0, spec.to ?? w.boxes.length); if (!bs.length) return null;
+    const b = bs[bs.length - 1]; return [bs[0].x, w.y, b.x + b.w - bs[0].x, w.size];
+  }
+  if (spec.target) { const p = F.targets[spec.target]; if (!p) return null; const ww = spec.w || 60, hh = spec.h || 60; return [p[0] - ww / 2, p[1] - hh / 2, ww, hh]; }
+  return null;
+}
+/** Yellow highlighter over any rectangle (code, typed text, a region). {id, rect, t0, t1, dur=0.35, pad=10} */
+COMP.band = {
+  draw(fx, t, F) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const r = rectOf(fx.rect, F); if (!r) return;
+    const pad = fx.pad ?? 10, p = EASE.out(clamp((t - fx.t0) / (fx.dur || 0.35)));
+    const x0 = r[0] - pad, xe = lerp(x0, r[0] + r[2] + pad, p), y0 = r[1] + r[3] * 0.08, y1 = r[1] + r[3] * 0.96, n = 8, top = [], bot = [];
+    for (let i = 0; i <= n; i++) { const x = lerp(x0, xe, i / n); top.push([x, y0 + Math.sin(i * 1.7) * 3]); bot.unshift([x, y1 + Math.sin(i * 2.3) * 4]); }
+    stroke(fx.id, top.concat(bot), { z: Z.hi, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+  },
+  cues: fx => [[fx.t0, 'swish']],
+};
+/** Red-pen strike-through over any rectangle. {id, rect, t0, t1, dur=0.25} */
+COMP.strike = {
+  draw(fx, t, F) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const r = rectOf(fx.rect, F); if (!r) return;
+    stroke(fx.id, [[r[0] - 6, r[1] + r[3] * 0.62], [r[0] + r[2] + 6, r[1] + r[3] * 0.4]], { z: Z.annot, w: 5.5, color: C.red, draw: EASE.out(clamp((t - fx.t0) / (fx.dur || 0.25))) });
+  },
+  cues: fx => [[fx.t0, 'pen']],
+};
+/** Red-pen ring around any rectangle. {id, rect, t0, t1, pad=14} */
+COMP.ringRect = {
+  draw(fx, t, F) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const r = rectOf(fx.rect, F); if (!r) return;
+    const pad = fx.pad ?? 14, p = EASE.out(clamp((t - fx.t0) / 0.35));
+    stroke(fx.id, ringPts(fx.id, r[0] + r[2] / 2, r[1] + r[3] / 2, r[2] / 2 + pad, r[3] / 2 + pad, { n: 12, a0: -140, sweep: 385, rv: 0.05 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
+  },
+  cues: fx => [[fx.t0, 'pen']],
+};
+/** Number line with slots from..to; a token hops between values; optional fence and highlighted range.
+ *  {id, from, to, x0 (x of `from`), y, dx=90, size=60, t0, token:[[t, value]], tokenText='i', fence:[[t, position|null]] (e.g. 9.5 = between 9 and 10),
+ *   hi:[[t, [lo, hi]] | null]}. Targets: '<id>.token', '<id>.v<value>'. */
+COMP.numberLine = {
+  draw(fx, t, F) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const lt = t - fx.t0, dx = fx.dx || 90, size = fx.size || 60, X = v => fx.x0 + (v - fx.from) * dx, k = fx.id;
+    const p = EASE.out(clamp(lt / 0.5));
+    stroke(k + '.axis', [[X(fx.from) - dx * 0.5, fx.y + size * 0.62], [lerp(X(fx.from) - dx * 0.5, X(fx.to) + dx * 0.5, p), fx.y + size * 0.62]], { z: Z.set, w: 3, color: C.pencil });
+    for (let v = fx.from; v <= fx.to; v++) {
+      const u = clamp((lt - 0.05 * (v - fx.from)) / 0.2); if (u <= 0) continue;
+      text(k + '.n' + v, String(v), X(v), fx.y, { size, font: CFG.FONT_MIX, z: Z.set + 1, opacity: u });
+      F.targets[k + '.v' + v] = [X(v), fx.y];
+    }
+    const hi = fx.hi && stepTrack(fx.hi, t);
+    if (hi) {
+      const x0 = X(hi[0]) - dx * 0.42, x1 = X(hi[1]) + dx * 0.42, y0 = fx.y - size * 0.45, y1 = fx.y + size * 0.45, top = [], bot = [];
+      for (let i = 0; i <= 8; i++) { const x = lerp(x0, x1, i / 8); top.push([x, y0 + Math.sin(i * 1.7) * 3]); bot.unshift([x, y1 + Math.sin(i * 2.3) * 3]); }
+      stroke(k + '.hi', top.concat(bot), { z: Z.hi, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+    }
+    const fe = fx.fence && evalTrack(fx.fence.map(([kk, v]) => [kk, v, 0.3, 'out']), t);
+    if (fe !== null && fe !== undefined) {
+      const x = X(fe);
+      stroke(k + '.fence', [[x, fx.y - size * 0.9], [x + 2, fx.y + size * 0.9]], { z: Z.annot, w: 6, color: C.red });
+      [-1, 0, 1].forEach(j => stroke(k + '.fb' + j, [[x - 12, fx.y + j * size * 0.45 - 6], [x + 12, fx.y + j * size * 0.45 + 6]], { z: Z.annot, w: 3.5, color: C.red }));
+    }
+    if (fx.token && t >= fx.token[0][0]) {
+      const v = evalTrack(fx.token.map(([kk, val]) => [kk, val, fx.hopDur ?? 0.28, 'io']), t), fr = v - Math.floor(v);
+      const cx = X(v), cy = fx.y - size * 1.25 - Math.sin(Math.PI * fr) * 40, r = size * 0.42;
+      stroke(k + '.tok', ringPts(k + '.tok', cx, cy, r, r, { n: 10, closed: true }), { z: Z.front, w: 4.5, closed: true, fill: C.paper });
+      text(k + '.tokT', fx.tokenText || 'i', cx, cy - 2, { size: size * 0.62, font: CFG.FONT_MONO, z: Z.front + 0.5 });
+      F.targets[k + '.token'] = [cx, cy];
+    }
+  },
+  cues: fx => (fx.token || []).slice(1).map(([kk]) => [kk, 'hop']),
 };
 function resolveTarget(tg, F) {
   if (!tg) return null;
@@ -1145,6 +1311,10 @@ function resolveTarget(tg, F) {
     return [b.x + b.w / 2 + (tg.dx || 0), b.y + b.h + (tg.dy || 0)];
   }
   if (tg.target) { const p = F.targets[tg.target]; return p ? [p[0] + (tg.dx || 0), p[1] + (tg.dy || 0)] : null; }
+  if (tg.code) { // just under character `col` of line `line` of a codeBlock
+    const c = FXBY[tg.code]; if (!c) return null;
+    return [c.x + ((tg.col ?? 0) + 0.5) * c.adv + (tg.dx || 0), c.y + tg.line * c.lh + c.size * 0.5 + (tg.dy || 0)];
+  }
   return null;
 }
 

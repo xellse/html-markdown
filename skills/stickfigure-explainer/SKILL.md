@@ -31,7 +31,7 @@ description: 用 Ben Orlin（《欢乐数学》《疯狂微积分》《数学游
    1. 先写逐句旁白，定时间；
    2. 再写场景，多的时候分给 3 个代理并行，用前缀隔离；
    3. 截图检查，至少改 2–3 轮；
-   4. `tools/audio.py` 生成配音和配乐包；
+   4. `tools/check_timing.py` 检查字幕时长，再用 `tools/audio.py` 生成配音和配乐包（它会自动重新构建页面）；
    5. `playtest.cjs` 测试播放器；
    6. 发布，写说明。
 
@@ -44,7 +44,7 @@ description: 用 Ben Orlin（《欢乐数学》《疯狂微积分》《数学游
 - **知识不降级，讲法童趣化**：聪明的孩子能接受真正的证明，真正要调的是句长、笑点和角色。
 - **小问号是好奇的朋友**：它追问"为什么"，是真的想弄懂，被说服时开心点头。它一旦像在挑刺，孩子就会讨厌"讲清楚"这件事。
 - **一切画面都是时间的纯函数**（`render(t)`）：拖动、截图、从任意时刻播放都可靠。不用随机数，不存上一帧的状态。
-- **先写旁白，画面跟着旁白演**：旁白说到什么，画面就在演什么。一行字幕不超过 20 个字，时长至少 `0.27 秒 × 字数 + 0.3 秒`。
+- **先写旁白，画面跟着旁白演**：旁白说到什么，画面就在演什么。一行字幕不超过 20 个字，时长至少 `0.2 秒 × 字数 + 0.8 秒`（按云希实测；`tools/check_timing.py` 会检查，`tools/audio.py` 用真实配音再核对一次）。
 - **事实和演绎分开**：真实的事要有出处；演绎只能用来表现有记录的特点；泛指不能说成真实事件。
 - **自己听不到声音**：音色、音量、配乐是否合适，要让用户判断；先给试听样本让用户选。
 
@@ -63,6 +63,9 @@ description: 用 Ben Orlin（《欢乐数学》《疯狂微积分》《数学游
 | 轮到你了 | 停下来等孩子想 | 场景里的 `pauses` |
 | 回调笑点 | 口头禅、下巴掉了 | `speech`、FACE 里的 `jaw` |
 | 片头、回顾、尾声、预告 | 固定的开场和收尾 | `title`、`speech` |
+| 程序一行行执行 | 打字、行指针、输出 | `codeBlock` + `varBox` |
+| 任意位置的重点、划掉、圈出 | 代码、文字、区域都能用 | `band`、`strike`、`ringRect` |
+| 计数、范围、循环 | 数轴上跳跃的小人、栅栏 | `numberLine` |
 
 ## 何时读哪份参考
 - `references/narrative.md`：定故事、写旁白之前。包括观众画像、固定手法、一集和一个系列的结构、旁白规则、事实边界。
@@ -75,9 +78,10 @@ description: 用 Ben Orlin（《欢乐数学》《疯狂微积分》《数学游
 
 ## 常用命令
 ```bash
-python3 build.py ep1                                  # 构建 → episode-1.html
-python3 build.py ep1 --only 10_,20_ -o /tmp/t.html    # 只构建部分场景，用于测试
-python3 tools/audio.py ep1                            # 配音 + 配乐 → episode-1.audio.js，并列出超时句子
+python3 build.py ep1                                  # 构建 → episode-1.html（没有音频包时用浏览器语音）
+python3 build.py ep1 --only 10_,20_ -o /tmp/t.html    # 只构建部分场景（_ 开头的共享文件总会带上）
+python3 tools/check_timing.py ep1                     # 生成配音前，先检查字幕长度和时长
+python3 tools/audio.py ep1                            # 配音 + 配乐 → episode-1.audio.js，列出超时句子，并自动重新构建页面
 NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280
 python3 <skill>/scripts/sheet.py frames sheet.png 4 480        # 用 Read 看这张图
 NODE_PATH=$(npm root -g) node <skill>/scripts/playtest.cjs episode-1.html out

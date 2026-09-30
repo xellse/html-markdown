@@ -1,5 +1,6 @@
 // Screenshot a built episode at given times — the main visual check.
-// Usage: NODE_PATH=$(npm root -g) node capture.cjs <page.html> <outdir> <times: "0,1.5,3" | "fps:12"> [width=1280] [selector=#stage]
+// Usage: NODE_PATH=$(npm root -g) node capture.cjs <page.html> <outdir> <times> [width=1280] [selector=#stage]
+//   times: "0,1.5,3" (exact times) | "every:5" (the middle of every 5-second slice: 2.5, 7.5, …) | "fps:12" (every frame, for GIFs)
 // The page exposes window.__seek(t) and window.__duration. Writes <outdir>/f_<t>.png (or f_0000.png… in fps mode)
 // and <outdir>/console.txt (console errors, page errors, failed requests — must be empty).
 const { chromium } = require('playwright');
@@ -16,7 +17,13 @@ const fs = require('fs'), path = require('path');
   p.on('requestfailed', r => logs.push('requestfailed: ' + r.url() + ' ' + r.failure().errorText));
   await p.goto('file://' + path.resolve(file), { waitUntil: 'networkidle' });
   await p.evaluate(() => document.fonts.ready);
-  await p.waitForFunction(() => typeof window.__seek === 'function', null, { timeout: 10000 });
+  try {
+    await p.waitForFunction(() => typeof window.__seek === 'function', null, { timeout: 10000 });
+  } catch (e) { // the page threw while loading (a scene error, a missing shared helper …): say why
+    fs.writeFileSync(path.join(outdir, 'console.txt'), logs.join('\n') || '(page never became ready, no console output)');
+    console.error('page did not start — console:\n  ' + (logs.join('\n  ') || '(nothing logged)'));
+    await b.close(); process.exit(1);
+  }
   const fonts = await p.evaluate(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family));
   if (!fonts.length) logs.push('warning: no web font loaded — screenshots use a fallback font (see references/environment.md)');
   const dur = await p.evaluate(() => window.__duration || 10);

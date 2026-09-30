@@ -21,6 +21,7 @@ const fs = require('fs'), path = require('path');
   const chaps = await p.$$('.chap');
   if (chaps.length > 1) { await chaps[1].click(); await p.waitForTimeout(1500); console.log('chapter 2    ', await st()); }
   const pauses = await p.evaluate(() => (typeof EP !== 'undefined' ? EP.pauses : []));
+  if (!pauses.length) console.log('think pause   (this episode has no pauses — skipped)');
   if (pauses.length) {
     await p.evaluate(t => { const s = document.getElementById('scrub'); s.value = t; s.dispatchEvent(new Event('input')); }, Math.max(0, pauses[0] - 1));
     await p.click('#btnPlay'); await p.waitForTimeout(2600);

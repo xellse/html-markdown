@@ -54,14 +54,21 @@ def main():
         meta['h1'] = a.title
         meta['title'] = f"{a.series} {a.title.split('·')[0].strip()}"
     meta['kicker'] = a.series
+    head = meta['h1']
+    # the demo's texts must not ship with a real episode: mark them so they are obviously placeholders
+    meta['desc'] = f'【待填写：一句话简介】{a.series} · {head}'
+    meta['aria'] = f'【待填写：给读屏器的画面描述】{a.series} · {head}'
+    meta['poster_label'] = f'播放 · {head.split("·")[0].strip()}'
     json.dump(meta, open(meta_p, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
     print(f'created {dst}')
     print(f'  episode folder: src/{a.episode}/  (starts as the working demo — edit meta.json and the scene files)')
     print('next:')
     print(f'  cd {dst}')
-    print(f'  python3 build.py {a.episode}            # -> {meta["out"]} (silent until you make the audio pack)')
-    print(f'  python3 tools/audio.py {a.episode}      # narration + music pack (needs network for the voices)')
+    print(f'  python3 build.py {a.episode}               # -> {meta["out"]} (browser voice until the audio pack exists)')
+    print(f'  python3 tools/check_timing.py {a.episode}  # subtitle length / timing rules')
+    print(f'  python3 tools/audio.py {a.episode}         # narration + music pack, then rebuilds the page with it')
+    print('  then fill in desc / aria / poster in the episode meta.json (marked 【待填写】)')
 
 
 if __name__ == '__main__':

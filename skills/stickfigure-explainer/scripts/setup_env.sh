@@ -15,6 +15,10 @@ else
   npm install -g playwright >/dev/null 2>&1 && echo "installed playwright" || echo "!! install playwright yourself: npm i -g playwright && npx playwright install chromium"
 fi
 NODE_GLOBAL="$(npm root -g 2>/dev/null)"
+# a browser for playwright (skipped when one is already provided, e.g. PLAYWRIGHT_BROWSERS_PATH in cloud sessions)
+if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && ! NODE_PATH="$NODE_GLOBAL" node -e "require('playwright').chromium.executablePath()" >/dev/null 2>&1; then
+  npx -y playwright install chromium >/dev/null 2>&1 && echo "installed chromium for playwright" || echo "!! run: npx playwright install chromium"
+fi
 echo "use: NODE_PATH=$NODE_GLOBAL node <script>.cjs ..."
 
 # Cloud sessions re-terminate TLS at a proxy. curl/pip/node trust it already; Chromium reads its own NSS store and

@@ -5,9 +5,11 @@
 
 Reads src/<ep>/meta.json ("audio" block). Writes
   audio/voice/<hash>.mp3          narration cache (one clip per subtitle line; reused while text/voice are unchanged)
-  audio/music/<file>              music beds, trimmed + faded + re-encoded (made once from --music-src)
+  audio/music/<file>              music beds, trimmed to tracks.secs + faded + re-encoded (made once from --music-src;
+                                  an existing file is used as is — the template's beds are already trimmed)
   <out>.audio.js                  window.TAO_AUDIO = {voice, music, credits}, loaded by the page
-and prints lines whose narration runs longer than the gap before the next line (the player then holds the picture).
+prints lines whose narration runs longer than the gap before the next line (the player then holds the picture),
+and rebuilds <out>.html so the page links the new pack.
 """
 import argparse, asyncio, base64, hashlib, json, os, subprocess, sys
 
@@ -27,8 +29,17 @@ def ca_bundle():
     return None
 
 
+def node_path():
+    if os.environ.get('NODE_PATH'):
+        return os.environ['NODE_PATH']
+    try:
+        return subprocess.check_output(['npm', 'root', '-g'], text=True).strip()
+    except Exception:
+        return ''
+
+
 def dump_lines(page):
-    env = dict(os.environ, NODE_PATH='/opt/node22/lib/node_modules')
+    env = dict(os.environ, NODE_PATH=node_path())
     out = subprocess.check_output(['node', os.path.join(ROOT, 'tools', 'dump_lines.cjs'), page], env=env)
     return json.loads(out)
 
@@ -147,9 +158,10 @@ def main():
         f.write('window.TAO_AUDIO = ' + json.dumps(pack, ensure_ascii=False, separators=(',', ':')) + ';\n')
     print(f'wrote {out_js} ({os.path.getsize(out_js) // 1024} KB): {len(voice)} lines, {len(music)} music beds')
     if over:
-        print('\nlines longer than their slot (player will hold the picture):')
+        print('\nlines longer than their slot (player will hold the picture; > 0.3 s is worth fixing):')
         for k, d, room, t in over:
             print(f'  {k:14s} {d:5.2f}s > {room:5.2f}s  {t}')
+    build.build(a.ep)   # link the fresh pack into the page
 
 
 if __name__ == '__main__':
