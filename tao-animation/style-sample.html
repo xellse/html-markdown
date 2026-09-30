@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>七岁的陶哲轩</title>
+<meta name="description" content="数学少年陶哲轩 · 10 秒风格样片：七岁的小陶走进中学数学课。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EEE5; --fg:#1E1E1E; --muted:#6B665D; --surface:#FFFDF8; --border:#D8D0C0;
+  --accent:#D23A3F; --btn-bg:#1E1E1E; --btn-fg:#FBF8F1; --focus:#2F74C0; --shadow:rgba(40,30,10,.10);
+  --sw-ink:#1E1E1E; --sw-red:#D23A3F; --sw-hi:#FFE066;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161519; --fg:#ECE8DF; --muted:#A39E94; --surface:#211F25; --border:#3A3740;
+    --accent:#FF6E72; --btn-bg:#ECE8DF; --btn-fg:#161519; --focus:#8CB8FF; --shadow:rgba(0,0,0,.4);
+    --sw-ink:#ECE8DF; --sw-red:#FF6E72; --sw-hi:#FFE066;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161519; --fg:#ECE8DF; --muted:#A39E94; --surface:#211F25; --border:#3A3740;
+  --accent:#FF6E72; --btn-bg:#ECE8DF; --btn-fg:#161519; --focus:#8CB8FF; --shadow:rgba(0,0,0,.4);
+  --sw-ink:#ECE8DF; --sw-red:#FF6E72; --sw-hi:#FFE066;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","Patrick Hand",system-ui,sans-serif;overflow-x:hidden}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 16px 32px}
+.head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.head h1{font-weight:400;font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:.02em}
+.head .kicker{margin:0;color:var(--muted);font-size:15px}
+#stage{position:relative;width:100%;aspect-ratio:16/9;background:#FBF8F1;border-radius:12px;overflow:hidden;box-shadow:0 1px 0 var(--border),0 8px 28px var(--shadow);user-select:none;-webkit-user-select:none}
+#stage > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.poster{position:absolute;inset:0;border:0;padding:0;margin:0;background:rgba(251,248,241,.18);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:inherit;color:#1E1E1E}
+.poster[hidden]{display:none}
+.poster .disc{width:clamp(64px,13vw,124px);height:clamp(64px,13vw,124px);border-radius:50%;background:#1E1E1E;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(251,248,241,.85);transition:transform .15s}
+.poster:hover .disc{transform:scale(1.06)}
+.poster .disc svg{position:static;width:42%;height:42%;margin-left:8%}
+.poster .plabel{background:#FBF8F1;padding:2px 12px;border-radius:999px;font-size:clamp(14px,2.2vw,20px)}
+.poster:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.bar{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.btn{height:44px;min-width:44px;padding:0 14px;border-radius:22px;border:1.5px solid var(--border);background:var(--surface);color:var(--fg);font:inherit;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn svg{width:18px;height:18px;fill:currentColor}
+.btn.primary{background:var(--btn-bg);color:var(--btn-fg);border-color:var(--btn-bg);padding:0}
+.btn.primary{width:48px;height:48px;border-radius:24px}
+.btn:focus-visible,#scrub:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn.toggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.btn.toggle[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+#scrub{flex:1 1 180px;min-width:120px;accent-color:var(--accent);height:28px}
+#time{font-family:"Patrick Hand",monospace;font-size:18px;min-width:84px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend{margin:14px 2px 0;color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:6px;border-radius:3px;display:inline-block}
+.sw.ink{background:var(--sw-ink)} .sw.red{background:var(--sw-red)} .sw.hi{background:var(--sw-hi);height:12px;opacity:.9}
+@media (max-width:560px){
+  #scrub{order:10;flex-basis:100%}
+  .btn.toggle{padding:0 10px;font-size:15px}
+  .head .kicker{font-size:13px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>七岁的陶哲轩</h1>
+    <p class="kicker">数学少年陶哲轩 · 风格样片（10 秒）</p>
+  </header>
+
+  <div id="stage" role="img" aria-label="动画：七岁的小陶背着大书包走进中学数学课，老师写下 3x+5=26，小陶举手答出 x=7，大哥哥大姐姐们惊得下巴都掉了。">
+    <svg id="svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <rect width="1600" height="900" fill="#FBF8F1"/>
+      <g id="layer"></g>
+    </svg>
+    <button id="poster" class="poster" type="button" aria-label="播放动画">
+      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17l15-8.5z" fill="#FBF8F1"/></svg></span>
+      <span class="plabel">播放 · 10 秒样片</span>
+    </button>
+  </div>
+
+  <div class="bar" role="group" aria-label="播放控制">
+    <button id="btnPlay" class="btn primary" type="button" aria-label="播放"></button>
+    <button id="btnRestart" class="btn" type="button" aria-label="从头播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+    <input id="scrub" type="range" min="0" max="10" step="0.1" value="0" aria-label="播放进度（秒）">
+    <output id="time" aria-live="off">0.0 / 10.0</output>
+    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="用浏览器语音朗读字幕">朗读</button>
+    <button id="btnSnd" class="btn toggle" type="button" aria-pressed="true" title="脚步、粉笔、弹跳等小音效">音效</button>
+  </div>
+  <p class="legend">
+    <span><i class="sw ink"></i>黑笔 = 故事</span>
+    <span><i class="sw red"></i>红笔 = 旁白批注</span>
+    <span><i class="sw hi"></i>黄色荧光笔 = 关键数学</span>
+  </p>
+</main>
+
+<script>
+'use strict';
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const CFG = {
+  W: 1600, H: 900, DUR: 10, FPS: 24,
+  BOIL_FPS: 5, BOIL_AMP: 1.1, WOBBLE: 1.4,
+  FLOOR: 780,
+  C: { paper: '#FBF8F1', ink: '#1E1E1E', red: '#D23A3F', pencil: '#9B9B9B', hi: '#FFE066' },
+  FONT_ZH: "'ZCOOL KuaiLe','Patrick Hand',sans-serif",
+  FONT_MIX: "'Patrick Hand','ZCOOL KuaiLe',sans-serif",
+  SIZE: { sub: 52, label: 40, speech: 84, mark: 84, series: 32 },
+};
+const C = CFG.C;
+// draw-order layers
+const Z = { set: 10, hi: 12, board: 14, shadow: 18, chair: 20, back: 28, body: 30, desk: 35, front: 40, fx: 50, annot: 60, stamp: 70, sub: 90 };
+const RAD = Math.PI / 180;
+const clamp = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, u) => a + (b - a) * u;
+const lerp2 = (p, q, u) => [lerp(p[0], q[0], u), lerp(p[1], q[1], u)];
+const dist = (p, q) => Math.hypot(q[0] - p[0], q[1] - p[1]);
+const EASE = {
+  lin: u => u,
+  io: u => u * u * (3 - 2 * u),
+  out: u => 1 - Math.pow(1 - u, 3),
+  in: u => u * u * u,
+  back: u => { const c = 2.2; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); },
+};
+
+/* =====================================================================
+   NOISE / BOIL  (deterministic: static wobble per key + boil per floor(t*BOIL_FPS))
+   ===================================================================== */
+const HCACHE = new Map();
+function hstr(s) {
+  let h = HCACHE.get(s); if (h !== undefined) return h;
+  h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  h >>>= 0; HCACHE.set(s, h); return h;
+}
+function rnd(a, b, c) { // -> [-1, 1)
+  let t = (a ^ Math.imul(b + 1, 0x9E3779B1) ^ Math.imul(c + 7, 0x85EBCA77)) >>> 0;
+  t = (t + 0x6D2B79F5) >>> 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return (((t ^ (t >>> 14)) >>> 0) / 4294967296) * 2 - 1;
+}
+const BOIL = { frame: 0, amp: CFG.BOIL_AMP };
+function jit(h, i, p, amp) {
+  const w = CFG.WOBBLE * 0.5, b = BOIL.amp * amp, f = BOIL.frame * 2 + 1000;
+  return [p[0] + rnd(h, i, 1) * w + (b ? rnd(h, i, f) * b : 0),
+          p[1] + rnd(h, i, 2) * w + (b ? rnd(h, i, f + 1) * b : 0)];
+}
+
+/* =====================================================================
+   DRAW LIST  (flat, keyed items; affine matrix stack; reconciled into SVG)
+   ===================================================================== */
+const DL = {
+  items: [], m: [1, 0, 0, 1, 0, 0], st: [], used: new Map(),
+  reset() { this.items.length = 0; this.m = [1, 0, 0, 1, 0, 0]; this.st.length = 0; this.used.clear(); },
+  save() { this.st.push(this.m.slice()); },
+  restore() { this.m = this.st.pop(); },
+  mul(n) {
+    const [a, b, c, d, e, f] = this.m, [A, B, Cc, D, E, F] = n;
+    this.m = [a * A + c * B, b * A + d * B, a * Cc + c * D, b * Cc + d * D, a * E + c * F + e, b * E + d * F + f];
+  },
+  translate(x, y) { this.mul([1, 0, 0, 1, x, y]); },
+  scale(sx, sy = sx) { this.mul([sx, 0, 0, sy, 0, 0]); },
+  rotate(deg) { const r = deg * RAD, c = Math.cos(r), s = Math.sin(r); this.mul([c, s, -s, c, 0, 0]); },
+  about(x, y, fn) { this.translate(x, y); fn(); this.translate(-x, -y); },
+  tp(p) { const m = this.m; return [m[0] * p[0] + m[2] * p[1] + m[4], m[1] * p[0] + m[3] * p[1] + m[5]]; },
+  k() { const m = this.m; return Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2])); },
+  add(z, key, tag, attrs, text) {
+    const n = this.used.get(key) || 0; this.used.set(key, n + 1);
+    if (n) key += '#' + n;
+    this.items.push({ z, key, tag, attrs, text, o: this.items.length });
+  },
+};
+
+/* =====================================================================
+   DRAWING PRIMITIVES
+   ===================================================================== */
+const f1 = v => Math.round(v * 10) / 10;
+function catRun(R) {
+  const n = R.length; let d = '';
+  if (n === 2) return `L${f1(R[1][0])} ${f1(R[1][1])}`;
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = R[Math.max(i - 1, 0)], p1 = R[i], p2 = R[i + 1], p3 = R[Math.min(i + 2, n - 1)];
+    d += `C${f1(p1[0] + (p2[0] - p0[0]) / 6)} ${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)} ${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])} ${f1(p2[1])}`;
+  }
+  return d;
+}
+function smoothD(P, corners, closed) {
+  let d = `M${f1(P[0][0])} ${f1(P[0][1])}`;
+  if (closed) {
+    const n = P.length;
+    for (let i = 0; i < n; i++) {
+      const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+      d += `C${f1(p1[0] + (p2[0] - p0[0]) / 6)} ${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)} ${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])} ${f1(p2[1])}`;
+    }
+    return d + 'Z';
+  }
+  let s = 0;
+  for (let i = 1; i < P.length; i++) {
+    if (i === P.length - 1 || corners[i]) { d += catRun(P.slice(s, i + 1)); s = i; }
+  }
+  return d;
+}
+/** A hand-drawn stroke through local points (3rd element truthy = sharp corner).
+ *  o: {z, w, color, fill, closed, draw(0..1), boil(scale), opacity, bow, noStroke, blend} */
+function stroke(key, pts, o = {}) {
+  if (o.draw !== undefined && o.draw <= 0.002) return;
+  if (!pts || pts.length < 2) return;
+  const h = hstr(key);
+  let P = pts, corners = pts.map(p => !!p[2]);
+  if (P.length === 2 && !o.closed) {
+    const a = P[0], b = P[1], len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    const bow = rnd(h, 99, 5) * Math.min(3, len * 0.03) * (o.bow ?? 1);
+    P = [a, [(a[0] + b[0]) / 2 - (b[1] - a[1]) / len * bow, (a[1] + b[1]) / 2 + (b[0] - a[0]) / len * bow], b];
+    corners = [false, false, false];
+  }
+  const amp = o.boil ?? 1;
+  const W = P.map((p, i) => jit(h, i, DL.tp(p), amp));
+  const a = {
+    d: smoothD(W, corners, o.closed), fill: o.fill || 'none',
+    stroke: o.noStroke ? 'none' : (o.color || C.ink),
+    'stroke-width': +((o.w || 6) * DL.k()).toFixed(2),
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+  };
+  if (o.opacity !== undefined && o.opacity < 1) a.opacity = +o.opacity.toFixed(3);
+  if (o.draw !== undefined && o.draw < 1) {
+    a.pathLength = 1; a['stroke-dasharray'] = '1 2'; a['stroke-dashoffset'] = +(1 - o.draw).toFixed(4);
+    if (a.fill !== 'none') a['fill-opacity'] = o.draw > 0.6 ? 1 : 0;
+  }
+  if (o.blend) a.style = 'mix-blend-mode:multiply';
+  DL.add(o.z ?? Z.body, key, 'path', a);
+}
+/** Points on a lumpy ring. a0/sweep in degrees; rv = radius variation. */
+function ringPts(key, cx, cy, rx, ry, o = {}) {
+  const n = o.n || 12, a0 = (o.a0 ?? -120) * RAD, sweep = (o.sweep ?? 360) * RAD, rv = o.rv ?? 0.03;
+  const h = hstr(key + '~r'), pts = [], closed = !!o.closed;
+  const cnt = closed ? n : n + 1;
+  for (let i = 0; i < cnt; i++) {
+    const a = a0 + sweep * i / n;
+    let rr = 1 + rnd(h, i % n, 3) * rv;
+    if (!closed && i === cnt - 1) rr *= 0.965; // Orlin's closing tick
+    pts.push([cx + Math.cos(a) * rx * rr, cy + Math.sin(a) * ry * rr]);
+  }
+  return pts;
+}
+function superPts(cx, cy, w, h, n = 20, ex = 5) { // rounded-rect-ish superellipse
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+    pts.push([cx + Math.sign(c) * Math.pow(Math.abs(c), 2 / ex) * w / 2, cy + Math.sign(s) * Math.pow(Math.abs(s), 2 / ex) * h / 2]);
+  }
+  return pts;
+}
+function dot(key, p, r, color = C.ink, z = Z.front) {
+  const q = DL.tp(p), k = DL.k();
+  DL.add(z, key, 'circle', { cx: f1(q[0]), cy: f1(q[1]), r: +(r * k).toFixed(2), fill: color });
+}
+function text(key, str, x, y, o = {}) {
+  const m = DL.m;
+  let tf = `matrix(${m.map(v => +v.toFixed(4)).join(' ')}) translate(${f1(x)} ${f1(y)})`;
+  if (o.rot) tf += ` rotate(${o.rot})`;
+  if (o.scale !== undefined && o.scale !== 1) tf += ` scale(${+o.scale.toFixed(4)})`;
+  const a = { transform: tf, x: 0, y: 0, 'font-size': o.size || 40, 'font-family': o.font || CFG.FONT_ZH,
+    fill: o.color || C.ink, 'text-anchor': o.anchor || 'middle', 'dominant-baseline': 'central' };
+  if (o.opacity !== undefined && o.opacity < 1) a.opacity = +o.opacity.toFixed(3);
+  if (o.halo) { a.stroke = C.paper; a['stroke-width'] = o.halo; a['stroke-linejoin'] = 'round'; a['paint-order'] = 'stroke'; }
+  DL.add(o.z ?? Z.annot, key, 'text', a, str);
+}
+function textWidth(str, size) {
+  let w = 0;
+  for (const ch of str) w += ch.charCodeAt(0) > 0x2E80 ? size : (ch === ' ' ? 0.3 : 0.5) * size;
+  return w;
+}
+/** Pencil-scribble ground shadow. */
+function shadow(key, cx, cy, w, op = 1) {
+  if (op <= 0.02) return;
+  const pts = [], n = 9;
+  for (let i = 0; i <= n; i++) {
+    const u = i / n, amp = 6 * Math.sqrt(Math.max(0, 1 - Math.pow(2 * u - 1, 2))) + 1.5;
+    pts.push([cx - w / 2 + w * u, cy + (i % 2 ? amp : -amp)]);
+  }
+  stroke(key, pts, { z: Z.shadow, w: 2.2, color: C.pencil, opacity: 0.75 * op, boil: 0.6 });
+}
+/** Curved arrow with a two-stroke head; draws on with p. */
+function arrow(key, from, to, o = {}) {
+  const p = o.p ?? 1; if (p <= 0) return;
+  const len = dist(from, to) || 1, bend = (o.bend ?? 0.18) * len;
+  const nx = -(to[1] - from[1]) / len, ny = (to[0] - from[0]) / len;
+  const c = [(from[0] + to[0]) / 2 + nx * bend, (from[1] + to[1]) / 2 + ny * bend];
+  const q = u => [(1 - u) * (1 - u) * from[0] + 2 * (1 - u) * u * c[0] + u * u * to[0], (1 - u) * (1 - u) * from[1] + 2 * (1 - u) * u * c[1] + u * u * to[1]];
+  const pts = []; for (let i = 0; i <= 6; i++) pts.push(q(i / 6));
+  const col = o.color || C.red, w = o.w || 3.5, z = o.z ?? Z.annot;
+  stroke(key, pts, { z, w, color: col, draw: p, boil: 0.8 });
+  if (p > 0.92) {
+    const b = q(0.88), tl = dist(b, to) || 1, tx = (b[0] - to[0]) / tl, ty = (b[1] - to[1]) / tl, hl = o.head || 20;
+    const r1 = [to[0] + (tx * Math.cos(0.5) - ty * Math.sin(0.5)) * hl, to[1] + (tx * Math.sin(0.5) + ty * Math.cos(0.5)) * hl];
+    const r2 = [to[0] + (tx * Math.cos(-0.5) - ty * Math.sin(-0.5)) * hl, to[1] + (tx * Math.sin(-0.5) + ty * Math.cos(-0.5)) * hl];
+    stroke(key + '.h', [r1, [to[0], to[1], 1], r2], { z, w, color: col, boil: 0.8 });
+  }
+}
+
+/* =====================================================================
+   HANDWRITING  (single-stroke glyphs so math is always *written*, in stroke order)
+   units: height 1 (0 = top, 1 = baseline); 3rd value 1 = corner
+   ===================================================================== */
+const GLYPH = {
+  '0': { w: .6, s: [[[.32, 0], [.08, .2], [.05, .6], [.2, .95], [.42, .98], [.57, .7], [.55, .25], [.34, 0]]] },
+  '1': { w: .42, s: [[[.08, .2], [.28, 0, 1], [.28, 1]]] },
+  '2': { w: .62, s: [[[.06, .24], [.22, .03], [.44, 0], [.6, .16], [.56, .4], [.3, .7], [.05, 1, 1], [.64, .98]]] },
+  '3': { w: .6, s: [[[.07, .12], [.3, 0], [.55, .07], [.58, .27], [.3, .46, 1], [.6, .6], [.62, .84], [.38, 1], [.05, .9]]] },
+  '4': { w: .62, s: [[[.46, 0], [.05, .68, 1], [.62, .68]], [[.47, .35], [.47, 1]]] },
+  '5': { w: .6, s: [[[.15, .02], [.1, .44, 1], [.36, .37], [.58, .5], [.62, .76], [.42, .98], [.06, .9]], [[.15, .02], [.6, .02]]] },
+  '6': { w: .6, s: [[[.55, .02], [.26, .2], [.07, .58], [.14, .92], [.38, 1], [.6, .84], [.58, .6], [.35, .5], [.1, .66]]] },
+  '7': { w: .6, s: [[[.04, .04], [.6, .03, 1], [.24, 1]]] },
+  '8': { w: .6, s: [[[.55, .14], [.32, 0], [.1, .14], [.3, .45], [.58, .72], [.32, 1], [.05, .74], [.3, .45], [.52, .26], [.55, .14]]] },
+  '9': { w: .6, s: [[[.57, .3], [.34, .44], [.1, .3], [.16, .06], [.4, 0], [.57, .16], [.56, .5], [.48, 1]]] },
+  'x': { w: .56, s: [[[.05, .4], [.3, .7], [.52, 1]], [[.52, .4], [.28, .7], [.04, 1]]] },
+  '+': { w: .62, s: [[[.06, .6], [.56, .6]], [[.31, .34], [.31, .88]]] },
+  '-': { w: .5, s: [[[.06, .6], [.44, .6]]] },
+  '×': { w: .5, s: [[[.06, .42], [.44, .84]], [[.44, .42], [.06, .84]]] },
+  '=': { w: .62, s: [[[.06, .5], [.56, .5]], [[.06, .74], [.56, .74]]] },
+  '✓': { w: .8, s: [[[.02, .56], [.25, .9, 1], [.8, .02]]] },
+  ' ': { w: .24, s: [] },
+};
+function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += dist(pts[i - 1], pts[i]); return L; }
+function pointAt(pts, u) {
+  const L = polyLen(pts) * u; let acc = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const d = dist(pts[i - 1], pts[i]);
+    if (acc + d >= L) return lerp2(pts[i - 1], pts[i], d ? (L - acc) / d : 0);
+    acc += d;
+  }
+  return pts[pts.length - 1];
+}
+/** Precompute layout + timing of a handwriting block (pure data). */
+function layoutWriting(fx) {
+  const size = fx.size, strokes = [], boxes = [];
+  let cx = fx.x, tt = fx.t0;
+  [...fx.text].forEach((ch, gi) => {
+    const g = GLYPH[ch]; if (!g) return;
+    boxes.push({ ch, x: cx, y: fx.y, w: g.w * size, h: size });
+    g.s.forEach(s => {
+      const pts = s.map(([u, v, c]) => [cx + u * size, fx.y + v * size, c]);
+      const dur = Math.max(0.06, polyLen(pts) / fx.speed);
+      strokes.push({ pts, t0: tt, dur, gi });
+      tt += dur + (fx.gap ?? 0.04);
+    });
+    if (g.s.length) tt += fx.glyphGap ?? 0.03;
+    cx += (g.w + (fx.track ?? 0.1)) * size;
+  });
+  fx.strokes = strokes; fx.boxes = boxes; fx.tEnd = tt; fx.xEnd = cx;
+  return fx;
+}
+function penAt(fx, t) {
+  let s = fx.strokes[0]; if (!s) return null;
+  for (const k of fx.strokes) if (k.t0 <= t) s = k;
+  return pointAt(s.pts, clamp((t - s.t0) / s.dur));
+}
+
+/* =====================================================================
+   TRACKS  (keys: [t, value, dur=0.12, ease='io']; value may be a library name or fn(t))
+   A key starts moving toward its value at t and arrives at t+dur.
+   ===================================================================== */
+function mix(a, b, u) {
+  if (b === undefined) return a;
+  if (a === undefined) return b;
+  if (typeof b === 'number') return typeof a === 'number' ? a + (b - a) * u : b;
+  if (Array.isArray(b)) return b.map((v, i) => mix(Array.isArray(a) ? a[i] : undefined, v, u));
+  if (b && typeof b === 'object') {
+    const o = {}; for (const k in a) o[k] = a[k];
+    for (const k in b) o[k] = mix(a[k], b[k], u);
+    return o;
+  }
+  return u < 0.5 ? a : b;
+}
+function evalTrack(keys, t, lib, base) {
+  if (!keys || !keys.length) return base;
+  const res = v => {
+    if (typeof v === 'function') v = v(t);
+    if (typeof v === 'string' && lib && lib[v]) v = lib[v];
+    if (typeof v === 'function') v = v(t);
+    if (base && typeof base === 'object' && !Array.isArray(base) && typeof v === 'object') v = Object.assign({}, base, v);
+    return v;
+  };
+  let cur = res(keys[0][1]);
+  for (let i = 1; i < keys.length; i++) {
+    const k = keys[i]; if (t < k[0]) break;
+    const d = k[2] ?? 0.12, u = d <= 0 ? 1 : clamp((t - k[0]) / d);
+    cur = mix(cur, res(k[1]), (EASE[k[3] || 'io'])(u));
+  }
+  return cur;
+}
+const stepTrack = (keys, t) => { let v = keys ? keys[0][1] : undefined; if (keys) for (const k of keys) if (k[0] <= t) v = k[1]; return v; };
+
+/* =====================================================================
+   CHARACTER RIG  — Orlin construction: lumpy head, big eye ovals with dot pupils,
+   tiny mouth, one-line body, bare line-end hands/feet, ground shadow.
+   ===================================================================== */
+const DEF_POSE = { lean: 0, tilt: 0, armL: [16, 10], armR: [16, 10], legL: [7, 0], legR: [7, 0],
+  armScale: 1, legScale: 1, thigh: 0.5, sit: 0, hop: 0, sq: 1, bagBob: 0, ikL: { w: 0 }, ikR: { w: 0 } };
+const DEF_FACE = { eyes: 'open', lidL: 0, lidR: 0, eyeSY: 1, pupil: 1, brow: 'none', browL: 0, browR: 0, browY: 0,
+  mouth: 'flat', mw: 0.28, mo: 0, mx: 0, headSY: 1 };
+
+const SIT = { sit: 1, legScale: 0.85, thigh: 0.25, legL: [62, -57], legR: [62, -57] };
+const POSE = {
+  stand: {},
+  // kid
+  carryBag: { armL: [8, 48], armR: [8, 48] },
+  crouch: { legL: [30, -62], legR: [30, -62], armL: [38, -25], armR: [38, -25], lean: 0 },
+  jumpUp: { legL: [4, 12], legR: [4, 12], armL: [140, 12], armR: [140, 12] },
+  sitHands: { ...SIT, legScale: 1.15, thigh: 0.2, legL: [70, -63], legR: [70, -63], ikL: { w: 1, to: 'hip', dx: -30, dy: 12, bend: 'out' }, ikR: { w: 1, to: 'hip', dx: 30, dy: 12, bend: 'out' } },
+  sitCrouch: { ...SIT, legScale: 1.1, thigh: 0.2, lean: 4, tilt: 4, sq: 0.9, armL: [22, -10], armR: [22, -10], legL: [70, -50], legR: [70, -50] },
+  raiseHand: { legL: [8, 0], legR: [8, 0], lean: -6, tilt: -4, armScale: 1.95, armR: [138, 34],
+    ikL: { w: 1, to: 'hip', dx: -22, dy: -10, bend: 'out' } },
+  // teen (seated behind desk)
+  sitBase: { ...SIT },
+  chinHand: { ...SIT, tilt: 12, lean: 3, ikR: { w: 1, to: 'chin', dx: 0.28, dy: 0.02, bend: 'down' }, ikL: { w: 1, to: 'desk', dx: -62, dy: -2, bend: 'out' } },
+  armsDesk: { ...SIT, tilt: -5, lean: -2, ikL: { w: 1, to: 'desk', dx: 34, dy: -2, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: -34, dy: -2, bend: 'down' } },
+  leanBack: { ...SIT, lean: -7, tilt: -7, armL: [14, 4], ikR: { w: 1, to: 'desk', dx: 62, dy: -2, bend: 'out' } },
+  sitUp: { ...SIT, ikL: { w: 1, to: 'desk', dx: -52, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'desk', dx: 52, dy: -2, bend: 'out' } },
+  scratchHead: { ...SIT, tilt: 8, ikR: { w: 1, to: 'head', dx: 0.72, dy: -0.72, bend: 'out' }, ikL: { w: 1, to: 'desk', dx: -52, dy: -2, bend: 'out' } },
+  thinkChin: { ...SIT, tilt: -8, ikL: { w: 1, to: 'chin', dx: -0.2, dy: 0.02, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: 52, dy: -2, bend: 'out' } },
+  shock: { ...SIT, lean: -5, tilt: 0, armL: [118, 36], armR: [118, 36] },
+  // teacher
+  chalkUp: { armR: [70, 55], armL: [12, 8] },
+  write: { lean: 3, armScale: 1.3, armL: [12, 6], ikR: { w: 1, to: 'pen', bend: 'down' } },
+  present: { armR: [96, 8], armL: [12, 8] },
+  teachShock: { lean: -4, armL: [48, 70], armR: [70, 40] },
+};
+const FACE = {
+  neutral: {},
+  smile: { mouth: 'smile', mw: 0.34 },
+  focus: { brow: 'line', browL: 14, browR: 14, mouth: 'flat', mw: 0.2 },
+  idea: { eyeSY: 1.1, brow: 'arc', browY: 0.04, mouth: 'o' },
+  grin: { mouth: 'grin', mw: 0.46, brow: 'arc', browY: 0.02 },
+  proud: { lidL: 0.34, lidR: 0.34, mouth: 'smirk', mw: 0.32 },
+  joy: { eyes: 'happy', mouth: 'grin', mw: 0.44 },
+  bored: { lidL: 0.52, lidR: 0.52, mouth: 'flat', mw: 0.22 },
+  puzzled: { lidL: 0.32, brow: 'line', browL: -16, browR: 20, mouth: 'wavy', mw: 0.32 },
+  surprised: { eyeSY: 1.12, pupil: 0.78, brow: 'arc', browY: 0.06, mouth: 'o' },
+  jaw: { eyeSY: 1.2, pupil: 0.62, brow: 'arc', browY: 0.16, mouth: 'jaw', mo: 1, headSY: 1.08 },
+};
+
+const HAIR = {
+  // Terry: an upright three-strand tuft with a curl — the series' silhouette
+  tuft(sw, sx) {
+    const b = 0.02;
+    return [
+      [[b, -0.97], [b + 0.05 + sx * 0.4, -1.32 - sw * 0.25], [b + 0.2 + sx * 0.7, -1.56 - sw * 0.35], [b + 0.37 + sx * 0.8, -1.5 - sw * 0.3], [b + 0.36 + sx * 0.7, -1.34 - sw * 0.2]],
+      [[b - 0.16, -0.95], [b - 0.26 + sx * 0.4, -1.26 - sw * 0.2], [b - 0.4 + sx * 0.5, -1.33 - sw * 0.2]],
+      [[b + 0.16, -0.96], [b + 0.3 + sx * 0.3, -1.22 - sw * 0.15]],
+    ];
+  },
+  messy() {
+    const z = [];
+    for (let i = 0; i <= 14; i++) { const a = (-172 + i * 11.5) * RAD, r = i % 2 ? 1.24 : 0.9; z.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    const z2 = [];
+    for (let i = 0; i <= 8; i++) { const a = (-150 + i * 15) * RAD, r = i % 2 ? 1.12 : 0.8; z2.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    return [z, z2];
+  },
+  part() {
+    const p = [-0.38, -0.92];
+    return [
+      [p, [0.1, -0.86], [0.6, -0.7], [0.93, -0.36]],
+      [[p[0] + 0.04, p[1] + 0.1], [0.2, -0.72], [0.62, -0.55], [0.98, -0.18]],
+      [p, [-0.7, -0.66], [-0.97, -0.3]],
+      [[-0.5, -0.8], [-0.85, -0.48], [-1.0, -0.12]],
+    ];
+  },
+  ponytail(sw, sx) {
+    const bang = [];
+    for (let i = 0; i <= 10; i++) { const a = (-160 + i * 14) * RAD, r = i % 2 ? 1.04 : 0.82; bang.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    return [
+      bang,
+      [[0.78, -0.66], [1.2, -0.84], [1.58, -0.5], [1.6 + sx, 0.0], [1.42 + sx, 0.42]],
+      [[0.86, -0.56], [1.25, -0.4], [1.36 + sx, 0.02], [1.26 + sx, 0.3]],
+      [[-0.96, -0.25], [-1.08, 0.3], [-1.02, 0.85]],
+      [[0.97, -0.2], [1.06, 0.34]],
+    ];
+  },
+  sides() {
+    // bald dome, two scruffy side tufts, a hopeful comb-over
+    const side = s => { const z = []; for (let i = 0; i <= 6; i++) { const a = (s < 0 ? 150 + i * 9 : 30 - i * 9) * RAD, r = i % 2 ? 1.12 : 0.97; z.push([Math.cos(a) * r, Math.sin(a) * r]); } return z; };
+    return [side(-1), side(1), [[-0.42, -0.9], [-0.05, -1.08], [0.38, -0.96]], [[-0.3, -0.94], [0.05, -1.14], [0.45, -1.02]]];
+  },
+};
+
+/** Two-bone IK; returns [elbow, hand]. */
+function solveIK(sh, tgt, L1, L2, pick) {
+  let dx = tgt[0] - sh[0], dy = tgt[1] - sh[1], d = Math.hypot(dx, dy) || 1;
+  const dc = clamp(d, Math.abs(L1 - L2) + 1, L1 + L2 - 0.5);
+  const base = Math.atan2(dy, dx), a = Math.acos(clamp((L1 * L1 + dc * dc - L2 * L2) / (2 * L1 * dc), -1, 1));
+  const e1 = [sh[0] + Math.cos(base + a) * L1, sh[1] + Math.sin(base + a) * L1];
+  const e2 = [sh[0] + Math.cos(base - a) * L1, sh[1] + Math.sin(base - a) * L1];
+  const hand = [sh[0] + dx / d * dc, sh[1] + dy / d * dc];
+  return [pick(e1, e2), hand];
+}
+
+/** Layout pass: resolves tracks and computes the skeleton (no drawing). */
+function layoutChar(id, t, F) {
+  const def = CAST[id], tr = TRACKS[id] || {};
+  const enter = tr.enter ?? -1;
+  if (t < enter) return null;
+  const pos = evalTrack(tr.pos, t);
+  const pose = evalTrack(tr.pose, t, POSE, DEF_POSE);
+  const face = evalTrack(tr.face, t, FACE, DEF_FACE);
+  const turn = evalTrack(tr.turn, t) ?? 0;
+  const sqT = evalTrack(tr.squash, t) ?? 1;
+  const H = def.H, r = def.head * H / 2, T = def.torso * H;
+  const Lg = def.leg * H * pose.legScale, A = def.arm * H * pose.armScale;
+  const [x, y] = pos;
+  const seg = (a, len, s) => [s * Math.sin(a * RAD) * len, Math.cos(a * RAD) * len];
+  const leg = (spec, s) => {
+    const k = seg(spec[0], Lg * pose.thigh, s), f = seg(spec[0] + spec[1], Lg * (1 - pose.thigh), s);
+    return { knee: k, foot: [k[0] + f[0], k[1] + f[1]] };
+  };
+  const lL = leg(pose.legL, -1), lR = leg(pose.legR, 1);
+  const reach = Math.max(lL.foot[1], lR.foot[1]);
+  const hip = [x, y - (1 - pose.sit) * reach + pose.hop];
+  const add = (p, q) => [p[0] + q[0], p[1] + q[1]];
+  const ln = pose.lean * RAD;
+  const neck = [hip[0] + Math.sin(ln) * T, hip[1] - Math.cos(ln) * T];
+  const sh = lerp2(neck, hip, 0.15);
+  const ha = (pose.lean + pose.tilt) * RAD;
+  const head = [neck[0] + Math.sin(ha) * r * 0.92, neck[1] - Math.cos(ha) * r * 0.92];
+  const L = { id, def, t, pos, pose, face, turn, r, hip, neck, sh, head, ha,
+    knees: [add(hip, lL.knee), add(hip, lR.knee)], feet: [add(hip, lL.foot), add(hip, lR.foot)] };
+  // head-local -> world (unit = head radius)
+  L.hl = (u, v) => {
+    const X = u * r, Y = v * r * face.headSY, c = Math.cos(ha), s = Math.sin(ha);
+    return [head[0] + X * c - Y * s, head[1] + X * s + Y * c];
+  };
+  // arms
+  const half = A / 2;
+  const target = spec => {
+    const dx = spec.dx || 0, dy = spec.dy || 0;
+    switch (spec.to) {
+      case 'hip': return [hip[0] + dx, hip[1] + dy];
+      case 'chin': return L.hl(dx, 0.98 + dy);
+      case 'head': return L.hl(dx, dy);
+      case 'desk': return [def.desk[0] + dx, def.desk[1] + dy];
+      case 'pen': { // aim at the pen, but never steeper than ~32deg (keeps the arm clear of the head)
+        const pp = F.pen || [sh[0] + 300, sh[1] - 200], vx = Math.max(1, pp[0] - sh[0]), vy = Math.max(pp[1] - sh[1], -vx * 0.42);
+        return [sh[0] + vx, sh[1] + vy];
+      }
+      default: return [dx, dy];
+    }
+  };
+  L.elbows = []; L.hands = [];
+  [-1, 1].forEach((s, i) => {
+    const spec = s < 0 ? pose.armL : pose.armR, ik = s < 0 ? pose.ikL : pose.ikR;
+    let e = add(sh, seg(spec[0], half, s)), h = add(e, seg(spec[0] + spec[1], half, s));
+    if (ik && ik.w > 0.001) {
+      const pick = ik.bend === 'down' ? (a, b) => (a[1] > b[1] ? a : b) : (a, b) => (s * a[0] > s * b[0] ? a : b);
+      const [e2, h2] = solveIK(sh, target(ik), half, half, pick);
+      e = lerp2(e, e2, ik.w); h = lerp2(h, h2, ik.w);
+    }
+    L.elbows[i] = e; L.hands[i] = h;
+  });
+  // squash & stretch about the base point, plus entrance pop
+  let pop = 1;
+  if (tr.enter !== undefined) { const u = (t - tr.enter) / 0.3; if (u < 1) pop = Math.max(0.01, EASE.back(clamp(u))); }
+  const sq = sqT * pose.sq;
+  L.base = [x, y]; L.sy = sq * pop; L.sx = (1 + (1 - sq) * 0.6) * pop;
+  const tf = p => [x + (p[0] - x) * L.sx, y + (p[1] - y) * L.sy];
+  // hair lag from vertical/horizontal velocity (pure: sampled at t and t-0.07)
+  if (tr.pos) {
+    const p0 = evalTrack(tr.pos, t - 0.07), pz = evalTrack(tr.pose, t - 0.07, POSE, DEF_POSE);
+    const vy = (y + pose.hop) - (p0[1] + pz.hop), vx = x - p0[0];
+    L.sway = clamp(vy * 0.012 + (sqT - (evalTrack(tr.squash, t - 0.07) ?? 1)) * -1.5, -0.4, 0.4);
+    L.swayX = clamp(-vx * 0.004, -0.25, 0.25);
+  } else { L.sway = 0; L.swayX = 0; }
+  F.anchors[id] = {
+    head: tf(head), headTop: tf(L.hl(0, -1)), mouth: tf(L.hl(0, 0.62)), jaw: tf(L.hl(0, 1.2)),
+    handL: tf(L.hands[0]), handR: tf(L.hands[1]), hip: tf(hip), r: r * L.sy,
+    footL: tf(L.feet[0]), footR: tf(L.feet[1]),
+  };
+  return L;
+}
+
+function drawChar(L, F) {
+  const { id, def, pose, face, turn, r, hip, neck, sh, t } = L, hl = L.hl, key = k => id + '.' + k;
+  const bw = def.kid ? 5.5 : 6;
+  // shadow (outside squash)
+  if (!def.noShadow) {
+    const onFloor = clamp(1 - (CFG.FLOOR - L.pos[1]) / 30) * (1 - pose.sit);
+    const lift = clamp((CFG.FLOOR - Math.max(L.feet[0][1], L.feet[1][1])) / 120);
+    shadow(key('shadow'), L.pos[0], CFG.FLOOR + 4, def.H * 0.36 * (1 - lift * 0.5), onFloor);
+  }
+  DL.save();
+  DL.translate(L.base[0], L.base[1]); DL.scale(L.sx, L.sy); DL.translate(-L.base[0], -L.base[1]);
+  // back props
+  if (def.bag) drawBagOnChar(L, F);
+  // legs + torso
+  stroke(key('legL'), [hip, L.knees[0], L.feet[0]], { z: Z.body, w: bw });
+  stroke(key('legR'), [hip, L.knees[1], L.feet[1]], { z: Z.body, w: bw });
+  stroke(key('torso'), [hip, neck], { z: Z.body, w: bw });
+  if (def.tie) {
+    const dx = hip[0] - neck[0], dy = hip[1] - neck[1], dl = Math.hypot(dx, dy), ux = dx / dl, uy = dy / dl, px = -uy, py = ux;
+    const P = (a, b) => [neck[0] + ux * a + px * b, neck[1] + uy * a + py * b];
+    stroke(key('tie'), [P(10, -9), P(dl * 0.52, -12), P(dl * 0.62, 0), P(dl * 0.52, 12), P(10, 9)], { z: Z.body, w: 4, closed: true, fill: C.paper });
+    stroke(key('knot'), [P(2, -8), P(12, -8), P(12, 8), P(2, 8)], { z: Z.body, w: 4, closed: true, fill: C.paper });
+  }
+  // arms
+  stroke(key('armL'), [sh, L.elbows[0], L.hands[0]], { z: Z.front, w: bw });
+  stroke(key('armR'), [sh, L.elbows[1], L.hands[1]], { z: Z.front, w: bw });
+  if (def.chalk) {
+    const e = L.elbows[1], h = L.hands[1], d = dist(e, h) || 1, u = [(h[0] - e[0]) / d, (h[1] - e[1]) / d];
+    const tip = [h[0] + u[0] * 16, h[1] + u[1] * 16];
+    stroke(key('chalk'), [h, tip], { z: Z.front, w: 11 });
+    stroke(key('chalk2'), [[h[0] + u[0] * 3, h[1] + u[1] * 3], [tip[0] - u[0] * 3, tip[1] - u[1] * 3]], { z: Z.front, w: 4.5, color: C.paper, boil: 0 });
+  }
+  // head
+  const ring = ringPts(key('head'), 0, 0, 1, 1, { n: 12, a0: -120, sweep: 372, rv: 0.035 }).map(p => hl(p[0], p[1]));
+  const fillRing = ringPts(key('head'), 0, 0, 1, 1, { n: 12, a0: -120, sweep: 360, rv: 0.035, closed: true }).map(p => hl(p[0], p[1]));
+  stroke(key('headFill'), fillRing, { z: Z.front, closed: true, fill: C.paper, noStroke: true, w: 1 });
+  stroke(key('headLine'), ring, { z: Z.front, w: bw });
+  drawFace(L, F, key);
+  // hair
+  const hf = HAIR[def.hair];
+  if (hf) {
+    const shift = turn * 0.16;
+    hf(L.sway, L.swayX).forEach((pts, i) => stroke(key('hair' + i), pts.map(p => hl(p[0] + shift, p[1])), { z: Z.front, w: def.hair === 'tuft' ? 5 : 4.2 }));
+  }
+  DL.restore();
+}
+
+function drawFace(L, F, key) {
+  const { def, face, turn, t, hl } = L;
+  const kid = !!def.kid;
+  const fu = turn * 0.28;
+  const ex = kid ? 0.36 : 0.38, ey = kid ? -0.1 : -0.16, erx = kid ? 0.34 : 0.36, ery = kid ? 0.41 : 0.44;
+  const pr = (kid ? 0.14 : 0.115) * face.pupil;
+  // blink (deterministic)
+  const bl = def.blink || [3.7, 0.4];
+  const blinking = face.eyes === 'open' && face.eyeSY <= 1.02 && ((t + bl[1]) % bl[0]) < 0.1;
+  const gz = stepTrack((TRACKS[L.id] || {}).gaze, t) ?? 'viewer';
+  let gpt = null;
+  if (Array.isArray(gz)) gpt = gz; else if (gz !== 'viewer') gpt = F.targets[gz] || null;
+  const eyesW = [];
+  [-1, 1].forEach((s, i) => {
+    const far = s * turn < 0 ? 1 - 0.28 * Math.abs(turn) : 1;
+    const rx = erx * (1 - 0.1 * Math.abs(turn)) * far, ry = ery * face.eyeSY;
+    const cx = s * ex * (1 - 0.12 * Math.abs(turn)) + fu, cy = ey - (face.eyeSY - 1) * 0.2;
+    const k = key('eye' + i);
+    if (blinking) {
+      stroke(k, [hl(cx - rx * 0.85, cy + 0.04), hl(cx, cy + ry * 0.2), hl(cx + rx * 0.85, cy + 0.04)], { z: Z.front, w: 4.5 });
+      return;
+    }
+    if (face.eyes === 'happy') {
+      stroke(k, [hl(cx - rx * 0.82, cy + ry * 0.18), hl(cx, cy - ry * 0.42), hl(cx + rx * 0.82, cy + ry * 0.18)], { z: Z.front, w: 5 });
+      return;
+    }
+    const ring = ringPts(k, cx, cy, rx, ry, { n: 11, a0: -100, sweep: 360, rv: 0.04, closed: true }).map(p => hl(p[0], p[1]));
+    stroke(k, ring, { z: Z.front, w: 4.5, closed: true, fill: C.paper });
+    // pupil: pinned to the rim in the gaze direction
+    let dx = 0, dy = 0.25;
+    if (gpt) {
+      const ew = hl(cx, cy), vx = gpt[0] - ew[0], vy = gpt[1] - ew[1], c = Math.cos(-L.ha), sn = Math.sin(-L.ha);
+      dx = vx * c - vy * sn; dy = vx * sn + vy * c;
+    }
+    const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+    const rim = 1 / Math.sqrt((dx / rx) ** 2 + (dy / ry) ** 2);
+    const m = gpt ? Math.max(0, rim - pr - 0.03) : 0.06;
+    let px = cx + dx * m, py = cy + dy * m;
+    const lid = s < 0 ? face.lidL : face.lidR;
+    if (lid > 0.01) {
+      const ly = cy - ry + 2 * ry * lid, hw = rx * Math.sqrt(Math.max(0, 1 - ((ly - cy) / ry) ** 2));
+      stroke(k + 'lid', [hl(cx - hw, ly), hl(cx + hw, ly)], { z: Z.front, w: 4.5, bow: 0.3 });
+      py = Math.max(py, Math.min(ly + pr * 0.8, cy + ry - pr));
+      // keep pupil inside the oval after pushing it under the lid
+      const ny = (py - cy) / ry, maxX = rx * Math.sqrt(Math.max(0, 1 - ny * ny)) - pr;
+      px = clamp(px, cx - maxX, cx + maxX);
+    }
+    dot(k + 'p', hl(px, py), pr * L.r, C.ink, Z.front);
+    eyesW.push({ cx, cy, rx, ry });
+  });
+  // brows
+  if (face.brow !== 'none') {
+    [-1, 1].forEach((s, i) => {
+      const cx = s * ex + fu, top = ey - ery * face.eyeSY - (face.eyeSY - 1) * 0.2;
+      const k = key('brow' + i);
+      if (face.brow === 'arc') {
+        const by = top - 0.14 - face.browY;
+        stroke(k, [hl(cx - erx * 0.6, by + 0.06), hl(cx, by - 0.05), hl(cx + erx * 0.6, by + 0.06)], { z: Z.front, w: 4.2 });
+      } else {
+        const by = top - 0.1 - face.browY, a = (s < 0 ? face.browL : face.browR) * RAD, hlf = 0.2;
+        stroke(k, [hl(cx - s * hlf * Math.cos(a), by + hlf * Math.sin(a)), hl(cx + s * hlf * Math.cos(a), by - hlf * Math.sin(a))], { z: Z.front, w: 4.6 });
+      }
+    });
+  }
+  // glasses
+  if (def.glasses && !blinking) {
+    eyesW.forEach((e, i) => stroke(key('gl' + i), superPts(e.cx, e.cy, e.rx * 2 + 0.16, e.ry * 1.75, 16, 4).map(p => hl(p[0], p[1])), { z: Z.front, w: 4, closed: true }));
+    if (eyesW.length === 2) stroke(key('glb'), [hl(fu - 0.06, ey - 0.12), hl(fu + 0.06, ey - 0.12)], { z: Z.front, w: 4 });
+  }
+  // mouth
+  const mx = face.mx + fu * 0.85, my = 0.6, w = face.mw, k = key('mouth');
+  switch (face.mouth) {
+    case 'smile': stroke(k, [hl(mx - w / 2, my - 0.04), hl(mx, my + 0.08), hl(mx + w / 2, my - 0.04)], { z: Z.front, w: 4.5 }); break;
+    case 'grin': stroke(k, [hl(mx - w / 2, my - 0.04), hl(mx + w / 2, my - 0.04, 1), hl(mx + w / 4, my + 0.14), hl(mx, my + 0.18), hl(mx - w / 4, my + 0.14)].map((p, i) => i === 1 ? [p[0], p[1], 1] : p), { z: Z.front, w: 4.5, closed: true, fill: C.paper }); break;
+    case 'o': stroke(k, ringPts(k, mx, my + 0.02, 0.075, 0.09, { n: 8, closed: true }).map(p => hl(p[0], p[1])), { z: Z.front, w: 4.2, closed: true, fill: C.paper }); break;
+    case 'jaw': {
+      const cy = my + 0.02 + 0.28 * face.mo, ry = 0.1 + 0.36 * face.mo, rx = 0.12 + 0.05 * face.mo;
+      stroke(k, ringPts(k, mx, cy, rx, ry, { n: 10, closed: true }).map(p => hl(p[0], p[1])), { z: Z.front, w: 4.5, closed: true, fill: C.paper });
+      break;
+    }
+    case 'wavy': stroke(k, [hl(mx - w / 2, my), hl(mx - w / 4, my - 0.05), hl(mx, my + 0.03), hl(mx + w / 4, my - 0.05), hl(mx + w / 2, my + 0.01)], { z: Z.front, w: 4.2 }); break;
+    case 'smirk': stroke(k, [hl(mx - w / 2, my + 0.02), hl(mx + w / 5, my + 0.03), hl(mx + w / 2, my - 0.07)], { z: Z.front, w: 4.5 }); break;
+    case 'frown': stroke(k, [hl(mx - w / 2, my + 0.05), hl(mx, my - 0.05), hl(mx + w / 2, my + 0.05)], { z: Z.front, w: 4.5 }); break;
+    default: stroke(k, [hl(mx - w / 2, my), hl(mx + w / 2, my)], { z: Z.front, w: 4.5 });
+  }
+}
+
+/* =====================================================================
+   PROPS
+   ===================================================================== */
+const BAG = { w: 122, h: 152 };
+function bagShape(key, cx, cy, rot, sq, z, p = 1) {
+  DL.save(); DL.translate(cx, cy + BAG.h / 2); DL.rotate(rot); DL.scale(1 + (1 - sq) * 0.6, sq); DL.translate(0, -BAG.h / 2);
+  const w = BAG.w, h = BAG.h;
+  stroke(key + '.body', superPts(0, 0, w, h, 22, 4.2), { z, w: 5, closed: true, fill: C.paper, draw: p });
+  stroke(key + '.flap', [[-w / 2 + 5, -h / 2 + 44], [-w * 0.2, -h / 2 + 60], [w * 0.2, -h / 2 + 60], [w / 2 - 5, -h / 2 + 44]], { z, w: 4.5, draw: p });
+  stroke(key + '.pocket', superPts(0, h * 0.2, w * 0.58, h * 0.32, 14, 4), { z, w: 4, closed: true, draw: p });
+  stroke(key + '.handle', [[-18, -h / 2 + 2], [-14, -h / 2 - 16], [14, -h / 2 - 16], [18, -h / 2 + 2]], { z, w: 4.5, draw: p });
+  stroke(key + '.buckle', [[-8, -h / 2 + 54], [8, -h / 2 + 54, 1], [8, -h / 2 + 70, 1], [-8, -h / 2 + 70, 1], [-8, -h / 2 + 54]], { z, w: 3.5, draw: p });
+  DL.restore();
+}
+function bagOnBack(L) { return [L.hip[0] + 40, L.neck[1] + 44 + L.pose.bagBob]; }
+function drawBagOnChar(L, F) {
+  const tr = TRACKS[L.id], u = evalTrack(tr.bag, L.t) ?? 1;
+  if (u < 0.999) return; // detached: drawn by drawLooseBag outside the squash
+  const c = bagOnBack(L);
+  bagShape(L.id + '.bag', c[0], c[1], -4, 1, Z.back);
+  stroke(L.id + '.strap', [[L.neck[0] + 16, L.neck[1] + 4], [L.neck[0] + 2, L.neck[1] + 30], [L.hip[0] - 6, L.hip[1] - 8]], { z: Z.body, w: 4.5 });
+  F.anchors[L.id].bag = [c[0], c[1] - BAG.h / 2];
+}
+function drawLooseBag(L, F) {
+  const tr = TRACKS[L.id], u = evalTrack(tr.bag, L.t) ?? 1;
+  if (u >= 0.999) return;
+  const tf = p => [L.base[0] + (p[0] - L.base[0]) * L.sx, L.base[1] + (p[1] - L.base[1]) * L.sy];
+  const from = tf(bagOnBack(L)), to = CAST[L.id].bagFloor;
+  const c = [lerp(to[0], from[0], u), lerp(to[1], from[1], u) - Math.sin(Math.PI * u) * 30];
+  const sq = evalTrack(tr.bagSq, L.t) ?? 1;
+  bagShape(L.id + '.bag', c[0], c[1], lerp(0, -12, u), sq, Z.back);
+  shadow(L.id + '.bagshadow', to[0], CFG.FLOOR + 4, BAG.w * 1.1, 1 - u);
+  F.anchors[L.id].bag = [c[0], c[1] - BAG.h / 2 * sq];
+}
+
+/* =====================================================================
+   SET PIECES  (draw on in stroke order with p)
+   ===================================================================== */
+const stag = (p, i, n) => clamp(p * n - i * 0.7);
+const SETDRAW = {
+  floor(s, p) { stroke('floor', [[20, CFG.FLOOR], [800, CFG.FLOOR + 2], [1580, CFG.FLOOR - 1]], { z: Z.set, w: 2.2, color: C.pencil, draw: p, opacity: 0.8 }); },
+  board(s, p) {
+    const { x, y, w, h } = s;
+    const rect = (k, x0, y0, x1, y1, i, ww) => stroke(k, [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0 - 2]], { z: Z.set, w: ww, draw: stag(p, i, 4) });
+    rect('board.o', x, y, x + w, y + h, 0, 6);
+    rect('board.i', x + 14, y + 14, x + w - 14, y + h - 14, 1, 3.5);
+    stroke('board.tray', [[x + 30, y + h + 12], [x + w - 30, y + h + 12]], { z: Z.set, w: 5, draw: stag(p, 2, 4) });
+    stroke('board.eraser', superPts(x + w - 150, y + h + 2, 64, 18, 12, 6), { z: Z.set, w: 4, closed: true, fill: C.paper, draw: stag(p, 3, 4) });
+    // chalk-dust smudges (pencil hatch)
+    for (let i = 0; i < 5; i++) stroke('board.dust' + i, [[x + 60 + i * 13, y + h - 30], [x + 84 + i * 13, y + h - 58]], { z: Z.set, w: 1.8, color: C.pencil, opacity: 0.55 * stag(p, 3, 4), boil: 0.5 });
+  },
+  desk(s, p) {
+    const { x, top } = s, z = Z.desk;
+    stroke(`desk${x}.slab`, superPts(x, top + 9, 226, 20, 16, 7), { z, w: 5, closed: true, fill: C.paper, draw: stag(p, 0, 3) });
+    stroke(`desk${x}.panel`, [[x - 100, top + 19], [x + 100, top + 19, 1], [x + 100, top + 76, 1], [x - 100, top + 76, 1], [x - 100, top + 19]], { z, w: 4.5, closed: false, fill: C.paper, draw: stag(p, 1, 3) });
+    stroke(`desk${x}.legL`, [[x - 94, top + 76], [x - 96, CFG.FLOOR]], { z, w: 5, draw: stag(p, 2, 3) });
+    stroke(`desk${x}.legR`, [[x + 94, top + 76], [x + 96, CFG.FLOOR]], { z, w: 5, draw: stag(p, 2, 3) });
+    if (p > 0.8) shadow(`desk${x}.sh`, x, CFG.FLOOR + 4, 250, 1);
+  },
+  stool(s, p) {
+    const { x, seat } = s, z = Z.chair;
+    stroke(`stool${x}.seat`, superPts(x, seat + 6, 122, 18, 14, 6), { z, w: 5, closed: true, fill: C.paper, draw: stag(p, 0, 3) });
+    stroke(`stool${x}.ll`, [[x - 48, seat + 14], [x - 58, CFG.FLOOR]], { z, w: 5, draw: stag(p, 1, 3) });
+    stroke(`stool${x}.lr`, [[x + 48, seat + 14], [x + 58, CFG.FLOOR]], { z, w: 5, draw: stag(p, 1, 3) });
+    stroke(`stool${x}.bar`, [[x - 55, seat + 100], [x + 55, seat + 100]], { z, w: 4, draw: stag(p, 2, 3) });
+    if (p > 0.8) shadow(`stool${x}.sh`, x, CFG.FLOOR + 4, 150, 1);
+  },
+  chair(s, p) {
+    const { x, seat } = s, z = Z.chair, top = seat - 118;
+    stroke(`chair${x}.pl`, [[x - 50, seat], [x - 48, top]], { z, w: 5, draw: stag(p, 0, 3) });
+    stroke(`chair${x}.pr`, [[x + 50, seat], [x + 48, top]], { z, w: 5, draw: stag(p, 0, 3) });
+    stroke(`chair${x}.rail`, [[x - 56, top], [x + 56, top]], { z, w: 5, draw: stag(p, 1, 3) });
+    stroke(`chair${x}.rail2`, [[x - 50, top + 34], [x + 50, top + 34]], { z, w: 4, draw: stag(p, 1, 3) });
+    if (s.full) {
+      stroke(`chair${x}.seat`, superPts(x, seat + 5, 134, 16, 14, 6), { z, w: 5, closed: true, fill: C.paper, draw: stag(p, 1, 3) });
+      stroke(`chair${x}.ll`, [[x - 56, seat + 12], [x - 62, CFG.FLOOR]], { z, w: 5, draw: stag(p, 2, 3) });
+      stroke(`chair${x}.lr`, [[x + 56, seat + 12], [x + 62, CFG.FLOOR]], { z, w: 5, draw: stag(p, 2, 3) });
+      if (p > 0.8) shadow(`chair${x}.sh`, x, CFG.FLOOR + 4, 160, 1);
+    }
+  },
+};
+
+/* =====================================================================
+   COMPONENTS  (data-driven FX: each has draw(fx, t, F) and cues(fx))
+   ===================================================================== */
+const COMP = {
+  seriesMark: {
+    draw(fx) {
+      text('series', fx.text, fx.x, fx.y, { size: CFG.SIZE.series, anchor: 'start', rot: -2, color: C.ink, opacity: 0.8, z: Z.stamp });
+      stroke('series.u', [[fx.x, fx.y + 24], [fx.x + 110, fx.y + 20], [fx.x + 222, fx.y + 14]], { z: Z.stamp, w: 2.2, color: C.pencil, boil: 0.5 });
+    },
+  },
+  /** Recurring age stamp: draws on big, then docks to a corner and stays. */
+  ageStamp: {
+    draw(fx, t) {
+      const lt = t - fx.t0; if (lt < 0) return;
+      const du = EASE.io(clamp((t - fx.dockT) / 0.4));
+      const pos = lerp2(fx.center, fx.dock, du);
+      let sc = lerp(1, fx.dockScale, du);
+      (fx.pulse || []).forEach(pt => { const v = (t - pt) / 0.45; if (v > 0 && v < 1) sc *= 1 + 0.22 * Math.sin(Math.PI * v); });
+      const R = fx.R, k = 'stamp';
+      DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); DL.rotate(-6 * (1 - du) - 4);
+      stroke(k + '.o', ringPts(k + '.o', 0, 0, R, R, { n: 14, a0: -110, sweep: 374, rv: 0.025 }), { z: Z.stamp, w: 7, color: C.red, draw: EASE.out(clamp(lt / 0.42)) });
+      stroke(k + '.i', ringPts(k + '.i', 0, 0, R - 18, R - 18, { n: 14, a0: 70, sweep: 368, rv: 0.02 }), { z: Z.stamp, w: 3.2, color: C.red, draw: EASE.out(clamp((lt - 0.12) / 0.4)) });
+      // "7" written in the red pen, then "岁" slams in
+      const g = GLYPH[String(fx.age)[0]], size = 170, gx = -118, gy = -size / 2 - 4;
+      g.s.forEach((s, i) => stroke(k + '.n' + i, s.map(([u, v, c]) => [gx + u * size, gy + v * size, c]), { z: Z.stamp, w: 12, color: C.red, draw: clamp((lt - 0.3) / 0.2), boil: 0.6 }));
+      const sl = clamp((lt - 0.48) / 0.2);
+      if (sl > 0) text(k + '.sui', '岁', 58, 8, { size: 118, color: C.red, z: Z.stamp, scale: lerp(1.9, 1, EASE.back(sl)), opacity: clamp(sl * 3) });
+      // ribbon with the place name (fades away when docked)
+      const rp = clamp((lt - 0.62) / 0.25), rop = 1 - clamp(du * 1.6);
+      if (rp > 0 && rop > 0) {
+        const rw = R * 1.5, ry = R + 44;
+        stroke(k + '.rib', [[-rw, ry - 30], [rw, ry - 30, 1], [rw - 26, ry, 1], [rw, ry + 30, 1], [-rw, ry + 30, 1], [-rw + 26, ry, 1], [-rw, ry - 30, 1]], { z: Z.stamp, w: 4.5, color: C.red, fill: C.paper, draw: rp, opacity: rop });
+        const tp = clamp((lt - 0.78) / 0.15);
+        if (tp > 0) text(k + '.place', fx.place, 0, ry + 1, { size: 44, color: C.red, z: Z.stamp, opacity: tp * rop, scale: lerp(1.15, 1, tp) });
+      }
+      DL.restore();
+      if (du < 1) {
+        const bs = [pos[0], pos[1]]; // nothing else; kept for symmetry
+        void bs;
+      }
+    },
+    cues: fx => [[fx.t0 + 0.02, 'whoosh'], [fx.t0 + 0.5, 'stamp'], [fx.t0 + 0.78, 'pop'], [fx.dockT, 'whoosh'], ...(fx.pulse || []).map(p => [p, 'boop'])],
+  },
+  /** Handwritten math in stroke order. */
+  write: {
+    init: layoutWriting,
+    draw(fx, t) {
+      const col = fx.color === 'red' ? C.red : C.ink;
+      fx.strokes.forEach((s, i) => {
+        const p = clamp((t - s.t0) / s.dur);
+        if (p > 0) stroke(fx.id + '.s' + i, s.pts, { z: fx.z ?? Z.board, w: fx.w || 6, color: col, draw: p, boil: 0.55 });
+      });
+    },
+    cues: fx => fx.strokes.map(s => [s.t0, fx.sfx || 'chalk']).concat(fx.endSfx ? [[fx.tEnd - 0.02, fx.endSfx]] : []),
+  },
+  /** Yellow highlighter swipe behind a writing block = the key math idea. */
+  highlight: {
+    draw(fx, t) {
+      const w = FXBY[fx.of]; if (!w) return;
+      const p = EASE.out(clamp((t - fx.t0) / fx.dur)); if (p <= 0) return;
+      const x0 = w.x - 22, x1 = lerp(x0, w.xEnd + 4, p), y0 = w.y + w.size * 0.3, y1 = w.y + w.size * 1.04;
+      const n = 8, top = [], bot = [];
+      for (let i = 0; i <= n; i++) { const x = lerp(x0, x1, i / n); top.push([x, y0 + Math.sin(i * 1.7) * 3]); bot.unshift([x, y1 + Math.sin(i * 2.3) * 4]); }
+      stroke(fx.id, top.concat(bot), { z: Z.hi, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+    },
+    cues: fx => [[fx.t0, 'swish']],
+  },
+  /** Red-pen ring around one glyph of a writing block. */
+  ring: {
+    draw(fx, t) {
+      const w = FXBY[fx.of], b = w && w.boxes[fx.glyph]; if (!b) return;
+      const p = EASE.out(clamp((t - fx.t0) / 0.35)); if (p <= 0) return;
+      stroke(fx.id, ringPts(fx.id, b.x + b.w / 2, b.y + b.h * 0.52, b.w / 2 + 20, b.h / 2 + 16, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
+    },
+    cues: fx => [[fx.t0, 'pen']],
+  },
+  /** Narrator label (red pen) with an arrow that tracks a target. */
+  label: {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const lt = t - fx.t0, lines = [].concat(fx.text), size = fx.size || CFG.SIZE.label;
+      const sizes = lines.map((_, i) => i === 0 ? size : size * 0.82);
+      const w = Math.max(...lines.map((l, i) => textWidth(l, sizes[i]))), h = sizes.reduce((a, b) => a + b * 1.15, 0);
+      const pp = EASE.back(clamp(lt / 0.2));
+      DL.save(); DL.translate(fx.at[0], fx.at[1]); DL.rotate(fx.rot || 0);
+      let yy = -h / 2;
+      lines.forEach((l, i) => { yy += sizes[i] * 0.575; text(fx.id + '.t' + i, l, 0, yy, { size: sizes[i], color: C.red, z: Z.annot, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), halo: 8 }); yy += sizes[i] * 0.575; });
+      DL.restore();
+      const tg = resolveTarget(fx.target, F); if (!tg) return;
+      // start on the label box edge facing the target
+      const hw = w / 2 + 12, hh = h / 2 + 8, vx = tg[0] - fx.at[0], vy = tg[1] - fx.at[1];
+      const s = Math.min(hw / Math.abs(vx || 1e-6), hh / Math.abs(vy || 1e-6));
+      const from = fx.from ? [fx.at[0] + fx.from[0], fx.at[1] + fx.from[1]] : [fx.at[0] + vx * s, fx.at[1] + vy * s];
+      const dl = dist(from, tg) || 1, gap = fx.gap ?? 16;
+      const to = [tg[0] - (tg[0] - from[0]) / dl * gap, tg[1] - (tg[1] - from[1]) / dl * gap];
+      arrow(fx.id + '.a', from, to, { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: fx.bend ?? 0.2 });
+    },
+    cues: fx => [[fx.t0, 'pop']],
+  },
+  /** Floating speech (no balloon) with a single tail line. */
+  speech: {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const lt = t - fx.t0, pp = EASE.back(clamp(lt / 0.22)), size = fx.size || CFG.SIZE.speech;
+      text(fx.id, fx.text, fx.at[0], fx.at[1], { size, font: CFG.FONT_ZH, color: C.ink, z: Z.annot, scale: lerp(0.4, 1, pp), rot: fx.rot || 0, halo: 10 });
+      const a = F.anchors[fx.speaker]; if (!a) return;
+      const from = [fx.at[0] + fx.tail[0], fx.at[1] + fx.tail[1]];
+      const d = dist(from, a.head), to = lerp2(from, a.head, clamp((d - a.r - 14) / d));
+      stroke(fx.id + '.tail', [from, to], { z: Z.annot, w: 3.5, draw: EASE.out(clamp((lt - 0.05) / 0.15)) });
+    },
+    cues: fx => [[fx.t0, 'pop']],
+  },
+  /** "?" / "!" popping above characters' heads. */
+  mark: {
+    draw(fx, t, F) {
+      fx.on.forEach((id, i) => {
+        const t0 = fx.t0 + i * (fx.stagger || 0), lt = t - t0;
+        if (lt < 0 || t >= fx.t1) return;
+        const a = F.anchors[id]; if (!a) return;
+        const pp = EASE.back(clamp(lt / 0.2)), rot = rnd(hstr(fx.id + id), 1, 1) * 12;
+        text(fx.id + id, fx.char, a.headTop[0] + (fx.dx || 0), a.headTop[1] - 50, { size: CFG.SIZE.mark, font: CFG.FONT_MIX, color: C.ink, z: Z.fx, scale: lerp(0.3, 1, pp), rot });
+      });
+    },
+    cues: fx => fx.on.map((_, i) => [fx.t0 + i * (fx.stagger || 0), 'boop']),
+  },
+  /** Motion lines under a moving hand. */
+  speedLines: {
+    draw(fx, t, F) {
+      const lt = t - fx.t0, dur = fx.t1 - fx.t0; if (lt < 0 || lt > dur) return;
+      const a = F.anchors[fx.char]; if (!a) return;
+      const h = a[fx.part], op = 1 - clamp((lt - dur * 0.5) / (dur * 0.5));
+      [-22, 0, 22].forEach((dx, i) => stroke(fx.id + i, [[h[0] + dx - 6, h[1] + 34 + i * 8], [h[0] + dx - 14, h[1] + 96 + i * 8]], { z: Z.fx, w: 3.5, draw: EASE.out(clamp(lt / 0.1)), opacity: op }));
+    },
+  },
+  /** Little pencil swing arcs beside dangling feet. */
+  swingMarks: {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const a = F.anchors[fx.char]; if (!a) return;
+      const op = clamp((t - fx.t0) / 0.2);
+      [['footL', -1], ['footR', 1]].forEach(([k, s]) => {
+        const f = a[k];
+        [0, 1].forEach(j => {
+          const r = 20 + j * 12, cx = f[0] + s * 6, cy = f[1] - 8;
+          const pts = [0, 1, 2, 3].map(i => { const ang = (s < 0 ? 200 - i * 22 : -20 + i * 22) * RAD; return [cx + Math.cos(ang) * r * s * -1 * -1, cy + Math.sin(ang) * r * -1 + 18]; });
+          stroke(fx.id + k + j, pts, { z: Z.fx, w: 2.4, color: C.ink, opacity: op * (0.8 - j * 0.25), boil: 0.8 });
+        });
+      });
+    },
+  },
+  subtitles: {
+    draw(fx, t) {
+      fx.lines.forEach((s, i) => {
+        if (t < s.t0 || t >= s.t1) return;
+        const op = clamp((t - s.t0) / 0.15) * clamp((s.t1 - t) / 0.12);
+        text('sub' + i, s.text, CFG.W / 2, fx.y, { size: CFG.SIZE.sub, color: C.ink, z: Z.sub, opacity: op, halo: 12 });
+      });
+    },
+  },
+};
+function resolveTarget(tg, F) {
+  if (!tg) return null;
+  if (Array.isArray(tg)) return tg;
+  if (tg.char) { const a = F.anchors[tg.char]; if (!a) return null; const p = a[tg.part]; return p ? [p[0] + (tg.dx || 0), p[1] + (tg.dy || 0)] : null; }
+  if (tg.write) {
+    const w = FXBY[tg.write], b = w && w.boxes[tg.glyph]; if (!b) return null;
+    return [b.x + b.w / 2 + (tg.dx || 0), b.y + b.h + (tg.dy || 0)];
+  }
+  return null;
+}
+
+/* =====================================================================
+   SCENE DATA — "七岁的陶哲轩"
+   ===================================================================== */
+const SEAT = 690, DESK_TOP = 628, STOOL = 652;
+const CAST = {
+  teacher: { H: 440, head: 0.42, torso: 0.25, leg: 0.33, arm: 0.34, hair: 'sides', tie: true, chalk: true, blink: [3.9, 1.1] },
+  teen1: { H: 384, head: 0.38, torso: 0.22, leg: 0.3, arm: 0.36, hair: 'messy', desk: [520, DESK_TOP], noShadow: true, blink: [4.1, 0.2] },
+  teen2: { H: 384, head: 0.38, torso: 0.22, leg: 0.3, arm: 0.36, hair: 'part', glasses: true, desk: [770, DESK_TOP], noShadow: true, blink: [3.6, 1.9] },
+  teen3: { H: 384, head: 0.38, torso: 0.22, leg: 0.3, arm: 0.36, hair: 'ponytail', desk: [1020, DESK_TOP], noShadow: true, blink: [4.4, 2.7] },
+  terry: { H: 240, head: 0.44, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, bag: true, bagFloor: [1440, CFG.FLOOR - BAG.h / 2 - 2], blink: [3.3, 0.9] },
+};
+// Terry's walk: bouncy 2-beat cycle with lagging schoolbag
+const WALK = { t0: 1.9, t1: 2.95, hz: 5.2 };
+function walkPose(t) {
+  if (t < WALK.t0 || t >= WALK.t1) return POSE.carryBag;
+  const ph = (t - WALK.t0) * WALK.hz * Math.PI, s = Math.sin(ph), a = Math.abs(s);
+  const odd = Math.floor((t - WALK.t0) * WALK.hz) % 2;
+  return { legL: [3 + 22 * a, odd ? -38 * (1 - a) : 0], legR: [3 + 22 * a, odd ? 0 : -38 * (1 - a)],
+    armL: [8 + 10 * s, 48], armR: [8 - 10 * s, 48], hop: -10 * (1 - a), lean: -5, tilt: 3 * s, sq: 1 - 0.05 * a,
+    bagBob: 7 * Math.sin(ph * 2 - 1.3) };
+}
+const swingPose = t => {
+  const s = Math.sin((t - 8.2) * 2 * Math.PI * 1.5);
+  return { ...POSE.sitHands, legL: [70, -63 + 28 * s], legR: [70, -63 - 28 * s], tilt: 4 * s };
+};
+function jumpToChair(t) { const u = clamp((t - 3.42) / 0.2); return [1300, lerp(CFG.FLOOR, STOOL, EASE.io(u)) - Math.sin(Math.PI * u) * 38]; }
+
+const TRACKS = {
+  terry: {
+    pos: [[0, [1760, CFG.FLOOR]], [1.9, [1300, CFG.FLOOR], 1.05, 'lin'], [3.42, jumpToChair, 0]],
+    pose: [[0, walkPose], [2.95, 'carryBag', 0.1], [3.1, 'stand', 0.1], [3.3, 'crouch', 0.08], [3.42, 'jumpUp', 0.08],
+      [3.62, 'sitHands', 0.1, 'back'], [5.6, 'sitCrouch', 0.12], [5.78, 'raiseHand', 0.09, 'back'],
+      [7.45, 'sitCrouch', 0.12], [7.62, 'sitHands', 0.12, 'back'], [8.2, swingPose, 0.15]],
+    squash: [[0, 1], [3.3, 0.86, 0.08], [3.42, 1.12, 0.06], [3.62, 0.86, 0.05], [3.68, 1, 0.16, 'back'],
+      [5.6, 0.88, 0.12], [5.78, 1.14, 0.07], [5.86, 1, 0.22, 'back'], [7.45, 0.9, 0.1], [7.62, 1, 0.18, 'back']],
+    bag: [[0, 1], [3.1, 0, 0.22, 'in']],
+    bagSq: [[0, 1], [3.32, 0.8, 0.04], [3.36, 1, 0.22, 'back']],
+    face: [[0, 'smile'], [2.3, 'neutral', 0.05], [2.75, 'smile', 0.05], [3.8, 'focus', 0.05], [5.1, 'idea', 0.05],
+      [5.78, 'grin', 0.05], [7.2, 'proud', 0.05], [8.2, 'joy', 0.05]],
+    turn: [[0, -0.6], [2.95, -0.2, 0.1], [3.3, 0, 0.1], [3.8, -0.4, 0.08], [5.78, -0.3, 0.08], [7.2, 0, 0.1], [8.2, 0.05, 0.1]],
+    gaze: [[0, [0, 700]], [2.3, 'teens'], [2.75, 'viewer'], [3.2, 'chair'], [3.8, 'board'], [5.78, 'boardHi'], [7.2, 'viewer']],
+  },
+  teacher: {
+    enter: 1.5,
+    pos: [[0, [150, CFG.FLOOR]]],
+    pose: [[0, 'chalkUp'], [3.85, 'write', 0.14], [5.4, 'present', 0.14], [6.05, 'chalkUp', 0.1], [8.35, 'teachShock', 0.08, 'back']],
+    face: [[0, 'neutral'], [2.3, 'surprised', 0.05], [2.9, 'smile', 0.05], [3.85, 'focus', 0.05], [5.4, 'neutral', 0.05],
+      [6.05, 'surprised', 0.05], [8.35, 'jaw', 0.06]],
+    turn: [[0, 0.45], [2.3, 0.6, 0.1], [3.85, 0.55, 0.1], [5.4, 0.2, 0.12], [6.05, 0.5, 0.1]],
+    gaze: [[0, 'board'], [2.3, 'terry'], [3.85, 'pen'], [5.4, 'teens'], [6.05, 'terry']],
+    squash: [[0, 1], [8.35, 1.08, 0.06], [8.42, 1, 0.25, 'back']],
+  },
+};
+// Three teens share one choreography (the synchronized double-take), with individual idle poses.
+function teenTracks(base, puzzle, enter) {
+  return {
+    enter,
+    pos: null,
+    pose: [[0, base], [2.62, 'sitUp', 0.07, 'back'], [3.8, base, 0.2], [4.6, puzzle, 0.14], [6.05, 'sitUp', 0.08, 'back'], [8.35, 'shock', 0.07, 'back']],
+    face: [[0, 'bored'], [2.62, 'surprised', 0.04], [3.1, 'puzzled', 0.05], [3.8, 'bored', 0.06], [4.6, 'puzzled', 0.06], [6.05, 'surprised', 0.04], [8.35, 'jaw', 0.06, 'back']],
+    turn: [[0, -0.35], [2.2, 0.45, 0.06], [2.45, -0.35, 0.06], [2.62, 0.7, 0.05], [3.8, -0.35, 0.1], [6.05, 0.6, 0.06], [8.35, 0.25, 0.08]],
+    gaze: [[0, 'board'], [2.2, 'terry'], [2.45, 'board'], [2.62, 'terry'], [3.8, 'board'], [6.05, 'terry'], [8.35, 'terry']],
+    squash: [[0, 1], [2.62, 1.1, 0.05], [2.68, 1, 0.2, 'back'], [8.35, 1.14, 0.06], [8.42, 1, 0.3, 'back']],
+  };
+}
+TRACKS.teen1 = teenTracks('chinHand', 'scratchHead', 1.58);
+TRACKS.teen2 = teenTracks('armsDesk', 'armsDesk', 1.66);
+TRACKS.teen3 = teenTracks('leanBack', 'thinkChin', 1.74);
+['teen1', 'teen2', 'teen3'].forEach(id => { TRACKS[id].pos = [[0, [CAST[id].desk[0], SEAT]]]; });
+const DRAW_ORDER = ['teacher', 'teen1', 'teen2', 'teen3', 'terry'];
+
+const SET = [
+  { type: 'floor', t0: 1.5 },
+  { type: 'board', x: 300, y: 56, w: 850, h: 272, t0: 1.52 },
+  { type: 'chair', x: 520, seat: SEAT, t0: 1.5 }, { type: 'chair', x: 770, seat: SEAT, t0: 1.54 }, { type: 'chair', x: 1020, seat: SEAT, t0: 1.58 },
+  { type: 'desk', x: 520, top: DESK_TOP, t0: 1.5 }, { type: 'desk', x: 770, top: DESK_TOP, t0: 1.55 }, { type: 'desk', x: 1020, top: DESK_TOP, t0: 1.6 },
+  { type: 'stool', x: 1300, seat: STOOL, t0: 1.72 },
+];
+
+const SUBS = [
+  { t0: 0.2, t1: 3.75, text: '七岁那年，小陶走进了中学的数学课。' },
+  { t0: 3.8, t1: 7.15, text: '老师刚写完题，小陶的手就举起来了！' },
+  { t0: 7.2, t1: 10.6, text: '脚还够不着地，数学已经够到了高中。' },
+];
+const FX = [
+  { type: 'seriesMark', text: '数学少年陶哲轩', x: 40, y: 44 },
+  { type: 'ageStamp', age: 7, place: '澳大利亚·阿德莱德', t0: 0, center: [800, 360], R: 150, dockT: 1.32, dock: [1486, 108], dockScale: 0.46, pulse: [8.1] },
+  { type: 'write', id: 'eq', text: '3x + 5 = 26', x: 395, y: 96, size: 112, t0: 3.88, speed: 2300, gap: 0.035, glyphGap: 0.03, w: 7 },
+  { type: 'highlight', id: 'hl', of: 'eq', t0: 5.3, dur: 0.28 },
+  { type: 'label', id: 'lbName', text: '陶哲轩，7岁', at: [1232, 372], rot: -3, t0: 2.3, t1: 3.8, target: { char: 'terry', part: 'headTop' }, bend: -0.25 },
+  { type: 'label', id: 'lbBag', text: ['书包', '（比他还大）'], at: [1478, 404], rot: 3, t0: 2.7, t1: 3.8, target: { char: 'terry', part: 'bag' }, bend: 0.2 },
+  { type: 'mark', id: 'q', char: '?', on: ['teen1', 'teen2', 'teen3'], t0: 2.78, t1: 3.75, stagger: 0.06 },
+  { type: 'speedLines', id: 'zip', char: 'terry', part: 'handR', t0: 5.8, t1: 6.25 },
+  { type: 'speech', id: 'ans', text: 'x = 7！', at: [1150, 392], tail: [70, 32], speaker: 'terry', t0: 5.95, t1: 7.35, rot: -4 },
+  { type: 'write', id: 'chk', text: '3×7+5=26 ✓', x: 640, y: 236, size: 64, t0: 7.22, speed: 3200, gap: 0.022, glyphGap: 0.012, color: 'red', w: 5, track: 0.16, sfx: 'pen', endSfx: 'ding', z: Z.annot },
+  { type: 'ring', id: 'ring7', of: 'chk', glyph: 2, t0: 7.95 },
+  { type: 'label', id: 'lbAge', text: '正好是他的年龄', at: [790, 396], rot: -2, t0: 8.05, t1: 10.6, target: { write: 'chk', glyph: 2, dy: 20 }, bend: 0.15, gap: 6 },
+  { type: 'label', id: 'lbJaw', text: '下巴（掉了）', at: [298, 652], rot: -3, t0: 8.7, t1: 10.6, target: { char: 'teen1', part: 'jaw' }, bend: 0.25, gap: 10 },
+  { type: 'swingMarks', id: 'swing', char: 'terry', t0: 8.3, t1: 10.6 },
+  { type: 'subtitles', lines: SUBS, y: 850 },
+];
+const FXBY = {};
+FX.forEach(fx => { const c = COMP[fx.type]; if (c && c.init) c.init(fx); if (fx.id) FXBY[fx.id] = fx; });
+
+// sound cues that are not owned by a component
+const EXTRA_SFX = [[1.5, 'plip'], [1.58, 'plip'], [1.66, 'plip'], [1.74, 'plip'], [2.62, 'whip'], [3.3, 'thud'], [3.44, 'hop'],
+  [5.78, 'zip'], [6.05, 'whip'], [7.5, 'hop'], [8.35, 'boing']];
+function buildCues() {
+  const c = [];
+  for (let k = 0; ; k++) { const t = WALK.t0 + (k + 0.5) / WALK.hz; if (t >= WALK.t1) break; c.push({ t, sfx: 'step' }); }
+  FX.forEach(fx => { const comp = COMP[fx.type]; if (comp.cues) comp.cues(fx).forEach(([t, n]) => c.push({ t, sfx: n })); });
+  EXTRA_SFX.forEach(([t, n]) => c.push({ t, sfx: n }));
+  SUBS.forEach(s => c.push({ t: s.t0, say: s.text }));
+  return c.sort((a, b) => a.t - b.t);
+}
+const CUES = buildCues();
+
+/* =====================================================================
+   RENDER  — pure function of t
+   ===================================================================== */
+const layer = document.getElementById('layer');
+const NS = 'http://www.w3.org/2000/svg';
+const POOL = new Map(); let lastOrder = '';
+const RM = { reduce: false };
+function commit() {
+  const items = DL.items.slice().sort((a, b) => a.z - b.z || a.o - b.o);
+  const seen = new Set(), order = [];
+  for (const it of items) {
+    let el = POOL.get(it.key);
+    if (!el || el.tagName !== it.tag) { if (el) el.remove(); el = document.createElementNS(NS, it.tag); el._a = {}; POOL.set(it.key, el); }
+    const prev = el._a;
+    for (const k in it.attrs) { const v = String(it.attrs[k]); if (prev[k] !== v) { el.setAttribute(k, v); prev[k] = v; } }
+    for (const k in prev) if (!(k in it.attrs)) { el.removeAttribute(k); delete prev[k]; }
+    if (it.text !== undefined && el._t !== it.text) { el.textContent = it.text; el._t = it.text; }
+    seen.add(it.key); order.push(it.key);
+  }
+  for (const [k, el] of POOL) if (!seen.has(k)) { el.remove(); POOL.delete(k); }
+  const ord = order.join('|');
+  if (ord !== lastOrder) { for (const k of order) layer.appendChild(POOL.get(k)); lastOrder = ord; }
+}
+function render(tIn) {
+  const t = clamp(Math.floor(tIn * CFG.FPS + 1e-6) / CFG.FPS, 0, CFG.DUR);
+  BOIL.frame = Math.floor(t * CFG.BOIL_FPS);
+  BOIL.amp = RM.reduce ? 0 : CFG.BOIL_AMP;
+  DL.reset();
+  const F = { t, anchors: {}, targets: {}, pen: null };
+  const eq = FXBY.eq;
+  if (t >= eq.t0 - 0.2) F.pen = penAt(eq, t);
+  SET.forEach(s => { const p = EASE.out(clamp((t - s.t0) / 0.38)); if (p > 0) SETDRAW[s.type](s, p); });
+  const Ls = {};
+  // Terry first so everyone else can look at him
+  ['terry', ...DRAW_ORDER.filter(i => i !== 'terry')].forEach(id => { Ls[id] = layoutChar(id, t, F); });
+  Object.assign(F.targets, {
+    board: [700, 180], boardHi: [650, 120], teens: [760, 560], chair: [1300, STOOL], pen: F.pen || [700, 180],
+    terry: F.anchors.terry && F.anchors.terry.head,
+  });
+  DRAW_ORDER.forEach(id => { const L = Ls[id]; if (L) { drawChar(L, F); if (CAST[id].bag) drawLooseBag(L, F); } });
+  FX.forEach(fx => COMP[fx.type].draw(fx, t, F));
+  commit();
+  return t;
+}
+
+/* =====================================================================
+   SOUND  — tiny WebAudio synth; only created after a user gesture
+   ===================================================================== */
+const SFX = (() => {
+  let ctx = null, master = null, noiseBuf = null;
+  function ensure() {
+    try {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+        ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.5; master.connect(ctx.destination);
+        noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+        const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3);
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { ctx = null; }
+    return ctx;
+  }
+  const env = (g, t, a, d, pk) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
+  function tone(type, f0, f1, dur, pk, lfo) {
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    if (lfo) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = lfo[0]; lg.gain.value = lfo[1]; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur + 0.05); }
+    env(g, t, 0.006, dur, pk); o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(type, freq, q, dur, pk, f1) {
+    const t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur); f.Q.value = q;
+    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(master); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+  }
+  const LIB = {
+    step() { tone('sine', 180, 70, 0.08, 0.32); noise('lowpass', 700, 0.8, 0.04, 0.06); },
+    chalk() { noise('bandpass', 3300, 1.6, 0.07, 0.2); noise('highpass', 6000, 0.7, 0.03, 0.05); },
+    pen() { noise('bandpass', 2300, 1.2, 0.05, 0.1); },
+    pop() { tone('sine', 380, 1000, 0.09, 0.28); },
+    plip() { tone('sine', 700, 1400, 0.06, 0.16); },
+    boop() { tone('triangle', 640, 1250, 0.08, 0.16); },
+    stamp() { tone('sine', 120, 45, 0.24, 0.6); noise('lowpass', 500, 0.7, 0.1, 0.25); },
+    whoosh() { noise('bandpass', 500, 0.9, 0.24, 0.12, 2600); },
+    whip() { noise('bandpass', 1200, 1.4, 0.12, 0.12, 3800); },
+    swish() { noise('bandpass', 1600, 0.8, 0.22, 0.1, 900); },
+    thud() { tone('sine', 100, 40, 0.2, 0.55); noise('lowpass', 300, 0.7, 0.08, 0.2); },
+    hop() { tone('sine', 280, 760, 0.13, 0.22); },
+    zip() { tone('triangle', 300, 1700, 0.15, 0.2); },
+    ding() { tone('sine', 1320, 1318, 0.55, 0.22); tone('sine', 1980, 1975, 0.35, 0.08); },
+    boing() { tone('triangle', 420, 140, 0.65, 0.34, [16, 70]); },
+  };
+  return {
+    unlock: ensure,
+    play(n) { if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
+  };
+})();
+
+/* =====================================================================
+   NARRATION  — optional browser TTS (zh-CN), silent fallback
+   ===================================================================== */
+const TTS = (() => {
+  const ok = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+  let voice = null;
+  const pick = () => { try { const vs = speechSynthesis.getVoices() || []; voice = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null; } catch (e) { voice = null; } };
+  if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) { /* old browsers */ } }
+  return {
+    say(txt) {
+      if (!ok) return;
+      try { const u = new SpeechSynthesisUtterance(txt); u.lang = 'zh-CN'; u.rate = 1.05; if (voice) u.voice = voice; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+    },
+    cancel() { if (ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+  };
+})();
+
+/* =====================================================================
+   PLAYER
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const ui = { play: $('btnPlay'), restart: $('btnRestart'), scrub: $('scrub'), time: $('time'), narr: $('btnNarr'), snd: $('btnSnd'), poster: $('poster') };
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
+};
+const P = { t: 0, playing: false, poster: true, wall0: 0, t0: 0, prev: 0, lastQ: -1, raf: 0,
+  narr: true, snd: true };
+try { const s = JSON.parse(localStorage.getItem('taoClipPrefs') || 'null'); if (s) { P.narr = !!s.narr; P.snd = !!s.snd; } } catch (e) { /* storage blocked */ }
+const savePrefs = () => { try { localStorage.setItem('taoClipPrefs', JSON.stringify({ narr: P.narr, snd: P.snd })); } catch (e) { /* ignore */ } };
+
+function paint(t, force) {
+  const q = Math.floor(t * CFG.FPS + 1e-6);
+  if (force || q !== P.lastQ) { render(t); P.lastQ = q; }
+}
+function syncUI() {
+  const t = P.poster ? 0 : P.t;
+  ui.scrub.value = t.toFixed(2);
+  ui.scrub.setAttribute('aria-valuetext', `${t.toFixed(1)} 秒`);
+  ui.time.textContent = `${t.toFixed(1)} / ${CFG.DUR.toFixed(1)}`;
+  ui.play.innerHTML = P.playing ? ICON.pause : ICON.play;
+  ui.play.setAttribute('aria-label', P.playing ? '暂停' : '播放');
+  ui.poster.hidden = !P.poster;
+  ui.narr.setAttribute('aria-pressed', String(P.narr));
+  ui.snd.setAttribute('aria-pressed', String(P.snd));
+}
+function fireCues(a, b) {
+  for (const c of CUES) {
+    if (c.t <= a) continue; if (c.t > b) break;
+    if (c.sfx && P.snd) SFX.play(c.sfx);
+    if (c.say && P.narr) TTS.say(c.say);
+  }
+}
+function tick(now) {
+  if (!P.playing) return;
+  let t = P.t0 + (now - P.wall0) / 1000;
+  if (t >= CFG.DUR) t = CFG.DUR;
+  fireCues(P.prev, t); P.prev = t; P.t = t;
+  paint(t);
+  if (t >= CFG.DUR) { P.playing = false; syncUI(); return; }
+  syncUI();
+  P.raf = requestAnimationFrame(tick);
+}
+function play() {
+  if (P.poster || P.t >= CFG.DUR - 1e-3) P.t = 0;
+  P.poster = false; P.playing = true;
+  SFX.unlock(); TTS.cancel();
+  P.t0 = P.t; P.prev = P.t - 1e-4; P.wall0 = performance.now();
+  cancelAnimationFrame(P.raf); P.raf = requestAnimationFrame(tick);
+  paint(P.t, true); syncUI();
+}
+function pause() { P.playing = false; cancelAnimationFrame(P.raf); TTS.cancel(); syncUI(); }
+function toggle() { P.playing ? pause() : play(); }
+function seek(t) {
+  pause(); P.poster = false;
+  P.t = clamp(+t || 0, 0, CFG.DUR);
+  paint(P.t, true); syncUI();
+}
+ui.play.addEventListener('click', toggle);
+ui.poster.addEventListener('click', play);
+ui.restart.addEventListener('click', () => { P.t = 0; P.poster = false; play(); });
+ui.scrub.addEventListener('input', () => seek(+ui.scrub.value));
+ui.narr.addEventListener('click', () => { P.narr = !P.narr; if (!P.narr) TTS.cancel(); savePrefs(); syncUI(); });
+ui.snd.addEventListener('click', () => { P.snd = !P.snd; if (P.snd) SFX.unlock(); savePrefs(); syncUI(); });
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' && e.key !== ' ') return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'TEXTAREA' || (tag === 'INPUT' && e.target.type !== 'range')) return;
+  e.preventDefault(); toggle();
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && P.playing) pause(); });
+
+// reduced motion: no line boil (holds become perfectly still)
+try {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  RM.reduce = mq.matches;
+  const onMQ = () => { RM.reduce = mq.matches; paint(P.poster ? 8.8 : P.t, true); };
+  mq.addEventListener ? mq.addEventListener('change', onMQ) : mq.addListener(onMQ);
+} catch (e) { /* ignore */ }
+
+// test/automation hooks
+window.render = render;
+window.__duration = CFG.DUR;
+window.__seek = t => { seek(t); render(P.t); P.lastQ = Math.floor(P.t * CFG.FPS + 1e-6); };
+
+// poster frame: the punchline
+paint(8.8, true); syncUI();
+</script>
+</body>
+</html>
