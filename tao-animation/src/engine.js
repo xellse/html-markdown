@@ -232,6 +232,8 @@ const GLYPH = {
   '(': { w: .34, s: [[[.28, 0], [.1, .3], [.08, .68], [.28, 1.04]]] },
   ')': { w: .34, s: [[[.06, 0], [.24, .3], [.26, .68], [.06, 1.04]]] },
   '≠': { w: .62, s: [[[.06, .5], [.56, .5]], [[.06, .74], [.56, .74]], [[.44, .26], [.18, .98]]] },
+  '…': { w: .62, s: [[[.08, .94], [.1, 1]], [[.28, .94], [.3, 1]], [[.48, .94], [.5, 1]]] },
+  '→': { w: .82, s: [[[.04, .6], [.74, .6]], [[.52, .4], [.76, .6, 1], [.52, .8]]] },
   '÷': { w: .62, s: [[[.06, .6], [.56, .6]], [[.3, .34], [.31, .38]], [[.3, .82], [.31, .86]]] },
 };
 function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += dist(pts[i - 1], pts[i]); return L; }
@@ -1069,7 +1071,8 @@ function prepareEpisode() {
     (sc.sfx || []).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n }));
     sc.subs.forEach(s => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, '') }); });
   });
-  EP.cues = c.sort((a, b) => a.t - b.t);
+  // a scene may pre-draw things with negative start times; their sounds must not leak into the previous scene
+  EP.cues = c.filter(q => q.say || EP.scenes.some(sc => q.t >= sc.start - 1e-6 && q.t < sc.start + sc.dur && q.t - sc.start >= -1e-6)).sort((a, b) => a.t - b.t);
   EP.pauses = EP.scenes.flatMap(sc => (sc.pauses || []).map(p => sc.start + p)).sort((a, b) => a - b);
   EP.syncs = [...new Set(EP.cues.filter(q => q.say).map(q => q.t).concat(EP.scenes.slice(1).map(s => s.start)))].sort((a, b) => a - b);
 }

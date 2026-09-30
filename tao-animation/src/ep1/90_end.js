@@ -19,7 +19,7 @@ defineScene({
     { type: 'title', id: 'a', text: '看出来', x: 400, y: 380, size: 120, t0: 0.5 },
     { type: 'write', id: 'neq', text: '≠', x: 575, y: 318, size: 130, t0: 1.0, speed: 1800, color: 'red', w: 9, sfx: 'pen', z: Z.annot },
     { type: 'title', id: 'b', text: '证出来', x: 840, y: 380, size: 120, t0: 1.3 },
-    { type: 'qm', id: 'qm', pos: [[0, [180, 700]]], size: 190, t0: 2.2, act: [[0, 'hop'], [3.2, 'idle']], mood: [[0, 'doubt']], sign: [[0, null], [3.2, '为什么？']] },
+    { type: 'q1_qm', id: 'qm', pos: [[0, [180, 700]]], size: 190, t0: 2.2, act: [[0, 'hop'], [3.2, 'idle']], mood: [[0, 'doubt']], sign: [[0, null], [3.2, '为什么？']] },
     { type: 'speech', id: 'bye', text: '下集见！', at: [1410, 400], tail: [-40, 40], speaker: 'terry', t0: 4.0, t1: 7, rot: 5 },
   ],
   subs: [

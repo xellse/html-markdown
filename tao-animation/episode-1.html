@@ -84,7 +84,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     </svg>
     <button id="poster" class="overlay" type="button" aria-label="播放动画">
       <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17l15-8.5z" fill="#FBF8F1"/></svg></span>
-      <span class="plabel">播放 · 第1集（约 3 分钟）</span>
+      <span class="plabel">播放 · 第1集（约 3 分半）</span>
     </button>
     <button id="think" class="overlay think" type="button" aria-label="继续播放，看答案" hidden>
       <span class="plabel">想好了吗？点这里看答案 ▶</span>
@@ -343,6 +343,8 @@ const GLYPH = {
   '(': { w: .34, s: [[[.28, 0], [.1, .3], [.08, .68], [.28, 1.04]]] },
   ')': { w: .34, s: [[[.06, 0], [.24, .3], [.26, .68], [.06, 1.04]]] },
   '≠': { w: .62, s: [[[.06, .5], [.56, .5]], [[.06, .74], [.56, .74]], [[.44, .26], [.18, .98]]] },
+  '…': { w: .62, s: [[[.08, .94], [.1, 1]], [[.28, .94], [.3, 1]], [[.48, .94], [.5, 1]]] },
+  '→': { w: .82, s: [[[.04, .6], [.74, .6]], [[.52, .4], [.76, .6, 1], [.52, .8]]] },
   '÷': { w: .62, s: [[[.06, .6], [.56, .6]], [[.3, .34], [.31, .38]], [[.3, .82], [.31, .86]]] },
 };
 function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += dist(pts[i - 1], pts[i]); return L; }
@@ -1180,7 +1182,8 @@ function prepareEpisode() {
     (sc.sfx || []).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n }));
     sc.subs.forEach(s => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, '') }); });
   });
-  EP.cues = c.sort((a, b) => a.t - b.t);
+  // a scene may pre-draw things with negative start times; their sounds must not leak into the previous scene
+  EP.cues = c.filter(q => q.say || EP.scenes.some(sc => q.t >= sc.start - 1e-6 && q.t < sc.start + sc.dur && q.t - sc.start >= -1e-6)).sort((a, b) => a.t - b.t);
   EP.pauses = EP.scenes.flatMap(sc => (sc.pauses || []).map(p => sc.start + p)).sort((a, b) => a - b);
   EP.syncs = [...new Set(EP.cues.filter(q => q.say).map(q => q.t).concat(EP.scenes.slice(1).map(s => s.start)))].sort((a, b) => a - b);
 }
@@ -1320,7 +1323,7 @@ const TTS = (() => {
   };
 })();
 
-EP.series = "数学少年陶哲轩"; EP.poster = 0;
+EP.series = "数学少年陶哲轩"; EP.poster = 141.2;
 /* ---- 00_title.js ---- */
 // 开场：片名卡
 defineScene({
@@ -1347,6 +1350,716 @@ defineScene({
   sfx: [[0.02, 'stamp'], [1.25, 'hop']],
   subs: [{ t0: 0.3, t1: 5.8, text: '数学少年陶哲轩，第一集：一眼看出来。', hide: true }],
 });
+
+/* ---- 10_age2.js ---- */
+// 2岁：看《芝麻街》学会认字和算数，还当起了五岁小朋友的“小老师”
+(() => {
+  const FL = 780, SIT_Y = 772;
+  const TVX = 1370, TVY = 520;                 // TV cabinet centre
+  const TERRY_X = 1100, GIRL_X = 545, DAD_X = 125, MOM_X = 372;
+  // toy blocks: 2 + 3 = ?
+  const BK = { x0: 625, S: 64, G: 10, D: 11, t0: 14.5, stag: 0.16, fall: 0.26, qT: 17.0, fiveT: 17.12, hiT: 17.85 };
+  const bkX = i => BK.x0 + BK.S / 2 + i * (BK.S + BK.G);
+
+  /* ---------- poses / faces / hair / sounds (a2_ prefix) ---------- */
+  const SITB = { sit: 1, legScale: 1, thigh: 0.55, legL: [80, 8], legR: [80, 8], armL: [55, 30], armR: [55, 30] };
+  const SITG = { sit: 1, legScale: 1, thigh: 0.5, legL: [78, 8], legR: [78, 8], armL: [30, 24], armR: [30, 24] };
+  Object.assign(POSE, {
+    a2_sitBaby: SITB,
+    a2_babyPoint: { ...SITB, armL: [75, 8], armR: [55, 30], lean: -8, tilt: -6 },
+    a2_babyCheer: { ...SITB, armL: [150, 16], armR: [150, 16] },
+    a2_babyThumb: { ...SITB, armR: [110, -10], armL: [55, 30], lean: 3, tilt: -6 },
+    a2_dadShock: { lean: -4, armL: [48, 70], armR: [48, 70] },
+    a2_sitGirl: SITG,
+    a2_girlScratch: { ...SITG, tilt: 8, ikR: { w: 1, to: 'head', dx: 0.72, dy: -0.72, bend: 'out' } },
+    a2_girlCheer: { ...SITG, armL: [150, 14], armR: [150, 14] },
+    a2_cheeks: { lean: -3, ikL: { w: 1, to: 'head', dx: -1.06, dy: 0.45, bend: 'down' }, ikR: { w: 1, to: 'head', dx: 1.06, dy: 0.45, bend: 'down' } },
+    a2_ask: { armR: [40, 75], armL: [16, 10], lean: 2 },
+  });
+  Object.assign(FACE, {
+    a2_proudGrin: { lidL: 0.3, lidR: 0.3, mouth: 'grin', mw: 0.44, brow: 'arc', browY: 0.02 },
+  });
+  // mom's bob: a rounded cap that stops at chin level, ends flicking in
+  HAIR.a2_bob = () => {
+    const cap = [[-1.02, 0.54], [-1.17, 0.44]];
+    for (let i = 0; i <= 12; i++) { const a = (170 + i * 200 / 12) * RAD, r = 1.16 + (i % 2 ? 0.05 : 0); cap.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    cap.push([1.17, 0.44], [1.02, 0.54]);
+    return [cap, [[-0.55, -0.9], [-0.9, -0.42], [-0.98, 0.25]], [[0.58, -0.92], [0.93, -0.45], [1.0, 0.25]]];
+  };
+  SFX.define('a2_static', (tone, noise) => { noise('highpass', 3200, 0.7, 0.18, 0.07); tone('sine', 1500, 900, 0.1, 0.05); });
+  SFX.define('a2_block', (tone, noise) => { tone('sine', 240, 95, 0.11, 0.34); noise('lowpass', 900, 0.8, 0.05, 0.12); });
+  SFX.define('a2_clap', (tone, noise) => { noise('bandpass', 1500, 0.9, 0.06, 0.28); });
+  SFX.define('a2_twinkle', tone => { [1568, 2093, 2637, 3136].forEach((f, i) => tone('sine', f, f * 1.01, 0.18, 0.07, null, i * 0.07)); });
+
+  /* ---------- Terry's little routines (pure functions of t) ---------- */
+  // screen programme: tokens hop in one by one
+  const SHOWS = [
+    { t0: 3.25, t1: 6.4, toks: ['A', 'B', 'C'] },
+    { t0: 6.55, t1: 9.4, toks: ['1', '2', '3'] },
+    { t0: 9.55, t1: 24.3, toks: ['2', '+', '3'] },
+  ];
+  const HOPS = SHOWS.flatMap(s => s.toks.map((_, i) => s.t0 + 0.25 + i * 0.55));
+  const readAlong = t => (HOPS.some(h => t >= h && t < h + 0.32) && t < 11 ? { mouth: 'o', eyeSY: 1.06, brow: 'arc', browY: 0.02 } : { mouth: 'smile', mw: 0.34 });
+  const watchBob = t => ({ ...SITB, lean: 2, tilt: 4 * Math.sin((t - 3.3) * 2 * Math.PI * 1.1) });
+  const CLAP = { t0: 10.0, t1: 11.3, hz: 2.5 };
+  const clap = t => { const c = Math.cos((t - CLAP.t0) * 2 * Math.PI * CLAP.hz); return { ...SITB, armL: [60, -100 - 20 * c], armR: [60, -100 - 20 * c] }; };
+  const tap = t => ({ ...POSE.a2_babyPoint, armL: [75 + 8 * Math.max(0, Math.sin((t - 16.2) * 2 * Math.PI * 2.2)), 8] });
+
+  /* ---------- set: a rug ---------- */
+  SETDRAW.a2_rug = (s, p) => {
+    const z = Z.set + 1;
+    stroke('a2rug.o', ringPts('a2rug.o', s.x, s.y, s.rx, s.ry, { n: 16, closed: true, rv: 0.01 }), { z, w: 4, closed: true, fill: C.paper, draw: stag(p, 0, 2) });
+    stroke('a2rug.i', ringPts('a2rug.i', s.x, s.y, s.rx - 40, s.ry - 6, { n: 16, a0: 60, sweep: 350, rv: 0.01 }), { z, w: 2.4, color: C.pencil, draw: stag(p, 1, 2) });
+    [-1, 1].forEach(sd => {
+      for (let i = 0; i < 4; i++) {
+        const y = s.y - s.ry * 0.6 + i * s.ry * 0.4, x = s.x + sd * s.rx * Math.sqrt(Math.max(0, 1 - ((y - s.y) / s.ry) ** 2));
+        stroke(`a2rug.f${sd}${i}`, [[x, y], [x + sd * 16, y + 2]], { z, w: 2.6, draw: stag(p, 1, 2) });
+      }
+    });
+  };
+
+  // a wall clock whose hands really move, and a framed doodle (sun over hills)
+  SETDRAW.a2_clock = (s, p, lt) => {
+    const { x, y, r } = s, z = Z.set;
+    stroke('a2clk.o', ringPts('a2clk.o', x, y, r, r, { n: 12, a0: -110, sweep: 372, rv: 0.03 }), { z, w: 5, draw: stag(p, 0, 2) });
+    if (p < 0.6) return;
+    [0, 3, 6, 9].forEach(i => { const a = i * 30 * RAD; stroke('a2clk.m' + i, [[x + Math.sin(a) * r * 0.72, y - Math.cos(a) * r * 0.72], [x + Math.sin(a) * r * 0.86, y - Math.cos(a) * r * 0.86]], { z, w: 3 }); });
+    const am = (lt * 4) * RAD, ah = (300 + lt * 0.7) * RAD;
+    stroke('a2clk.hm', [[x, y], [x + Math.sin(am) * r * 0.7, y - Math.cos(am) * r * 0.7]], { z, w: 3.5 });
+    stroke('a2clk.hh', [[x, y], [x + Math.sin(ah) * r * 0.45, y - Math.cos(ah) * r * 0.45]], { z, w: 4.5 });
+    dot('a2clk.c', [x, y], 4, C.ink, z);
+  };
+  SETDRAW.a2_frame = (s, p) => {
+    const { x, y, w, h } = s, z = Z.set, L = x - w / 2, R = x + w / 2, T = y - h / 2, B = y + h / 2;
+    stroke('a2frm.o', [[L, T], [R, T, 1], [R, B, 1], [L, B, 1], [L, T - 2, 1]], { z, w: 5, draw: stag(p, 0, 3) });
+    stroke('a2frm.i', [[L + 12, T + 12], [R - 12, T + 12, 1], [R - 12, B - 12, 1], [L + 12, B - 12, 1], [L + 12, T + 10, 1]], { z, w: 2.5, draw: stag(p, 1, 3) });
+    stroke('a2frm.hill', [[L + 14, B - 30], [x - 22, T + 52], [x + 10, B - 34], [x + 34, T + 60], [R - 14, B - 32]], { z, w: 3, draw: stag(p, 2, 3) });
+    stroke('a2frm.sun', ringPts('a2frm.sun', R - 36, T + 34, 11, 11, { n: 8 }), { z, w: 3, draw: stag(p, 2, 3) });
+    stroke('a2frm.nail', [[x - 30, T], [x, T - 30, 1], [x + 30, T]], { z, w: 2.2, color: C.pencil, draw: stag(p, 1, 3) });
+  };
+
+  /* ---------- props ---------- */
+  // a 1970s TV set on legs with rabbit-ear antenna; the screen shows only letters and numbers
+  PROPS.a2_tv = (fx, t, lt, p) => {
+    const z = Z.chair, SX = -30, SW = 196, SH = 158;
+    // one happy squash at the sparkle
+    const sv = (t - 24.45) / 0.45, sp = sv > 0 && sv < 1 ? Math.sin(Math.PI * sv) : 0;
+    DL.save(); DL.translate(0, 260); DL.scale(1 + 0.05 * sp, 1 - 0.04 * sp); DL.translate(0, -260);
+    stroke('a2tv.cab', superPts(0, 0, 290, 210, 24, 6), { z, w: 6, closed: true, fill: C.paper, draw: stag(p, 0, 5) });
+    stroke('a2tv.scr', superPts(SX, 0, SW, SH, 24, 3.2), { z: z + 1, w: 5, closed: true, fill: C.paper, draw: stag(p, 1, 5) });
+    [[-52, 'k1'], [-8, 'k2']].forEach(([y, k], i) => {
+      stroke('a2tv.' + k, ringPts('a2tv.' + k, 112, y, 15, 15, { n: 9, closed: true }), { z: z + 1, w: 4, closed: true, fill: C.paper, draw: stag(p, 2, 5) });
+      stroke('a2tv.' + k + 't', [[112, y], [112 + (i ? 8 : -6), y - 10]], { z: z + 1, w: 3, draw: stag(p, 2, 5) });
+    });
+    for (let i = 0; i < 4; i++) stroke('a2tv.g' + i, [[98, 34 + i * 14], [126, 34 + i * 14]], { z: z + 1, w: 3, draw: stag(p, 3, 5) });
+    stroke('a2tv.legL', [[-108, 104], [-128, 260]], { z, w: 5.5, draw: stag(p, 3, 5) });
+    stroke('a2tv.legR', [[108, 104], [128, 260]], { z, w: 5.5, draw: stag(p, 3, 5) });
+    stroke('a2tv.dome', [[-24, -104], [-17, -117], [0, -122], [17, -117], [24, -104]], { z, w: 5, fill: C.paper, draw: stag(p, 4, 5) });
+    stroke('a2tv.earL', [[-6, -118], [-74, -226]], { z, w: 4, draw: stag(p, 4, 5) });
+    stroke('a2tv.earR', [[6, -118], [82, -234]], { z, w: 4, draw: stag(p, 4, 5) });
+    if (p > 0.95) { dot('a2tv.tipL', [-74, -226], 7, C.ink, z); dot('a2tv.tipR', [82, -234], 7, C.ink, z); }
+    stroke('a2tv.gl1', [[SX + 52, -58], [SX + 72, -44]], { z: z + 2, w: 2.4, color: C.pencil, draw: stag(p, 2, 5) });
+    stroke('a2tv.gl2', [[SX + 62, -64], [SX + 82, -50]], { z: z + 2, w: 2.4, color: C.pencil, draw: stag(p, 2, 5) });
+    if (p > 0.8) shadow('a2tv.sh', 0, 264, 300, 1);
+    // --- screen ---
+    const zc = z + 3;
+    if (t >= 3.0 && t < 3.25) { // CRT switch-on: a line that opens up
+      const u = EASE.out(clamp((t - 3.0) / 0.25));
+      stroke('a2tv.on', [[SX - 80 * u, 0], [SX + 80 * u, 0]], { z: zc, w: 5, boil: 0.4 });
+    }
+    [6.4, 9.4, 24.3].forEach((f, k) => { // channel-change flicker
+      if (t < f || t >= f + 0.15) return;
+      for (let i = 0; i < 4; i++) { const y = -52 + i * 34 + rnd(hstr('a2fl' + k), i, BOIL.frame) * 8; stroke(`a2tv.fl${k}.${i}`, [[SX - 78, y], [SX + 78, y + 3]], { z: zc, w: 3, boil: 1.5 }); }
+    });
+    const show = SHOWS.find(s => t >= s.t0 && t < s.t1);
+    if (show) show.toks.forEach((tk, i) => {
+      const a = show.t0 + 0.25 + i * 0.55, v = t - a; if (v < 0) return;
+      const pp = EASE.back(clamp(v / 0.2)), hop = v < 0.3 ? -14 * Math.sin(Math.PI * v / 0.3) : 0;
+      text('a2tv.tk' + i, tk, SX + (i - 1) * 54, 2 + hop, { size: 70, font: CFG.FONT_MIX, color: C.ink, z: zc, scale: lerp(0.3, 1, pp) });
+    });
+    if (t >= 24.45) { // finale: both things he learned
+      const v = t - 24.45, pp = EASE.back(clamp(v / 0.25));
+      text('a2tv.fa', 'A B C', SX, -30, { size: 54, font: CFG.FONT_MIX, z: zc, scale: lerp(0.3, 1, pp) });
+      text('a2tv.fb', '1 2 3', SX, 34, { size: 54, font: CFG.FONT_MIX, z: zc, scale: lerp(0.3, 1, EASE.back(clamp((v - 0.12) / 0.25))) });
+    }
+    DL.restore();
+    // --- one glow / sparkle ---
+    const g = t - 24.45;
+    if (g > 0 && g < 1.6) {
+      const out = EASE.out(clamp(g / 0.3)), op = 1 - clamp((g - 1.1) / 0.5);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2 + 0.2, c = Math.cos(a), s = Math.sin(a);
+        const r0x = 172, r0y = 136;
+        const p0 = [c * r0x, s * r0y - 10], p1 = [c * (r0x + 30 * out), s * (r0y + 30 * out) - 10];
+        if (s > 0.75) continue; // no rays into the floor
+        stroke('a2tv.ray' + i, [p0, p1], { z: Z.fx, w: 3.5, opacity: op, boil: 0.8 });
+      }
+      [[-176, -150, 1], [150, -180, 0.8], [178, 40, 0.9]].forEach(([x, y, k], i) => {
+        const sc = k * EASE.back(clamp((g - 0.1 - i * 0.08) / 0.25)) * op; if (sc <= 0.01) return;
+        stroke('a2tv.st' + i + 'a', [[x - 22 * sc, y], [x + 22 * sc, y]], { z: Z.fx, w: 4 });
+        stroke('a2tv.st' + i + 'b', [[x, y - 22 * sc], [x, y + 22 * sc]], { z: Z.fx, w: 4 });
+        stroke('a2tv.st' + i + 'c', [[x - 10 * sc, y - 10 * sc], [x + 10 * sc, y + 10 * sc]], { z: Z.fx, w: 2.5 });
+        stroke('a2tv.st' + i + 'd', [[x - 10 * sc, y + 10 * sc], [x + 10 * sc, y - 10 * sc]], { z: Z.fx, w: 2.5 });
+      });
+    }
+  };
+
+  // one handwriting glyph, top-left at (x, y); draw 0..1 runs through its strokes in order
+  const glyph = (key, ch, x, y, size, o = {}) => {
+    const g = GLYPH[ch]; if (!g) return;
+    const lens = g.s.map(s => polyLen(s.map(([u, v]) => [u, v]))), tot = lens.reduce((a, b) => a + b, 0) || 1;
+    let acc = 0;
+    g.s.forEach((s, i) => {
+      const d = o.draw === undefined ? 1 : clamp((o.draw * tot - acc) / lens[i]); acc += lens[i];
+      if (d > 0) stroke(key + '.' + i, s.map(([u, v, c]) => [x + u * size, y + v * size, c]), { z: o.z, w: o.w || 6, color: o.color || C.ink, draw: d, boil: 0.55, opacity: o.opacity });
+    });
+  };
+
+  // big toy blocks that fall in: 2 + 3 = ?  → the '?' hops off and a 5 is written
+  PROPS.a2_blocks = (fx, t) => {
+    const { S, D } = BK, z = Z.desk - 2, syms = ['2', '+', '3', '=', '?'];
+    syms.forEach((ch, i) => {
+      const tl = t - (BK.t0 + i * BK.stag); if (tl < 0) return;
+      const u = clamp(tl / BK.fall);
+      let yo = -330 * (1 - u * u), sy = 1;
+      const v = (tl - BK.fall) / 0.22;
+      if (v > 0 && v < 1) { yo = -14 * Math.sin(Math.PI * v); sy = 1 - 0.1 * Math.sin(Math.PI * Math.min(1, v * 2)); }
+      const cx = bkX(i), by = FL;
+      DL.save(); DL.translate(cx, by + yo); DL.scale(1 + (1 - sy) * 0.6, sy); DL.translate(-cx, -by);
+      const L = cx - S / 2, R = cx + S / 2, T = by - S, k = 'a2bk' + i;
+      stroke(k + '.top', [[L, T], [L + D, T - D, 1], [R + D, T - D, 1], [R, T, 1], [L, T, 1]], { z, w: 4.5, fill: C.paper });
+      stroke(k + '.side', [[R, T], [R + D, T - D, 1], [R + D, by - D, 1], [R, by, 1], [R, T, 1]], { z, w: 4.5, fill: C.paper });
+      stroke(k + '.front', [[L + 6, T], [R, T, 1], [R, by, 1], [L, by, 1], [L, T, 1], [L + 8, T - 1]], { z, w: 5, fill: C.paper });
+      const gs = 48, gy = T + (S - gs) / 2 - 1;
+      if (ch === '?') {
+        const q = t - BK.qT;
+        if (q < 0.35) {
+          const qu = clamp(q / 0.35), gw = GLYPH['?'].w * gs;
+          DL.save(); DL.translate(0, -80 * EASE.out(qu)); DL.about(cx, gy + gs / 2, () => DL.rotate(28 * qu));
+          glyph(k + '.q', '?', cx - gw / 2, gy, gs, { z: z + 1.5, w: 5.5, opacity: 1 - qu });
+          DL.restore();
+        }
+        const d = clamp((t - BK.fiveT) / 0.5);
+        if (d > 0) glyph(k + '.five', '5', cx - GLYPH['5'].w * gs / 2, gy, gs, { z: z + 1.5, w: 6.5, draw: d });
+      } else glyph(k + '.g', ch, cx - GLYPH[ch].w * gs / 2, gy, gs, { z: z + 1.5, w: 5.5 });
+      DL.restore();
+    });
+    // the key idea: yellow highlighter across 2 + 3 = 5
+    const hp = EASE.out(clamp((t - BK.hiT) / 0.3));
+    if (hp > 0) {
+      const x0 = BK.x0 - 16, x1 = lerp(x0, bkX(4) + S / 2 + 20, hp), y0 = FL - S + 12, y1 = FL - 10, n = 8, top = [], bot = [];
+      for (let i = 0; i <= n; i++) { const x = lerp(x0, x1, i / n); top.push([x, y0 + Math.sin(i * 1.7) * 3]); bot.unshift([x, y1 + Math.sin(i * 2.3) * 4]); }
+      stroke('a2bk.hi', top.concat(bot), { z: z + 1, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+    }
+  };
+
+  defineScene({
+    id: 'age2', chapter: '2岁 · 芝麻街', dur: 27.8, floor: FL,
+    cast: {
+      dad: { H: 440, head: 0.4, torso: 0.25, leg: 0.33, arm: 0.34, hair: 'part', glasses: true, blink: [4.1, 0.4] },
+      mom: { H: 420, head: 0.4, torso: 0.25, leg: 0.33, arm: 0.34, hair: 'a2_bob', blink: [3.6, 2.2] },
+      girl: { H: 215, head: 0.44, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'ponytail', kid: true, blink: [3.8, 1.6] },
+      terry: { H: 170, head: 0.56, torso: 0.24, leg: 0.28, arm: 0.46, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    order: ['dad', 'mom', 'girl', 'terry'],
+    tracks: {
+      terry: {
+        enter: 2.0,
+        pos: [[0, [TERRY_X, SIT_Y]]],
+        pose: [[0, 'a2_sitBaby'], [3.3, watchBob, 0.2], [CLAP.t0, clap, 0.12], [11.5, 'a2_sitBaby', 0.2],
+          [16.2, tap, 0.1, 'back'], [18.3, 'a2_babyCheer', 0.12, 'back'], [19.3, 'a2_sitBaby', 0.2], [24.1, 'a2_babyThumb', 0.1, 'back']],
+        face: [[0, 'smile'], [3.26, 'surprised', 0.04], [3.5, readAlong, 0.05], [CLAP.t0, 'joy', 0.05], [11.5, 'grin', 0.05],
+          [13.3, 'smile', 0.05], [16.2, 'grin', 0.05], [17.7, 'proud', 0.05], [18.3, 'joy', 0.05], [19.3, 'smile', 0.05],
+          [21.0, 'neutral', 0.05], [24.1, 'a2_proudGrin', 0.05]],
+        turn: [[0, 0.55], [13.2, -0.45, 0.2], [19.3, -0.55, 0.15]],
+        gaze: [[0, 'screen'], [13.0, 'girl'], [14.5, 'blocks'], [16.2, 'qblock'], [17.8, 'girl'], [19.3, 'dad']],
+        squash: [[0, 1], [3.26, 1.12, 0.05], [3.32, 1, 0.22, 'back'], [16.2, 1.1, 0.05], [16.26, 1, 0.2, 'back'],
+          [18.3, 1.14, 0.06], [18.37, 1, 0.25, 'back'], [24.1, 1.14, 0.06], [24.17, 1, 0.25, 'back']],
+      },
+      girl: {
+        pos: [[0, [-90, FL]], [12.6, [GIRL_X, FL], 1.4, 'lin'], [14.0, [GIRL_X, SIT_Y], 0.25]],
+        pose: [[0, makeWalk(12.6, 14.0, 5.2)], [14.0, 'a2_sitGirl', 0.25], [15.4, 'a2_girlScratch', 0.15], [17.9, 'a2_sitGirl', 0.12],
+          [18.4, 'a2_girlCheer', 0.1, 'back'], [19.6, 'a2_sitGirl', 0.2]],
+        face: [[0, 'smile'], [15.3, 'puzzled', 0.05], [17.9, 'idea', 0.05], [18.4, 'joy', 0.05], [19.6, 'smile', 0.05]],
+        turn: [[0, 0.5], [14.0, 0.4, 0.2], [19.5, -0.3, 0.2]],
+        gaze: [[0, [800, 700]], [14.3, 'terry'], [14.6, 'blocks'], [15.3, 'qblock'], [16.3, 'terry'], [17.1, 'qblock'], [18.4, 'viewer'], [19.5, 'mom']],
+        squash: [[0, 1], [14.22, 0.88, 0.05], [14.28, 1, 0.2, 'back'], [18.4, 1.12, 0.06], [18.46, 1, 0.25, 'back']],
+      },
+      dad: {
+        enter: 18.8,
+        pos: [[0, [DAD_X, FL]]],
+        pose: [[0, 'stand'], [19.3, 'a2_dadShock', 0.08, 'back'], [21.0, 'a2_ask', 0.15], [24.3, 'stand', 0.25]],
+        face: [[0, 'surprised'], [19.3, 'jaw', 0.06, 'back'], [20.9, 'surprised', 0.1], [24.8, 'smile', 0.1]],
+        turn: [[0, 0.45]],
+        gaze: [[0, 'terry']],
+        squash: [[0, 1], [19.3, 1.08, 0.06], [19.37, 1, 0.25, 'back']],
+      },
+      mom: {
+        enter: 18.9,
+        pos: [[0, [MOM_X, FL]]],
+        pose: [[0, 'stand'], [19.35, 'a2_cheeks', 0.08, 'back'], [24.8, 'stand', 0.25]],
+        face: [[0, 'surprised'], [19.35, 'jaw', 0.06, 'back'], [24.8, 'joy', 0.1]],
+        turn: [[0, 0.5]],
+        gaze: [[0, 'terry']],
+        squash: [[0, 1], [19.35, 1.08, 0.06], [19.42, 1, 0.25, 'back']],
+      },
+    },
+    targets: () => ({ screen: [TVX - 30, TVY], blocks: [805, 745], qblock: [bkX(4), 740] }),
+    set: [
+      { type: 'floor', t0: 1.4 },
+      { type: 'a2_rug', x: 820, y: 784, rx: 400, ry: 20, t0: 1.5 },
+      { type: 'a2_clock', x: 760, y: 190, r: 48, t0: 1.6 },
+      { type: 'a2_frame', x: 1060, y: 170, w: 150, h: 110, t0: 1.65 },
+      { type: 'door', x: 250, w: 420, top: 280, t0: 1.55 },
+    ],
+    fx: [
+      { type: 'ageStamp', age: 2, place: '澳大利亚·阿德莱德', t0: 0, center: [800, 360], R: 150, dockT: 1.32, dock: [1486, 108], dockScale: 0.46, pulse: [15.25] },
+      { type: 'prop', kind: 'a2_tv', id: 'tv', t0: 1.6, at: [TVX, TVY], drawDur: 0.5 },
+      { type: 'label', id: 'lbName', text: '陶哲轩，2岁', at: [950, 540], rot: -3, t0: 2.4, t1: 5.6, target: { char: 'terry', part: 'headTop' }, bend: -0.25 },
+      { type: 'label', id: 'lbTV', text: '电视节目《芝麻街》', at: [1100, 330], rot: -2, t0: 6.0, t1: 9.4, target: [TVX - 118, TVY - 72], bend: 0.2 },
+      // he learned it himself
+      { type: 'thought', id: 'th', at: [930, 440], rx: 150, ry: 80, t0: 10.2, t1: 12.8, from: { char: 'terry', part: 'headTop' } },
+      { type: 'title', id: 'thA', text: 'A B C', x: 930, y: 412, size: 54, font: CFG.FONT_MIX, t0: 10.4, t1: 12.8, z: Z.fx + 1 },
+      { type: 'title', id: 'th1', text: '1 2 3', x: 930, y: 470, size: 54, font: CFG.FONT_MIX, t0: 10.6, t1: 12.8, z: Z.fx + 1 },
+      // the lesson
+      { type: 'prop', kind: 'a2_blocks', id: 'blocks', t0: BK.t0, at: [0, 0], drawDur: 0 },
+      { type: 'label', id: 'lbTeach', text: '小老师（2岁）', at: [1110, 520], rot: 3, t0: 15.2, t1: 18.4, target: { char: 'terry', part: 'headTop' }, bend: 0.25 },
+      { type: 'label', id: 'lbKid', text: '学生（5岁）', at: [660, 500], rot: -3, t0: 15.45, t1: 18.4, target: { char: 'girl', part: 'headTop', dx: 10 }, bend: -0.25 },
+      { type: 'mark', id: 'q', char: '?', on: ['girl'], t0: 15.5, t1: 17.0, dx: -34 },
+      // parents
+      { type: 'label', id: 'lbJaw', text: '下巴（掉了）', at: [700, 420], rot: -3, t0: 19.6, t1: 21.6, target: { char: 'mom', part: 'jaw', dx: 14 }, bend: 0.2, gap: 12 },
+      { type: 'speech', id: 'ask', text: '你怎么会的？', at: [400, 196], tail: [-150, 46], speaker: 'dad', t0: 21.0, t1: 23.9, rot: -3 },
+      { type: 'speech', id: 'ans', text: '《芝麻街》教的！', at: [860, 460], tail: [200, 44], speaker: 'terry', t0: 24.1, t1: 27.7, rot: -4, size: 80 },
+    ],
+    sfx: [[2.0, 'hop'], [3.0, 'a2_static'], [6.4, 'a2_static'], [9.4, 'a2_static'],
+      ...HOPS.map(h => [h, 'plip']),
+      ...[0, 1, 2, 3].map(i => [CLAP.t0 + i / CLAP.hz, 'a2_clap']),
+      ...[0, 1, 2, 3, 4].map(i => [BK.t0 + i * BK.stag + BK.fall, 'a2_block']),
+      [14.22, 'thud'], [16.2, 'boop'], [BK.qT, 'whip'], [BK.fiveT, 'pen'], [BK.fiveT + 0.25, 'pen'], [BK.fiveT + 0.5, 'ding'], [BK.hiT, 'swish'],
+      [18.3, 'hop'], [18.8, 'plip'], [18.9, 'plip'], [19.3, 'boing'], [24.1, 'hop'], [24.3, 'a2_static'], [24.45, 'a2_twinkle']],
+    steps: [{ t0: 12.6, t1: 14.0, hz: 5.2 }],
+    subs: [
+      { t0: 0.2, t1: 4.6, text: '陶哲轩出生在澳大利亚的阿德莱德。' },
+      { t0: 4.7, t1: 9.6, text: '两岁时，他天天看电视节目《芝麻街》，' },
+      { t0: 9.7, t1: 12.9, text: '自己学会了认字和算数。' },
+      { t0: 13.2, t1: 16.5, text: '有一天，爸爸妈妈发现：' },
+      { t0: 16.6, t1: 20.3, text: '他在教五岁的小朋友做加法！' },
+      { t0: 20.8, t1: 24.0, text: '问他怎么学会的，他说：' },
+      { t0: 24.1, t1: 27.1, text: '“《芝麻街》教的！”' },
+    ],
+  });
+})();
+
+/* ---- 20_age6.js ---- */
+// 6岁：照着一本书自学 BASIC，在家里的电脑上编了猜谜游戏《Fibonacci》
+// (Clements 1984, Fig. 5: the program text below is quoted from Terence's listing)
+(() => {
+  const FL = 780, DESK_TOP = 600, SEAT = 640;
+  const TX = 525, DX = 1210;                     // Terry (seated, left of the screen) / Dad (standing, right)
+  const KB0 = 720, KB1 = 930, KB_T = 12.3;       // keyboard centre: Terry's side -> slid over to Dad
+
+  /* ---------------- the screen: a tiny scrolling terminal, pure function of t ---------------- */
+  const MONO = 42, ADV = 0.4 * MONO, LH = 42, ROWS = 7, COLS = 29, SX = 508, SY = 127;
+  const ROWSX = [], CLEARS = [], KEYS = [], SFXS = [];
+  const wrap = s => {
+    const out = []; let cur = '';
+    s.split(' ').forEach(w => { const nx = cur ? cur + ' ' + w : w; if (nx.length > COLS && cur) { out.push(cur); cur = w; } else cur = nx; });
+    if (cur) out.push(cur); return out;
+  };
+  /** computer prints a message (fast typewriter) */
+  const out = (id, t, s, cps = 55) => {
+    let tt = t;
+    wrap(s).forEach(line => { const ts = [...line].map(() => { const v = tt; tt += 1 / cps; return v; }); ROWSX.push({ id, text: line, ts, t0: ts[0] }); });
+    return tt;
+  };
+  /** somebody types on the keyboard (key clicks every `every` chars) */
+  const typed = (id, t, s, cps, every = 1) => {
+    let tt = t;
+    wrap(s).forEach(line => {
+      const ts = [...line].map((ch, i) => { const v = tt; tt += 1 / cps; if (ch !== ' ' && i % every === 0) KEYS.push(v); return v; });
+      ROWSX.push({ id, text: line, ts, t0: ts[0] });
+    });
+    return tt;
+  };
+  /** INPUT: "? " appears with the prompt, the digits are typed later */
+  const input = (id, tPrompt, digits, tType, gap) => {
+    const ts = [tPrompt, tPrompt];
+    [...digits].forEach((_, i) => { ts.push(tType + i * gap); KEYS.push(tType + i * gap); });
+    ROWSX.push({ id, text: '? ' + digits, ts, t0: tPrompt });
+    const ret = tType + digits.length * gap + 0.12; KEYS.push(ret); return ret;
+  };
+  // Terry types his program (lines 10–30 of the real listing), then RUN
+  let tt = typed('code', 2.1, '10 PRINT "HERE COMES MR. FIBONACCI"', 36, 2);
+  tt = typed('code2', tt + 0.15, '20 PRINT "CAN YOU GUESS WHICH YEAR WAS MR. FIBONACCI BORN?"', 36, 2);
+  tt = typed('code3', tt + 0.15, '30 PRINT "WRITE DOWN A NUMBER PLEASE...":INPUT C', 36, 2);
+  const T_RUN = typed('run', tt + 0.3, 'RUN', 9) + 0.2;   // RETURN
+  KEYS.push(T_RUN);
+  CLEARS.push(T_RUN + 0.18);
+  // the game
+  const G0 = T_RUN + 0.35;
+  tt = out('hello', G0, 'HERE COMES MR. FIBONACCI');
+  tt = out('ask', tt + 0.2, 'CAN YOU GUESS WHICH YEAR WAS MR. FIBONACCI BORN?');
+  const P1 = out('write1', tt + 0.2, 'WRITE DOWN A NUMBER PLEASE...');
+  const R1 = input('in1', P1, '1300', 13.3, 0.22);
+  tt = out('heaven', R1 + 0.2, 'NO, HE IS ALREADY IN HEAVEN, TRY AGAIN');
+  SFXS.push([R1 + 0.2, 'buzz']);
+  const P2 = out('write2', tt + 0.35, 'WRITE DOWN A NUMBER PLEASE...');
+  const R2 = input('in2', P2, '1000', 21.2, 0.22);
+  tt = out('born', R2 + 0.2, 'SORRY, HE WASN\'T BORN YET! TRY AGAIN');
+  SFXS.push([R2 + 0.2, 'buzz']);
+  const P3 = out('write3', tt + 0.35, 'WRITE DOWN A NUMBER PLEASE...');
+  const R3 = input('in3', P3, '1170', 25.8, 0.22);
+  const T_OK = R3 + 0.2;
+  tt = out('correct', T_OK, 'YOU ARE CORRECT! NOW WE START');
+  SFXS.push([T_OK + 0.05, 'tada']);
+  tt = out('go', tt + 0.3, 'OKAY. HERE THEY GO');
+  // the numbers appear one at a time
+  const NUMS = '1 1 2 3 5 8 13 21', T_NUM = tt + 0.25, NUM_GAP = 0.15;
+  { let k = 0, prevSpace = true; const ts = [];
+    [...NUMS].forEach(ch => { if (ch !== ' ' && prevSpace) { SFXS.push([T_NUM + k * NUM_GAP, 'plip']); k++; } prevSpace = ch === ' '; ts.push(T_NUM + (k - 1) * NUM_GAP); });
+    ROWSX.push({ id: 'nums', text: NUMS, ts, t0: ts[0] }); }
+  const T_NUM_END = T_NUM + 8 * NUM_GAP, T_HI = T_NUM_END + 0.2, T_CHEER = T_NUM + 0.45;
+
+  function screenAt(t) {
+    let lastClear = -1; CLEARS.forEach(c => { if (c <= t) lastClear = c; });
+    const live = ROWSX.filter(r => r.t0 <= t && r.t0 >= lastClear);
+    const vis = live.slice(-ROWS);
+    return vis.map((r, i) => {
+      let n = 0; r.ts.forEach(v => { if (v <= t) n++; });
+      return { id: r.id, text: r.text.slice(0, n), full: r.text, y: SY + i * LH, last: r.ts[r.ts.length - 1] };
+    });
+  }
+  const rowOf = (t, id) => screenAt(t).find(r => r.id === id);
+
+  PROPS.a6_computer = (fx, t, lt, p) => {
+    const zc = Z.set + 1, zt = Z.set + 3;
+    // CRT monitor
+    stroke('a6c.case', superPts(760, 255, 608, 394, 30, 7), { z: zc, w: 6, closed: true, fill: C.paper, draw: stag(p, 0, 5) });
+    stroke('a6c.scr', superPts(760, 252, 548, 332, 30, 5), { z: zc + 0.2, w: 4.5, closed: true, fill: C.paper, draw: stag(p, 1, 5) });
+    stroke('a6c.gl1', [[1022, 330], [1018, 380], [1000, 404]], { z: zc + 0.3, w: 2.4, color: C.pencil, opacity: 0.6 * stag(p, 2, 5), boil: 0.5 });
+    stroke('a6c.gl2', [[1006, 372], [998, 390]], { z: zc + 0.3, w: 2.4, color: C.pencil, opacity: 0.6 * stag(p, 2, 5), boil: 0.5 });
+    [0, 1].forEach(i => stroke('a6c.knob' + i, ringPts('a6c.knob' + i, 990 + i * 30, 436, 8, 8, { n: 8, closed: true }), { z: zc + 0.3, w: 3.5, closed: true, fill: C.paper, draw: stag(p, 2, 5) }));
+    if (p > 0.6) dot('a6c.led', [512, 436], 5, C.ink, zc + 0.3);
+    // stand + disk drive (lifts the monitor)
+    stroke('a6c.plinth', [[716, 452], [804, 452, 1], [816, 478, 1], [704, 478, 1], [716, 452, 1]], { z: Z.set, w: 4.5, fill: C.paper, draw: stag(p, 3, 5) });
+    stroke('a6c.drive', [[620, 478], [900, 478, 1], [900, DESK_TOP, 1], [620, DESK_TOP, 1], [620, 478, 1]], { z: Z.set + 0.5, w: 5, fill: C.paper, draw: stag(p, 3, 5) });
+    stroke('a6c.slot', [[690, 512], [830, 512]], { z: Z.set + 0.6, w: 5, draw: stag(p, 4, 5) });
+    stroke('a6c.lever', [[745, 500], [775, 500, 1], [775, 524, 1], [745, 524, 1], [745, 500, 1]], { z: Z.set + 0.6, w: 3.5, fill: C.paper, draw: stag(p, 4, 5) });
+    // keyboard (the computer itself, a wedge), slides over to Dad
+    const kx = evalTrack([[0, KB0], [KB_T, KB1, 0.35, 'out']], t), kb = 'a6c.kb', zk = Z.desk + 1;
+    stroke(kb, [[kx - 124, DESK_TOP], [kx - 112, 564, 1], [kx + 112, 564, 1], [kx + 124, DESK_TOP, 1], [kx - 124, DESK_TOP, 1]], { z: zk, w: 5, fill: C.paper, draw: stag(p, 4, 5) });
+    if (p > 0.8) {
+      [0, 1, 2].forEach(r => {
+        const y = 573 + r * 8.5, n = 11 - r, x0 = kx - 96 + r * 5;
+        for (let i = 0; i < n; i++) stroke(`${kb}.k${r}.${i}`, [[x0 + i * 17.5, y], [x0 + i * 17.5 + 9, y]], { z: zk + 0.1, w: 4, boil: 0.4 });
+      });
+      stroke(kb + '.space', [[kx - 42, 594], [kx + 42, 594]], { z: zk + 0.1, w: 4, boil: 0.4 });
+    }
+    if (p < 0.99) return;
+    // the text on the screen
+    const rows = screenAt(t);
+    rows.forEach((r, i) => { if (r.text) text('a6c.row' + i, r.text, SX, r.y, { size: MONO, font: CFG.FONT_MONO, anchor: 'start', z: zt, color: C.ink }); });
+    // yellow: the Fibonacci numbers are the key math
+    const nr = rows.find(r => r.id === 'nums');
+    const hp = EASE.out(clamp((t - T_HI) / 0.35));
+    if (nr && hp > 0) {
+      const x0 = SX - 10, x1 = lerp(x0, SX + nr.full.length * ADV + 10, hp), y0 = nr.y - 20, y1 = nr.y + 20;
+      const top = [], bot = [];
+      for (let i = 0; i <= 8; i++) { const x = lerp(x0, x1, i / 8); top.push([x, y0 + Math.sin(i * 1.7) * 2.5]); bot.unshift([x, y1 + Math.sin(i * 2.3) * 3]); }
+      stroke('a6c.hi', top.concat(bot), { z: zt - 0.5, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+    }
+    // blinking block cursor
+    const last = rows[rows.length - 1];
+    const typing = KEYS.some(k => t >= k && t < k + 0.35);
+    if (typing || (t * 2.4) % 1 < 0.55) {
+      const cx = last ? SX + last.text.length * ADV + 2 : SX, cy = last ? last.y : SY;
+      stroke('a6c.cur', [[cx, cy - 15], [cx + ADV - 2, cy - 15, 1], [cx + ADV - 2, cy + 15, 1], [cx, cy + 15, 1]], { z: zt, closed: true, fill: C.ink, noStroke: true, w: 1, boil: 0.2 });
+    }
+  };
+
+  // the BASIC book, propped open on the desk so we can see its pages
+  SETDRAW.a6_book = (s, p) => {
+    const { x } = s, y = DESK_TOP, z = Z.desk + 1;
+    stroke('a6b.stand', [[x - 30, y], [x - 4, y - 22, 1], [x + 30, y]], { z, w: 4, draw: stag(p, 0, 4) });
+    stroke('a6b.cover', [[x, y - 6], [x - 88, y - 14, 1], [x - 92, y - 92, 1], [x, y - 80, 1], [x + 92, y - 92, 1], [x + 88, y - 14, 1], [x, y - 6, 1]], { z, w: 5, fill: C.paper, draw: stag(p, 0, 4) });
+    stroke('a6b.l', [[x - 2, y - 12], [x - 80, y - 20], [x - 84, y - 86, 1], [x - 2, y - 76]], { z: z + 0.1, w: 3.5, fill: C.paper, closed: true, draw: stag(p, 1, 4) });
+    stroke('a6b.r', [[x + 2, y - 12], [x + 80, y - 20], [x + 84, y - 86, 1], [x + 2, y - 76]], { z: z + 0.1, w: 3.5, fill: C.paper, closed: true, draw: stag(p, 1, 4) });
+    stroke('a6b.spine', [[x, y - 78], [x, y - 8]], { z: z + 0.2, w: 4, draw: stag(p, 1, 4) });
+    if (p > 0.7) text('a6b.t', 'BASIC', x - 42, y - 66, { size: 26, font: CFG.FONT_MONO, z: z + 0.2, rot: 5 });
+    for (let i = 0; i < 4; i++) {
+      if (i) stroke('a6b.tl' + i, [[x - 70, y - 60 + i * 11], [x - 14, y - 56 + i * 11]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 4), boil: 0.5 });
+      stroke('a6b.tr' + i, [[x + 14, y - 62 + i * 11], [x + 70, y - 66 + i * 11]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 3, 4), boil: 0.5 });
+    }
+  };
+
+  /* ---------------- poses ---------------- */
+  const bob = (t, ph) => Math.max(0, Math.sin(t * 21 + ph)) * 8;
+  const S = POSE.sitBase;
+  const tType = t => ({ ...S, lean: 5, tilt: 5, armScale: 1.5,
+    ikL: { w: 1, to: 'desk', dx: -14, dy: -bob(t, 0), bend: 'down' }, ikR: { w: 1, to: 'desk', dx: 24, dy: -bob(t, Math.PI), bend: 'down' } });
+  const dType = t => ({ lean: -17, tilt: -6, armScale: 1.3, armR: [14, 12],
+    ikL: { w: 1, to: 'desk', dx: 0, dy: -bob(t, 0.6), bend: 'down' } });
+  Object.assign(POSE, {
+    a6_tPress: { ...S, lean: 8, tilt: 8, armScale: 1.5, ikL: { w: 1, to: 'desk', dx: -14, dy: 4, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: 24, dy: 6, bend: 'down' } },
+    a6_tRest: { ...S, tilt: -3, armScale: 1.2, ikL: { w: 1, to: 'desk', dx: -130, dy: 2, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: -64, dy: 2, bend: 'down' } },
+    a6_tPush: { ...S, lean: 9, tilt: 6, armScale: 1.9, ikL: { w: 1, to: 'desk', dx: 20, dy: -2, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: 44, dy: -2, bend: 'down' } },
+    a6_tProud: { ...S, tilt: -9, lean: -3, armScale: 1.2, ikL: { w: 1, to: 'desk', dx: -134, dy: 2, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: -58, dy: 2, bend: 'down' } },
+    a6_tCheer: { ...S, armScale: 1.8, armL: [112, 40], armR: [112, 40] },
+    a6_dLean: { lean: -17, tilt: -6, armScale: 1.3, armR: [14, 12], ikL: { w: 1, to: 'desk', dx: 0, dy: -4, bend: 'down' } },
+    a6_dLaugh: { lean: -6, tilt: 12, armL: [22, -100], armR: [22, -100] },
+    a6_dPuzzled: { lean: -12, tilt: 10, armScale: 1.3, ikL: { w: 1, to: 'desk', dx: 0, dy: -4, bend: 'down' }, ikR: { w: 1, to: 'head', dx: 0.7, dy: -0.75, bend: 'out' } },
+    a6_dCheer: { lean: -8, tilt: -4, armL: [120, 30], armR: [120, 30] },
+  });
+  Object.assign(FACE, {
+    a6_laugh: { lidL: 0.5, lidR: 0.5, mouth: 'grin', mw: 0.48, brow: 'arc', browY: 0.06 },
+  });
+  const laughSq = t => 1 + 0.045 * Math.sin((t - 15.2) * 2 * Math.PI * 4.2);
+  const cheerSq = t => 1 + 0.06 * Math.abs(Math.sin((t - T_CHEER) * Math.PI * 3.2));
+
+  // Dad's walk in and typing windows
+  const DW0 = 10.9, DW1 = 12.15;
+  const dadPose = [[0, makeWalk(DW0, DW1, 4.6)], [DW1, 'stand', 0.12], [12.4, 'a6_dLean', 0.25],
+    [13.2, dType, 0.1], [14.0, 'a6_dLean', 0.1], [15.2, 'a6_dLaugh', 0.18], [18.8, 'a6_dLean', 0.3],
+    [21.1, dType, 0.1], [21.9, 'a6_dLean', 0.1], [22.35, 'a6_dPuzzled', 0.2], [25.2, 'a6_dLean', 0.25],
+    [25.7, dType, 0.1], [26.5, 'a6_dLean', 0.1], [T_CHEER + 0.2, 'a6_dCheer', 0.2]];
+
+  defineScene({
+    id: 'age6', chapter: '6岁 · 自己编游戏', dur: 31.8, floor: FL,
+    cast: {
+      terry: { H: 225, head: 0.45, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, desk: [622, 584], blink: [3.3, 0.9], noShadow: true },
+      dad: { H: 440, head: 0.4, torso: 0.25, leg: 0.33, arm: 0.34, hair: 'part', glasses: true, desk: [KB1 + 70, 584], blink: [4.2, 1.6] },
+    },
+    order: ['dad', 'terry'],
+    tracks: {
+      terry: {
+        enter: 1.55,
+        pos: [[0, [TX, SEAT]]],
+        pose: [[0, 'a6_tRest'], [1.95, tType, 0.2], [T_RUN - 0.25, 'a6_tPress', 0.08], [T_RUN + 0.35, 'a6_tRest', 0.25],
+          [12.1, 'a6_tPush', 0.12, 'back'], [12.7, 'a6_tRest', 0.25], [15.4, 'a6_tProud', 0.2], [19.2, 'a6_tRest', 0.3],
+          [T_CHEER, 'a6_tCheer', 0.15, 'back']],
+        face: [[0, 'smile'], [1.95, 'focus', 0.05], [T_RUN, 'grin', 0.05], [G0 + 0.6, 'smile', 0.05], [11.1, 'surprised', 0.05], [11.6, 'grin', 0.05],
+          [13.2, 'smile', 0.05], [15.4, 'proud', 0.05], [19.0, 'smile', 0.05], [22.6, 'joy', 0.05], [24.8, 'smile', 0.05], [26.9, 'grin', 0.05], [T_CHEER, 'joy', 0.05]],
+        turn: [[0, 0.35], [G0 + 1.8, 0.1, 0.15], [11.1, 0.55, 0.12], [13.2, 0.35, 0.12], [15.4, 0.15, 0.15], [19.0, 0.35, 0.15], [T_CHEER, 0.05, 0.15]],
+        gaze: [[0, 'screen'], [G0 + 1.8, 'viewer'], [11.1, 'dad'], [13.2, 'screen'], [15.4, 'dad'], [16.6, 'viewer'], [19.0, 'screen'], [22.6, 'dad'], [24.0, 'screen'], [T_CHEER + 0.9, 'viewer']],
+        squash: [[0, 1], [T_RUN - 0.25, 0.9, 0.06], [T_RUN - 0.1, 1.06, 0.08], [T_RUN + 0.05, 1, 0.2, 'back'], [12.1, 0.9, 0.08], [12.25, 1, 0.2, 'back'],
+          [T_CHEER - 0.1, 0.88, 0.08], [T_CHEER, cheerSq, 0.1]],
+      },
+      dad: {
+        pos: walkPath(DW0, DW1, 1720, DX, FL),
+        pose: dadPose,
+        face: [[0, 'smile'], [13.2, 'focus', 0.05], [14.5, 'surprised', 0.05], [15.2, 'a6_laugh', 0.05], [18.8, 'smile', 0.05],
+          [21.1, 'focus', 0.05], [22.35, 'puzzled', 0.05], [25.2, 'neutral', 0.05], [25.7, 'focus', 0.05], [T_OK, 'surprised', 0.05], [T_CHEER + 0.2, 'a6_laugh', 0.05]],
+        turn: [[0, -0.55], [12.2, -0.45, 0.1], [15.2, -0.3, 0.1], [18.8, -0.45, 0.1]],
+        gaze: [[0, 'terry'], [12.5, 'screen'], [15.2, 'terry'], [16.8, 'viewer'], [18.8, 'screen'], [22.35, 'screen'], [T_CHEER + 0.2, 'terry']],
+        squash: [[0, 1], [15.2, laughSq, 0.1], [18.7, 1, 0.2], [T_OK, 1.06, 0.06], [T_OK + 0.1, 1, 0.25, 'back']],
+      },
+    },
+    targets: F => {
+      const tg = { screen: [760, 290] };
+      const add = (name, id) => { const r = rowOf(F.t, id); if (r) tg[name] = [SX - 14, r.y]; };
+      add('rowCode', 'code'); add('rowAsk', 'ask'); add('rowHeaven', 'heaven'); add('rowBorn', 'born');
+      return tg;
+    },
+    set: [
+      { type: 'floor', t0: 1.4 },
+      { type: 'chair', x: TX, seat: SEAT, t0: 1.45 },
+      { type: 'desk', x: 740, top: DESK_TOP, w: 980, t0: 1.4 },
+      { type: 'a6_book', x: 370, t0: 1.7 },
+    ],
+    fx: [
+      { type: 'ageStamp', age: 6, place: '自学编电脑程序', t0: 0, center: [800, 360], R: 150, dockT: 1.32, dock: [1486, 108], dockScale: 0.46, pulse: [] },
+      { type: 'prop', kind: 'a6_computer', id: 'pc', t0: 1.45, at: [0, 0], drawDur: 0.55 },
+      { type: 'label', id: 'lbBook', text: '一本 BASIC 编程书', at: [212, 424], rot: -3, t0: 2.2, t1: 4.8, target: [322, 530], bend: 0.2, gap: 8 },
+      { type: 'label', id: 'lbCode', text: ['这是他', '自己写的程序'], at: [236, 196], rot: -3, t0: 4.9, t1: 7.2, target: { target: 'rowCode' }, bend: -0.15, gap: 8 },
+      { type: 'label', id: 'lbAsk', text: ['猜猜斐波那契先生', '哪年出生？'], at: [236, 250], rot: -2, t0: 8.9, t1: 12.5, target: { target: 'rowAsk' }, bend: -0.12, gap: 8 },
+      { type: 'label', id: 'lbHeaven', text: ['不对，那时他', '已经上天堂啦！'], at: [236, 250], rot: -3, t0: R1 + 0.7, t1: R1 + 4.7, target: { target: 'rowHeaven' }, bend: 0.12, gap: 8 },
+      { type: 'label', id: 'lbBorn', text: ['对不起，', '他还没出生呢！'], at: [236, 250], rot: 2, t0: R2 + 0.5, t1: R2 + 4.0, target: { target: 'rowBorn' }, bend: 0.12, gap: 8 },
+      { type: 'mark', id: 'huh', char: '?', on: ['dad'], t0: 22.5, t1: 24.9, dx: 60 },
+    ],
+    sfx: [[1.55, 'hop'], ...KEYS.map(k => [k, 'key']), [T_RUN + 0.2, 'beep'], [G0, 'beep'], ...SFXS, [KB_T, 'whip'], [15.25, 'boing'], [T_HI, 'swish'], [T_CHEER, 'hop']],
+    steps: [{ t0: DW0, t1: DW1, hz: 4.6 }],
+    subs: [
+      { t0: 0.2, t1: 5.3, text: '六岁时，他照着一本书，自学编电脑程序。' },
+      { t0: 5.4, t1: 8.3, text: '他编了一个猜谜游戏：' },
+      { t0: 8.4, t1: 12.8, text: '猜猜数学家斐波那契是哪年出生的？' },
+      { t0: 12.9, t1: 16.6, text: '爸爸猜1300年，电脑说：' },
+      { t0: 16.7, t1: 21.1, text: '“不对，那时候他已经上天堂啦！”' },
+      { t0: 21.2, t1: 25.6, text: '猜1000年：“他还没出生呢！”' },
+      { t0: 25.7, t1: 29.6, text: '猜对1170年，游戏才开始。' },
+    ],
+  });
+})();
+
+/* ---- 25_fib.js ---- */
+// 数学小知识：斐波那契数（系列固定栏目卡片，COMP.a6_factCard 可复用）
+(() => {
+  /** "数学小知识" card: an index card that draws on, a red rubber-stamp header, the topic in ink, a red header rule
+   *  and faint pencil rules. {id, t0, t1, box:[x0,y0,x1,y1], topic, rules:[y...]} */
+  COMP.a6_factCard = {
+    draw(fx, t) {
+      if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+      const lt = t - fx.t0, [x0, y0, x1, y1] = fx.box, k = fx.id, z = Z.set;
+      const p = EASE.out(clamp(lt / 0.45));
+      stroke(k + '.card', [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]], { z, w: 5, fill: C.paper, draw: p });
+      stroke(k + '.shade', [[x0 + 14, y1 + 8], [x1 + 8, y1 + 8, 1], [x1 + 8, y0 + 14]], { z: z - 0.5, w: 2.5, color: C.pencil, opacity: 0.7 * p, boil: 0.5 });
+      // header rule (index cards have a red one) + faint ruled lines
+      const hy = y0 + 150;
+      stroke(k + '.hr', [[x0 + 18, hy], [x1 - 18, hy - 2]], { z: z + 0.2, w: 3.5, color: C.red, draw: EASE.out(clamp((lt - 0.25) / 0.4)), boil: 0.5 });
+      (fx.rules || []).forEach((y, i) => stroke(k + '.rl' + i, [[x0 + 18, y], [x1 - 18, y + 1]], { z: z + 0.1, w: 2, color: C.pencil, opacity: 0.45, draw: EASE.out(clamp((lt - 0.3 - i * 0.05) / 0.4)), boil: 0.4 }));
+      // rubber stamp "数学小知识"
+      const sp = clamp((lt - 0.35) / 0.18);
+      if (sp > 0) {
+        const sx = x0 + 190, sy = y0 + 76, sc = lerp(1.7, 1, EASE.out(sp));
+        DL.save(); DL.translate(sx, sy); DL.scale(sc); DL.rotate(-5);
+        const W = 128, H = 44;
+        stroke(k + '.st1', [[-W, -H], [W, -H, 1], [W, H, 1], [-W, H, 1], [-W, -H, 1]], { z: Z.stamp, w: 5, color: C.red, opacity: sp, boil: 0.6 });
+        stroke(k + '.st2', [[-W + 9, -H + 9], [W - 9, -H + 9, 1], [W - 9, H - 9, 1], [-W + 9, H - 9, 1], [-W + 9, -H + 9, 1]], { z: Z.stamp, w: 2.4, color: C.red, opacity: sp, boil: 0.6 });
+        text(k + '.stt', '数学小知识', 0, 2, { size: 46, color: C.red, z: Z.stamp, opacity: sp });
+        DL.restore();
+      }
+      const tp = clamp((lt - 0.7) / 0.25);
+      if (tp > 0) text(k + '.topic', fx.topic, x0 + 360, y0 + 78, { size: 78, anchor: 'start', z: Z.annot, opacity: clamp(tp * 3), scale: lerp(0.7, 1, EASE.back(tp)) });
+    },
+    cues: fx => [[fx.t0, 'paper'], [fx.t0 + 0.4, 'stamp'], [fx.t0 + 0.72, 'pop']],
+  };
+
+  // the sequence, laid out so that it is centred on the card
+  const SEQ = '1, 1, 2, 3, 5, 8, 13, 21', SIZE = 100, TRACK = 0.1;
+  let wSeq = 0; for (const ch of SEQ) wSeq += (GLYPH[ch].w + TRACK) * SIZE;
+  const SEQ_X = Math.round(800 - wSeq / 2), SEQ_Y = 290, BASE = SEQ_Y + SIZE;
+  const ARC0 = 3.6, ARC_GAP = 0.52;
+
+  /** Red "+" and arc from each pair into the next number, one after another. */
+  COMP.a6_fibArcs = {
+    init(fx) { fx.n = 6; return fx; },
+    draw(fx, t) {
+      const w = FXBY[fx.of]; if (!w) return;
+      // group glyph boxes into numbers
+      const nums = []; let cur = null;
+      w.boxes.forEach(b => {
+        if (/\d/.test(b.ch)) { if (!cur) { cur = { x0: b.x, x1: b.x + b.w }; nums.push(cur); } else cur.x1 = b.x + b.w; } else cur = null;
+      });
+      const cx = i => (nums[i].x0 + nums[i].x1) / 2;
+      for (let k = 0; k < fx.n; k++) {
+        const t0 = fx.t0 + k * fx.gap, lt = t - t0; if (lt < 0) continue;
+        const deep = k % 2 ? 1 : 0, mid = (nums[k].x1 + nums[k + 1].x0) / 2, y = BASE + 26 + deep * 14;
+        text(fx.id + '.p' + k, '+', mid + 4, BASE + 8, { size: 60, font: CFG.FONT_MIX, color: C.red, z: Z.annot, scale: lerp(0.3, 1, EASE.back(clamp(lt / 0.15))), halo: 6 });
+        arrow(fx.id + '.a' + k, [mid + 4, y + 16], [cx(k + 2) - 4, y], { p: EASE.io(clamp((lt - 0.08) / 0.34)), bend: 0.32 + deep * 0.22, head: 16, w: 4 });
+      }
+    },
+    cues: fx => Array.from({ length: 6 }, (_, k) => [fx.t0 + k * fx.gap, 'pen']),
+  };
+
+  defineScene({
+    id: 'fib', dur: 10.4, floor: 770,
+    cast: {
+      terry: { H: 225, head: 0.45, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    tracks: {
+      terry: {
+        enter: 1.0,
+        pos: [[0, [1400, 770]], [7.1, t => [1400, 770 - 36 * Math.sin(Math.PI * clamp((t - 7.1) / 0.32))], 0]],
+        pose: [[0, 'stand'], [7.1, 'jumpUp', 0.08], [7.42, { armL: [84, 6], armR: [16, 10] }, 0.12, 'back'],
+          [9.1, { armScale: 1.6, armL: [118, 42], armR: [118, 42] }, 0.12, 'back']],
+        face: [[0, 'smile'], [1.3, 'focus', 0.05], [3.4, 'idea', 0.05], [7.1, 'grin', 0.05], [9.1, 'joy', 0.05]],
+        turn: [[0, -0.35]],
+        gaze: [[0, 'viewer'], [1.3, 'seq'], [3.6, 'arcs'], [7.1, 'viewer'], [7.9, 'chk'], [9.1, 'viewer']],
+        squash: [[0, 1], [7.0, 0.88, 0.08], [7.1, 1.1, 0.08], [7.42, 0.9, 0.05], [7.48, 1, 0.2, 'back'], [9.0, 0.9, 0.08], [9.1, 1.08, 0.08], [9.2, 1, 0.25, 'back']],
+      },
+    },
+    targets: () => ({ seq: [800, 340], arcs: [900, 450], chk: [480, 660] }),
+    fx: [
+      { type: 'a6_factCard', id: 'card', t0: 0, box: [90, 92, 1510, 790], topic: '斐波那契数', rules: [BASE, 490, 590, 690] },
+      { type: 'write', id: 'seq', text: SEQ, x: SEQ_X, y: SEQ_Y, size: SIZE, t0: 1.0, speed: 2300, gap: 0.025, glyphGap: 0.025, w: 7, track: TRACK, z: Z.board, sfx: 'pen' },
+      { type: 'highlight', id: 'seqHi', of: 'seq', t0: 3.1, dur: 0.4 },
+      { type: 'a6_fibArcs', id: 'arcs', of: 'seq', t0: ARC0, gap: ARC_GAP },
+      { type: 'speech', id: 'say', text: '下一个是 34！', at: [1060, 560], tail: [230, 24], speaker: 'terry', t0: 7.15, t1: 10.4, rot: -3, size: 76 },
+      { type: 'write', id: 'chk', text: '13+21=34 ✓', x: 250, y: 612, size: 76, t0: 7.9, speed: 2600, gap: 0.022, glyphGap: 0.012, color: 'red', w: 5.5, track: 0.16, sfx: 'pen', endSfx: 'ding', z: Z.annot },
+    ],
+    sfx: [[1.0, 'hop'], [7.1, 'hop'], [9.1, 'boop']],
+    subs: [
+      { t0: 0.3, t1: 3.3, text: '这串数叫斐波那契数，' },
+      { t0: 3.4, t1: 7.05, text: '每个数都是前两个数加起来。' },
+      { t0: 7.15, t1: 9.9, text: '“下一个是34！”' },
+    ],
+  });
+})();
+
+/* ---- 26_ratio.js ---- */
+// 数学小知识（续）：相邻两个斐波那契数相除 → 越来越接近 1.618…（黄金比）——“极限”
+(() => {
+  const LINES = [
+    ['8 ÷ 5 = 1.6', 1.6], ['13 ÷ 8 = 1.625', 1.625], ['21 ÷ 13 = 1.615…', 21 / 13], ['34 ÷ 21 = 1.619…', 34 / 21], ['55 ÷ 34 = 1.617…', 55 / 34],
+  ];
+  const LX = 170, LY0 = 292, LDY = 86, LSIZE = 62, T0 = 3.3, TSTEP = 1.25;
+  // little convergence plot: values bounce above/below the golden ratio and settle
+  const PX0 = 820, PX1 = 1250, vy = v => 660 - (v - 1.598) / 0.032 * 360, GOLD = (1 + Math.sqrt(5)) / 2;
+  const px = i => PX0 + 40 + i * ((PX1 - PX0 - 80) / 4);
+
+  COMP.r1_plot = {
+    draw(fx, t) {
+      if (t < fx.t0) return;
+      const lt = t - fx.t0;
+      // axis
+      stroke('r1.ax', [[PX0, 690], [PX0, 290]], { z: Z.set, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.4)) });
+      stroke('r1.ay', [[PX0, 690], [PX1, 690]], { z: Z.set, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.4)) });
+      // the golden-ratio line, dashed in red
+      const gp = clamp((t - fx.goldT) / 0.6);
+      if (gp > 0) {
+        const y = vy(GOLD), n = 9;
+        for (let i = 0; i < n; i++) {
+          const a = PX0 + (PX1 - PX0) * i / n, b = a + (PX1 - PX0) / n * 0.55;
+          if (i / n < gp) stroke('r1.g' + i, [[a, y], [b, y]], { z: Z.annot, w: 4, color: C.red, boil: 0.5 });
+        }
+        if (gp > 0.9) text('r1.gl', '1.618…', PX1 + 16, y, { size: 44, font: CFG.FONT_MIX, anchor: 'start', color: C.red, z: Z.annot, halo: 6 });
+      }
+      // points + zig-zag
+      const pts = [];
+      LINES.forEach(([, v], i) => {
+        const ti = T0 + i * TSTEP + 1.0; if (t < ti) return;
+        const p = [px(i), vy(v)]; pts.push(p);
+        dot('r1.p' + i, p, 9 * EASE.back(clamp((t - ti) / 0.2)), C.ink, Z.annot);
+      });
+      if (pts.length > 1) stroke('r1.zz', pts, { z: Z.annot - 1, w: 3.5, boil: 0.6 });
+    },
+    cues: fx => LINES.map((_, i) => [T0 + i * TSTEP + 1.0, 'plip']).concat([[fx.goldT, 'swish']]),
+  };
+
+  defineScene({
+    id: 'ratio', dur: 19.2, floor: 770,
+    cast: {
+      terry: { H: 225, head: 0.45, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    tracks: {
+      terry: {
+        enter: 0.6,
+        pos: [[0, [1420, 770]]],
+        pose: [[0, 'stand'], [9.4, { armScale: 1.5, armL: [84, 6], armR: [16, 10] }, 0.12], [14.3, { armScale: 1.6, armL: [118, 42], armR: [118, 42] }, 0.12, 'back']],
+        face: [[0, 'smile'], [3.3, 'focus', 0.05], [9.4, 'surprised', 0.05], [11.5, 'idea', 0.05], [14.3, 'joy', 0.05]],
+        turn: [[0, -0.35]],
+        gaze: [[0, 'viewer'], [3.3, 'lines'], [7.0, 'plot'], [11.5, 'viewer']],
+        squash: [[0, 1], [14.2, 0.9, 0.08], [14.3, 1.1, 0.08], [14.4, 1, 0.25, 'back']],
+      },
+    },
+    targets: () => ({ lines: [420, 480], plot: [1040, 480] }),
+    fx: [
+      { type: 'a6_factCard', id: 'card', t0: -0.2, box: [90, 92, 1510, 790], topic: '越来越接近……', rules: [] },
+      ...LINES.map(([s], i) => ({ type: 'write', id: 'l' + i, text: s, x: LX, y: LY0 + i * LDY, size: LSIZE, t0: T0 + i * TSTEP, speed: 2900, gap: 0.02, glyphGap: 0.015, w: 5.5, sfx: 'pen', z: Z.board })),
+      { type: 'r1_plot', id: 'plot', t0: 3.0, goldT: 9.4 },
+      { type: 'label', id: 'lbGold', text: '黄金比', at: [1380, 280], rot: -3, t0: 11.5, t1: 19.2, target: [1330, vy(GOLD) - 22], bend: 0.2, gap: 8 },
+      { type: 'label', id: 'lbLim', text: '越来越接近一个数 = 极限', at: [1040, 738], rot: -2, t0: 14.3, t1: 19.2, target: [1150, vy(GOLD) + 22], bend: -0.2, gap: 10, size: 42 },
+      { type: 'label', id: 'lbBook', text: '（《疯狂微积分》里讲过哦）', at: [440, 748], rot: 2, t0: 15.4, t1: 19.2, size: 32 },
+    ],
+    sfx: [[14.3, 'ding']],
+    subs: [
+      { t0: 0.3, t1: 3.0, text: '再告诉你一个秘密：' },
+      { t0: 3.1, t1: 6.5, text: '用后一个数，除以前一个数，' },
+      { t0: 6.6, t1: 11.4, text: '得数跳来跳去，越来越接近1.618……', say: '得数跳来跳去，越来越接近一点六一八。' },
+      { t0: 11.5, t1: 14.2, text: '这个数叫“黄金比”。' },
+      { t0: 14.3, t1: 19.0, text: '越来越接近一个数——这就是“极限”！' },
+    ],
+  });
+})();
 
 /* ---- 30_age7.js ---- */
 // 7岁：走进中学数学课（样片），接 1983 年报纸头版
@@ -1452,8 +2165,8 @@ defineScene({
       { type: 'mark', id: 'q', char: '?', on: ['teen1', 'teen2', 'teen3'], t0: 2.78, t1: 3.75, stagger: 0.06 },
       { type: 'speedLines', id: 'zip', char: 'terry', part: 'handR', t0: 5.8, t1: 6.25 },
       { type: 'speech', id: 'ans', text: 'x = 7！', at: [1150, 392], tail: [70, 32], speaker: 'terry', t0: 5.95, t1: 7.35, rot: -4 },
-      { type: 'write', id: 'chk', text: '3×7+5=26 ✓', x: 640, y: 236, size: 64, t0: 7.22, speed: 3200, gap: 0.022, glyphGap: 0.012, color: 'red', w: 5, track: 0.16, sfx: 'pen', endSfx: 'ding', z: Z.annot },
-      { type: 'ring', id: 'ring7', of: 'chk', glyph: 2, t0: 7.95 },
+      { type: 'write', id: 'chk', text: '3×7+5=26 ✓', x: 640, y: 236, size: 64, t0: 7.22, speed: 3200, gap: 0.022, glyphGap: 0.012, color: 'red', w: 5, track: 0.16, sfx: 'pen', endSfx: 'ding', z: Z.annot, t1: 10.75 },
+      { type: 'ring', id: 'ring7', of: 'chk', glyph: 2, t0: 7.95, t1: 10.75 },
       { type: 'label', id: 'lbAge', text: '正好是他的年龄', at: [790, 396], rot: -2, t0: 8.05, t1: 10.7, target: { write: 'chk', glyph: 2, dy: 20 }, bend: 0.15, gap: 6 },
       { type: 'label', id: 'lbJaw', text: '下巴（掉了）', at: [372, 404], rot: -4, t0: 8.7, t1: 10.7, target: { char: 'teen1', part: 'mouth', dx: -18 }, bend: -0.3, gap: 12 },
       { type: 'swingMarks', id: 'swing', char: 'terry', t0: 8.3, t1: 10.7 },
@@ -1471,6 +2184,634 @@ defineScene({
       { t0: 10.9, t1: 14.6, text: '1983年，报纸头版登了他的故事。' },
       { t0: 14.7, t1: 19.0, text: '他的数学老师说：“我几乎没什么可教他的，' },
       { t0: 19.1, t1: 22.3, text: '他总是比别人早两节课就做完了。”' },
+    ],
+  });
+})();
+
+/* ---- 40_notebook.js ---- */
+// 小问号登场（一）：下课后翻开作业本。大哥哥一步一步写清楚；小陶只写了一个答案。
+// 小问号第一次从本子里跳出来，举牌问“为什么是 7？”。（据 Clements 1984 的观察改编，非真实事件）
+// Shared with 44_notebook2.js through window.q1Book: the notebook spread, its writing and COMP.q1_qm.
+(() => {
+  const FL = 780;
+  const NB = { x0: 100, x1: 1300, sp: 700, top: 150, bot: 760, E: 58 };
+  const RULES = [248, 320, 392, 464, 536, 608, 680];
+
+  /* ---------------- the open notebook spread ---------------- */
+  // o: { ear: 0..1 dog-ear lift, head: 0..1 page-name opacity, wig: dog-ear shake 0..1 }
+  function drawBook(p, o = {}) {
+    const { x0, x1, sp, top, bot, E } = NB, z = Z.set;
+    const st = i => stag(p, i, 5);
+    // back cover peeking out around the pages
+    stroke('q1b.cover', [[sp, top + 6], [sp - 90, top - 10], [x0 - 16, top - 12, 1], [x0 - 16, bot + 22, 1], [sp - 90, bot + 24], [sp, bot + 30], [sp + 90, bot + 24], [x1 + 16, bot + 22, 1], [x1 + 16, top - 12, 1], [sp + 90, top - 10], [sp, top + 6]],
+      { z, w: 5, fill: C.paper, draw: st(0) });
+    // page stack (thickness) under the bottom edges
+    [-1, 1].forEach(s => {
+      const xo = s < 0 ? x0 : x1;
+      [7, 14].forEach((d, j) => stroke(`q1b.stk${s}${j}`, [[sp, bot + 14 + d], [sp + s * 90, bot + 4 + d], [xo - s * (4 + j * 4), bot + d]], { z: z + 0.2, w: 2.4, draw: st(1) }));
+    });
+    // the two pages (right page has a dog-eared corner)
+    const L = [[sp, top + 16], [sp - 90, top + 1], [x0, top, 1], [x0, bot, 1], [sp - 90, bot + 4], [sp, bot + 14]];
+    const R = [[sp, top + 16], [sp + 90, top + 1], [x1, top, 1], [x1, bot - E, 1], [x1 - E, bot, 1], [sp + 90, bot + 4], [sp, bot + 14]];
+    stroke('q1b.pL', L, { z: z + 0.5, w: 5, fill: C.paper, draw: st(1) });
+    stroke('q1b.pR', R, { z: z + 0.5, w: 5, fill: C.paper, draw: st(1) });
+    // spine: a crease and two soft pencil shade lines
+    stroke('q1b.spine', [[sp, top + 16], [sp + 1, (top + bot) / 2], [sp, bot + 14]], { z: z + 1, w: 4, draw: st(2) });
+    [-12, 12].forEach((d, j) => stroke('q1b.sh' + j, [[sp + d, top + 24], [sp + d * 1.1, bot + 6]], { z: z + 1, w: 2, color: C.pencil, opacity: 0.6, draw: st(2) }));
+    // ruled lines + margin lines (pencil)
+    RULES.forEach((y, i) => {
+      stroke('q1b.rl' + i, [[x0 + 26, y], [sp - 30, y + 1]], { z: z + 1, w: 2, color: C.pencil, opacity: 0.55, draw: st(3), boil: 0.4 });
+      const xe = y > bot - E - 30 ? x1 - E - 40 : x1 - 26;
+      stroke('q1b.rr' + i, [[sp + 30, y + 1], [xe, y]], { z: z + 1, w: 2, color: C.pencil, opacity: 0.55, draw: st(3), boil: 0.4 });
+    });
+    stroke('q1b.mL', [[x0 + 62, top + 22], [x0 + 62, bot - 18]], { z: z + 1, w: 2, color: C.pencil, opacity: 0.55, draw: st(3), boil: 0.4 });
+    stroke('q1b.mR', [[sp + 64, top + 26], [sp + 64, bot - 14]], { z: z + 1, w: 2, color: C.pencil, opacity: 0.55, draw: st(3), boil: 0.4 });
+    // dog-ear flap: folded flat at ear=0, stands up toward the corner as it lifts
+    const ear = clamp(o.ear || 0), wig = o.wig || 0;
+    const tip = lerp2([x1 - E + 4, bot - E + 4], [x1 - 6, bot - 6], ear * 0.8);
+    const tipW = [tip[0] + wig * 7, tip[1] - wig * 5];
+    stroke('q1b.ear', [[x1 - E, bot, 1], tipW, [x1, bot - E, 1], [x1 - E, bot, 1]], { z: z + 1.5, w: 4, fill: C.paper, draw: st(4) });
+    if (Math.abs(wig) > 0.001) { // something is wriggling under the corner
+      stroke('q1b.wg0', [[x1 + 16, bot - 76], [x1 + 30, bot - 88]], { z: Z.fx, w: 3.5, boil: 0.8 });
+      stroke('q1b.wg1', [[x1 + 22, bot - 46], [x1 + 40, bot - 50]], { z: Z.fx, w: 3.5, boil: 0.8 });
+      stroke('q1b.wg2', [[x1 - 84, bot + 30], [x1 - 96, bot + 44]], { z: Z.fx, w: 3.5, boil: 0.8 });
+    }
+    if (p > 0.9) stroke('q1b.earSh', [[x1 - E + 12, bot - 6], [tipW[0] + 6, tipW[1] + 12]], { z: z + 1.6, w: 2, color: C.pencil, opacity: 0.7, boil: 0.5 });
+    // page owners (ink, small)
+    const hp = o.head ?? 1;
+    if (hp > 0) {
+      text('q1b.nL', '姓名：大哥哥', x0 + 78, 198, { size: 32, anchor: 'start', z: z + 2, opacity: hp });
+      text('q1b.nR', '姓名：小陶', sp + 80, 198, { size: 32, anchor: 'start', z: z + 2, opacity: hp });
+    }
+  }
+  PROPS.q1_book = (fx, t, lt, p) => {
+    const e = fx.ear ? evalTrack(fx.ear, t) : 0, wg = fx.wig ? fx.wig(t) : 0;
+    drawBook(p, { ear: e, wig: wg, head: fx.headT === undefined ? 1 : clamp((t - fx.headT) / 0.3) });
+  };
+  /** the page being turned: sweeps from the right page over the spine to the left */
+  PROPS.q1_flip = (fx, t, lt) => {
+    const u = EASE.io(clamp(lt / 0.55)); if (u >= 1) return;
+    const { sp, top, bot, x1 } = NB, w = x1 - sp;
+    const ex = sp + Math.cos(Math.PI * u) * w, lift = Math.sin(Math.PI * u) * 46, mid = sp + (ex - sp) * 0.55;
+    stroke('q1f.pg', [[sp, top + 16], [mid, top - lift * 0.9], [ex, top - lift, 1], [ex, bot - lift * 0.6, 1], [mid, bot + 4 - lift * 0.5], [sp, bot + 14]], { z: Z.set + 3, w: 5, fill: C.paper, closed: false });
+    stroke('q1f.pgc', [[sp, bot + 14], [sp, top + 16]], { z: Z.set + 3, w: 4 });
+  };
+  /** Terry's doodle in the corner: a tiny rocket (it comes back in the next scene) */
+  PROPS.q1_rocket = (fx, t, lt, p) => {
+    const z = Z.board, st = i => stag(p, i, 4);
+    DL.rotate(38);
+    stroke('q1r.body', [[0, -44], [14, -22], [15, 20, 1], [-15, 20, 1], [-14, -22], [0, -44]], { z, w: 4, fill: C.paper, draw: st(0) });
+    stroke('q1r.win', ringPts('q1r.win', 0, -12, 7, 7, { n: 8, closed: true }), { z, w: 3.2, closed: true, fill: C.paper, draw: st(1) });
+    stroke('q1r.fL', [[-15, 4], [-27, 26, 1], [-15, 20]], { z, w: 3.6, draw: st(2) });
+    stroke('q1r.fR', [[15, 4], [27, 26, 1], [15, 20]], { z, w: 3.6, draw: st(2) });
+    stroke('q1r.fl', [[-8, 22], [-4, 40], [0, 30], [4, 44], [8, 22]], { z, w: 3.2, draw: st(3) });
+  };
+
+  /* ---------------- handwriting on the pages ---------------- */
+  const SZ = 62, LX = 180;
+  const probe = s => layoutWriting({ text: s, x: 0, y: 0, size: SZ, t0: 0, speed: 1 });
+  const eqOf = s => probe(s).boxes.find(b => b.ch === '=').x;
+  const E0 = eqOf('3x + 5 = 26');
+  // equal signs aligned, baselines on the ruled lines
+  const LINES = [['3x + 5 = 26', 320], ['3x = 21', 464], ['x = 7', 608]].map(([s, base], i) => ({ id: 'q1w' + i, text: s, x: LX + E0 - eqOf(s), y: base - SZ, size: SZ }));
+  const NOTES = [{ id: 'q1n0', text: '-5', x: 598, y: 464 - 44, size: 44 }, { id: 'q1n1', text: '÷3', x: 598, y: 608 - 44, size: 44 }];
+  const BIG = { id: 'q1big', text: 'x = 7', x: 790, y: 206, size: 150 };
+  const ROCKET_AT = [1238, 250];
+
+  /* ---------------- 小问号 (wrapper around the COMP.qm design) ----------------
+     Same construction and proportions as COMP.qm, plus: gaze (face + pupils shift toward a target),
+     act phases that start when the act starts, hop squash, foot-tap marks, sign pop-in,
+     emerge burst, cheek blush when happy. */
+  COMP.q1_qm = {
+    draw(fx, t, F) {
+      if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+      const lt = t - fx.t0, pos = evalTrack(fx.pos, t), S = (fx.size || 200) / 200;
+      const mood = stepTrack(fx.mood, t) || 'neutral';
+      let act = 'idle', ta = 0; (fx.act || []).forEach(k => { if (k[0] <= t) { act = k[1]; ta = k[0]; } });
+      let sign = null, sT = -99, prev; (fx.sign || []).forEach(k => { if (k[0] <= t) { if (k[1] !== prev) sT = k[0]; sign = k[1]; prev = k[1]; } });
+      const at = t - ta;
+      const pop = fx.t0 < 0 ? 1 : Math.max(0.01, EASE.back(clamp(lt / 0.3)));
+      let hop = 0, tilt = fx.tilt ? evalTrack(fx.tilt, t) : 0, tap = 0, wave = 0, sq = 1, tapHit = -1;
+      if (act === 'hop') { const s = Math.abs(Math.sin(at * (fx.hopHz || 2.2) * Math.PI)); hop = -s * 34; sq = 1 - 0.16 * Math.pow(1 - s, 10) + 0.05 * s; }
+      if (act === 'nod') tilt += Math.sin(at * 2 * Math.PI * 1.8) * 8;
+      if (act === 'shake') tilt += Math.sin(at * 2 * Math.PI * 3.2) * 11;
+      if (act === 'tap') { const ph = (at * 2.6) % 1; tap = Math.max(0, Math.sin(ph * 2 * Math.PI)) * 13; tapHit = ph >= 0.5 ? ph - 0.5 : -1; }
+      if (act === 'wave') wave = Math.sin(at * 2 * Math.PI * 2.2);
+      const k = fx.id, z = fx.z ?? Z.front, col = C.red, w = 6.5;
+      // gaze: shift the whole face a little toward the target
+      const gz = stepTrack(fx.gaze, t) || 'viewer';
+      const gp = Array.isArray(gz) ? gz : (gz !== 'viewer' ? F.targets[gz] : null);
+      let lx = 0, ly = 0;
+      if (gp) { const hx = pos[0], hy = pos[1] + hop - 160 * S, dx = gp[0] - hx, dy = gp[1] - hy, d = Math.hypot(dx, dy) || 1; lx = dx / d; ly = dy / d; }
+      const fsx = lx * 9, fsy = ly * 5;
+      // emerge burst (ink), outside the body scale
+      if (fx.burst && fx.t0 >= 0 && lt < 0.5) {
+        const u = EASE.out(clamp(lt / 0.5));
+        DL.save(); DL.translate(pos[0], pos[1]); DL.scale(S);
+        for (let i = 0; i < 7; i++) {
+          const a = (-170 + i * 26.7) * RAD, r0 = 90 + 90 * u, r1 = r0 + 40 * (1 - u) + 12;
+          stroke(k + '.burst' + i, [[Math.cos(a) * r0, -60 + Math.sin(a) * r0 * 0.9], [Math.cos(a) * r1, -60 + Math.sin(a) * r1 * 0.9]], { z: Z.fx, w: 4, opacity: 1 - u, boil: 0.6 });
+        }
+        DL.restore();
+      }
+      DL.save(); DL.translate(pos[0], pos[1] + hop); DL.scale(S * pop * (1 + (1 - sq) * 0.6), S * pop * sq);
+      stroke(k + '.legL', [[0, -34], [-12, -12], [-26, 0]], { z, w, color: col });
+      stroke(k + '.legR', [[0, -34], [14, -12 - tap * 0.4], [28, -tap]], { z, w, color: col });
+      if (tapHit >= 0 && tapHit < 0.22) {
+        const o = 1 - tapHit / 0.22;
+        stroke(k + '.tk0', [[42, -6], [56, -14]], { z: Z.fx, w: 3.5, opacity: o });
+        stroke(k + '.tk1', [[38, -20], [48, -32]], { z: Z.fx, w: 3.5, opacity: o });
+      }
+      DL.about(0, -40, () => DL.rotate(tilt));
+      const hook = [[-56, -150], [-52, -180], [-28, -200], [6, -204], [42, -190], [58, -162], [50, -134], [26, -114], [6, -96], [0, -72], [0, -34]];
+      stroke(k + '.fill', hook.slice(0, 8).concat([[-10, -120]]), { z, closed: true, fill: C.paper, noStroke: true, w: 1 });
+      stroke(k + '.hook', hook, { z, w: w + 1.5, color: col });
+      const waving = !sign && act === 'wave';
+      const handL = [-40, -44 + wave * 4], handR = sign ? [66, -92] : (waving ? [100 + wave * 12, -156] : [38, -46]);
+      stroke(k + '.armL', [[0, -70], [-22, -58], handL], { z, w: w - 1, color: col });
+      stroke(k + '.armR', [[0, -70], waving ? [52, -90] : [30, -74], handR], { z, w: w - 1, color: col });
+      if (waving) [0, 1].forEach(j => { // little wave arcs beside the hand (ink)
+        const r = 22 + j * 14, c = [100, -150];
+        stroke(k + '.wv' + j, [0, 1, 2, 3].map(i => { const a = (-60 + i * 30) * RAD; return [c[0] + Math.cos(a) * r + 8, c[1] + Math.sin(a) * r]; }), { z: Z.fx, w: 3, opacity: 0.75 - j * 0.25, boil: 0.8 });
+      });
+      // face
+      const blink = ((t + (fx.blink ?? 0.7)) % 3.4) < 0.1;
+      const eyeY = -162 + fsy, ex = 14;
+      [-1, 1].forEach((s, i) => {
+        const e = [s * ex + fsx, eyeY];
+        if (mood === 'happy') stroke(k + '.e' + i, [[e[0] - 8, e[1] + 3], [e[0], e[1] - 6], [e[0] + 8, e[1] + 3]], { z, w: 4.5, color: col });
+        else if (blink) stroke(k + '.e' + i, [[e[0] - 7, e[1]], [e[0] + 7, e[1]]], { z, w: 4, color: col });
+        else dot(k + '.e' + i, [e[0] + lx * 1.5, e[1] + ly * 1.5], mood === 'surprised' ? 7.5 : 6, col, z);
+      });
+      if (mood === 'doubt') { stroke(k + '.brow', [[4 + fsx, eyeY - 22], [24 + fsx, eyeY - 16]], { z, w: 4, color: col }); stroke(k + '.brow2', [[-24 + fsx, eyeY - 14], [-6 + fsx, eyeY - 16]], { z, w: 4, color: col }); }
+      if (mood === 'surprised') { stroke(k + '.brow', [[6 + fsx, eyeY - 20], [14 + fsx, eyeY - 25], [22 + fsx, eyeY - 20]], { z, w: 3.6, color: col }); stroke(k + '.brow2', [[-22 + fsx, eyeY - 20], [-14 + fsx, eyeY - 25], [-6 + fsx, eyeY - 20]], { z, w: 3.6, color: col }); }
+      const my = -136 + fsy * 0.6, mx = fsx * 0.8;
+      if (mood === 'happy') {
+        stroke(k + '.m', [[mx - 12, my - 4], [mx, my + 6], [mx + 12, my - 4]], { z, w: 4.5, color: col });
+        [-1, 1].forEach((s, i) => stroke(k + '.bl' + i, [[mx + s * 27 - 5, my - 4], [mx + s * 27 + 2, my - 10]], { z, w: 2.6, color: col, opacity: 0.8 }));
+      } else if (mood === 'surprised') stroke(k + '.m', ringPts(k + '.m', mx, my, 6, 8, { n: 8, closed: true }), { z, w: 4, color: col, closed: true, fill: C.paper });
+      else if (mood === 'doubt') stroke(k + '.m', [[mx - 12, my], [mx - 4, my - 4], [mx + 4, my + 2], [mx + 12, my - 2]], { z, w: 4, color: col });
+      else stroke(k + '.m', [[mx - 9, my - 1], [mx + 9, my - 1]], { z, w: 4.5, color: col });
+      // the sign, popping up on its stick
+      if (sign) {
+        const sp = EASE.back(clamp((t - sT) / 0.25));
+        const size = fx.signSize || 40, tw = textWidth(sign, size) + 40, cx = 70, cy = -262 + (1 - sp) * 40;
+        stroke(k + '.stick', [handR, [68, cy + 32]], { z, w: 5, color: col });
+        DL.about(cx, cy + 32, () => DL.scale(lerp(0.5, 1, sp)));
+        stroke(k + '.board', [[cx - tw / 2, cy - 34], [cx + tw / 2, cy - 34, 1], [cx + tw / 2, cy + 32, 1], [cx - tw / 2, cy + 32, 1], [cx - tw / 2, cy - 34, 1]], { z, w: 5, color: col, fill: C.paper });
+        text(k + '.sign', sign, cx, cy, { size, color: col, z: z + 0.5 });
+      }
+      DL.restore();
+      DL.save(); DL.translate(pos[0], pos[1] + hop); DL.scale(S * pop); DL.about(0, -40, () => DL.rotate(tilt));
+      F.anchors[k] = { head: DL.tp([0, -160]), headTop: DL.tp([0, -214]), mouth: DL.tp([0, -136]), jaw: DL.tp([0, -110]), r: 58 * S * pop, handR: DL.tp(handR), handL: DL.tp(handL), sign: DL.tp([70, -300]) };
+      DL.restore();
+    },
+    cues: fx => (fx.t0 >= 0 && !fx.silent ? [[fx.t0, 'boop']] : []).concat(fx.sfxAt || []),
+  };
+  SFX.define('q1_tap', tone => { tone('sine', 900, 520, 0.035, 0.12); });
+
+  // shared with 44_notebook2.js
+  window.q1Book = { NB, LINES, NOTES, BIG, ROCKET_AT, FL };
+
+  /* ---------------- timing ---------------- */
+  const chain = (specs, t0, speed, gapAfter, extra = {}) => {
+    let t = t0;
+    return specs.map(s => { const fx = layoutWriting({ ...s, t0: t, speed, gap: 0.03, glyphGap: 0.03, ...extra }); t = fx.tEnd + gapAfter; return { ...s, t0: fx.t0, tEnd: fx.tEnd }; });
+  };
+  const LW = chain(LINES, 4.75, 1250, 0.32);
+  // step notes: '-5' right after line 1, '÷3' right after line 2
+  const NW = [{ ...NOTES[0], t0: LW[0].tEnd + 0.08 }, { ...NOTES[1], t0: LW[1].tEnd + 0.08 }];
+  const QM_T = 13.75, QM_HOP = 13.95, QM_LAND = QM_HOP + 1.8, QM_X = 860, QM_Y = 752;
+  const HOPHZ = 4 / 1.8, TERRY_T = 19.45;
+  const earWig = t => (t > 12.95 && t < QM_T) ? Math.sin((t - 12.95) * 2 * Math.PI * 5) * clamp((t - 12.95) / 0.3) : 0;
+
+  defineScene({
+    id: 'notebook', chapter: '小问号登场', dur: 24.3, floor: FL,
+    cast: {
+      terry: { H: 240, head: 0.44, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    tracks: {
+      terry: {
+        enter: TERRY_T,
+        pos: [[0, [1452, FL]]],
+        pose: [[0, 'q1_akimbo']],
+        face: [[0, 'proud']],
+        turn: [[0, -0.3]],
+        gaze: [[0, 'qmHead']],
+        squash: [[0, 1], [TERRY_T + 0.05, 1.1, 0.08], [TERRY_T + 0.13, 1, 0.25, 'back']],
+      },
+    },
+    targets: () => ({ qmHead: [QM_X + 10, QM_Y - 180] }),
+    fx: [
+      { type: 'prop', kind: 'q1_book', id: 'book', t0: 0.1, at: [0, 0], drawDur: 0.8, headT: 4.15,
+        ear: [[0, 0], [QM_T - 0.05, 1, 0.12, 'out'], [QM_T + 0.45, 0, 0.5, 'back']], wig: earWig, sfxAt: [[0.12, 'swish']] },
+      // the teacher leafs through everyone's notebooks
+      ...[0.95, 1.75, 2.55, 3.35].map((t0, i) => ({ type: 'prop', kind: 'q1_flip', id: 'flip' + i, t0, t1: t0 + 0.6, at: [0, 0], drawDur: 0, sfxAt: [[t0, 'paper']] })),
+      { type: 'label', id: 'lbL', text: '大哥哥的作业本', at: [420, 96], rot: -2, t0: 4.5, t1: 8.3, target: [400, 180], bend: 0.3, gap: 4 },
+      ...LW.map(s => ({ type: 'write', id: s.id, text: s.text, x: s.x, y: s.y, size: s.size, t0: s.t0, speed: 1250, gap: 0.03, glyphGap: 0.03, w: 6, sfx: 'pen' })),
+      ...NW.map(s => ({ type: 'write', id: s.id, text: s.text, x: s.x, y: s.y, size: s.size, t0: s.t0, speed: 900, w: 4, sfx: 'pen' })),
+      { type: 'label', id: 'lbR', text: '小陶的作业本', at: [1000, 96], rot: 2, t0: 8.85, t1: 12.6, target: [980, 180], bend: -0.3, gap: 4 },
+      { type: 'write', id: BIG.id, text: BIG.text, x: BIG.x, y: BIG.y, size: BIG.size, t0: 9.35, speed: 3400, gap: 0.02, glyphGap: 0.02, w: 9, sfx: 'pen', endSfx: 'zip' },
+      { type: 'prop', kind: 'q1_rocket', id: 'rk', t0: 10.6, at: ROCKET_AT, drawDur: 0.7, sfxAt: [[10.6, 'pen'], [10.9, 'pen']] },
+      // 小问号 hops out of the dog-eared corner
+      { type: 'q1_qm', id: 'qm', size: 240, t0: QM_T, burst: true,
+        pos: [[0, [1238, QM_Y]], [QM_HOP, [QM_X, QM_Y], QM_LAND - QM_HOP, 'lin']],
+        act: [[0, 'idle'], [QM_HOP, 'hop'], [QM_LAND, 'idle'], [17.55, 'tap']], hopHz: HOPHZ,
+        mood: [[0, 'surprised'], [QM_HOP + 0.2, 'happy'], [QM_LAND, 'neutral'], [16.55, 'doubt']],
+        gaze: [[0, 'viewer'], [QM_LAND + 0.1, [BIG.x + 200, BIG.y + 90]], [TERRY_T + 0.25, [1452, 600]]],
+        sign: [[0, null], [17.3, '为什么是 7？']],
+        sfxAt: [[QM_T, 'boing'], ...[1, 2, 3, 4].map(n => [QM_HOP + n / HOPHZ - 0.02, 'hop']), [17.3, 'pop']] },
+      { type: 'label', id: 'lbQ', text: ['小问号', '（最爱问“为什么”）'], at: [460, 700], rot: -3, t0: 15.9, t1: 19.3, target: [792, 600], bend: -0.25, gap: 8 },
+      { type: 'speech', id: 'say', text: ['这不是一眼', '就看出来了吗！'], at: [1392, 398], tail: [34, 66], speaker: 'terry', t0: 19.95, t1: 24.3, size: 54, rot: -3 },
+    ],
+    sfx: [[TERRY_T, 'pop'], [12.95, 'plip'], [13.2, 'plip'], [13.45, 'plip'],
+      ...[0, 1, 2, 3, 4, 5].map(i => [17.55 + (0.5 + i) / 2.6, 'q1_tap'])],
+    subs: [
+      { t0: 0.2, t1: 4.4, text: '下课了，老师翻开大家的作业本。' },
+      { t0: 4.5, t1: 8.7, text: '大哥哥一步一步，写得清清楚楚；' },
+      { t0: 8.8, t1: 12.75, text: '小陶的本子上，只有一个答案。' },
+      { t0: 12.85, t1: 17.2, text: '这时，本子里跳出来一个小家伙——' },
+      { t0: 17.3, t1: 19.8, text: '“为什么是7？”' },
+      { t0: 19.9, t1: 24.2, text: '“这不是一眼就看出来了吗！”' },
+    ],
+  });
+
+  // standing poses for Terry in these scenes
+  Object.assign(POSE, {
+    q1_akimbo: { lean: -2, tilt: -4, ikL: { w: 1, to: 'hip', dx: -30, dy: -6, bend: 'out' }, ikR: { w: 1, to: 'hip', dx: 30, dy: -6, bend: 'out' } },
+    q1_scratchStand: { tilt: 8, armScale: 1.7, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 1.0, dy: -0.95, bend: 'out' } },
+  });
+})();
+
+/* ---- 42_race.js ---- */
+// 小问号登场（二）：脑子 vs 手 的赛跑。脑子（带着小陶的头发）一溜烟到了终点，手还在起点慢慢写。
+(() => {
+  const GY = 690;                       // the track (ground line)
+  const START_X = 120, FIN_X = 1090;    // flag poles
+  const B0 = [330, 262], B1 = [1262, 606], LAUNCH = 1.25, ARRIVE = 1.75;
+  const FLAG_X = 1420, FLAG_T = 2.05;
+
+  /* ---------- brain-rocket position (pure function of t) ---------- */
+  const brainPos = t => {
+    if (t < LAUNCH) return [B0[0], B0[1] + Math.sin(t * 2 * Math.PI * 1.4) * 6 - clamp((t - LAUNCH + 0.3) / 0.3) * 10];
+    if (t < ARRIVE) { const u = EASE.io((t - LAUNCH) / (ARRIVE - LAUNCH)); return [lerp(B0[0], B1[0], u), lerp(B0[1], B1[1], u * u) - Math.sin(Math.PI * u) * 40]; }
+    return B1;
+  };
+  const brainSq = t => {
+    if (t >= LAUNCH - 0.25 && t < LAUNCH) return 0.86;                    // crouch before the zoom
+    if (t >= LAUNCH && t < ARRIVE) return 1.0;
+    const v = t - ARRIVE; if (v >= 0 && v < 0.35) return 1 - 0.2 * Math.sin(Math.PI * v / 0.35) * (1 - v / 0.35 * 0.3); // landing squash
+    return 1 + 0.03 * Math.sin(t * 2 * Math.PI * 1.2);                    // breathing
+  };
+
+  /** the brain with Terry's tuft, tiny arms, a rocket nozzle. Local: centre of brain, ~170 x 120. */
+  function drawBrain(key, t, flying, holdFlag) {
+    const z = Z.front, w = 5;
+    // lumpy outline (a cloud of bumps)
+    const pts = [];
+    for (let i = 0; i < 36; i++) {
+      const a = i / 36 * Math.PI * 2, bump = 1 + 0.07 * Math.abs(Math.sin(a * 4.5));
+      pts.push([Math.cos(a) * 86 * bump, Math.sin(a) * 60 * bump - (Math.sin(a) < 0 ? 4 : 0)]);
+    }
+    stroke(key + '.o', pts, { z, w, closed: true, fill: C.paper });
+    // folds: a middle fissure and a few squiggles (behind the face)
+    stroke(key + '.f0', [[-4, -60], [4, -40], [-6, -22], [2, -6]], { z, w: 3.4 });
+    stroke(key + '.f1', [[-66, -24], [-48, -38], [-30, -28], [-40, -12]], { z, w: 3.2 });
+    stroke(key + '.f2', [[34, -40], [52, -30], [68, -38]], { z, w: 3.2 });
+    stroke(key + '.f3', [[-70, 22], [-54, 34], [-40, 26]], { z, w: 3.2 });
+    stroke(key + '.f4', [[46, 28], [62, 18], [72, 30]], { z, w: 3.2 });
+    // Terry's tuft on top
+    HAIR.tuft(flying ? 0.35 : 0, flying ? -0.25 : 0).forEach((h, i) => stroke(key + '.t' + i, h.map(p => [p[0] * 62 + 4, (p[1] + 0.97) * 62 - 58]), { z, w: 5 }));
+    // face: happy, determined
+    [-1, 1].forEach((s, i) => {
+      stroke(key + '.e' + i, ringPts(key + '.e' + i, s * 22, 4, 13, 16, { n: 10, closed: true }), { z, w: 3.8, closed: true, fill: C.paper });
+      dot(key + '.p' + i, [s * 22 + (flying ? 4 : 2), 7], 5.5, C.ink, z);
+    });
+    stroke(key + '.m', [[-14, 34], [0, 44], [14, 34]], { z, w: 4 });
+    // arms
+    stroke(key + '.aL', [[-70, 30], [-94, 40], [-104, 30]], { z, w: 4.5 });
+    const hR = holdFlag || [100, 34];
+    stroke(key + '.aR', [[70, 30], [(70 + hR[0]) / 2 + 6, hR[1] + 10], hR], { z, w: 4.5 });
+    // rocket nozzle on the back, flame while flying
+    stroke(key + '.nz', [[-84, -16], [-110, -24, 1], [-110, 24, 1], [-84, 16]], { z: z - 0.5, w: 4.5, fill: C.paper });
+    if (flying) {
+      const f = 1 + 0.25 * Math.sin(t * 60);
+      stroke(key + '.fl', [[-112, -18], [-150 * f, -10], [-132, 0], [-168 * f, 8], [-112, 18]], { z: z - 0.5, w: 4 });
+    }
+  }
+  PROPS.q1_brain = (fx, t) => {
+    const flying = t >= LAUNCH - 0.05 && t < ARRIVE + 0.05;
+    const sq = brainSq(t);
+    DL.about(0, 64, () => DL.scale(1 + (1 - sq) * 0.6, sq)); // squash about the bottom
+    const hold = t >= FLAG_T - 0.25 ? [118, lerp(-40, 30, EASE.io(clamp((t - FLAG_T + 0.25) / 0.25)))] : null;
+    DL.scale(1.3);
+    drawBrain('q1br', t, flying, hold);
+  };
+  /** speed lines + dust behind the brain */
+  COMP.q1_zoom = {
+    draw(fx, t) {
+      if (t < LAUNCH || t > ARRIVE + 0.55) return;
+      const p = brainPos(Math.min(t, ARRIVE)), fade = 1 - clamp((t - ARRIVE) / 0.55);
+      [-36, -6, 26, 52].forEach((dy, i) => {
+        const x1 = p[0] - 190 - i * 14, len = t < ARRIVE ? 180 + i * 40 : 120;
+        stroke('q1z' + i, [[x1 - len, p[1] + dy], [x1, p[1] + dy]], { z: Z.fx, w: 4, opacity: fade, boil: 0.6 });
+      });
+      // dust puffs left at the start
+      const u = clamp((t - LAUNCH) / 0.6);
+      [0, 1, 2].forEach(i => stroke('q1d' + i, ringPts('q1d' + i, B0[0] - 150 + i * 40, B0[1] + 40 - i * 10, 18 + u * 14, 12 + u * 8, { n: 9, closed: true }), { z: Z.fx, w: 3, closed: true, opacity: 1 - u }));
+    },
+    cues: () => [[LAUNCH, 'whoosh'], [LAUNCH + 0.02, 'zip'], [ARRIVE, 'thud']],
+  };
+  /** race flags: red pole + pennant with a word */
+  PROPS.q1_flag = (fx, t, lt, p) => {
+    const z = Z.set + 2, col = fx.color === 'ink' ? C.ink : C.red, H = fx.h || 300, fw = fx.fw || 130;
+    stroke(fx.id + '.pole', [[0, 0], [2, -H]], { z, w: 6, color: col, draw: clamp(p * 2) });
+    const fp = clamp(p * 2 - 1);
+    if (fp > 0) {
+      stroke(fx.id + '.cloth', [[2, -H], [fw, -H + 8, 1], [fw - 14, -H + 36], [fw, -H + 64, 1], [2, -H + 64]], { z, w: 5, color: col, fill: C.paper, draw: fp });
+      if (fx.word) text(fx.id + '.w', fx.word, fw / 2 - 4, -H + 33, { size: 40, color: col, z: z + 0.5, opacity: clamp(fp * 2 - 1) });
+    }
+  };
+  /** the x = 7 flag the brain plants beyond the finish */
+  PROPS.q1_goal = (fx, t, lt) => {
+    const drop = EASE.in(clamp(lt / 0.18)), z = Z.front;
+    DL.translate(0, (1 - drop) * -70);
+    stroke('q1g.pole', [[0, 0], [1, -170]], { z, w: 5 });
+    stroke('q1g.cloth', [[1, -170], [138, -166, 1], [138, -106, 1], [1, -110]], { z, w: 4.5, fill: C.paper });
+  };
+
+  /* ---------- the tired hand holding a pencil ---------- */
+  // pencil tip follows the slow writing '3x + 5 ...'; the hand (a fist with a sleeve, and a tired little face) pants
+  function drawHand(tip, t, done) {
+    const z = Z.front, pant = Math.sin(t * 2 * Math.PI * (done ? 2.4 : 1.8));
+    DL.save(); DL.translate(tip[0], tip[1]); DL.rotate(30 + pant * 2.5); DL.scale(1.3);
+    // pencil: tip at origin, body going up
+    stroke('q1p.tip', [[0, 0], [-11, -34, 1], [11, -34, 1], [0, 0]], { z, w: 4, fill: C.paper });
+    stroke('q1p.lead', [[0, 0], [-3.5, -10, 1], [3.5, -10, 1], [0, 0]], { z: z + 0.1, w: 3.5, fill: C.ink });
+    stroke('q1p.body', [[-11, -34], [-11, -176, 1], [11, -176, 1], [11, -34]], { z, w: 4.5, fill: C.paper });
+    stroke('q1p.hex', [[0, -40], [0, -60]], { z, w: 2.4, color: C.pencil });
+    stroke('q1p.hex2', [[0, -150], [0, -170]], { z, w: 2.4, color: C.pencil });
+    stroke('q1p.fer', [[-12, -176], [-12, -196, 1], [12, -196, 1], [12, -176]], { z, w: 4, fill: C.paper });
+    stroke('q1p.fer2', [[-12, -186], [12, -186]], { z, w: 2.6 });
+    stroke('q1p.eras', [[-11, -196], [-10, -214], [0, -220], [10, -214], [11, -196]], { z, w: 4, fill: C.paper });
+    const hy = pant * 2;
+    // sleeve + forearm going off up-right
+    stroke('q1h.arm', [[40, -150 + hy], [92, -236 + hy], [134, -212 + hy], [78, -120 + hy]], { z: z + 0.1, w: 5, fill: C.paper });
+    stroke('q1h.cuff', [[84, -222 + hy], [118, -202 + hy]], { z: z + 0.15, w: 3.4 });
+    // fist: back of the hand on the right of the pencil
+    stroke('q1h.back', [[8, -140 + hy], [44, -150 + hy], [80, -128 + hy], [86, -92 + hy], [70, -62 + hy], [30, -54 + hy], [6, -62 + hy]], { z: z + 0.2, w: 5, fill: C.paper });
+    // curled fingers wrapping round the front of the pencil (three knuckle bumps)
+    [0, 1, 2].forEach(i => {
+      const y0 = -66 - i * 24 + hy;
+      stroke('q1h.k' + i, [[8, y0 + 4], [-14, y0 + 2], [-20, y0 - 10], [-12, y0 - 20], [8, y0 - 20]], { z: z + 0.25, w: 4.5, fill: C.paper });
+    });
+    // thumb over the top
+    stroke('q1h.th', [[10, -140 + hy], [-8, -150 + hy], [-18, -140 + hy], [-8, -128 + hy], [12, -126 + hy]], { z: z + 0.25, w: 4.5, fill: C.paper });
+    // tired face on the back of the hand
+    [-1, 1].forEach((s, i) => stroke('q1h.e' + i, [[48 + s * 14 - 6, -112 + hy], [48 + s * 14 + 6, -109 + hy]], { z: z + 0.3, w: 3.6 }));
+    const mo = 0.5 + 0.5 * Math.abs(pant);
+    stroke('q1h.m', ringPts('q1h.m', 48, -86 + hy, 5, 3 + 6 * mo, { n: 8, closed: true }), { z: z + 0.3, w: 3.2, closed: true, fill: C.paper });
+    DL.restore();
+    // sweat drops flying off (two, on a loop)
+    [0, 1].forEach(i => {
+      const ph = ((t * 0.9 + i * 0.5) % 1), o = Math.sin(Math.PI * ph);
+      const c = [tip[0] + 150 + ph * 70 + i * 16, tip[1] - 250 + ph * ph * 90 - i * 18];
+      stroke('q1s' + i, [[c[0], c[1] - 16], [c[0] + 9, c[1] + 2], [c[0], c[1] + 9], [c[0] - 9, c[1] + 2], [c[0], c[1] - 16]], { z: Z.fx, w: 3.4, fill: C.paper, opacity: o });
+    });
+    // panting puffs
+    const pp = (t * 1.8) % 1;
+    if (pp < 0.5) [0, 1].forEach(i => stroke('q1pf' + i, [[tip[0] + 196 + i * 12 + pp * 30, tip[1] - 100 - i * 16], [tip[0] + 218 + i * 12 + pp * 40, tip[1] - 106 - i * 16]], { z: Z.fx, w: 3, opacity: 1 - pp * 2 }));
+  }
+  const SLOW = { id: 'q1slow', text: '3x + 5 ...', x: 196, y: GY - 58 - 12, size: 58, t0: 1.55, speed: 170, gap: 0.22, glyphGap: 0.28, w: 5, sfx: 'pen' };
+  const SLOWL = layoutWriting({ ...SLOW });
+  PROPS.q1_hand = (fx, t) => {
+    const done = t >= SLOWL.tEnd;
+    const tip = t < SLOW.t0 ? SLOWL.strokes[0].pts[0] : penAt(SLOWL, Math.min(t, SLOWL.tEnd - 0.001));
+    drawHand(tip, t, done);
+  };
+
+  /* ---------- thought cloud contents ---------- */
+  const TH = { at: [1290, 220], rx: 250, ry: 92 };
+  const TW1 = { id: 'q1th1', text: '3x = 21', x: 1092, y: 194, size: 50, t0: 5.75, speed: 1400, w: 4.5, z: Z.fx + 1, sfx: 'pen' };
+  const TW1L = layoutWriting({ ...TW1 });
+  const TW2 = { id: 'q1th2', text: 'x = 7', x: TW1L.xEnd + 88, y: 194, size: 50, t0: TW1L.tEnd + 0.45, speed: 1400, w: 4.5, z: Z.fx + 1, sfx: 'pen' };
+  COMP.q1_thArrow = {
+    draw(fx, t) {
+      if (t < fx.t0) return;
+      arrow('q1tha', [TW1L.xEnd + 8, 224], [TW1L.xEnd + 70, 224], { p: EASE.out(clamp((t - fx.t0) / 0.3)), bend: 0.12, color: C.ink, w: 4, z: Z.fx + 1, head: 16 });
+    },
+  };
+
+  defineScene({
+    id: 'race', dur: 10.3, floor: GY,
+    fx: [
+      // the track: a pencil ground line with little lane ticks
+      { type: 'prop', kind: 'q1_track', id: 'trk', t0: 0, at: [0, 0], drawDur: 0.5, sfxAt: [[0.02, 'swish']] },
+      { type: 'prop', kind: 'q1_flag', id: 'fS', word: '起点', t0: 0.2, at: [START_X, GY], drawDur: 0.4, sfxAt: [[0.3, 'pop']] },
+      { type: 'prop', kind: 'q1_flag', id: 'fF', word: '终点', t0: 0.45, at: [FIN_X, GY], drawDur: 0.4, sfxAt: [[0.55, 'pop']] },
+      { type: 'write', ...SLOW },
+      { type: 'prop', kind: 'q1_hand', id: 'hand', t0: 0.6, at: [0, 0], drawDur: 0 },
+      { type: 'prop', kind: 'q1_brain', id: 'brain', t0: 0.6, pos: [[0, brainPos]], drawDur: 0, sfxAt: [[0.6, 'boop']] },
+      { type: 'q1_zoom', id: 'zoom' },
+      { type: 'prop', kind: 'q1_goal', id: 'goal', t0: FLAG_T, at: [FLAG_X, GY], drawDur: 0, sfxAt: [[FLAG_T + 0.16, 'thud']] },
+      { type: 'write', id: 'q1gw', text: 'x = 7', x: FLAG_X + 14, y: GY - 162, size: 44, t0: FLAG_T + 0.22, speed: 2400, w: 4.5, z: Z.front + 1, sfx: 'pen', endSfx: 'ding' },
+      { type: 'label', id: 'lbBrain', text: '脑子：已经到终点', at: [1250, 300], rot: -3, t0: 2.2, t1: 5.3, target: [1262, 505], bend: -0.2, gap: 14 },
+      { type: 'label', id: 'lbHand', text: '手：还在起点', at: [640, 290], rot: 3, t0: 2.9, t1: 5.5, target: { target: 'hand' }, bend: 0.25, gap: 16 },
+      { type: 'thought', id: 'q1cloud', at: TH.at, rx: TH.rx, ry: TH.ry, t0: 5.4, t1: 10.3, from: [1266, 512] },
+      { type: 'write', ...TW1 },
+      { type: 'q1_thArrow', id: 'tha', t0: TW1L.tEnd + 0.1 },
+      { type: 'write', ...TW2 },
+      { type: 'label', id: 'lbOnly', text: '这些，只有他自己看得见', at: [760, 190], rot: -2, t0: 6.9, t1: 10.2, target: [1036, 220], bend: -0.2, gap: 8 },
+    ],
+    targets: F => ({ hand: [SLOWL_tip(F.t)[0] + 150, SLOWL_tip(F.t)[1] - 210] }),
+    subs: [
+      { t0: 0.2, t1: 4.9, text: '小陶的脑子跑得飞快，手却懒得跟上。' },
+      { t0: 5.0, t1: 9.8, text: '答案写出来了，想法却还藏在脑子里。' },
+    ],
+  });
+  function SLOWL_tip(t) { return t < SLOW.t0 ? SLOWL.strokes[0].pts[0] : penAt(SLOWL, Math.min(t, SLOWL.tEnd - 0.001)); }
+
+  PROPS.q1_track = (fx, t, lt, p) => {
+    stroke('q1t.g', [[80, GY], [800, GY + 2], [1540, GY - 1]], { z: Z.set, w: 4, draw: p });
+    for (let i = 0; i < 12; i++) {
+      const x = 130 + i * 118;
+      stroke('q1t.k' + i, [[x, GY + 16], [x + 40, GY + 17]], { z: Z.set, w: 2.4, color: C.pencil, opacity: 0.8, draw: clamp(p * 1.5 - i * 0.04) });
+    }
+    // chequered finish line on the ground
+    stroke('q1t.fin', [[FIN_X, GY - 4], [FIN_X, GY + 30]], { z: Z.set, w: 5, color: C.red, draw: p });
+  };
+})();
+
+/* ---- 44_notebook2.js ---- */
+// 小问号登场（三）：回到作业本。别人看不见你的脑子，只看得见纸上的字。小问号转身向观众挥手——以后还会常来。
+(() => {
+  const B = window.q1Book, FL = B.FL;
+  const QM_X = 860, QM_Y = 752, TERRY_X = 1452;
+  const WAVE_T = 7.35;
+  const done = { t0: -30, speed: 5000, silent: true };
+
+  /** little scratch squiggles by Terry's scratching hand (ink) */
+  COMP.q1_scratch = {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const a = F.anchors[fx.char]; if (!a) return;
+      const h = a.handR, ph = Math.floor(t * 6) % 2;
+      [0, 1].forEach(i => stroke('q1sc' + i, [[h[0] + 14 + i * 8, h[1] - 16 - i * 12 + ph * 3], [h[0] + 22 + i * 8, h[1] - 24 - i * 12], [h[0] + 30 + i * 8, h[1] - 16 - i * 12 - ph * 3]], { z: Z.fx, w: 3, boil: 0.8 }));
+    },
+  };
+  defineScene({
+    id: 'notebook2', dur: 12.0, floor: FL,
+    cast: {
+      terry: { H: 240, head: 0.44, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    tracks: {
+      terry: {
+        pos: [[0, [TERRY_X, FL]]],
+        pose: [[0, 'q1_scratchStand'], [WAVE_T + 1.2, 'q1_thinkStand', 0.25]],
+        face: [[0, 'puzzled'], [WAVE_T + 1.2, 'focus', 0.1]],
+        turn: [[0, -0.3]],
+        gaze: [[0, 'qmHead'], [3.8, 'leftPage'], [WAVE_T + 1.2, 'bigX']],
+      },
+    },
+    targets: () => ({ qmHead: [QM_X + 10, QM_Y - 180], leftPage: [400, 430], bigX: [B.BIG.x + 200, B.BIG.y + 90] }),
+    fx: [
+      { type: 'prop', kind: 'q1_book', id: 'book', t0: -30, at: [0, 0], drawDur: 0 },
+      ...B.LINES.map(s => ({ type: 'write', ...s, ...done, w: 6 })),
+      ...B.NOTES.map(s => ({ type: 'write', ...s, ...done, w: 4 })),
+      { type: 'write', ...B.BIG, ...done, w: 9 },
+      { type: 'prop', kind: 'q1_rocket', id: 'rk', t0: -30, at: B.ROCKET_AT, drawDur: 0 },
+      // what only Terry can see: the thought bubble above his head
+      { type: 'thought', id: 'q1th', at: [1400, 330], rx: 150, ry: 70, t0: 0.5, t1: 3.65, from: { char: 'terry', part: 'headTop', dy: -30 } },
+      { type: 'write', id: 'q1thw', text: '3x = 21', x: 1318, y: 306, size: 46, t0: 0.85, t1: 3.65, speed: 1500, w: 4.5, z: Z.fx + 1, sfx: 'pen' },
+      { type: 'label', id: 'lbSee', text: '小问号看不见', at: [1440, 176], rot: -3, t0: 1.9, t1: 3.65, target: [1410, 262], bend: 0.2, gap: 6 },
+      // what everyone can see: the written steps (yellow = the key idea)
+      ...B.LINES.map((s, i) => ({ type: 'highlight', id: 'q1hl' + i, of: s.id, t0: 4.0 + i * 0.4, dur: 0.35 })),
+      { type: 'q1_scratch', id: 'scr', char: 'terry', t0: 0, t1: WAVE_T + 1.2 },
+      { type: 'q1_qm', id: 'qm', size: 240, t0: -30,
+        pos: [[0, [QM_X, QM_Y]]],
+        act: [[0, 'tap'], [3.9, 'idle'], [4.3, 'nod'], [6.3, 'idle'], [WAVE_T, 'wave']],
+        mood: [[0, 'doubt'], [4.3, 'neutral'], [WAVE_T, 'happy']],
+        gaze: [[0, [B.BIG.x + 200, B.BIG.y + 90]], [3.85, [400, 430]], [WAVE_T - 0.25, 'viewer']],
+        sign: [[0, '为什么是 7？'], [WAVE_T - 0.05, null]],
+        tilt: [[0, 0], [3.85, -6, 0.3], [WAVE_T - 0.25, 0, 0.25]],
+        sfxAt: [[4.3, 'plip'], [WAVE_T, 'boop'], [WAVE_T + 0.4, 'plip']] },
+    ],
+    sfx: [...[0, 1, 2, 3, 4].map(i => [(0.5 + i) / 2.6, 'q1_tap'])],
+    subs: [
+      { t0: 0.2, t1: 3.6, text: '可是别人看不见你的脑子，' },
+      { t0: 3.7, t1: 7.1, text: '只看得见你写在纸上的字。' },
+      { t0: 7.2, t1: 11.7, text: '这个小问号，以后还会常常来找他。' },
+    ],
+  });
+  Object.assign(POSE, {
+    q1_thinkStand: { tilt: -6, armScale: 1.5, ikR: { w: 1, to: 'hip', dx: 24, dy: -2, bend: 'out' }, ikL: { w: 1, to: 'head', dx: -1.02, dy: 0.42, bend: 'out' } },
+  });
+})();
+
+/* ---- 50_yourturn.js ---- */
+// 轮到你了：斐波那契数里的偶数。一眼能看出规律，但“为什么永远这样”要讲清楚（奇偶证明）。
+(() => {
+  const FL = 780, SEQ_T = '1, 1, 2, 3, 5, 8, 13, 21, 34', SIZE = 84, Y = 200;
+  // centre the sequence and find each number's box (digits between separators)
+  const probe = layoutWriting({ text: SEQ_T, x: 0, y: 0, size: SIZE, t0: 0, speed: 1 });
+  const X0 = 800 - probe.xEnd / 2, NUMS = [];
+  let cur = null;
+  probe.boxes.forEach((b, i) => {
+    if (/[0-9]/.test(b.ch)) { if (!cur) { cur = { i0: i, x0: b.x }; NUMS.push(cur); } cur.x1 = b.x + b.w; }
+    else cur = null;
+  });
+  NUMS.forEach(n => { n.cx = X0 + (n.x0 + n.x1) / 2; n.w = n.x1 - n.x0; });
+  const PAR_Y = Y + SIZE + 64, PARITY = ['奇', '奇', '偶', '奇', '奇', '偶', '奇', '奇', '偶'], EVEN = [2, 5, 8];
+
+  COMP.yt_ringNum = {
+    draw(fx, t) {
+      const p = EASE.out(clamp((t - fx.t0) / 0.35)); if (p <= 0) return;
+      const n = NUMS[fx.n];
+      stroke(fx.id, ringPts(fx.id, n.cx, Y + SIZE * 0.52, n.w / 2 + 22, SIZE / 2 + 16, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: p });
+    },
+    cues: fx => [[fx.t0, 'pen']],
+  };
+  /** 奇/偶 under each number, then red separators every three and "永远重复" at the end. */
+  COMP.yt_parity = {
+    draw(fx, t) {
+      NUMS.forEach((n, i) => {
+        const lt = t - (fx.t0 + i * fx.step); if (lt < 0) return;
+        const pp = EASE.back(clamp(lt / 0.2));
+        if (EVEN.includes(i)) {
+          const hp = EASE.out(clamp((lt - 0.1) / 0.25));
+          if (hp > 0) stroke('yt.phi' + i, superPts(n.cx, PAR_Y, 70 * hp, 64, 14, 3), { z: Z.hi, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, w: 1 });
+        }
+        text('yt.par' + i, PARITY[i], n.cx, PAR_Y, { size: 54, z: Z.annot, scale: lerp(0.4, 1, pp), opacity: clamp(lt / 0.08) });
+      });
+      [2, 5].forEach((i, k) => {
+        const p = EASE.out(clamp((t - fx.sepT - k * 0.3) / 0.2)); if (p <= 0) return;
+        const x = (NUMS[i].cx + NUMS[i + 1].cx) / 2;
+        stroke('yt.sep' + k, [[x, PAR_Y - 44], [x + 2, PAR_Y + 40]], { z: Z.annot, w: 5, color: C.red, draw: p });
+      });
+      const lp = clamp((t - fx.sepT - 0.7) / 0.3);
+      if (lp > 0) {
+        const x = NUMS[8].cx + 70;
+        text('yt.dots', '……', x + 34, PAR_Y, { size: 54, z: Z.annot, color: C.red, opacity: lp });
+      }
+    },
+    cues: fx => NUMS.map((_, i) => [fx.t0 + i * fx.step, 'plip']).concat([[fx.sepT, 'pen'], [fx.sepT + 0.3, 'pen']]),
+  };
+
+  defineScene({
+    id: 'yourturn', chapter: '轮到你了', dur: 47.4, floor: FL,
+    cast: {
+      terry: { H: 240, head: 0.44, torso: 0.22, leg: 0.3, arm: 0.34, hair: 'tuft', kid: true, blink: [3.3, 0.9] },
+    },
+    tracks: {
+      terry: {
+        enter: 0.3,
+        pos: [[0, [175, FL]]],
+        pose: [[0, 'stand'], [3.3, 'point', 0.12], [7.0, { ...POSE.stand, ikR: { w: 1, to: 'chin', dx: 0.2, dy: 0.05, bend: 'down' } }, 0.14],
+          [12.6, 'point', 0.1], [16.0, 'cheer', 0.1, 'back'], [19.5, 'stand', 0.2],
+          [24.2, { ...POSE.stand, ikR: { w: 1, to: 'chin', dx: 0.2, dy: 0.05, bend: 'down' } }, 0.14], [27.9, 'point', 0.12], [42.4, 'cheer', 0.1, 'back']],
+        squash: [[0, 1], [16.0, 1.1, 0.06], [16.08, 1, 0.25, 'back'], [42.4, 1.1, 0.06], [42.48, 1, 0.25, 'back']],
+        face: [[0, 'smile'], [3.3, 'grin', 0.05], [7.0, 'focus', 0.05], [12.6, 'smile', 0.05], [16.0, 'proud', 0.05], [19.8, 'surprised', 0.05],
+          [24.2, 'focus', 0.05], [27.9, 'idea', 0.05], [32.6, 'focus', 0.05], [37.7, 'grin', 0.05], [42.4, 'joy', 0.05]],
+        turn: [[0, 0.35]],
+        gaze: [[0, 'viewer'], [3.3, 'seq'], [7.0, 'viewer'], [12.6, 'seq'], [16.0, 'viewer'], [19.8, 'qm'], [24.2, 'viewer'], [27.9, 'par'], [32.6, 'rules'], [42.4, 'viewer']],
+      },
+    },
+    targets: F => ({ seq: [800, 240], par: [800, PAR_Y], rules: [800, 540], qm: (F.anchors.qm || {}).head || [1290, 560] }),
+    set: [{ type: 'floor', t0: 0.1 }],
+    fx: [
+      { type: 'title', id: 'yt', text: '轮到你了！', x: 800, y: 108, size: 96, t0: -0.1, color: 'red', rot: -2, underline: true, sfx: 'tada' },
+      { type: 'write', id: 'seq', text: SEQ_T, x: X0, y: Y, size: SIZE, t0: 0.6, speed: 2600, gap: 0.025, glyphGap: 0.02, w: 6.5, sfx: 'pen' },
+      { type: 'scribe', id: 'think1', text: '想一想……', x: 800, y: 520, size: 64, t0: 7.2, t1: 12.6, cps: 5, color: 'red', anchor: 'middle', sfx: 'plip' },
+      { type: 'yt_ringNum', id: 'r2', n: 2, t0: 12.8 },
+      { type: 'yt_ringNum', id: 'r8', n: 5, t0: 13.4 },
+      { type: 'yt_ringNum', id: 'r34', n: 8, t0: 14.0 },
+      { type: 'speech', id: 'glance', text: '一眼就看出来了！', at: [470, 470], tail: [-150, 60], speaker: 'terry', t0: 16.1, t1: 19.5, size: 64, rot: -3 },
+      { type: 'q1_qm', id: 'qm', pos: [[0, [1290, FL]]], size: 230, t0: 19.5,
+        act: [[0, 'hop'], [20.4, 'tap'], [27.9, 'idle'], [42.4, 'nod'], [45.2, 'wave']],
+        mood: [[0, 'surprised'], [20.4, 'doubt'], [27.9, 'neutral'], [37.7, 'surprised'], [42.4, 'happy']],
+        sign: [[0, null], [20.4, '后面也这样？'], [24.2, '为什么？'], [27.9, null], [42.4, '懂了！']] },
+      { type: 'scribe', id: 'think2', text: '为什么呢……', x: 800, y: 520, size: 64, t0: 24.6, t1: 27.9, cps: 5, color: 'red', anchor: 'middle', sfx: 'plip' },
+      { type: 'yt_parity', id: 'par', t0: 28.2, step: 0.28, sepT: 38.0 },
+      { type: 'scribe', id: 'rule1', text: '奇 + 奇 = 偶', x: 800, y: 470, size: 62, t0: 32.8, cps: 6, anchor: 'middle' },
+      { type: 'scribe', id: 'rule2', text: '奇 + 偶 = 奇', x: 800, y: 550, size: 62, t0: 34.4, cps: 6, anchor: 'middle' },
+      { type: 'scribe', id: 'rule3', text: '偶 + 奇 = 奇', x: 800, y: 630, size: 62, t0: 36.0, cps: 6, anchor: 'middle' },
+      { type: 'label', id: 'lbLoop', text: ['又回到“奇、奇”，', '所以永远重复！'], at: [1172, 468], rot: -4, t0: 38.9, t1: 42.3, target: [NUMS[8].cx + 104, PAR_Y + 30], bend: 0.3, gap: 10 },
+    ],
+    pauses: [12.45, 27.75],
+    sfx: [[16.0, 'hop'], [42.4, 'tada']],
+    subs: [
+      { t0: 0.3, t1: 3.2, text: '还记得斐波那契数吗？' },
+      { t0: 3.3, t1: 6.7, text: '请你圈出里面所有的偶数，' },
+      { t0: 6.8, t1: 9.9, text: '看看它们藏着什么规律？' },
+      { t0: 10.0, t1: 12.4, text: '想好了再点继续。' },
+      { t0: 12.6, t1: 15.7, text: '偶数是 2、8、34——', say: '偶数是二、八、三十四——' },
+      { t0: 15.8, t1: 19.4, text: '每隔两个数，就有一个偶数！' },
+      { t0: 19.5, t1: 24.1, text: '小问号问：后面一万个数，也都这样吗？' },
+      { t0: 24.2, t1: 27.6, text: '为什么？想一想，再点继续。' },
+      { t0: 27.9, t1: 32.5, text: '只看奇偶：奇、奇、偶，奇、奇、偶……' },
+      { t0: 32.6, t1: 37.6, text: '奇加奇得偶，奇加偶得奇，偶加奇得奇，' },
+      { t0: 37.7, t1: 42.3, text: '接着又回到“奇、奇”，所以永远重复！' },
+      { t0: 42.4, t1: 47.1, text: '把“为什么”讲清楚，小问号就点头啦！' },
     ],
   });
 })();
@@ -1497,7 +2838,7 @@ defineScene({
     { type: 'title', id: 'a', text: '看出来', x: 400, y: 380, size: 120, t0: 0.5 },
     { type: 'write', id: 'neq', text: '≠', x: 575, y: 318, size: 130, t0: 1.0, speed: 1800, color: 'red', w: 9, sfx: 'pen', z: Z.annot },
     { type: 'title', id: 'b', text: '证出来', x: 840, y: 380, size: 120, t0: 1.3 },
-    { type: 'qm', id: 'qm', pos: [[0, [180, 700]]], size: 190, t0: 2.2, act: [[0, 'hop'], [3.2, 'idle']], mood: [[0, 'doubt']], sign: [[0, null], [3.2, '为什么？']] },
+    { type: 'q1_qm', id: 'qm', pos: [[0, [180, 700]]], size: 190, t0: 2.2, act: [[0, 'hop'], [3.2, 'idle']], mood: [[0, 'doubt']], sign: [[0, null], [3.2, '为什么？']] },
     { type: 'speech', id: 'bye', text: '下集见！', at: [1410, 400], tail: [-40, 40], speaker: 'terry', t0: 4.0, t1: 7, rot: 5 },
   ],
   subs: [
