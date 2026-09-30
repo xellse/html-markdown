@@ -1,0 +1,77 @@
+{
+  "series": "数学少年陶哲轩",
+  "title": "数学少年陶哲轩 第2集",
+  "desc": "第2集《看出来 ≠ 证出来》：陶哲轩 8–9 岁，从只写答案到学会写出过程。",
+  "h1": "第2集 · 看出来 ≠ 证出来",
+  "kicker": "数学少年陶哲轩 · 8–9 岁",
+  "aria": "动画第2集：八岁的陶哲轩一眼猜出快乐数的规律却没有证明；圆上连线的例子说明猜想会骗人；九岁去大学上课，学会一步一步写出理由；最后用新的写法把快乐数讲清楚。",
+  "poster_label": "播放 · 第2集",
+  "poster": 0,
+  "out": "episode-2.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      },
+      "think": {
+        "file": "Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "secs": 45
+      }
+    },
+    "music": {
+      "title": "main",
+      "recap": "main",
+      "visitor": "calm",
+      "handwave": "sneaky",
+      "circles": "calm",
+      "university": "sneaky",
+      "stages": "turn",
+      "oddproof": "calm",
+      "rules": "turn",
+      "happyproof": "calm",
+      "ending": "main",
+      "end": "main"
+    },
+    "think": "think"
+  }
+}
