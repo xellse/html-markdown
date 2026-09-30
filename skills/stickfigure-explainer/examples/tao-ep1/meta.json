@@ -1,0 +1,76 @@
+{
+  "series": "数学少年陶哲轩",
+  "title": "数学少年陶哲轩 第1集",
+  "desc": "第1集《一眼看出来》：陶哲轩 2 到 7 岁的故事，Ben Orlin 式火柴人动画。",
+  "h1": "第1集 · 一眼看出来",
+  "kicker": "数学少年陶哲轩 · 2–7 岁",
+  "aria": "动画第1集：两岁的陶哲轩看《芝麻街》学会认字算数；六岁自己编电脑猜谜游戏；七岁去中学上数学课；小问号第一次出现，问他“为什么？”。",
+  "poster_label": "播放 · 第1集（约 3 分半）",
+  "poster": 141.2,
+  "out": "episode-1.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      },
+      "think": {
+        "file": "Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "secs": 45
+      }
+    },
+    "music": {
+      "title": "main",
+      "age2": "main",
+      "age6": "chip",
+      "fib": "calm",
+      "ratio": "calm",
+      "age7": "main",
+      "notebook": "sneaky",
+      "race": "sneaky",
+      "notebook2": "sneaky",
+      "yourturn": "turn",
+      "end": "main"
+    },
+    "think": "think"
+  }
+}

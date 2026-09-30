@@ -1,0 +1,28 @@
+{
+  "series": "火柴人数学课",
+  "title": "火柴人数学课 演示",
+  "desc": "演示：为什么 1+3+5+7 总是平方数。火柴人讲解动画模板。",
+  "h1": "演示 · 为什么是平方数",
+  "kicker": "火柴人数学课",
+  "aria": "演示动画：小朋友发现连续奇数的和都是平方数，小问号追问为什么，用点阵的“L”形拼图讲清楚，最后留一道题。",
+  "poster_label": "播放 · 演示（约 1 分钟）",
+  "poster": 40,
+  "out": "episode-1.html",
+  "audio": {
+    "voices": {
+      "narr": {"voice": "zh-CN-YunxiNeural", "rate": "+5%", "pitch": "+0Hz"},
+      "kid": {"voice": "zh-CN-YunxiaNeural", "rate": "+0%", "pitch": "+0Hz"},
+      "qm": {"voice": "zh-CN-YunxiNeural", "rate": "+8%", "pitch": "+30Hz"}
+    },
+    "tracks": {
+      "main": {"file": "Carefree.mp3", "title": "Carefree", "secs": 95},
+      "chip": {"file": "Bit Shift.mp3", "title": "Bit Shift", "secs": 70},
+      "calm": {"file": "Easy Lemon.mp3", "title": "Easy Lemon", "secs": 70},
+      "sneaky": {"file": "Investigations.mp3", "title": "Investigations", "secs": 94},
+      "turn": {"file": "Life of Riley.mp3", "title": "Life of Riley", "secs": 80},
+      "think": {"file": "Local Forecast - Elevator.mp3", "title": "Local Forecast - Elevator", "secs": 45}
+    },
+    "music": {"title": "main", "look": "sneaky", "proof": "calm", "yourturn": "turn"},
+    "think": "think"
+  }
+}

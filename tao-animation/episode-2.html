@@ -349,6 +349,8 @@ const GLYPH = {
   '≠': { w: .62, s: [[[.06, .5], [.56, .5]], [[.06, .74], [.56, .74]], [[.44, .26], [.18, .98]]] },
   '…': { w: .62, s: [[[.08, .94], [.1, 1]], [[.28, .94], [.3, 1]], [[.48, .94], [.5, 1]]] },
   '→': { w: .82, s: [[[.04, .6], [.74, .6]], [[.52, .4], [.76, .6, 1], [.52, .8]]] },
+  '<': { w: .56, s: [[[.5, .38], [.06, .64, 1], [.5, .9]]] },
+  '>': { w: .56, s: [[[.06, .38], [.5, .64, 1], [.06, .9]]] },
   '÷': { w: .62, s: [[[.06, .6], [.56, .6]], [[.3, .34], [.31, .38]], [[.3, .82], [.31, .86]]] },
 };
 function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += dist(pts[i - 1], pts[i]); return L; }
@@ -793,6 +795,39 @@ Object.assign(POSE, {
   point: { armR: [84, 6], armL: [16, 10] },
   cheer: { armL: [150, 14], armR: [150, 14] },
 });
+// kid-proportion arms are short and hide behind the big head, so these raise armScale
+Object.assign(POSE, {
+  akimbo: { lean: -2, tilt: -4, ikL: { w: 1, to: 'hip', dx: -30, dy: -6, bend: 'out' }, ikR: { w: 1, to: 'hip', dx: 30, dy: -6, bend: 'out' } },
+  scratchStand: { tilt: 8, armScale: 1.7, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 1.0, dy: -0.95, bend: 'out' } },
+  thinkStand: { tilt: -6, armScale: 1.5, ikR: { w: 1, to: 'hip', dx: 24, dy: -2, bend: 'out' }, ikL: { w: 1, to: 'head', dx: -1.02, dy: 0.42, bend: 'out' } },
+  wipeSweat: { tilt: 6, armScale: 1.7, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 0.55, dy: -0.72, bend: 'out' } },
+  cheeks: { lean: -3, ikL: { w: 1, to: 'head', dx: -1.06, dy: 0.45, bend: 'down' }, ikR: { w: 1, to: 'head', dx: 1.06, dy: 0.45, bend: 'down' } },
+  kidCheer: { armScale: 1.75, armL: [140, 18], armR: [140, 18] },
+  kidPoint: { armScale: 1.5, armR: [80, 8], armL: [16, 10] },
+  announce: { lean: -3, tilt: -6, armScale: 1.35, armR: [160, 8], ikL: { w: 1, to: 'hip', dx: -26, dy: -6, bend: 'out' } },
+  lookUp: { tilt: -10, lean: -3, armL: [18, 12], armR: [18, 12] },
+  sitScratch: { sit: 1, legScale: 0.85, thigh: 0.25, legL: [62, -57], legR: [62, -57], tilt: 9, armScale: 1.7, ikR: { w: 1, to: 'head', dx: 1.0, dy: -0.95, bend: 'out' } },
+});
+Object.assign(FACE, {
+  proudGrin: { lidL: 0.3, lidR: 0.3, mouth: 'grin', mw: 0.44, brow: 'arc', browY: 0.02 },
+  sheepish: { lidL: 0.3, lidR: 0.3, brow: 'line', browL: -14, browR: -14, browY: 0.02, mouth: 'wavy', mw: 0.3 },
+  effort: { lidL: 0.3, lidR: 0.3, brow: 'line', browL: 16, browR: 16, mouth: 'frown', mw: 0.3 },
+  laugh: { lidL: 0.5, lidR: 0.5, mouth: 'grin', mw: 0.48, brow: 'arc', browY: 0.06 },
+});
+Object.assign(HAIR, {
+  // a rounded bob that stops at chin level, ends flicking in
+  bob() {
+    const cap = [[-1.02, 0.54], [-1.17, 0.44]];
+    for (let i = 0; i <= 12; i++) { const a = (170 + i * 200 / 12) * RAD, r = 1.16 + (i % 2 ? 0.05 : 0); cap.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    cap.push([1.17, 0.44], [1.02, 0.54]);
+    return [cap, [[-0.55, -0.9], [-0.9, -0.42], [-0.98, 0.25]], [[0.58, -0.92], [0.93, -0.45], [1.0, 0.25]]];
+  },
+  curly() {
+    const top = [];
+    for (let i = 0; i <= 20; i++) { const a = (-170 + i * 8) * RAD, r = i % 2 ? 1.16 : 0.99; top.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    return [top];
+  },
+});
 /** Generic walk cycle → pose function of t. o: {bag, idle, lean, bounce} */
 function makeWalk(t0, t1, hz = 5.2, o = {}) {
   const idle = o.idle || 'stand', carry = !!o.bag;
@@ -884,7 +919,8 @@ const COMP = {
       stroke('series.u', [[fx.x, fx.y + 24], [fx.x + 110, fx.y + 20], [fx.x + 222, fx.y + 14]], { z: Z.stamp, w: 2.2, color: C.pencil, boil: 0.5 });
     },
   },
-  /** Recurring age stamp: draws on big in the red pen, then docks to a corner and stays. {age, place, center, R, dockT, dock, dockScale, pulse} */
+  /** Recurring stamp: draws on big in the red pen, then docks to a corner and stays.
+   *  {age + suffix('岁') | label('唐朝'), place (ribbon), center, R, dockT, dock, dockScale, pulse} */
   ageStamp: {
     draw(fx, t) {
       const lt = t - fx.t0; if (lt < 0) return;
@@ -896,15 +932,20 @@ const COMP = {
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); DL.rotate(-6 * (1 - du) - 4);
       stroke(k + '.o', ringPts(k + '.o', 0, 0, R, R, { n: 14, a0: -110, sweep: 374, rv: 0.025 }), { z: Z.stamp, w: 7, color: C.red, draw: EASE.out(clamp(lt / 0.42)) });
       stroke(k + '.i', ringPts(k + '.i', 0, 0, R - 18, R - 18, { n: 14, a0: 70, sweep: 368, rv: 0.02 }), { z: Z.stamp, w: 3.2, color: C.red, draw: EASE.out(clamp((lt - 0.12) / 0.4)) });
-      const digits = String(fx.age), two = digits.length > 1, size = two ? 120 : 170;
-      let gx = two ? -140 : -118; const gy = -size / 2 - 4;
-      [...digits].forEach((d, di) => {
-        const g = GLYPH[d];
-        g.s.forEach((s, i) => stroke(k + '.n' + di + '.' + i, s.map(([u, v, c]) => [gx + u * size, gy + v * size, c]), { z: Z.stamp, w: two ? 11 : 12, color: C.red, draw: clamp((lt - 0.3 - di * 0.12) / 0.2), boil: 0.6 }));
-        gx += (g.w + 0.1) * size;
-      });
-      const sl = clamp((lt - 0.48 - (two ? 0.12 : 0)) / 0.2);
-      if (sl > 0) text(k + '.sui', '岁', two ? 60 : 58, 8, { size: two ? 100 : 118, color: C.red, z: Z.stamp, scale: lerp(1.9, 1, EASE.back(sl)), opacity: clamp(sl * 3) });
+      if (fx.label !== undefined) { // free text (e.g. '唐朝', '第3步'): slams in like the suffix does
+        const L = [...String(fx.label)], size = Math.min(150, (2 * R - 70) / Math.max(1, L.length)), sl = clamp((lt - 0.3) / 0.22);
+        if (sl > 0) text(k + '.lab', fx.label, 0, 4, { size, color: C.red, z: Z.stamp, scale: lerp(1.9, 1, EASE.back(sl)), opacity: clamp(sl * 3) });
+      } else { // hand-written number + suffix (default: an age, '7岁')
+        const digits = String(fx.age), two = digits.length > 1, size = two ? 120 : 170, suf = fx.suffix ?? '岁';
+        let gx = two ? -140 : -118; const gy = -size / 2 - 4;
+        [...digits].forEach((d, di) => {
+          const g = GLYPH[d];
+          g.s.forEach((s, i) => stroke(k + '.n' + di + '.' + i, s.map(([u, v, c]) => [gx + u * size, gy + v * size, c]), { z: Z.stamp, w: two ? 11 : 12, color: C.red, draw: clamp((lt - 0.3 - di * 0.12) / 0.2), boil: 0.6 }));
+          gx += (g.w + 0.1) * size;
+        });
+        const sl = clamp((lt - 0.48 - (two ? 0.12 : 0)) / 0.2);
+        if (sl > 0 && suf) text(k + '.sui', suf, two ? 60 : 58, 8, { size: two ? 100 : 118, color: C.red, z: Z.stamp, scale: lerp(1.9, 1, EASE.back(sl)), opacity: clamp(sl * 3) });
+      }
       const rp = clamp((lt - 0.62) / 0.25), rop = 1 - clamp(du * 1.6);
       if (fx.place && rp > 0 && rop > 0) {
         const rw = Math.max(R * 1.5, textWidth(fx.place, 44) / 2 + 60), ry = R + 44;
@@ -1227,7 +1268,7 @@ function resolveTarget(tg, F) {
    scene: { id, chapter?, dur, floor?, cast, tracks, order, set, fx, subs:[{t0,t1,text,say?}],
             sfx:[[t,name]], steps:[{t0,t1,hz}], pauses:[t], targets(F), pen:fxId, noSeries }
    ===================================================================== */
-const EP = { scenes: [], dur: 0, poster: 0, series: '数学少年陶哲轩', cues: [], pauses: [], syncs: [] };
+const EP = { scenes: [], dur: 0, poster: 0, series: '', cues: [], pauses: [], syncs: [] };
 function defineScene(sc) { EP.scenes.push(sc); return sc; }
 function prepareEpisode() {
   let t = 0;
