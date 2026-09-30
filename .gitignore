@@ -17,3 +17,6 @@ build/
 .env
 .env.local
 .env.*.local
+
+# episode build scratch
+tao-animation/.*-lines.html

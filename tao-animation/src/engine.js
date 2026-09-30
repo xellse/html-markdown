@@ -1069,7 +1069,7 @@ function prepareEpisode() {
     (sc.steps || []).forEach(w => { for (let k = 0; ; k++) { const tt = w.t0 + (k + 0.5) / w.hz; if (tt >= w.t1) break; c.push({ t: o + tt, sfx: w.sfx || 'step' }); } });
     sc.fx.forEach(fx => { const comp = COMP[fx.type]; if (comp.cues) comp.cues(fx).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n })); });
     (sc.sfx || []).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n }));
-    sc.subs.forEach(s => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, '') }); });
+    sc.subs.forEach((s, i) => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, ''), key: `${sc.id}#${i}`, voice: s.voice || 'narr' }); });
   });
   // a scene may pre-draw things with negative start times; their sounds must not leak into the previous scene
   EP.cues = c.filter(q => q.say || EP.scenes.some(sc => q.t >= sc.start - 1e-6 && q.t < sc.start + sc.dur && q.t - sc.start >= -1e-6)).sort((a, b) => a.t - b.t);
@@ -1130,33 +1130,44 @@ function render(tIn) {
 }
 
 /* =====================================================================
-   SOUND  — tiny WebAudio synth; only created after a user gesture. Scenes add sounds with SFX.define(name, (tone, noise) => …)
+   AUDIO  — one WebAudio context, created on the first user gesture, with three buses: sfx, voice, music
    ===================================================================== */
-const SFX = (() => {
-  let ctx = null, master = null, noiseBuf = null;
+const LEVEL = { sfx: 0.45, voice: 1.0, music: 0.3, duck: 0.11 };
+const AUD = (() => {
+  let ctx = null; const bus = {};
   function ensure() {
     try {
       if (!ctx) {
         const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
-        ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.5; master.connect(ctx.destination);
-        noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-        const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3);
+        ctx = new AC();
+        const master = ctx.createGain(); master.connect(ctx.destination);
+        for (const k of ['sfx', 'voice', 'music']) { bus[k] = ctx.createGain(); bus[k].gain.value = LEVEL[k]; bus[k].connect(master); }
       }
       if (ctx.state === 'suspended') ctx.resume();
     } catch (e) { ctx = null; }
     return ctx;
   }
+  const b64 = str => { const bin = atob(str), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a.buffer; };
+  // callback form of decodeAudioData for older Safari
+  const decode = str => new Promise((res, rej) => { try { ctx.decodeAudioData(b64(str), res, rej); } catch (e) { rej(e); } });
+  return { ensure, decode, get ctx() { return ctx; }, bus: k => bus[k] };
+})();
+
+/* SOUND EFFECTS  — tiny synth on the sfx bus. Scenes add sounds with SFX.define(name, (tone, noise) => …) */
+const SFX = (() => {
+  let noiseBuf = null;
   const env = (g, t, a, d, pk) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
   function tone(type, f0, f1, dur, pk, lfo, delay = 0) {
-    const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
     if (lfo) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = lfo[0]; lg.gain.value = lfo[1]; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur + 0.05); }
-    env(g, t, 0.006, dur, pk); o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+    env(g, t, 0.006, dur, pk); o.connect(g).connect(AUD.bus('sfx')); o.start(t); o.stop(t + dur + 0.05);
   }
   function noise(type, freq, q, dur, pk, f1, delay = 0) {
-    const t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    if (!noiseBuf) { noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3); }
     s.buffer = noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur); f.Q.value = q;
-    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(master); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(AUD.bus('sfx')); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
   }
   const LIB = {
     step() { tone('sine', 180, 70, 0.08, 0.32); noise('lowpass', 700, 0.8, 0.04, 0.06); },
@@ -1181,33 +1192,96 @@ const SFX = (() => {
     paper() { noise('bandpass', 900, 0.6, 0.3, 0.12, 2400); },
   };
   return {
-    unlock: ensure,
+    unlock: AUD.ensure,
     define(name, fn) { LIB[name] = () => fn(tone, noise); },
-    play(n) { if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
+    play(n) { const ctx = AUD.ctx; if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
   };
 })();
 
-/* =====================================================================
-   NARRATION  — optional browser TTS (zh-CN), silent fallback. busy() lets the clock wait for the voice.
-   ===================================================================== */
-const TTS = (() => {
-  const ok = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
-  let voice = null, active = 0, deadline = 0;
-  const pick = () => { try { const vs = speechSynthesis.getVoices() || []; voice = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null; } catch (e) { voice = null; } };
-  if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) { /* old browsers */ } }
+/* NARRATION  — pre-recorded clips from the audio pack (window.TAO_AUDIO.voice, keyed "sceneId#line");
+   falls back to browser TTS when the pack is missing. busy() lets the clock wait for the voice. */
+const NARR = (() => {
+  const pack = (window.TAO_AUDIO && window.TAO_AUDIO.voice) || null;
+  const buf = {}; let loading = null, src = null, endAt = 0;
+  const tts = (() => {
+    const ok = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+    let voice = null, active = 0, deadline = 0;
+    const pick = () => { try { const vs = speechSynthesis.getVoices() || []; voice = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null; } catch (e) { voice = null; } };
+    if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) { /* old browsers */ } }
+    return {
+      prime() { if (!ok) return; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'zh-CN'; speechSynthesis.speak(u); } catch (e) { /* ignore */ } },
+      say(txt) {
+        if (!ok) return;
+        try {
+          const u = new SpeechSynthesisUtterance(txt); u.lang = 'zh-CN'; u.rate = 1.05; if (voice) u.voice = voice;
+          const done = () => { active = Math.max(0, active - 1); }; u.onend = done; u.onerror = done;
+          active++; deadline = Math.max(deadline, performance.now()) + ([...txt].length / 3.2 + 1.2) * 1000;
+          speechSynthesis.speak(u);
+        } catch (e) { /* ignore */ }
+      },
+      busy() { return ok && active > 0 && performance.now() < deadline; },
+      cancel() { active = 0; deadline = 0; if (ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+    };
+  })();
+  const recorded = () => !!pack && !!AUD.ctx;
   return {
-    prime() { if (!ok) return; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'zh-CN'; speechSynthesis.speak(u); } catch (e) { /* ignore */ } },
-    say(txt) {
-      if (!ok) return;
-      try {
-        const u = new SpeechSynthesisUtterance(txt); u.lang = 'zh-CN'; u.rate = 1.05; if (voice) u.voice = voice;
-        const done = () => { active = Math.max(0, active - 1); };
-        u.onend = done; u.onerror = done;
-        active++; deadline = Math.max(deadline, performance.now()) + ([...txt].length / 3.2 + 1.2) * 1000;
-        speechSynthesis.speak(u);
-      } catch (e) { /* ignore */ }
+    /** decode every clip once (after the first tap); resolves when done */
+    load() {
+      if (loading) return loading;
+      if (!pack || !AUD.ctx) return Promise.resolve();
+      loading = Promise.all(Object.keys(pack).map(k => AUD.decode(pack[k].b).then(b => { buf[k] = b; }, () => {})));
+      return loading;
     },
-    busy() { return ok && active > 0 && performance.now() < deadline; },
-    cancel() { active = 0; deadline = 0; if (ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+    dur: key => (pack && pack[key] ? pack[key].d : 0),
+    prime() { if (!recorded()) tts.prime(); },
+    /** speak a cue, optionally starting part-way into it (after a seek) */
+    say(cue, offset = 0) {
+      if (recorded()) {
+        const b = buf[cue.key]; if (!b || offset >= b.duration - 0.25) return;
+        this.cancel();
+        const s = AUD.ctx.createBufferSource(); s.buffer = b; s.connect(AUD.bus('voice')); s.start(0, Math.max(0, offset));
+        src = s; endAt = AUD.ctx.currentTime + b.duration - offset;
+      } else if (offset < 0.3) tts.say(cue.say);
+    },
+    busy() { return recorded() ? AUD.ctx.currentTime < endAt - 0.03 : tts.busy(); },
+    cancel() { if (src) { try { src.stop(); } catch (e) { /* already stopped */ } } src = null; endAt = 0; tts.cancel(); },
+  };
+})();
+
+/* MUSIC  — looping beds from the audio pack; one bed per run of scenes (EP.music), cross-faded at changes, ducked under the voice */
+const MUSIC = (() => {
+  const pack = (window.TAO_AUDIO && window.TAO_AUDIO.music) || null;
+  const buf = {}; let loading = null, cur = null, ducked = false;
+  function stopNode(n, fade) {
+    const ctx = AUD.ctx, t = ctx.currentTime;
+    try { n.g.gain.cancelScheduledValues(t); n.g.gain.setValueAtTime(n.g.gain.value, t); n.g.gain.linearRampToValueAtTime(0.0001, t + fade); n.s.stop(t + fade + 0.05); } catch (e) { /* ignore */ }
+  }
+  return {
+    available: () => !!pack,
+    load() {
+      if (loading) return loading;
+      if (!pack || !AUD.ctx) return Promise.resolve();
+      loading = Promise.all(Object.keys(pack).map(k => AUD.decode(pack[k].b).then(b => { buf[k] = b; }, () => {})));
+      return loading;
+    },
+    current: () => (cur ? cur.key : null),
+    /** play bed `key` from `offset` seconds (no-op if it is already the current bed, unless force) */
+    set(key, offset = 0, force = false) {
+      const ctx = AUD.ctx; if (!ctx) return;
+      if (cur && cur.key === key && !force) return;
+      if (cur) { stopNode(cur, 0.8); cur = null; }
+      const b = key && buf[key]; if (!b) return;
+      const t = ctx.currentTime, s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = b; s.loop = true;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(1, t + 0.7);
+      s.connect(g).connect(AUD.bus('music')); s.start(t, ((offset % b.duration) + b.duration) % b.duration);
+      cur = { key, s, g };
+    },
+    ready: key => !!buf[key],
+    stop(fade = 0.4) { if (cur && AUD.ctx) stopNode(cur, fade); cur = null; },
+    duck(on) {
+      if (on === ducked || !AUD.ctx) return; ducked = on;
+      const g = AUD.bus('music').gain; g.cancelScheduledValues(AUD.ctx.currentTime); g.setTargetAtTime(on ? LEVEL.duck : LEVEL.music, AUD.ctx.currentTime, on ? 0.08 : 0.35);
+    },
   };
 })();

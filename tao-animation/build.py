@@ -13,7 +13,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, 'src')
 
 
-def build(ep, only=None, out=None):
+def build(ep, only=None, out=None, audio=True):
     meta = json.load(open(os.path.join(SRC, ep, 'meta.json'), encoding='utf-8'))
     shell = open(os.path.join(SRC, 'shell.html'), encoding='utf-8').read()
     engine = open(os.path.join(SRC, 'engine.js'), encoding='utf-8').read()
@@ -23,10 +23,15 @@ def build(ep, only=None, out=None):
         keys = only.split(',')
         files = [f for f in files if any(k in os.path.basename(f) for k in keys)]
     scenes = '\n'.join(f'/* ---- {os.path.basename(f)} ---- */\n' + open(f, encoding='utf-8').read() for f in files)
-    config = f"EP.series = {json.dumps(meta['series'], ensure_ascii=False)}; EP.poster = {meta.get('poster', 0)};\n"
+    au = meta.get('audio', {})
+    config = (f"EP.series = {json.dumps(meta['series'], ensure_ascii=False)}; EP.poster = {meta.get('poster', 0)};\n"
+              f"EP.music = {json.dumps(au.get('music', {}))}; EP.think = {json.dumps(au.get('think'))};\n")
+    pack = meta['out'].replace('.html', '.audio.js')
+    audio_tag = f'<script src="{pack}"></script>' if audio and os.path.exists(os.path.join(ROOT, pack)) else ''
     page = shell
     for k in ('TITLE', 'DESC', 'H1', 'KICKER', 'ARIA', 'POSTER_LABEL'):
         page = page.replace('{{' + k + '}}', meta[k.lower()])
+    page = page.replace('{{AUDIO_TAG}}', audio_tag)
     for ph, body in (('/*@@ENGINE@@*/', engine), ('/*@@SCENES@@*/', config + scenes), ('/*@@BOOT@@*/', player)):
         page = page.replace(ph, body)
     left = re.findall(r'\{\{[A-Z_]+\}\}|/\*@@[A-Z]+@@\*/', page)

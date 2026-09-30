@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=VT323&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<script src="episode-1.audio.js"></script>
 <style>
 /* Layout: one column — a sheet of paper (the stage) lying on a desk, with the player bar under it. */
 :root{
@@ -60,6 +61,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
 .chap[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
 .legend{margin:14px 2px 0;color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;gap:6px 18px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.credits{margin:10px 2px 0;color:var(--muted);font-size:13px;font-family:system-ui,sans-serif;line-height:1.5}
 .sw{width:22px;height:6px;border-radius:3px;display:inline-block}
 .sw.ink{background:var(--sw-ink)} .sw.red{background:var(--sw-red)} .sw.hi{background:var(--sw-hi);height:12px;opacity:.9}
 @media (max-width:560px){
@@ -96,7 +98,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <button id="btnRestart" class="btn" type="button" aria-label="从头播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
     <input id="scrub" type="range" min="0" max="10" step="0.1" value="0" aria-label="播放进度（秒）">
     <output id="time" aria-live="off">0:00 / 0:00</output>
-    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="用浏览器语音朗读字幕">朗读</button>
+    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="旁白配音">配音</button>
+    <button id="btnMusic" class="btn toggle" type="button" aria-pressed="true" title="背景音乐">音乐</button>
     <button id="btnSnd" class="btn toggle" type="button" aria-pressed="true" title="脚步、粉笔、弹跳等小音效">音效</button>
   </div>
   <ol id="chapters" class="chapters" aria-label="章节"></ol>
@@ -105,6 +108,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <span><i class="sw red"></i>红笔 = 旁白批注（和小问号）</span>
     <span><i class="sw hi"></i>黄色荧光笔 = 关键数学</span>
   </p>
+  <p id="credits" class="credits" hidden></p>
 </main>
 
 <script>
@@ -1180,7 +1184,7 @@ function prepareEpisode() {
     (sc.steps || []).forEach(w => { for (let k = 0; ; k++) { const tt = w.t0 + (k + 0.5) / w.hz; if (tt >= w.t1) break; c.push({ t: o + tt, sfx: w.sfx || 'step' }); } });
     sc.fx.forEach(fx => { const comp = COMP[fx.type]; if (comp.cues) comp.cues(fx).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n })); });
     (sc.sfx || []).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n }));
-    sc.subs.forEach(s => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, '') }); });
+    sc.subs.forEach((s, i) => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, ''), key: `${sc.id}#${i}`, voice: s.voice || 'narr' }); });
   });
   // a scene may pre-draw things with negative start times; their sounds must not leak into the previous scene
   EP.cues = c.filter(q => q.say || EP.scenes.some(sc => q.t >= sc.start - 1e-6 && q.t < sc.start + sc.dur && q.t - sc.start >= -1e-6)).sort((a, b) => a.t - b.t);
@@ -1241,33 +1245,44 @@ function render(tIn) {
 }
 
 /* =====================================================================
-   SOUND  — tiny WebAudio synth; only created after a user gesture. Scenes add sounds with SFX.define(name, (tone, noise) => …)
+   AUDIO  — one WebAudio context, created on the first user gesture, with three buses: sfx, voice, music
    ===================================================================== */
-const SFX = (() => {
-  let ctx = null, master = null, noiseBuf = null;
+const LEVEL = { sfx: 0.45, voice: 1.0, music: 0.3, duck: 0.11 };
+const AUD = (() => {
+  let ctx = null; const bus = {};
   function ensure() {
     try {
       if (!ctx) {
         const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
-        ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.5; master.connect(ctx.destination);
-        noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-        const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3);
+        ctx = new AC();
+        const master = ctx.createGain(); master.connect(ctx.destination);
+        for (const k of ['sfx', 'voice', 'music']) { bus[k] = ctx.createGain(); bus[k].gain.value = LEVEL[k]; bus[k].connect(master); }
       }
       if (ctx.state === 'suspended') ctx.resume();
     } catch (e) { ctx = null; }
     return ctx;
   }
+  const b64 = str => { const bin = atob(str), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a.buffer; };
+  // callback form of decodeAudioData for older Safari
+  const decode = str => new Promise((res, rej) => { try { ctx.decodeAudioData(b64(str), res, rej); } catch (e) { rej(e); } });
+  return { ensure, decode, get ctx() { return ctx; }, bus: k => bus[k] };
+})();
+
+/* SOUND EFFECTS  — tiny synth on the sfx bus. Scenes add sounds with SFX.define(name, (tone, noise) => …) */
+const SFX = (() => {
+  let noiseBuf = null;
   const env = (g, t, a, d, pk) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
   function tone(type, f0, f1, dur, pk, lfo, delay = 0) {
-    const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
     if (lfo) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = lfo[0]; lg.gain.value = lfo[1]; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur + 0.05); }
-    env(g, t, 0.006, dur, pk); o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+    env(g, t, 0.006, dur, pk); o.connect(g).connect(AUD.bus('sfx')); o.start(t); o.stop(t + dur + 0.05);
   }
   function noise(type, freq, q, dur, pk, f1, delay = 0) {
-    const t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    if (!noiseBuf) { noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3); }
     s.buffer = noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur); f.Q.value = q;
-    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(master); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(AUD.bus('sfx')); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
   }
   const LIB = {
     step() { tone('sine', 180, 70, 0.08, 0.32); noise('lowpass', 700, 0.8, 0.04, 0.06); },
@@ -1292,38 +1307,102 @@ const SFX = (() => {
     paper() { noise('bandpass', 900, 0.6, 0.3, 0.12, 2400); },
   };
   return {
-    unlock: ensure,
+    unlock: AUD.ensure,
     define(name, fn) { LIB[name] = () => fn(tone, noise); },
-    play(n) { if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
+    play(n) { const ctx = AUD.ctx; if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
   };
 })();
 
-/* =====================================================================
-   NARRATION  — optional browser TTS (zh-CN), silent fallback. busy() lets the clock wait for the voice.
-   ===================================================================== */
-const TTS = (() => {
-  const ok = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
-  let voice = null, active = 0, deadline = 0;
-  const pick = () => { try { const vs = speechSynthesis.getVoices() || []; voice = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null; } catch (e) { voice = null; } };
-  if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) { /* old browsers */ } }
+/* NARRATION  — pre-recorded clips from the audio pack (window.TAO_AUDIO.voice, keyed "sceneId#line");
+   falls back to browser TTS when the pack is missing. busy() lets the clock wait for the voice. */
+const NARR = (() => {
+  const pack = (window.TAO_AUDIO && window.TAO_AUDIO.voice) || null;
+  const buf = {}; let loading = null, src = null, endAt = 0;
+  const tts = (() => {
+    const ok = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+    let voice = null, active = 0, deadline = 0;
+    const pick = () => { try { const vs = speechSynthesis.getVoices() || []; voice = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null; } catch (e) { voice = null; } };
+    if (ok) { pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) { /* old browsers */ } }
+    return {
+      prime() { if (!ok) return; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'zh-CN'; speechSynthesis.speak(u); } catch (e) { /* ignore */ } },
+      say(txt) {
+        if (!ok) return;
+        try {
+          const u = new SpeechSynthesisUtterance(txt); u.lang = 'zh-CN'; u.rate = 1.05; if (voice) u.voice = voice;
+          const done = () => { active = Math.max(0, active - 1); }; u.onend = done; u.onerror = done;
+          active++; deadline = Math.max(deadline, performance.now()) + ([...txt].length / 3.2 + 1.2) * 1000;
+          speechSynthesis.speak(u);
+        } catch (e) { /* ignore */ }
+      },
+      busy() { return ok && active > 0 && performance.now() < deadline; },
+      cancel() { active = 0; deadline = 0; if (ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+    };
+  })();
+  const recorded = () => !!pack && !!AUD.ctx;
   return {
-    prime() { if (!ok) return; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'zh-CN'; speechSynthesis.speak(u); } catch (e) { /* ignore */ } },
-    say(txt) {
-      if (!ok) return;
-      try {
-        const u = new SpeechSynthesisUtterance(txt); u.lang = 'zh-CN'; u.rate = 1.05; if (voice) u.voice = voice;
-        const done = () => { active = Math.max(0, active - 1); };
-        u.onend = done; u.onerror = done;
-        active++; deadline = Math.max(deadline, performance.now()) + ([...txt].length / 3.2 + 1.2) * 1000;
-        speechSynthesis.speak(u);
-      } catch (e) { /* ignore */ }
+    /** decode every clip once (after the first tap); resolves when done */
+    load() {
+      if (loading) return loading;
+      if (!pack || !AUD.ctx) return Promise.resolve();
+      loading = Promise.all(Object.keys(pack).map(k => AUD.decode(pack[k].b).then(b => { buf[k] = b; }, () => {})));
+      return loading;
     },
-    busy() { return ok && active > 0 && performance.now() < deadline; },
-    cancel() { active = 0; deadline = 0; if (ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+    dur: key => (pack && pack[key] ? pack[key].d : 0),
+    prime() { if (!recorded()) tts.prime(); },
+    /** speak a cue, optionally starting part-way into it (after a seek) */
+    say(cue, offset = 0) {
+      if (recorded()) {
+        const b = buf[cue.key]; if (!b || offset >= b.duration - 0.25) return;
+        this.cancel();
+        const s = AUD.ctx.createBufferSource(); s.buffer = b; s.connect(AUD.bus('voice')); s.start(0, Math.max(0, offset));
+        src = s; endAt = AUD.ctx.currentTime + b.duration - offset;
+      } else if (offset < 0.3) tts.say(cue.say);
+    },
+    busy() { return recorded() ? AUD.ctx.currentTime < endAt - 0.03 : tts.busy(); },
+    cancel() { if (src) { try { src.stop(); } catch (e) { /* already stopped */ } } src = null; endAt = 0; tts.cancel(); },
+  };
+})();
+
+/* MUSIC  — looping beds from the audio pack; one bed per run of scenes (EP.music), cross-faded at changes, ducked under the voice */
+const MUSIC = (() => {
+  const pack = (window.TAO_AUDIO && window.TAO_AUDIO.music) || null;
+  const buf = {}; let loading = null, cur = null, ducked = false;
+  function stopNode(n, fade) {
+    const ctx = AUD.ctx, t = ctx.currentTime;
+    try { n.g.gain.cancelScheduledValues(t); n.g.gain.setValueAtTime(n.g.gain.value, t); n.g.gain.linearRampToValueAtTime(0.0001, t + fade); n.s.stop(t + fade + 0.05); } catch (e) { /* ignore */ }
+  }
+  return {
+    available: () => !!pack,
+    load() {
+      if (loading) return loading;
+      if (!pack || !AUD.ctx) return Promise.resolve();
+      loading = Promise.all(Object.keys(pack).map(k => AUD.decode(pack[k].b).then(b => { buf[k] = b; }, () => {})));
+      return loading;
+    },
+    current: () => (cur ? cur.key : null),
+    /** play bed `key` from `offset` seconds (no-op if it is already the current bed, unless force) */
+    set(key, offset = 0, force = false) {
+      const ctx = AUD.ctx; if (!ctx) return;
+      if (cur && cur.key === key && !force) return;
+      if (cur) { stopNode(cur, 0.8); cur = null; }
+      const b = key && buf[key]; if (!b) return;
+      const t = ctx.currentTime, s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = b; s.loop = true;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(1, t + 0.7);
+      s.connect(g).connect(AUD.bus('music')); s.start(t, ((offset % b.duration) + b.duration) % b.duration);
+      cur = { key, s, g };
+    },
+    ready: key => !!buf[key],
+    stop(fade = 0.4) { if (cur && AUD.ctx) stopNode(cur, fade); cur = null; },
+    duck(on) {
+      if (on === ducked || !AUD.ctx) return; ducked = on;
+      const g = AUD.bus('music').gain; g.cancelScheduledValues(AUD.ctx.currentTime); g.setTargetAtTime(on ? LEVEL.duck : LEVEL.music, AUD.ctx.currentTime, on ? 0.08 : 0.35);
+    },
   };
 })();
 
 EP.series = "数学少年陶哲轩"; EP.poster = 141.2;
+EP.music = {"title": "main", "age2": "main", "age6": "chip", "fib": "calm", "ratio": "calm", "age7": "main", "notebook": "sneaky", "race": "sneaky", "notebook2": "sneaky", "yourturn": "turn", "end": "main"}; EP.think = "think";
 /* ---- 00_title.js ---- */
 // 开场：片名卡
 defineScene({
@@ -1645,7 +1724,7 @@ defineScene({
       { t0: 13.2, t1: 16.5, text: '有一天，爸爸妈妈发现：' },
       { t0: 16.6, t1: 20.3, text: '他在教五岁的小朋友做加法！' },
       { t0: 20.8, t1: 24.0, text: '问他怎么学会的，他说：' },
-      { t0: 24.1, t1: 27.1, text: '“《芝麻街》教的！”' },
+      { t0: 24.1, t1: 27.1, text: '“《芝麻街》教的！”', voice: 'kid' },
     ],
   });
 })();
@@ -1882,10 +1961,10 @@ defineScene({
       { t0: 0.2, t1: 5.3, text: '六岁时，他照着一本书，自学编电脑程序。' },
       { t0: 5.4, t1: 8.3, text: '他编了一个猜谜游戏：' },
       { t0: 8.4, t1: 12.8, text: '猜猜数学家斐波那契是哪年出生的？' },
-      { t0: 12.9, t1: 16.6, text: '爸爸猜1300年，电脑说：' },
+      { t0: 12.9, t1: 16.6, text: '爸爸猜1300年，电脑说：', say: '爸爸猜一三零零年，电脑说：' },
       { t0: 16.7, t1: 21.1, text: '“不对，那时候他已经上天堂啦！”' },
-      { t0: 21.2, t1: 25.6, text: '猜1000年：“他还没出生呢！”' },
-      { t0: 25.7, t1: 29.6, text: '猜对1170年，游戏才开始。' },
+      { t0: 21.2, t1: 25.6, text: '猜1000年：“他还没出生呢！”', say: '猜一零零零年：“他还没出生呢！”' },
+      { t0: 25.7, t1: 29.6, text: '猜对1170年，游戏才开始。', say: '猜对一一七零年，游戏才开始。' },
     ],
   });
 })();
@@ -1980,7 +2059,7 @@ defineScene({
     subs: [
       { t0: 0.3, t1: 3.3, text: '这串数叫斐波那契数，' },
       { t0: 3.4, t1: 7.05, text: '每个数都是前两个数加起来。' },
-      { t0: 7.15, t1: 9.9, text: '“下一个是34！”' },
+      { t0: 7.15, t1: 9.9, text: '“下一个是34！”', say: '下一个是三十四！', voice: 'kid' },
     ],
   });
 })();
@@ -2181,7 +2260,7 @@ defineScene({
       { t0: 0.2, t1: 3.75, text: '七岁那年，小陶走进了中学的数学课。' },
       { t0: 3.8, t1: 7.15, text: '老师刚写完题，小陶的手就举起来了！' },
       { t0: 7.2, t1: 10.7, text: '脚还够不着地，数学已经够到了高中。' },
-      { t0: 10.9, t1: 14.6, text: '1983年，报纸头版登了他的故事。' },
+      { t0: 10.9, t1: 14.6, text: '1983年，报纸头版登了他的故事。', say: '一九八三年，报纸头版登了他的故事。' },
       { t0: 14.7, t1: 19.0, text: '他的数学老师说：“我几乎没什么可教他的，' },
       { t0: 19.1, t1: 22.3, text: '他总是比别人早两节课就做完了。”' },
     ],
@@ -2431,8 +2510,8 @@ defineScene({
       { t0: 4.5, t1: 8.7, text: '大哥哥一步一步，写得清清楚楚；' },
       { t0: 8.8, t1: 12.75, text: '小陶的本子上，只有一个答案。' },
       { t0: 12.85, t1: 17.2, text: '这时，本子里跳出来一个小家伙——' },
-      { t0: 17.3, t1: 19.8, text: '“为什么是7？”' },
-      { t0: 19.9, t1: 24.2, text: '“这不是一眼就看出来了吗！”' },
+      { t0: 17.3, t1: 19.8, text: '“为什么是7？”', say: '为什么是七？', voice: 'qm' },
+      { t0: 19.9, t1: 24.2, text: '“这不是一眼就看出来了吗！”', voice: 'kid' },
     ],
   });
 
@@ -2848,20 +2927,23 @@ defineScene({
 });
 
 /* =====================================================================
-   PLAYER  — clock, controls, chapters, "think" pauses, narration sync
+   PLAYER  — clock, controls, chapters, "think" pauses, narration sync, music
    ===================================================================== */
 prepareEpisode();
 const $ = id => document.getElementById(id);
-const ui = { play: $('btnPlay'), restart: $('btnRestart'), scrub: $('scrub'), time: $('time'), narr: $('btnNarr'), snd: $('btnSnd'),
-  poster: $('poster'), think: $('think'), chapters: $('chapters') };
+const ui = { play: $('btnPlay'), restart: $('btnRestart'), scrub: $('scrub'), time: $('time'), narr: $('btnNarr'), snd: $('btnSnd'), music: $('btnMusic'),
+  poster: $('poster'), think: $('think'), chapters: $('chapters'), credits: $('credits') };
 const ICON = {
   play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>',
   pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
 };
 const fmt = s => { s = Math.max(0, s); const m = Math.floor(s / 60), r = Math.floor(s % 60); return `${m}:${String(r).padStart(2, '0')}`; };
-const P = { t: 0, playing: false, poster: true, waiting: null, wall0: 0, t0: 0, prev: 0, lastQ: -1, raf: 0, holdAt: null, narr: true, snd: true };
-try { const s = JSON.parse(localStorage.getItem('taoPlayerPrefs') || 'null'); if (s) { P.narr = !!s.narr; P.snd = !!s.snd; } } catch (e) { /* storage blocked */ }
-const savePrefs = () => { try { localStorage.setItem('taoPlayerPrefs', JSON.stringify({ narr: P.narr, snd: P.snd })); } catch (e) { /* ignore */ } };
+const P = { t: 0, playing: false, poster: true, waiting: null, wall0: 0, t0: 0, prev: 0, lastQ: -1, raf: 0, scene: -1, loading: false,
+  narr: true, snd: true, music: true };
+try { const s = JSON.parse(localStorage.getItem('taoPlayerPrefs') || 'null'); if (s) { P.narr = s.narr !== false; P.snd = s.snd !== false; P.music = s.music !== false; } } catch (e) { /* storage blocked */ }
+const savePrefs = () => { try { localStorage.setItem('taoPlayerPrefs', JSON.stringify({ narr: P.narr, snd: P.snd, music: P.music })); } catch (e) { /* ignore */ } };
+if (!MUSIC.available()) ui.music.hidden = true;
+if (window.TAO_AUDIO && window.TAO_AUDIO.credits) { ui.credits.textContent = window.TAO_AUDIO.credits; ui.credits.hidden = false; }
 
 ui.scrub.max = EP.dur.toFixed(2);
 const CHAPS = EP.scenes.filter(sc => sc.chapter).map(sc => {
@@ -2873,6 +2955,19 @@ const CHAPS = EP.scenes.filter(sc => sc.chapter).map(sc => {
   return { sc, b };
 });
 
+/** Which music bed plays at global time t, and how far into it (beds restart at the first scene of each run). */
+function musicAt(t) {
+  const sc = sceneAt(Math.min(t, EP.dur - 1e-6)), key = (EP.music || {})[sc.id] || null;
+  let i = sc.index;
+  while (i > 0 && (EP.music || {})[EP.scenes[i - 1].id] === key) i--;
+  return { key, offset: t - EP.scenes[i].start };
+}
+function syncMusic(force) {
+  if (!P.music || !P.playing) { MUSIC.stop(); return; }
+  const m = musicAt(P.t);
+  if (m.key && MUSIC.ready(m.key)) MUSIC.set(m.key, m.offset, force);
+}
+
 function paint(t, force) {
   const q = Math.floor(t * CFG.FPS + 1e-6);
   if (force || q !== P.lastQ) { render(t); P.lastQ = q; }
@@ -2881,13 +2976,14 @@ function syncUI() {
   const t = P.poster ? 0 : P.t;
   ui.scrub.value = t.toFixed(2);
   ui.scrub.setAttribute('aria-valuetext', `${fmt(t)}`);
-  ui.time.textContent = `${fmt(t)} / ${fmt(EP.dur)}`;
+  ui.time.textContent = P.loading ? '加载声音…' : `${fmt(t)} / ${fmt(EP.dur)}`;
   ui.play.innerHTML = P.playing ? ICON.pause : ICON.play;
   ui.play.setAttribute('aria-label', P.playing ? '暂停' : '播放');
   ui.poster.hidden = !P.poster;
   ui.think.hidden = P.waiting === null || P.playing;
   ui.narr.setAttribute('aria-pressed', String(P.narr));
   ui.snd.setAttribute('aria-pressed', String(P.snd));
+  ui.music.setAttribute('aria-pressed', String(P.music));
   let cur = null; for (const c of CHAPS) if (t >= c.sc.start - 1e-6) cur = c;
   CHAPS.forEach(c => c.b.setAttribute('aria-current', String(c === cur && !P.poster)));
 }
@@ -2895,40 +2991,64 @@ function fireCues(a, b) {
   for (const c of EP.cues) {
     if (c.t <= a) continue; if (c.t > b) break;
     if (c.sfx && P.snd) SFX.play(c.sfx);
-    if (c.say && P.narr) TTS.say(c.say);
+    if (c.say && P.narr) NARR.say(c);
   }
+}
+/** after a seek, pick up the line that is being spoken at t */
+function resumeVoice(t) {
+  if (!P.narr) return;
+  let last = null; for (const c of EP.cues) { if (c.t > t) break; if (c.say) last = c; }
+  if (last && t - last.t > 0.05) NARR.say(last, t - last.t);
 }
 function tick(now) {
   if (!P.playing) return;
   let t = P.t0 + (now - P.wall0) / 1000;
   // hold the picture while the voice finishes, instead of letting lines pile up
-  if (P.narr && TTS.busy()) {
+  const talking = P.narr && NARR.busy();
+  if (talking) {
     const nx = EP.syncs.find(x => x > P.prev + 1e-4 && x <= t);
     if (nx !== undefined) { t = Math.max(P.prev, nx - 1e-3); P.t0 = t; P.wall0 = now; }
   }
+  MUSIC.duck(talking);
   // "轮到你了" pauses: stop and wait for the child
   const pp = EP.pauses.find(x => x > P.prev && x <= t);
   if (pp !== undefined) t = pp;
   if (t >= EP.dur) t = EP.dur;
   fireCues(P.prev, t); P.prev = t; P.t = t;
   paint(t);
-  if (pp !== undefined) { P.playing = false; P.waiting = pp; syncUI(); return; }
-  if (t >= EP.dur) { P.playing = false; syncUI(); return; }
+  const si = sceneAt(Math.min(t, EP.dur - 1e-6)).index;
+  if (si !== P.scene) { P.scene = si; syncMusic(false); }
+  else if (P.music && !MUSIC.current()) syncMusic(false); // bed finished decoding after play started
+  if (pp !== undefined) {
+    P.playing = false; P.waiting = pp;
+    if (P.music && EP.think && MUSIC.ready(EP.think)) MUSIC.set(EP.think, 0, true); else MUSIC.stop();
+    syncUI(); return;
+  }
+  if (t >= EP.dur) { P.playing = false; MUSIC.stop(1.5); syncUI(); return; }
   syncUI();
   P.raf = requestAnimationFrame(tick);
 }
-function play() {
+async function play() {
+  if (P.loading) return;
   const resume = P.waiting !== null;
   if (P.poster || P.t >= EP.dur - 1e-3) P.t = 0;
-  P.poster = false; P.playing = true; P.waiting = null;
+  P.poster = false; P.waiting = null;
   SFX.unlock();
-  if (!resume) TTS.cancel();
-  if (P.narr) TTS.prime();
+  if (!resume) NARR.cancel();
+  if (P.narr) NARR.prime();
+  // first play: decode the narration (quick) before the clock starts; music decodes alongside and joins when ready
+  const voiceReady = NARR.load();
+  MUSIC.load();
+  if (voiceReady) { P.loading = true; paint(P.t, true); syncUI(); await voiceReady; P.loading = false; }
+  P.playing = true;
   P.t0 = P.t; P.prev = resume ? P.t : P.t - 1e-4; P.wall0 = performance.now();
+  if (!resume) resumeVoice(P.t);
+  P.scene = sceneAt(Math.min(P.t, EP.dur - 1e-6)).index;
+  syncMusic(true);
   cancelAnimationFrame(P.raf); P.raf = requestAnimationFrame(tick);
   paint(P.t, true); syncUI();
 }
-function pause() { P.playing = false; cancelAnimationFrame(P.raf); TTS.cancel(); syncUI(); }
+function pause() { P.playing = false; cancelAnimationFrame(P.raf); NARR.cancel(); MUSIC.stop(); syncUI(); }
 function toggle() { P.playing ? pause() : play(); }
 function seek(t) {
   pause(); P.poster = false; P.waiting = null;
@@ -2940,8 +3060,9 @@ ui.poster.addEventListener('click', play);
 ui.think.addEventListener('click', play);
 ui.restart.addEventListener('click', () => { seek(0); play(); });
 ui.scrub.addEventListener('input', () => seek(+ui.scrub.value));
-ui.narr.addEventListener('click', () => { P.narr = !P.narr; if (!P.narr) TTS.cancel(); savePrefs(); syncUI(); });
+ui.narr.addEventListener('click', () => { P.narr = !P.narr; if (!P.narr) NARR.cancel(); savePrefs(); syncUI(); });
 ui.snd.addEventListener('click', () => { P.snd = !P.snd; if (P.snd) SFX.unlock(); savePrefs(); syncUI(); });
+ui.music.addEventListener('click', () => { P.music = !P.music; SFX.unlock(); MUSIC.load(); syncMusic(true); savePrefs(); syncUI(); });
 document.addEventListener('keydown', e => {
   if (e.code !== 'Space' && e.key !== ' ') return;
   const tag = e.target && e.target.tagName;
@@ -2963,6 +3084,7 @@ window.render = render;
 window.__duration = EP.dur;
 window.__scenes = EP.scenes.map(s => ({ id: s.id, chapter: s.chapter || null, start: +s.start.toFixed(3), dur: s.dur }));
 window.__seek = t => { seek(t); render(P.t); P.lastQ = Math.floor(P.t * CFG.FPS + 1e-6); };
+window.__audio = () => ({ ctx: AUD.ctx && AUD.ctx.state, music: MUSIC.current(), talking: NARR.busy(), t: P.t, playing: P.playing, waiting: P.waiting });
 
 paint(Math.min(EP.poster, EP.dur), true); syncUI();
 

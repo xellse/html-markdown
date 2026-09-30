@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=VT323&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+{{AUDIO_TAG}}
 <style>
 /* Layout: one column — a sheet of paper (the stage) lying on a desk, with the player bar under it. */
 :root{
@@ -60,6 +61,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
 .chap[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
 .legend{margin:14px 2px 0;color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;gap:6px 18px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.credits{margin:10px 2px 0;color:var(--muted);font-size:13px;font-family:system-ui,sans-serif;line-height:1.5}
 .sw{width:22px;height:6px;border-radius:3px;display:inline-block}
 .sw.ink{background:var(--sw-ink)} .sw.red{background:var(--sw-red)} .sw.hi{background:var(--sw-hi);height:12px;opacity:.9}
 @media (max-width:560px){
@@ -96,7 +98,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <button id="btnRestart" class="btn" type="button" aria-label="从头播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
     <input id="scrub" type="range" min="0" max="10" step="0.1" value="0" aria-label="播放进度（秒）">
     <output id="time" aria-live="off">0:00 / 0:00</output>
-    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="用浏览器语音朗读字幕">朗读</button>
+    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="旁白配音">配音</button>
+    <button id="btnMusic" class="btn toggle" type="button" aria-pressed="true" title="背景音乐">音乐</button>
     <button id="btnSnd" class="btn toggle" type="button" aria-pressed="true" title="脚步、粉笔、弹跳等小音效">音效</button>
   </div>
   <ol id="chapters" class="chapters" aria-label="章节"></ol>
@@ -105,6 +108,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <span><i class="sw red"></i>红笔 = 旁白批注（和小问号）</span>
     <span><i class="sw hi"></i>黄色荧光笔 = 关键数学</span>
   </p>
+  <p id="credits" class="credits" hidden></p>
 </main>
 
 <script>
