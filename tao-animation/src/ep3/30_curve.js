@@ -7,12 +7,12 @@
 (() => {
   /* ---------------- the chart ---------------- */
   const OX = 180, AXY = 760, YTOP = 104, XEND = 1546;   // axes: origin x, time-axis y, top of the mood axis, end of the time axis
-  const X0 = 192, YB = 400;                             // every curve starts here (neutral mood)
+  const X0 = 240, YB = 400;                             // every curve starts here (neutral mood)
   const R = 46;                                         // the rider's head radius
-  const EASY_END = 450;
-  const easyY = x => YB - 18 * Math.exp(-(((x - 330) / 34) ** 2));                 // flat, one tiny bump
-  const HARD = { drop: [290, 420], floor: 620, valley: [420, 860], amp: 11, cycles: 5.5, climb: [860, 940], peak: 228, desc: [940, 1010], plateau: 322, end: 1040 };
-  const HARDER = { drop: [290, 440], floor: 725, valley: [440, 1130], amp: 8, cycles: 8.5, climb: [1130, 1210], peak: 125, desc: [1210, 1290], plateau: 286, end: 1340 };
+  const EASY_END = 480;
+  const easyY = x => YB - 18 * Math.exp(-(((x - 360) / 34) ** 2));                 // flat, one tiny bump
+  const HARD = { drop: [320, 420], floor: 620, valley: [420, 860], amp: 11, cycles: 5.5, climb: [860, 940], peak: 228, desc: [940, 1010], plateau: 322, end: 1040 };
+  const HARDER = { drop: [320, 440], floor: 725, valley: [440, 1130], amp: 8, cycles: 8.5, climb: [1130, 1210], peak: 125, desc: [1210, 1290], plateau: 286, end: 1340 };
   const sm = u => { u = clamp(u); return u * u * (3 - 2 * u); };
   /** the "stuck" curve: flat, drop into the valley, wiggle along the floor, rocket up to a sharp peak, settle a bit lower */
   function stuckY(c, x) {
@@ -28,7 +28,7 @@
   }
   const hardY = x => stuckY(HARD, x), harderY = x => stuckY(HARDER, x);
   // sanity: the harder problem's valley is deeper and its peak higher (smaller y = happier)
-  if (!(HARDER.floor > HARD.floor && HARDER.peak < HARD.peak && HARD.peak < easyY(330))) console.error('c3: curve shapes');
+  if (!(HARDER.floor > HARD.floor && HARDER.peak < HARD.peak && HARD.peak < easyY(360))) console.error('c3: curve shapes');
 
   /** sample a curve densely enough on steep parts; the peak is a sharp corner */
   function sample(fn, x0, x1, peakX) {
@@ -142,7 +142,7 @@
     if (t < T.sud) return [c[0] + 220, c[1] + 30];
     if (t < T.sit) return [TOP[0], TOP[1] - 120];
     if (t >= 34.1 && t < 37.3) { const x = pen3(t); return [x, harderY(x)]; }
-    if (t >= 44.3 && t < 46.6) return [330, YB];
+    if (t >= 44.3 && t < 46.6) return [440, YB];
     return null;
   }
 
@@ -301,20 +301,23 @@
       stroke(k, [[x0, y - 18], [x0 + 5, y - 3], [x0 + 18, y], [mid - 14, y], [mid - 3, y + 4], [mid, y + 15, 1], [mid + 3, y + 4], [mid + 14, y], [x1 - 18, y], [x1 - 5, y - 3], [x1, y - 18]],
         { z: Z.annot, w: 4, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.3)) });
       let lab = null, lt = 0; LONG.forEach(([t0, s]) => { if (t >= t0) { lab = s; lt = t0; } });
-      if (lab) text(k + '.t', lab, x0 + 4, y + 42, { size: 38, color: C.red, anchor: 'start', z: Z.annot, scale: lerp(1.25, 1, EASE.out(clamp((t - lt) / 0.2))) });
+      if (lab) text(k + '.t', lab, x0 + 4, y + 46, { size: 46, color: C.red, anchor: 'start', z: Z.annot, scale: lerp(1.25, 1, EASE.out(clamp((t - lt) / 0.2))) });
     },
     cues: fx => [[fx.t0, 'pen'], ...LONG.map(([t0]) => [t0, 'pen'])],
   };
   /** red note + arrow like `label`, but with no paper halo (so a highlighter band can sit under it) */
+  const val = (v, t) => (typeof v === 'function' ? v(t) : v);
   COMP.c3_cnote = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
-      const lt = t - fx.t0, size = fx.size || 44, pp = EASE.back(clamp(lt / 0.2));
-      text(fx.id, fx.text, fx.at[0], fx.at[1], { size, color: C.red, z: Z.annot, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), rot: fx.rot || 0 });
-      arrow(fx.id + '.a', fx.from, fx.to, { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: fx.bend ?? 0.2 });
+      const lt = t - fx.t0, size = fx.size || 44, pp = EASE.back(clamp(lt / 0.2)), at = val(fx.at, t);
+      text(fx.id, fx.text, at[0], at[1], { size, color: C.red, z: Z.annot, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), rot: fx.rot || 0, halo: fx.halo });
+      arrow(fx.id + '.a', val(fx.from, t), val(fx.to, t), { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: fx.bend ?? 0.2 });
     },
-    cues: fx => [[fx.t0, 'pop']],
+    cues: fx => [[fx.t0, 'pop'], ...(fx.sfxAt || [])],
   };
+  /** 卡住谷: first beside the drop (while the rider falls in), then it slides into the empty valley before the dashed curve's drop is drawn */
+  const VMOVE = 33.6, vU = t => EASE.io(clamp((t - VMOVE) / 0.4));
 
   const DUR = 48.4;
   defineScene({
@@ -329,17 +332,18 @@
         ext: t => (t < T.h0 ? X0 : Math.max(HX(t), t >= T.top ? HARD.climb[1] : 0, t >= T.after0 ? lerp(HARD.climb[1], HARD.end, EASE.io(clamp((t - T.after0) / (T.after1 - T.after0)))) : 0)) },
       { type: 'c3_ccurve', id: 'c3c.harder', fn: harderY, x1: HARDER.end, peakX: HARDER.climb[1], w: 4, dash: true, ext: pen3 },
       // tags at the ends of the lines (ink)
-      { type: 'title', id: 'c3c.tagE', text: '简单题', x: 510, y: 404, size: 40, t0: 6.9, anchor: 'start', color: 'ink' },
+      { type: 'title', id: 'c3c.tagE', text: '简单题', x: EASY_END + 60, y: 404, size: 40, t0: T.e1, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagH', text: '难题', x: HARD.end + 16, y: HARD.plateau, size: 40, t0: T.after1 + 0.05, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagX', text: '更难的题', x: HARDER.end + 14, y: HARDER.plateau, size: 40, t0: 37.15, anchor: 'start', color: 'ink' },
       // red notes on the chart
-      { type: 'label', id: 'c3c.lbValley', text: '卡住谷', at: [282, 600], rot: -4, t0: 19.3, t1: DUR, target: [500, 640], bend: 0.25, gap: 12, size: 46 },
+      { type: 'c3_cnote', id: 'c3c.lbValley', text: '卡住谷', rot: -4, size: 46, halo: 8, t0: 19.3, t1: DUR, bend: 0.2, sfxAt: [[VMOVE, 'whoosh']],
+        at: t => lerp2([282, 600], [640, 545], vU(t)), from: t => lerp2([352, 612], [640, 572], vU(t)), to: t => lerp2([486, 634], [640, 612], vU(t)) },
       { type: 'c3_cbrace', id: 'c3c.brace', t0: 21.0, t1: 34.0 },
       { type: 'band', id: 'c3c.hiPeak', rect: [652, 212, 138, 50], t0: 40.0, dur: 0.45, pad: 12 },
       { type: 'c3_cnote', id: 'c3c.lbPeak', text: '啊哈峰', at: [720, 236], rot: -2, size: 46, t0: 30.9, t1: DUR, from: [800, 246], to: [918, 262], bend: 0.25 },
       { type: 'label', id: 'c3c.lbDeep', text: '更深', at: [934, 684], rot: -3, t0: 35.65, t1: 39.1, target: [850, 728], bend: -0.25, gap: 12, size: 42 },
-      { type: 'label', id: 'c3c.lbHigh', text: '更高', at: [1352, 134], rot: 3, t0: 36.75, t1: 39.1, target: [1222, 128], bend: 0.25, gap: 12, size: 42 },
-      { type: 'label', id: 'c3c.lbNoPeak', text: '（没有峰）', at: [330, 292], rot: -3, t0: 44.6, t1: DUR, target: [338, 380], bend: 0.2, gap: 12, size: 40 },
+      { type: 'label', id: 'c3c.lbHigh', text: '更高', at: [1090, 150], rot: -3, t0: 36.75, t1: 39.1, target: [1198, 130], bend: -0.2, gap: 12, size: 42 },
+      { type: 'label', id: 'c3c.lbNoPeak', text: '（没有峰）', at: [430, 300], rot: -3, t0: 44.6, t1: DUR, target: [455, 398], bend: 0.2, gap: 12, size: 40 },
       // the rider, its bulb and its words
       { type: 'c3_crider', id: 'c3c.rider' },
       { type: 'e3_bulb', id: 'c3c.bulb', char: 'c3_head', size: 64, t0: T.aha, dy: 4, state: [[T.aha, 'on']] },

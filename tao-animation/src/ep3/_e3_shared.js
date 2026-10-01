@@ -24,14 +24,14 @@ COMP.e3_bulb = {
     const st = stepTrack(fx.state, t) || 'off';
     let sT = fx.t0; (fx.state || []).forEach(q => { if (q[0] <= t) sT = q[0]; });
     let lit = st === 'on';
-    if (st === 'flicker') lit = rnd(hstr(k), Math.floor(t * 11), 3) > 0.35; // mostly dark, with short sputters
+    const sputter = st === 'flicker' && rnd(hstr(k), Math.floor(t * 11), 3) > 0.35; // mostly dark, with short weak sputters
     const pop = fx.t0 < 0 ? 1 : EASE.back(clamp(lt / 0.26));
     const flash = st === 'on' ? 1 + 0.18 * Math.max(0, 1 - (t - sT) / 0.25) : 1;
     const tiltDead = st === 'dead' ? 14 * EASE.back(clamp((t - sT) / 0.35)) : 0;
     DL.save(); DL.translate(base[0], base[1]); DL.scale(pop * flash); DL.rotate(tiltDead);
     const z = fx.z ?? Z.fx, cy = -s * 0.62, R = s * 0.4;
-    if (lit) stroke(k + '.glow', ringPts(k + '.g', 0, cy, R * 0.98, R * 1.02, { n: 12, closed: true }), { z: z - 0.2, closed: true, fill: C.hi, noStroke: true, opacity: 0.9, blend: true, w: 1 });
-    stroke(k + '.glass', ringPts(k, 0, cy, R, R * 1.04, { n: 14, a0: 125, sweep: 290 }).concat([[s * 0.17, -s * 0.2], [-s * 0.17, -s * 0.2]]), { z, w: 4.5, closed: true, fill: lit ? 'none' : C.paper });
+    if (lit || sputter) stroke(k + '.glow', ringPts(k + '.g', 0, cy, R * 0.98, R * 1.02, { n: 12, closed: true }), { z: z - 0.2, closed: true, fill: C.hi, noStroke: true, opacity: lit ? 0.9 : 0.4, blend: true, w: 1 });
+    stroke(k + '.glass', ringPts(k, 0, cy, R, R * 1.04, { n: 14, a0: 125, sweep: 290 }).concat([[s * 0.17, -s * 0.2], [-s * 0.17, -s * 0.2]]), { z, w: 4.5, closed: true, fill: lit || sputter ? 'none' : C.paper });
     [-0.2, -0.1, 0].forEach((y, i) => stroke(k + '.neck' + i, [[-s * 0.17, y * s], [s * 0.17, y * s + 1]], { z, w: 4 }));
     stroke(k + '.tip', [[-s * 0.07, s * 0.02], [0, s * 0.07], [s * 0.07, s * 0.02]], { z, w: 4 });
     // filament: a little zigzag (droops when dead)
@@ -64,6 +64,7 @@ COMP.e3_bulb = {
  *       一次"摆骨牌"：从 t0 起每隔 step 秒放一块；fail 时把没盖住的格子用红圈圈出来；t1 时整组撤掉（不写 = 一直留着）
  *       t0 为负数 = 切进来时已经摆好。
  *   rings: [{ cells: [[r,c],…], t0, t1 }]   额外的红圈（例如只圈某一块骨牌的两格）
+ *   attempt 的 outDur（默认 0.3）：t1 之后骨牌撤掉用多久；domColor: "pencil" + domW: 0.6 画浅一点的骨牌（缩略图用）；ringW: 红圈线宽倍数
  *   hideLeft: true           不自动圈出剩下的格子
  * }
  * 发布命名点：'<id>.c<r>_<c>'（每个格子的中心，世界坐标）、'<id>.center'、'<id>.top'、'<id>.bottom'。 */
@@ -109,7 +110,7 @@ COMP.e3_board = {
     if (cutOn && fx.cut >= 0 && t >= fx.cut && t < fx.cut + 1.3) { // a negative cut = already cut when the scene opens
       [[0, 0], [n - 1, n - 1]].forEach(([r, c], i) => {
         const u = clamp((t - fx.cut - 0.55) / 0.7), fall = EASE.in(u);
-        const cx = x0 + (c + 0.5) * s + (i ? 1 : -1) * fall * 60, cy = y0 + (r + 0.5) * s + fall * 260;
+        const cx = x0 + (c + 0.5) * s + (i ? 1 : -1) * fall * 60, cy = y0 + (r + 0.5) * s + fall * Math.min(260, 2.2 * s);   // small cells fall a shorter way
         const h = s / 2, rot = (i ? 1 : -1) * 40 * fall, op = 1 - u;
         DL.save(); DL.translate(cx, cy); DL.rotate(rot);
         stroke(k + '.cut' + i, [[-h, -h], [h, -h, 1], [h, h, 1], [-h, h, 1], [-h, -h, 1]], { z: z + 0.5, w: 4.5, color: C.red, draw: EASE.out(clamp((t - fx.cut) / 0.4)), opacity: op, fill: u > 0 ? C.paper : 'none' });
@@ -128,8 +129,9 @@ COMP.e3_board = {
     // dominoes
     const doms = [];
     (fx.attempts || []).forEach((a, ai) => {
-      if (t < a.t0 || (a.t1 !== undefined && t >= a.t1 + 0.3)) return;
-      const out = a.t1 !== undefined ? clamp((t - a.t1) / 0.3) : 0;
+      const od = a.outDur ?? 0.3;   // how long the dominoes take to clear away after t1
+      if (t < a.t0 || (a.t1 !== undefined && t >= a.t1 + od)) return;
+      const out = a.t1 !== undefined ? clamp((t - a.t1) / od) : 0;
       a.dom.forEach((d, di) => {
         const td = a.t0 + di * (a.step ?? 0.32); if (t < td) return;
         const u = a.t0 < 0 ? 1 : EASE.back(clamp((t - td) / 0.16));
@@ -140,7 +142,7 @@ COMP.e3_board = {
       if (!fx.hideLeft && t >= failT && out < 1) {
         E3B.cells(n, true).filter(([r, c]) => !covered.has(r + '_' + c)).forEach(([r, c], j) => {
           const cx = x0 + (c + 0.5) * s, cy = y0 + (r + 0.5) * s, q = clamp((t - failT - j * 0.12) / 0.25);
-          if (q > 0) stroke(`${k}.a${ai}L${j}`, ringPts(`${k}.a${ai}L${j}`, cx, cy, s * 0.4, s * 0.4, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9, color: C.red, draw: EASE.out(q), opacity: 1 - out });
+          if (q > 0) stroke(`${k}.a${ai}L${j}`, ringPts(`${k}.a${ai}L${j}`, cx, cy, s * 0.4, s * 0.4, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9 * (fx.ringW || 1), color: C.red, draw: EASE.out(q), opacity: 1 - out });
         });
       }
     });
@@ -149,9 +151,10 @@ COMP.e3_board = {
       const cx = x0 + ((c1 + c2) / 2 + 0.5) * s, cy = y0 + ((r1 + r2) / 2 + 0.5) * s;
       const hw = (d[2] === 'h' ? s : s / 2) - s * 0.1, hh = (d[2] === 'h' ? s / 2 : s) - s * 0.1;
       DL.save(); DL.translate(cx, cy - out * 30); DL.scale(lerp(0.6, 1, u));
-      stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: z + 1, w: wOut * 0.95, closed: true, fill: 'none', opacity: 1 - out });
+      const dcol = fx.domColor === 'pencil' ? C.pencil : C.ink, dw = fx.domW || 1;   // thumbnails can draw lighter dominoes
+      stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: z + 1, w: wOut * 0.95 * dw, color: dcol, closed: true, fill: 'none', opacity: 1 - out });
       const tk = d[2] === 'h' ? [[0, -hh * 0.45], [0, hh * 0.45]] : [[-hw * 0.45, 0], [hw * 0.45, 0]];
-      stroke(key + '.m', tk, { z: z + 1, w: wIn, opacity: 1 - out });
+      stroke(key + '.m', tk, { z: z + 1, w: wIn * dw, color: dcol, opacity: 1 - out });
       DL.restore();
     });
     // extra red rings (e.g. the two squares under one domino)
@@ -159,7 +162,7 @@ COMP.e3_board = {
       if (t < g.t0 || (g.t1 !== undefined && t >= g.t1)) return;
       g.cells.forEach(([r, c], j) => {
         const cx = x0 + (c + 0.5) * s, cy = y0 + (r + 0.5) * s;
-        stroke(`${k}.R${gi}_${j}`, ringPts(`${k}.R${gi}_${j}`, cx, cy, s * 0.42, s * 0.42, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9, color: C.red, draw: EASE.out(clamp((t - g.t0 - j * 0.12) / 0.25)) });
+        stroke(`${k}.R${gi}_${j}`, ringPts(`${k}.R${gi}_${j}`, cx, cy, s * 0.42, s * 0.42, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9 * (fx.ringW || 1), color: C.red, draw: EASE.out(clamp((t - g.t0 - j * 0.12) / 0.25)) });
       });
     });
     DL.restore();

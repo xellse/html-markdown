@@ -8,26 +8,26 @@
   /* ---------------- 题目卡片：一张张飞来，叮一声，答案写上去 ---------------- */
   const CW = 440, CH = 270, OUT_T = 14.65;
   const CARDS = [
-    { q: '12×12 =', a: '144', tIn: 0.7, at: [880, 455], rot: -5, tAns: 4.3 },
-    { q: '□+□+□=21', box7: true, qSize: 64, qy: -42, tIn: 6.0, at: [930, 432], rot: 3, tAns: 8.3 },
-    { q: '9×9 =', a: '81', tIn: 11.3, at: [868, 448], rot: -3, tAns: 11.75 },
-    { q: '1+2+…+10 =', a: '55', tIn: 12.4, at: [940, 426], rot: 4, tAns: 12.85 },
-    { q: '100-58 =', a: '42', tIn: 13.4, at: [902, 442], rot: -2, tAns: 13.85 },
+    { q: '12×12 =', a: '144', tIn: 0.7, at: [893, 447], rot: -4, tAns: 4.3 },
+    { q: '□+□+□=21', a: '□ = 7', box7: 8.95, qSize: 64, tIn: 6.0, at: [907, 434], rot: 3, tAns: 8.3 },
+    { q: '9×9 =', a: '81', tIn: 11.3, at: [889, 445], rot: -3, tAns: 11.75 },
+    { q: '1+2+…+10 =', a: '55', tIn: 12.4, at: [911, 436], rot: 3, tAns: 12.85 },
+    { q: '100-58 =', a: '42', tIn: 13.4, at: [900, 441], rot: -1, tAns: 13.85 },
   ];
   CARDS.forEach(c => {
     const qs = c.qSize || 60, qy = c.qy ?? -100;
     c.qL = layoutWriting({ text: c.q, x: 0, y: qy, size: qs, t0: 0, speed: 1, anchor: 'middle' });
-    if (c.a) c.aL = [layoutWriting({ text: c.a, x: 0, y: 2, size: 100, t0: c.tAns, speed: 2600, gap: 0.02, glyphGap: 0.02, anchor: 'middle' })];
-    // □+□+□=21: a 7 goes into each box
-    if (c.box7) c.aL = c.qL.boxes.filter(b => b.ch === '□').map((b, i) =>
-      layoutWriting({ text: '7', x: b.x + 0.39 * qs - 0.3 * 36, y: qy + 0.2 * qs + 8, size: 36, t0: c.tAns + i * 0.22, speed: 2200 }));
+    c.aL = [{ ...layoutWriting({ text: c.a, x: 0, y: 2, size: 100, t0: c.tAns, speed: 2600, gap: 0.02, glyphGap: 0.02, anchor: 'middle' }), w: 7 }];
+    // □+□+□=21: the big answer '□ = 7', then a 7 goes into each box
+    if (c.box7) c.qL.boxes.filter(b => b.ch === '□').forEach((b, i) =>
+      c.aL.push({ ...layoutWriting({ text: '7', x: b.x + 0.39 * qs - 0.3 * 40, y: qy + 0.2 * qs + 6, size: 40, t0: c.box7 + i * 0.16, speed: 2400 }), w: 5 }));
   });
   // the maths on the cards, checked
   if (12 * 12 !== 144 || 7 * 3 !== 21 || 9 * 9 !== 81 || 55 !== 10 * 11 / 2 || 100 - 58 !== 42) console.error('f3: card maths');
   function cardPose(c, i, t) {
     const u = clamp((t - c.tIn) / 0.42), e = EASE.out(u);
     let x = lerp(1880, c.at[0], e), y = lerp(c.at[1] + 40, c.at[1], e) - Math.sin(Math.PI * u) * 34, rot = c.rot + 34 * (1 - e);
-    const sc = lerp(0.85, 1, e), v = clamp((t - (OUT_T + i * 0.05)) / 0.35);
+    const sc = lerp(0.85, 1, e), v = clamp((t - (OUT_T + (CARDS.length - 1 - i) * 0.05)) / 0.35);   // top card leaves first
     if (v > 0) { const w = EASE.in(v); x += 1300 * w; y -= 160 * w; rot += 25 * w; }
     return { x, y, rot, sc, gone: v >= 1 };
   }
@@ -43,7 +43,7 @@
         c.qL.strokes.forEach((s, j) => stroke(k + '.q' + j, s.pts, { z: z + 0.1, w: 5, boil: 0.5 }));
         (c.aL || []).forEach((L, m) => L.strokes.forEach((s, j) => {
           const q = clamp((t - s.t0) / s.dur);
-          if (q > 0) stroke(k + '.a' + m + '.' + j, s.pts, { z: z + 0.1, w: c.box7 ? 5.5 : 7, draw: q, boil: 0.55 });
+          if (q > 0) stroke(k + '.a' + m + '.' + j, s.pts, { z: z + 0.1, w: L.w, draw: q, boil: 0.55 });
         }));
         DL.restore();
       });
@@ -62,28 +62,35 @@
     { at: [1165, 350], rot: 2, tIn: 20.68, tc: 25.3 },
     { at: [1355, 336], rot: -2, tIn: 20.86, tc: 25.6 },
   ];
-  const EXAM_T1 = 38.5, PW = 150, PH = 200;
+  const EXAM_T1 = 38.5, PW = 150, PH = 200, DIM_T = 31.15;
+  const dim = t => 1 - 0.65 * clamp((t - DIM_T) / 0.35);     // the diagram steps back while Terry talks
+  const CNT = PAPERS.map((pp, i) => layoutWriting({ text: String(i + 1), x: pp.at[0], y: 158, size: 58, t0: pp.tc, speed: 2600, anchor: 'middle' }));
   COMP.f3_exam = {
     draw(fx, t) {
       if (t >= EXAM_T1) return;
+      const op = dim(t);
+      CNT.forEach((L, i) => L.strokes.forEach((st, j) => {
+        const q = clamp((t - st.t0) / st.dur);
+        if (q > 0) stroke('f3.cnt' + i + '.' + j, st.pts, { z: Z.annot, w: 6, color: C.red, draw: q, boil: 0.55, opacity: op });
+      }));
       PAPERS.forEach((pp, i) => {
         if (t < pp.tIn) return;
         const k = 'f3.ex' + i, u = clamp((t - pp.tIn) / 0.28), z = Z.set + 2;
         let sc = Math.max(0.01, EASE.back(u));
         const v = (t - pp.tc) / 0.32; if (v > 0 && v < 1) sc *= 1 + 0.12 * Math.sin(Math.PI * v);
         DL.save(); DL.translate(pp.at[0], pp.at[1] - (1 - EASE.out(u)) * 40); DL.rotate(pp.rot); DL.scale(sc);
-        stroke(k, [[-PW / 2, -PH / 2], [PW / 2, -PH / 2, 1], [PW / 2, PH / 2, 1], [-PW / 2, PH / 2, 1], [-PW / 2, -PH / 2, 1]], { z, w: 4.5, fill: C.paper });
-        stroke(k + '.sh', [[-PW / 2 + 10, PH / 2 + 6], [PW / 2 + 6, PH / 2 + 6, 1], [PW / 2 + 6, -PH / 2 + 10]], { z: z - 0.05, w: 2.2, color: C.pencil, opacity: 0.7, boil: 0.5 });
+        stroke(k, [[-PW / 2, -PH / 2], [PW / 2, -PH / 2, 1], [PW / 2, PH / 2, 1], [-PW / 2, PH / 2, 1], [-PW / 2, -PH / 2, 1]], { z, w: 4.5, fill: C.paper, opacity: op });
+        stroke(k + '.sh', [[-PW / 2 + 10, PH / 2 + 6], [PW / 2 + 6, PH / 2 + 6, 1], [PW / 2 + 6, -PH / 2 + 10]], { z: z - 0.05, w: 2.2, color: C.pencil, opacity: 0.7 * op, boil: 0.5 });
         // dense scribbled lines = a long, hard question
         for (let r = 0; r < 7; r++) {
           const y = -PH / 2 + 30 + r * 23, x0 = -PW / 2 + 16, len = (r === 0 ? 70 : 104) - (r === 6 ? 40 : 0) + rnd(hstr(k), r, 4) * 10, pts = [];
           for (let j = 0; j <= 7; j++) pts.push([x0 + len * j / 7, y + (j % 2 ? -3.5 : 3) + rnd(hstr(k), r, j) * 1.5]);
-          stroke(k + '.l' + r, pts, { z: z + 0.1, w: r === 0 ? 4 : 2.6, boil: 0.6 });
+          stroke(k + '.l' + r, pts, { z: z + 0.1, w: r === 0 ? 4 : 2.6, boil: 0.6, opacity: op });
         }
         DL.restore();
       });
     },
-    cues: () => PAPERS.flatMap(pp => [[pp.tIn, 'paper'], [pp.tc, 'boop']]),
+    cues: () => PAPERS.flatMap(pp => [[pp.tIn, 'paper'], [pp.tc, 'boop'], [pp.tc + 0.02, 'pen']]),
   };
   // the clock: 9:00 → 13:30 (four and a half hours) in a whirl, a red arc following the hour hand
   const CLK = { c: [655, 335], r: 112, t0: 23.4, s0: 23.65, s1: 24.75 };
@@ -93,33 +100,33 @@
     draw(fx, t) {
       if (t < CLK.t0 || t >= EXAM_T1) return;
       const lt = t - CLK.t0, pop = Math.max(0.01, EASE.back(clamp(lt / 0.3))), { r } = CLK, z = Z.set + 2, k = 'f3.clk';
-      const m = clkMin(t);
+      const m = clkMin(t), op = dim(t);
       DL.save(); DL.translate(CLK.c[0], CLK.c[1]); DL.scale(pop); DL.translate(-CLK.c[0], -CLK.c[1]);
       const [cx, cy] = CLK.c;
-      [-1, 1].forEach(s => stroke(k + '.ft' + s, [[cx + s * r * 0.5, cy + r * 0.86], [cx + s * r * 0.72, cy + r * 1.12]], { z, w: 6 }));
-      stroke(k + '.o', ringPts(k + '.o', cx, cy, r, r, { n: 14, a0: -110, sweep: 374, rv: 0.02 }), { z, w: 6.5, fill: C.paper });
-      stroke(k + '.i', ringPts(k + '.i', cx, cy, r * 0.9, r * 0.9, { n: 14, a0: 60, sweep: 366, rv: 0.02 }), { z: z + 0.1, w: 2.5 });
+      [-1, 1].forEach(s => stroke(k + '.ft' + s, [[cx + s * r * 0.5, cy + r * 0.86], [cx + s * r * 0.72, cy + r * 1.12]], { z, w: 6, opacity: op }));
+      stroke(k + '.o', ringPts(k + '.o', cx, cy, r, r, { n: 14, a0: -110, sweep: 374, rv: 0.02 }), { z, w: 6.5, fill: C.paper, opacity: op });
+      stroke(k + '.i', ringPts(k + '.i', cx, cy, r * 0.9, r * 0.9, { n: 14, a0: 60, sweep: 366, rv: 0.02 }), { z: z + 0.1, w: 2.5, opacity: op });
       for (let i = 0; i < 12; i++) {
         const a = i * 30, big = i % 3 === 0;
-        stroke(k + '.t' + i, [clockPt(a, r * (big ? 0.66 : 0.72)), clockPt(a, r * 0.82)], { z: z + 0.1, w: big ? 4.5 : 3 });
+        stroke(k + '.t' + i, [clockPt(a, r * (big ? 0.66 : 0.72)), clockPt(a, r * 0.82)], { z: z + 0.1, w: big ? 4.5 : 3, opacity: op });
       }
       // blur behind the minute hand while it whirls
       const spin = t > CLK.s0 && t < CLK.s1;
       if (spin) for (let j = 1; j <= 3; j++) stroke(k + '.bl' + j, [0, 1, 2, 3, 4].map(q => clockPt(m * 6 - j * 14 - q * 5, r * 0.62)), { z: z + 0.15, w: 2.4, color: C.pencil, opacity: 0.8 - j * 0.2, boil: 0.6 });
-      stroke(k + '.hh', [CLK.c, clockPt(hourA(m), r * 0.46)], { z: z + 0.2, w: 7 });
-      stroke(k + '.hm', [CLK.c, clockPt(m * 6, r * 0.7)], { z: z + 0.2, w: 4.5 });
-      dot(k + '.c', CLK.c, 6, C.ink, z + 0.3);
+      stroke(k + '.hh', [CLK.c, clockPt(hourA(m), r * 0.46)], { z: z + 0.2, w: 7, opacity: op });
+      stroke(k + '.hm', [CLK.c, clockPt(m * 6, r * 0.7)], { z: z + 0.2, w: 4.5, opacity: op });
+      stroke(k + '.c', ringPts(k + '.c', cx, cy, 6, 6, { n: 6, closed: true }), { z: z + 0.3, w: 1, closed: true, fill: C.ink, opacity: op });
       // red arc outside the rim: 9 o'clock round to where the hour hand is now
       const sweep = hourA(m) - 270;
       if (sweep > 2) {
         const R2 = r + 22, pts = [];
         for (let i = 0; i <= 14; i++) pts.push(clockPt(270 + sweep * i / 14, R2));
-        stroke(k + '.arc', pts, { z: Z.annot, w: 5, color: C.red, boil: 0.6 });
+        stroke(k + '.arc', pts, { z: Z.annot, w: 5, color: C.red, boil: 0.6, opacity: op });
         if (t >= CLK.s1) {
           const e = pts[14], b = clockPt(270 + sweep - 8, R2), L = dist(b, e) || 1, tx = (b[0] - e[0]) / L, ty = (b[1] - e[1]) / L, hl = 18;
           const r1 = [e[0] + (tx * Math.cos(0.5) - ty * Math.sin(0.5)) * hl, e[1] + (tx * Math.sin(0.5) + ty * Math.cos(0.5)) * hl];
           const r2 = [e[0] + (tx * Math.cos(-0.5) - ty * Math.sin(-0.5)) * hl, e[1] + (tx * Math.sin(-0.5) + ty * Math.cos(-0.5)) * hl];
-          stroke(k + '.arcH', [r1, [e[0], e[1], 1], r2], { z: Z.annot, w: 5, color: C.red, boil: 0.6 });
+          stroke(k + '.arcH', [r1, [e[0], e[1], 1], r2], { z: Z.annot, w: 5, color: C.red, boil: 0.6, opacity: op });
         }
       }
       DL.restore();
@@ -169,7 +176,7 @@
   };
 
   /* the bulb sputters in shorter and shorter bursts, then dies (one fizz per burst) */
-  const BURSTS = [[45.85, 0.34], [46.8, 0.26], [47.65, 0.18], [48.4, 0.1]];
+  const BURSTS = [[45.85, 0.7], [46.8, 0.55], [47.65, 0.4], [48.35, 0.25]];
   const FLICK = [[41.85, 'off'], ...BURSTS.flatMap(([b, d]) => [[b, 'flicker'], [b + d, 'off']]), [49.1, 'dead']];
   /** a little curl of pencil smoke rising off the dead bulb */
   COMP.f3_smoke = {
@@ -181,6 +188,42 @@
         stroke('f3.smk' + j, pts, { z: Z.fx, w: 3, color: C.pencil, opacity: op, boil: 0.8 });
       });
     },
+  };
+
+  /** the first bulb, shrinking away (off) instead of vanishing in one frame */
+  COMP.f3_bulbOut = {
+    draw(fx, t, F) {
+      const a = F.anchors[fx.char]; if (!a) return;
+      const sc = 1 - EASE.in(clamp((t - fx.out) / 0.2)); if (sc <= 0.02) return;
+      const b = [a.headTop[0], a.headTop[1] - 26];
+      DL.save(); DL.translate(b[0], b[1]); DL.scale(sc); DL.translate(-b[0], -b[1]);
+      COMP.e3_bulb.draw(fx, t, F);
+      DL.restore();
+    },
+    cues: fx => COMP.e3_bulb.cues(fx),
+  };
+  /** waiting: three ink dots appear one by one beside the dark bulb */
+  COMP.f3_dots = {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const b = F.targets['f3.bulb2.bulb']; if (!b) return;
+      [0, 1, 2].forEach(i => { const u = clamp((t - fx.t0 - i * 0.45) / 0.15); if (u > 0) dot('f3.dot' + i, [b[0] + 52 + i * 22, b[1] + 12], 5.5 * EASE.back(u), C.ink, Z.fx); });
+    },
+    cues: fx => [0, 1, 2].map(i => [fx.t0 + i * 0.45, 'tap']),
+  };
+  /** red label 'IMO = 国际数学奥林匹克' (IMO in Patrick Hand: the Chinese font draws the O as a square) */
+  COMP.f3_imo = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const lt = t - fx.t0, pp = EASE.back(clamp(lt / 0.2)), op = clamp(lt / 0.08), [x, y] = fx.at;
+      const s1 = 56, s2 = 46, w1 = 96, rest = '= 国际数学奥林匹克', x0 = x - (w1 + textWidth(rest, s2)) / 2;
+      DL.save(); DL.translate(x, y); DL.rotate(-2); DL.scale(lerp(0.6, 1, pp)); DL.translate(-x, -y);
+      text('f3.imo.a', 'IMO', x0, y + 2, { size: s1, font: CFG.FONT_MIX, anchor: 'start', color: C.red, z: Z.annot, opacity: op, halo: 8 });
+      text('f3.imo.b', rest, x0 + w1, y + 2, { size: s2, anchor: 'start', color: C.red, z: Z.annot, opacity: op, halo: 8 });
+      DL.restore();
+      arrow('f3.imo.ar', [x + 26, y - 32], fx.target, { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: 0.12, color: C.red });
+    },
+    cues: fx => [[fx.t0, 'pop']],
   };
 
   /* ---------------- poses ---------------- */
@@ -202,14 +245,14 @@
           [27.4, 'thinkStand', 0.15], [31.2, 'f3_shock', 0.08, 'back'], [33.95, 'f3_finger', 0.1, 'back'], [38.3, 'stand', 0.2],
           [38.95, 'f3_lean', 0.08, 'back'], [39.6, 'lookUp', 0.2], [45.8, 'thinkStand', 0.2], [49.2, 'scratchStand', 0.12, 'back']],
         face: [[0, 'smile'], [1.1, 'focus', 0.05], [1.9, 'proud', 0.05], [4.0, 'idea', 0.05], [4.6, 'grin', 0.05], [6.0, 'focus', 0.05],
-          [7.5, 'idea', 0.05], [8.3, 'grin', 0.05], [11.2, 'proudGrin', 0.05], [15.35, 'surprised', 0.05], [16.3, 'smile', 0.1], [17.45, 'grin', 0.05],
-          [20.3, 'neutral', 0.05], [21.3, 'surprised', 0.05], [22.4, 'focus', 0.1], [23.7, 'surprised', 0.05], [24.9, 'focus', 0.1],
-          [31.2, 'jaw', 0.06, 'back'], [33.95, 'proudGrin', 0.05], [38.95, 'surprised', 0.05], [39.9, 'focus', 0.1], [45.8, 'puzzled', 0.08],
+          [7.5, 'idea', 0.05], [8.3, 'grin', 0.05], [11.2, 'proudGrin', 0.05], [15.35, 'surprised', 0.05], [17.45, 'grin', 0.06],
+          [20.3, 'neutral', 0.05], [21.3, 'surprised', 0.05], [22.8, 'focus', 0.1], [23.7, 'surprised', 0.05], [25.25, 'focus', 0.1],
+          [31.2, 'jaw', 0.06, 'back'], [33.95, 'proudGrin', 0.05], [38.95, 'surprised', 0.05], [40.5, 'focus', 0.1], [45.8, 'puzzled', 0.08],
           [49.15, 'sheepish', 0.06]],
         turn: [[0, 0.35], [1.9, 0, 0.12], [4.0, 0.4, 0.1], [11.2, 0.1, 0.12], [15.35, 0.35, 0.12], [31.2, 0.1, 0.1], [33.95, 0, 0.1],
           [38.95, 0.45, 0.1], [41.9, 0.15, 0.15], [49.2, 0.1, 0.12]],
         gaze: [[0, 'viewer'], [0.8, 'card'], [1.9, 'viewer'], [3.9, 'card'], [11.2, 'viewer'], [15.35, 'stamp'], [20.3, 'papers'], [23.45, 'clock'],
-          [24.95, 'papers'], [27.4, 'eq'], [31.2, 'viewer'], [38.7, 'giant'], [41.9, 'bulbUp'], [49.3, 'viewer']],
+          [24.95, 'papers'], [27.4, 'eq'], [31.2, 'viewer'], [38.7, 'giant'], [41.9, 'bulbUp'], [43.0, 'giant'], [44.0, 'bulbUp'], [49.3, 'viewer']],
         squash: [[0, 1], ...dingPop(4.0), ...dingPop(7.5), ...dingPop(11.7), ...dingPop(12.8), ...dingPop(13.8),
           [15.85, 0.92, 0.05], [15.91, 1, 0.22, 'back'], [21.3, 1.06, 0.05], [21.36, 1, 0.2, 'back'],
           [31.2, 1.13, 0.06], [31.27, 1, 0.28, 'back'], [38.95, 0.86, 0.05], [39.0, 1.08, 0.08], [39.1, 1, 0.22, 'back'],
@@ -223,26 +266,26 @@
     fx: [
       { type: 'f3_cards', id: 'f3.cards' },
       { type: 'title', id: 'f3.title', text: '灵光一闪', x: 905, y: 150, size: 130, t0: 4.05, t1: OUT_T, underline: true },
-      { type: 'e3_bulb', id: 'f3.bulb', char: 'terry', t0: 4.0, t1: 14.95,
-        state: [[4.0, 'on'], [5.95, 'off'], [7.5, 'on'], [11.2, 'off'], [11.7, 'on'], [12.35, 'off'], [12.8, 'on'], [13.35, 'off'], [13.8, 'on']] },
+      { type: 'f3_bulbOut', id: 'f3.bulb', char: 'terry', t0: 4.0, out: 14.75, t1: 15.0,
+        state: [[4.0, 'on'], [5.95, 'off'], [7.5, 'on'], [11.2, 'off'], [11.7, 'on'], [12.35, 'off'], [12.8, 'on'], [13.35, 'off'], [13.8, 'on'], [14.55, 'off']] },
       // 10 岁的印章，先盖在中间，再停靠到右上角
       { type: 'ageStamp', age: 10, place: '准备奥数', t0: 15.35, center: E3.STAMP.center, R: E3.STAMP.R, dockT: 20.25, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale, pulse: [] },
-      { type: 'label', id: 'f3.lbIMO', text: 'IMO = 国际数学奥林匹克', at: [800, 692], rot: -2, size: 46, t0: 17.45, t1: 20.2, target: [836, 592], bend: 0.12, gap: 8 },
+      { type: 'f3_imo', id: 'f3.imo', at: [800, 692], t0: 17.45, t1: 20.2, target: [834, 600] },
       // the exam
       { type: 'f3_exam', id: 'f3.exam' },
-      ...PAPERS.map((pp, i) => ({ type: 'write', id: 'f3.cnt' + i, text: String(i + 1), x: pp.at[0], y: 158, size: 58, t0: pp.tc, t1: EXAM_T1, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'middle', z: Z.annot })),
       { type: 'f3_clock', id: 'f3.clock' },
-      { type: 'label', id: 'f3.lbHours', text: '4.5 小时', at: [455, 162], rot: -4, t0: 24.85, t1: EXAM_T1, target: clockPt(325, CLK.r + 30), bend: -0.2, gap: 8 },
+      { type: 'label', id: 'f3.lbHours', text: '4.5 小时', at: [455, 162], rot: -4, t0: 24.85, t1: DIM_T, target: clockPt(325, CLK.r + 30), bend: -0.2, gap: 8 },
       { type: 'write', id: 'f3.eq1', text: '4.5 ÷ 3 =', x: EQ_X, y: EQ_Y, size: EQ_S, t0: 27.45, t1: EXAM_T1, speed: 2400, gap: 0.03, glyphGap: 0.04, color: 'red', w: 6.5, sfx: 'pen', z: Z.annot },
       { type: 'write', id: 'f3.eq2', text: '1.5', x: EQ2_X, y: EQ_Y, size: EQ_S, t0: 28.95, t1: EXAM_T1, speed: 2400, gap: 0.03, glyphGap: 0.04, color: 'red', w: 7, sfx: 'pen', z: Z.annot },
       { type: 'highlight', id: 'f3.hi', of: 'f3.eq2', t0: 29.45, dur: 0.35, t1: EXAM_T1 },
       { type: 'label', id: 'f3.lbHr', text: '小时', at: [EQ2_X + w2 + 120, 700], rot: -4, t0: 29.75, t1: EXAM_T1, target: [EQ2_X + w2 * 0.6, EQ_Y + EQ_S + 18], bend: 0.25, gap: 8 },
       { type: 'speech', id: 'f3.say1', text: '一个半小时？', at: [300, 370], tail: [0, 44], speaker: 'terry', t0: 31.25, t1: 33.85, size: 64, rot: -3 },
-      { type: 'speech', id: 'f3.say2', text: ['我做一道题，', '一般只要一分钟！'], at: [318, 352], tail: [6, 74], speaker: 'terry', t0: 33.95, t1: 38.2, size: 54, rot: -2 },
+      { type: 'speech', id: 'f3.say2', text: ['我做一道题，', '一般只要一分钟！'], at: [318, 352], tail: [-70, 72], speaker: 'terry', t0: 33.95, t1: 38.2, size: 54, rot: -2 },
       // the first hard problem
       { type: 'f3_giant', id: 'f3.giant' },
       { type: 'e3_bulb', id: 'f3.bulb2', char: 'terry', t0: 41.85, state: FLICK },
       { type: 'f3_smoke', id: 'f3.smoke', t0: 49.35 },
+      { type: 'f3_dots', id: 'f3.dots', t0: 43.9, t1: 45.8 },
       { type: 'label', id: 'f3.lbDead', text: '（没电了）', at: [505, 318], rot: -4, size: 44, t0: 49.5, t1: 51.6, target: { target: 'f3.bulb2.bulb', dx: 28, dy: -10 }, bend: 0.2, gap: 12 },
     ],
     sfx: [[21.3, 'boing'], [31.2, 'boing'], ...BURSTS.map(([b]) => [b, 'f3_fizz'])],

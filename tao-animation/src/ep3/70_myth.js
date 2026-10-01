@@ -13,22 +13,23 @@
   /* ---------------- the cliff (group coords; the whole group shrinks into the corner at TM.shrink) ---------------- */
   // a craggy rock: every vertex a sharp corner
   const OUTLINE = [[640, 768], [662, 692], [702, 642], [694, 590], [738, 522], [730, 470], [782, 420], [832, 394], [852, 346], [930, 320], [990, 298],
-    [1050, 304], [1118, 264], [1170, 260], [1210, 236], [1252, 256], [1312, 262], [1352, 302], [1420, 330], [1442, 382], [1492, 432], [1502, 520],
+    [1050, 304], [1118, 290], [1170, 284], [1210, 270], [1252, 286], [1312, 292], [1352, 318], [1420, 340], [1442, 382], [1492, 432], [1502, 520],
     [1532, 562], [1528, 662], [1556, 768]].map((p, i) => (i ? [p[0], p[1], 1] : p));
   const PIV = [1548, 770], SHRINK = 0.6;
   const groupS = t => lerp(1, SHRINK, EASE.io(clamp((t - TM.shrink) / 0.5)));
   const G = (p, t) => { const s = groupS(t); return [PIV[0] + (p[0] - PIV[0]) * s, PIV[1] + (p[1] - PIV[1]) * s]; };
-  const S0 = [760, 752], LA = [840, 650], DEAD = [905, 560], LB = [1050, 548], LC = [1170, 410], DOOR = [1350, 392], SUM = [1210, 238];
+  const S0 = [760, 752], LA = [840, 650], DEAD = [905, 560], LB = [1050, 548], LC = [1170, 440], DOOR = [1345, 462], SUM = [1210, 270];
+  const FS = 1.3;                                   // the climber's scale (feet at the route point)
   const SEGS = [
     { t0: 11.2, t1: 12.6, pts: [S0, [790, 695], LA], mode: 'climb', trail: 0 },
     { t0: 12.8, t1: 14.0, pts: [LA, [872, 605], DEAD], mode: 'climb', trail: 1 },
     { t0: 15.4, t1: 16.0, pts: [DEAD, [872, 605], LA], mode: 'slide', ease: 'in' },
     { t0: 16.25, t1: 17.9, pts: [LA, [930, 645], [1010, 610], LB], mode: 'climb', trail: 2 },
     { t0: 20.2, t1: 20.6, pts: [LB, LC], mode: 'zip', ease: 'io' },
-    { t0: 21.8, t1: 24.3, pts: [LC, [1240, 440], [1320, 470], [1400, 450], [1420, 410], [1390, 392], DOOR], mode: 'plod', trail: 3 },
+    { t0: 21.8, t1: 24.3, pts: [LC, [1235, 470], [1305, 500], [1372, 492], DOOR], mode: 'plod', trail: 3 },
   ];
   SEGS.forEach(s => { s.len = polyLen(s.pts); });
-  const INSIDE = [[1350, 378], [1322, 340], [1272, 330], [1242, 292], [1213, 262]];
+  const INSIDE = [[1345, 440], [1318, 392], [1270, 372], [1240, 330], [1213, 300]];
   /** where the climber's feet are, and what it is doing */
   function climberAt(t) {
     if (t < TM.pop || (t >= TM.inside && t < TM.summit)) return null;
@@ -54,7 +55,7 @@
     [19.8, 'grin'], [20.7, 'smile'], [21.8, 'focus'], [22.6, 'effort'], [24.2, 'smile'], [TM.summit, 'puzzled'], [TM.ohTop, 'surprised'], [TM.flag, 'grin'], [TM.solved, 'joy']];
   function climberGaze(t, st) {
     const [x, y] = st.p;
-    if (t >= 14.0 && t < 15.4) return [930, 440];
+    if (t >= 14.0 && t < 15.4) return [930, 390];
     if (t >= TM.oh && t < 20.2) return LC;
     if (t >= TM.summit + 0.2 && t < TM.ohTop) return [x + (Math.floor((t - TM.summit) / 0.45) % 2 ? 160 : -160), y - 60];
     if (t >= TM.ohTop) return null;
@@ -124,7 +125,7 @@
   }
   function climberFig(k, st, t) {
     const L = limbsFor(st, t), z = Z.front, op = st.op, sq = 1 + (st.mode === 'cheer' ? -0.12 * Math.exp(-8 * (t - TM.solved)) * Math.cos(18 * (t - TM.solved)) : 0);
-    DL.save(); DL.translate(st.p[0], st.p[1]); DL.scale(st.pop * (1 + (1 - sq) * 0.6), st.pop * sq); DL.rotate(L.lean);
+    DL.save(); DL.translate(st.p[0], st.p[1]); DL.scale(st.pop * FS * (1 + (1 - sq) * 0.6), st.pop * FS * sq); DL.rotate(L.lean);
     const hip = [0, -40], sh = [0, -70], neck = [0, -74], head = [0, -94];
     const lw = { z, w: 4.5, opacity: op };
     L.feet.forEach((f, i) => { const s = i ? 1 : -1, [kn, ft] = solveIK(hip, f, LEG, LEG, (a, b) => (s * a[0] > s * b[0] ? a : b)); stroke(k + '.leg' + i, [hip, kn, ft], lw); });
@@ -150,10 +151,10 @@
     if (t < t0) return;
     const lt = t - t0, pp = EASE.back(clamp(lt / 0.2)), op = clamp(lt / 0.08) * (1 - clamp((t - TM.shrink) / 0.3));
     if (op <= 0.01) return;
-    text(k, str, at[0], at[1], { size: o.size || 40, color: C.red, z: Z.annot, rot, scale: lerp(0.6, 1, pp), opacity: op, halo: 8 });
+    text(k, str, at[0], at[1], { size: o.size || 46, color: C.red, z: Z.annot, rot, scale: lerp(0.6, 1, pp), opacity: op, halo: 8 });
     if (target) arrow(k + '.a', o.from, target, { p: EASE.out(clamp((lt - 0.12) / 0.3)) * (op > 0.9 ? 1 : 0), bend: o.bend ?? 0.2, head: 16 });
   }
-  const BULB = { id: 'c3m.bulbTop', t0: TM.solved, size: 52, state: [[TM.solved, 'on']], at: [0, 0] };
+  const BULB = { id: 'c3m.bulbTop', t0: TM.solved, size: 58, state: [[TM.solved, 'on']], at: [0, 0] };
 
   COMP.c3_mcliff = {
     draw(fx, t, F) {
@@ -164,17 +165,17 @@
       stroke('c3m.rock', OUTLINE, { z, w: 6, fill: C.paper, draw: stag(p, 0, 3) });
       stroke('c3m.ground', [[600, 770], [1080, 772], [1590, 769]], { z, w: 2.2, color: C.pencil, opacity: 0.8, draw: stag(p, 0, 3) });
       // ledges: a shelf line with pencil shading under it
-      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 413], [1206, 411]]].forEach((pts, i) => {
+      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 443], [1206, 441]]].forEach((pts, i) => {
         stroke('c3m.ledge' + i, pts, { z: z + 0.2, w: 4.5, draw: stag(p, 1, 3) });
         for (let j = 0; j < 4; j++) { const x = lerp(pts[0][0] + 10, pts[1][0] - 4, j / 3), y = lerp(pts[0][1], pts[1][1], j / 3);
           stroke('c3m.lh' + i + '_' + j, [[x, y + 5], [x - 10, y + 17]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
       });
       for (let j = 0; j < 6; j++) { const x = 872 + j * 21;
-        stroke('c3m.oh' + j, [[x, 452 - j * 0.6], [x - 11, 466 - j * 0.6]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
+        stroke('c3m.oh' + j, [[x, 402 - j * 0.6], [x - 11, 416 - j * 0.6]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
       [[[720, 700], [745, 682], [750, 662]], [[1100, 705], [1132, 692]], [[1420, 560], [1440, 598], [1434, 630]], [[985, 372], [1008, 362]], [[1300, 640], [1322, 610]], [[1210, 560], [1236, 572]],
         [[1352, 330], [1390, 352]], [[1458, 470], [1470, 500]], [[700, 742], [722, 730]], [[1240, 690], [1278, 680], [1290, 700]]]
         .forEach((pts, i) => stroke('c3m.crack' + i, pts, { z: z + 0.2, w: 2.4, color: C.pencil, draw: stag(p, 2, 3), boil: 0.5 }));
-      stroke('c3m.over', [[858, 446, 1], [915, 426], [990, 432, 1], [986, 446, 1], [930, 441], [868, 452, 1], [858, 446, 1]], { z: z + 0.3, w: 5, fill: C.paper, draw: stag(p, 1, 3) });
+      stroke('c3m.over', [[858, 396, 1], [915, 376], [990, 382, 1], [986, 396, 1], [930, 391], [868, 402, 1], [858, 396, 1]], { z: z + 0.3, w: 5, fill: C.paper, draw: stag(p, 1, 3) });
       // trails (dashed ink): each one grows behind the climber
       SEGS.forEach(sg => { if (sg.trail !== undefined) dashedTo('c3m.tr' + sg.trail, sg.pts, segU(sg, t), {}); });
       // the shortcut, spotted before it is taken
@@ -186,7 +187,7 @@
       // the back door: pops in, swings open, swallows the climber, shuts
       if (t >= TM.door) {
         const dp = EASE.back(clamp((t - TM.door) / 0.3)), open = clamp((t - TM.doorOpen) / 0.15) * (1 - clamp((t - TM.doorShut) / 0.15));
-        DL.save(); DL.translate(DOOR[0], DOOR[1]); DL.scale(dp);
+        DL.save(); DL.translate(DOOR[0], DOOR[1]); DL.scale(dp * FS);
         const fr = [[-21, 0], [-21, -42, 1], [-14, -56], [0, -61], [14, -56], [21, -42, 1], [21, 0]];
         stroke('c3m.doorF', fr, { z: z + 0.5, w: 4.5, fill: open > 0.05 ? C.ink : C.paper });
         const lw = 42 * (1 - 0.8 * open);
@@ -199,24 +200,25 @@
       // flag on the summit
       if (t >= TM.flag) {
         const u = EASE.in(clamp((t - TM.flag) / 0.16)), dy = -70 * (1 - u), wave = Math.sin(t * 7) * 4;
-        stroke('c3m.pole', [[1252, 240 + dy], [1252, 128 + dy]], { z: Z.front - 1, w: 5 });
-        stroke('c3m.flag', [[1252, 130 + dy], [1306, 146 + dy + wave, 1], [1252, 164 + dy, 1]], { z: Z.front - 1, w: 4.5, fill: C.paper });
+        const fx0 = SUM[0] + 44, fy = SUM[1];
+        stroke('c3m.pole', [[fx0, fy + 2 + dy], [fx0, fy - 132 + dy]], { z: Z.front - 1, w: 5.5 });
+        stroke('c3m.flag', [[fx0, fy - 130 + dy], [fx0 + 64, fy - 110 + dy + wave, 1], [fx0, fy - 88 + dy, 1]], { z: Z.front - 1, w: 4.5, fill: C.paper });
       }
       // red notes along the way
-      note('c3m.n0', '试试这个', [588, 636], -4, 11.1, t, [780, 700], { from: [662, 650], bend: 0.15 });
-      note('c3m.n1', '再试试那个', [985, 714], -3, 15.95, t, [975, 640], { from: [985, 692], bend: 0.15 });
-      note('c3m.n2', '小捷径', [1218, 522], 3, 19.85, t, [1118, 482], { from: [1158, 512], bend: -0.2 });
-      note('c3m.n3', '后门', [1468, 296], 4, 23.9, t, [1376, 352], { from: [1440, 312], bend: -0.2 });
+      note('c3m.n0', '试试这个', [584, 636], -4, 11.1, t, [780, 700], { from: [672, 652], bend: 0.15 });
+      note('c3m.n1', '再试试那个', [985, 718], -3, 15.95, t, [975, 640], { from: [985, 692], bend: 0.15 });
+      note('c3m.n2', '小捷径', [1224, 550], 3, 19.85, t, [1114, 500], { from: [1158, 540], bend: -0.2 });
+      note('c3m.n3', '后门', [1498, 352], 4, 23.9, t, [1374, 428], { from: [1452, 362], bend: -0.2 });
       // the climber, its "!" and speed lines, sweat while plodding, the bulb at the top
       const st = climberAt(t);
       if (st) {
         climberFig('c3m.cl', st, t);
-        const hd = [st.p[0], st.p[1] - 94];
-        if (t >= TM.oh && t < 19.6) text('c3m.bang', '!', hd[0] + 30, hd[1] - 56, { size: 60, font: CFG.FONT_MIX, z: Z.fx, scale: lerp(0.3, 1, EASE.back(clamp((t - TM.oh) / 0.2))), rot: 8 });
+        const hd = [st.p[0], st.p[1] - 94 * FS];
+        if (t >= TM.oh && t < 19.6) text('c3m.bang', '!', hd[0] + 36, hd[1] - 70, { size: 60, font: CFG.FONT_MIX, z: Z.fx, scale: lerp(0.3, 1, EASE.back(clamp((t - TM.oh) / 0.2))), rot: 8 });
         if (st.mode === 'zip') [0, 1, 2].forEach(i => { const a = [hd[0] - 34 - i * 4, hd[1] + 30 + i * 22]; stroke('c3m.sp' + i, [a, [a[0] - 52, a[1] + 58]], { z: Z.fx, w: 3.5, boil: 0.6 }); });
-        if (t >= 22.6 && t < 24.2) { const ph = ((t - 22.6) * 1.3) % 1, d = [hd[0] - 30 - ph * 16, hd[1] - 10 + ph * ph * 30];
+        if (t >= 22.6 && t < 24.2) { const ph = ((t - 22.6) * 1.3) % 1, d = [hd[0] - 38 - ph * 16, hd[1] - 10 + ph * ph * 30];
           stroke('c3m.sw', [[d[0], d[1] - 12], [d[0] + 7, d[1] + 2], [d[0], d[1] + 8], [d[0] - 7, d[1] + 2], [d[0], d[1] - 12]], { z: Z.fx, w: 3, fill: C.paper, opacity: Math.sin(Math.PI * ph) }); }
-        if (t >= TM.solved) { BULB.at = [SUM[0] + 2, SUM[1] - 94 - 20 - 18]; COMP.e3_bulb.draw(BULB, t, F); }
+        if (t >= TM.solved) { BULB.at = [SUM[0] + 2, SUM[1] - 114 * FS - 18]; COMP.e3_bulb.draw(BULB, t, F); }
       }
       DL.restore();
     },
@@ -282,7 +284,7 @@
     c3_cheerA: { armScale: 1.35, armL: [128, 20], armR: [128, 20] },
     c3_kidSitCheer: { ...POSE.sitFloor, armScale: 1.75, armL: [140, 18], armR: [140, 18] },
   });
-  const climberWorld = t => { const st = climberAt(t); return st ? G([st.p[0], st.p[1] - 94], t) : G(SUM, t); };
+  const climberWorld = t => { const st = climberAt(t); return st ? G([st.p[0], st.p[1] - 94 * FS], t) : G(SUM, t); };
 
   defineScene({
     id: 'myth', chapter: '他自己说', dur: DUR, floor: FL,

@@ -6,9 +6,12 @@
   const CL = [1065, 300];                                   // where the thought clouds and the big words live
 
   /* ---------------- the blank sheet on the desk (seen a little from above) ---------------- */
-  const SHEET = [[DX - 76, DTOP + 1], [DX - 62, DTOP - 22, 1], [DX + 62, DTOP - 22, 1], [DX + 76, DTOP + 1, 1], [DX - 76, DTOP + 1, 1]];
+  const SHEET = [[DX - 112, DTOP + 1], [DX - 90, DTOP - 40, 1], [DX + 90, DTOP - 40, 1], [DX + 112, DTOP + 1, 1], [DX - 112, DTOP + 1, 1]];
   COMP.f3_sheet = {
-    draw() { stroke('f3s.sheet', SHEET, { z: Z.desk + 1, w: 4, fill: C.paper }); },
+    draw() {
+      stroke('f3s.sheet', SHEET, { z: Z.desk + 1, w: 4.5, fill: C.paper });
+      stroke('f3s.sheetSh', [[DX - 104, DTOP + 6], [DX + 116, DTOP + 6, 1], [DX + 98, DTOP - 32]], { z: Z.desk + 0.9, w: 2.2, color: C.pencil, opacity: 0.7, boil: 0.5 });
+    },
   };
 
   /* ---------------- wall clock: 1 min → 10 min → 20 min, each a quick whirl ---------------- */
@@ -66,6 +69,22 @@
   };
   /** inside the memory cloud: a happy little Terry (the bulb above him is the shared e3_bulb) */
   PROPS.f3_memo = () => { portrait('f3s.memo', 0, 0, 44, { z: Z.fx + 1, happy: true }); };
+  /** …and one of the quick cards from before: 12×12 = 144, the answer written in a flash */
+  const MC = { at: [CL[0] + 92, CL[1] + 16], t0: 14.3, tA: 14.6, w: 190, h: 112 };
+  const MC_Q = layoutWriting({ text: '12×12 =', x: 0, y: -44, size: 32, t0: 0, speed: 1, anchor: 'middle' });
+  const MC_A = layoutWriting({ text: '144', x: 0, y: -4, size: 48, t0: MC.tA, speed: 2400, gap: 0.02, glyphGap: 0.02, anchor: 'middle' });
+  COMP.f3_memoCard = {
+    draw(fx, t) {
+      if (t < MC.t0 || t >= fx.t1) return;
+      const z = Z.fx + 1, k = 'f3s.mc', pp = Math.max(0.01, EASE.back(clamp((t - MC.t0) / 0.25)));
+      DL.save(); DL.translate(MC.at[0], MC.at[1]); DL.rotate(4); DL.scale(pp);
+      stroke(k, [[-MC.w / 2, -MC.h / 2], [MC.w / 2, -MC.h / 2, 1], [MC.w / 2, MC.h / 2, 1], [-MC.w / 2, MC.h / 2, 1], [-MC.w / 2, -MC.h / 2, 1]], { z, w: 3.6, fill: C.paper });
+      MC_Q.strokes.forEach((st, j) => stroke(k + '.q' + j, st.pts, { z: z + 0.1, w: 3.2, boil: 0.5 }));
+      MC_A.strokes.forEach((st, j) => { const q = clamp((t - st.t0) / st.dur); if (q > 0) stroke(k + '.a' + j, st.pts, { z: z + 0.1, w: 4.5, draw: q, boil: 0.5 }); });
+      DL.restore();
+    },
+    cues: () => [[MC.t0, 'plip'], [MC.tA, 'pen']],
+  };
 
   const cArc = (cx, cy, r, a0, a1, n = 5) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * RAD; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
   const GLOOM = [[-64, 22], ...cArc(-40, 4, 26, 150, 290), ...cArc(0, -10, 34, 215, 330), ...cArc(42, 4, 26, 250, 390), [64, 22, 1], [-64, 22, 1]];
@@ -138,6 +157,7 @@
   const desk = (dx, dy = -3, bend = 'down') => ({ w: 1, to: 'desk', dx, dy, bend });
   Object.assign(POSE, {
     f3_sitPaper: { ...SIT, tilt: 6, ikL: desk(-48), ikR: desk(48) },
+    f3_cheeks: { ...SIT, lean: -1, tilt: 3, ikL: { w: 1, to: 'head', dx: -1.06, dy: 0.45, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 1.06, dy: 0.45, bend: 'out' } },
     f3_slump: { ...SIT, hop: 34, lean: 4, tilt: 24, armScale: 1.2, ikL: desk(-52), ikR: desk(38) },
     f3_hunch: { ...SIT, hop: 10, tilt: -4, ikL: desk(-36), ikR: desk(36) },
     f3_shrink: { ...SIT, hop: 22, tilt: 10, ikL: desk(-30, -3, 'out'), ikR: desk(30, -3, 'out') },
@@ -151,7 +171,7 @@
     tracks: {
       terry: {
         pos: [[0, [DX, SEAT]]],
-        pose: [[0, 'f3_sitPaper'], [3.85, 'thinkChin', 0.12, 'back'], [6.6, 'f3_sitPaper', 0.12], [9.3, 'chinHand', 0.12, 'back'],
+        pose: [[0, 'f3_sitPaper'], [3.85, 'thinkChin', 0.12, 'back'], [6.6, 'f3_cheeks', 0.12, 'back'], [9.3, 'chinHand', 0.12, 'back'],
           [10.3, 'sitScratch', 0.12, 'back'], [11.25, 'f3_slump', 0.14, 'back'], [13.65, 'f3_hunch', 0.2], [18.2, 'f3_shrink', 1.2],
           [26.55, 'sitUp', 0.07, 'back'], [28.7, 'f3_up', 0.2], [31.85, 'f3_fists', 0.1, 'back']],
         face: [[0, 'focus'], [1.75, 'puzzled', 0.06], [6.6, 'bored', 0.08], [9.3, 'bored'], [10.3, 'puzzled', 0.06], [11.25, 'sheepish', 0.08],
@@ -180,7 +200,7 @@
       { type: 'thought', id: 'f3s.cloud1', at: CL, rx: 240, ry: 140, t0: 3.88, t1: 9.2, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
       { type: 'f3_tangle', id: 'f3s.tangle', at: [CL[0] - 10, CL[1] - 4], t0: 4.15, t1: 9.2 },
       // 纸上一片空白
-      { type: 'label', id: 'f3s.lbBlank', text: '（空白）', at: [800, 560], rot: 3, t0: 7.25, t1: 9.2, target: [DX + 50, DTOP - 12], bend: -0.25, gap: 8 },
+      { type: 'label', id: 'f3s.lbBlank', text: '（空白）', at: [800, 560], rot: 3, t0: 7.25, t1: 9.2, target: [DX + 62, DTOP - 20], bend: -0.25, gap: 10 },
       // 1 分钟，10 分钟，20 分钟……
       ...MINS.flatMap(([n, t0, y], i) => [
         { type: 'write', id: 'f3s.mn' + i, text: n, x: 384, y: y - 26, size: 52, t0, t1: 13.55, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'end', z: Z.annot },
@@ -188,9 +208,10 @@
       ]),
       { type: 'f3_balls', id: 'f3s.balls' },
       // 习惯了“一眼看出来”：a memory of the old ding
-      { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 185, ry: 135, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
-      { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0], CL[1] + 52], t0: 13.85, t1: 17.95, drawDur: 0 },
-      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0], CL[1] - 20], size: 62, t0: 13.85, t1: 17.95, state: [[-1000, 'on']], z: Z.fx + 2 },   // already lit, and no ding leaking into the previous scene
+      { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 238, ry: 138, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
+      { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0] - 80, CL[1] + 56], t0: 13.85, t1: 17.95, drawDur: 0 },
+      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0] - 80, CL[1] - 34], size: 62, t0: 13.85, t1: 17.95, state: [[-1000, 'on']], z: Z.fx + 2 },   // already lit, and no ding leaking into the previous scene
+      { type: 'f3_memoCard', id: 'f3s.memoCard', t1: 17.95 },
       // “我是不是……没那么聪明？”
       { type: 'f3_gloom', id: 'f3s.gloom', t0: 18.7, t1: 21.8 },
       { type: 'thought', id: 'f3s.cloud3', at: CL, rx: 262, ry: 132, t0: 21.85, t1: 26.5, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },

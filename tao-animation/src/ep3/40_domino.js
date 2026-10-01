@@ -1,6 +1,6 @@
 // 第 40 场 · 骨牌难题：4×4 棋盘剪掉对角两格，7 块骨牌能不能盖满？小陶“能！”，摆了九次，次次剩两格。
 // 演绎：“我们陪小陶一起卡一次”，不是他当年做过的某一道具体的题。九次摆法 = E3B.TRIES[0..8]（每次剩两个白格）。
-// 结尾画面交给第 45 场：主棋盘在 E3B.MAIN，剪过角、没涂色、空的；小问号 [960, 770]（size 160，牌子在左边）举牌“为什么总剩两格？”；小陶在 1180。
+// 结尾画面交给第 45 场：主棋盘在 E3B.MAIN，剪过角、没涂色、空的；小问号 [970, 770]（size 160，signSize 52，牌子在左边）举牌“为什么总剩两格？”；小陶在 1180。
 (() => {
   const FL = 780, TX = 1180, M = E3B.MAIN, CS = M.cell, TR = E3B.TRIES;
   const cellC = (r, c) => [M.at[0] + (c - 1.5) * CS, M.at[1] + (r - 1.5) * CS];
@@ -13,16 +13,24 @@
   });
 
   /* ---------------- timing ---------------- */
-  const T = { wink: 1.4, old: 4.5, board: 7.75, cut: 10.9, diag: 14.35, drop: 14.8, ask: 18.75, can: 23.2 };
-  const L9 = 28.55, L10 = 32.15, L11 = 35.55, L12 = 38.05, L13 = 42.35, L14 = 45.25;
-  const CLEAR = 45.0, QT = 46.7, SIGN = 47.25, DUR = 49.35;
+  const T = { wink: 1.4, old: 4.5, board: 4.5, size: 7.8, cut: 10.9, diag: 14.35, drop: 14.8, ask: 18.75, can: 23.2 };
+  const L9 = 28.55, L10 = 32.15, L11 = 35.55, L12 = 38.05, L13 = 42.6, L14 = 45.5;
+  const CLEAR = 45.25, DEAD = 46.7, QT = 47.3, SIGN = 47.85, DUR = 49.6;
+  const QP = [970, 770], QSIGN = 52;   // 小问号 at the end (= the start of scene 45)
   // the attempts: two careful ones, then the montage (3rd … 9th try), faster and faster
   const ATT = [
     { t0: 25.55, step: 0.38, fail: L9, t1: 32.0 },
     { t0: 32.6, step: 0.42, fail: L11, t1: 37.75 },
   ];
-  const MONT = [[37.99, 0.08], [38.96, 0.07], [39.81, 0.03], [40.28, 0.03], [40.75, 0.03], [41.22, 0.03], [41.69, 0.03]];
-  MONT.forEach(([t0, step], i) => ATT.push({ t0, step, fail: +(t0 + 5 * step + 0.16).toFixed(2), t1: i < MONT.length - 1 ? MONT[i + 1][0] - 0.02 : CLEAR }));
+  // montage: [step, how long the two left-over squares stay ringed]; each try is cleared fast (outDur 0.08) before the next starts
+  const MONT = [[0.08, 0.3], [0.06, 0.28], [0.04, 0.22], [0.04, 0.22], [0.04, 0.22], [0.04, 0.22], [0.03, null]];
+  { let tt = 37.99;
+    MONT.forEach(([step, hold]) => {
+      const fail = +(tt + 5 * step + 0.08).toFixed(2), a = { t0: tt, step, fail, outDur: 0.08, t1: CLEAR };
+      if (hold !== null) { a.t1 = +(fail + hold).toFixed(2); tt = +(a.t1 + 0.1).toFixed(2); }
+      ATT.push(a);
+    }); }
+  ATT[ATT.length - 1].outDur = 0.3;
   const FAILS = ATT.map(a => a.fail), NINE = FAILS[8];
   const tdOf = (k, i) => ATT[k].t0 + i * ATT[k].step;
 
@@ -65,7 +73,7 @@
   };
 
   /* ---------------- L5: one domino, on its own: it covers two neighbouring squares ---------------- */
-  const DG = { at: [200, 472], s: 90 };
+  const DG = { at: [205, 472], s: 100 };   // same squares as the board
   function dominoShape(key, s, o) { // a domino lying flat, centred at the origin, s = one square
     const hw = s * 0.9, hh = s * 0.4;
     stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: o.z, w: o.w, closed: true, fill: 'none', opacity: o.opacity });
@@ -138,6 +146,18 @@
     cues: fx => [[fx.ringT, 'pen'], [CLEAR, 'whoosh']],
   };
 
+  /* ---------------- a pencil puff where the (dead) bulb was ---------------- */
+  COMP.d3_dPoof = {
+    draw(fx, t, F) {
+      const lt = t - fx.t0; if (lt < 0 || lt > 0.5) return;
+      const a = F.anchors[fx.char]; if (!a) return;
+      const c = [a.headTop[0] + 8, a.headTop[1] - 26 - 56], u = EASE.out(lt / 0.5);
+      for (let i = 0; i < 6; i++) {
+        const ang = (i * 60 + 15) * RAD, r = (14 + 26 * u) * 0.45, q = [c[0] + Math.cos(ang) * (18 + 40 * u), c[1] + Math.sin(ang) * (18 + 40 * u)];
+        stroke(fx.id + i, ringPts(fx.id + i, q[0], q[1], r, r, { n: 8, closed: true }), { z: Z.fx, w: 2.6, color: C.pencil, closed: true, opacity: 1 - u, boil: 0.6 });
+      }
+    },
+  };
   /* ---------------- sweat drops (ink) ---------------- */
   COMP.d3_dSweat = {
     draw(fx, t, F) {
@@ -170,7 +190,7 @@
     d3_dReach: { lean: -6, tilt: -4, armScale: 1.55, armL: [86, 6], armR: [24, 16] },
     d3_dStartle: { lean: 4, tilt: 4, armScale: 1.45, armL: [62, 46], armR: [62, 46] },
   });
-  const firstFail = FAILS[0];
+  const M0 = ATT[2].t0;   // the montage starts
   const curCell = t => { // the domino being placed right now (for Terry's eyes)
     let c = null;
     [0, 1].forEach(k => TR[k].forEach((d, i) => { if (tdOf(k, i) - 0.25 <= t && t < ATT[k].fail) c = domC(d); }));
@@ -187,41 +207,44 @@
         pos: [[0, [TX, FL]]],
         pose: [[0, 'akimbo'], [T.old, 'stand', 0.15], [T.diag + 0.6, 'thinkStand', 0.15], [T.can, 'kidCheer', 0.1, 'back'],
           [ATT[0].t0 - 0.3, jab(placeTimes(0)), 0.15], [L9, 'stand', 0.15], [L10, 'akimbo', 0.12, 'back'], [ATT[1].t0 - 0.3, jab(placeTimes(1)), 0.15],
-          [L11 + 0.4, 'scratchStand', 0.12, 'back'], [MONT[0][0] - 0.1, flail, 0.12], [NINE, 'd3_dSlump', 0.2],
-          [CLEAR + 0.05, 'd3_dOneMore', 0.12, 'back'], [46.15, 'd3_dReach', 0.15], [QT + 0.05, 'd3_dStartle', 0.07, 'back'], [48.0, 'thinkStand', 0.25]],
-        face: [[0, 'proudGrin'], [T.old, 'neutral', 0.08], [T.board, 'focus', 0.08], [T.cut + 0.6, 'surprised', 0.05], [T.cut + 1.4, 'focus', 0.08],
+          [L11 + 0.4, 'scratchStand', 0.12, 'back'], [M0 - 0.1, flail, 0.12], [NINE, 'd3_dSlump', 0.2],
+          [CLEAR + 0.05, 'd3_dOneMore', 0.12, 'back'], [46.25, 'd3_dReach', 0.15], [QT + 0.05, 'd3_dStartle', 0.07, 'back'], [48.4, 'thinkStand', 0.25]],
+        face: [[0, 'proudGrin'], [T.old, 'neutral', 0.08], [T.size, 'focus', 0.08], [T.cut + 0.6, 'surprised', 0.05], [T.cut + 1.4, 'focus', 0.08],
           [T.can, 'proudGrin', 0.05], [ATT[0].t0, 'grin', 0.08], [L9, 'puzzled', 0.06], [L10, 'effort', 0.06], [L11, 'puzzled', 0.06], [L11 + 0.4, 'sheepish', 0.08],
-          [MONT[0][0], 'effort', 0.06], [NINE, 'sheepish', 0.1], [CLEAR + 0.05, 'effort', 0.06], [QT + 0.05, 'surprised', 0.04], [48.0, 'focus', 0.1]],
-        turn: [[0, -0.15], [T.old, -0.4, 0.12], [T.can, -0.1, 0.08], [ATT[0].t0 - 0.3, -0.4, 0.1], [CLEAR + 0.05, -0.15, 0.1], [46.15, -0.4, 0.1]],
-        gaze: [[0, 'viewer'], [T.old, 'old'], [T.board, 'board'], [T.cut + 0.5, 'fall'], [T.cut + 1.4, 'board'], [T.diag, 'diag'], [T.ask, 'ask'], [ROW_IN, 'row'],
-          [T.can, 'viewer'], [ATT[0].t0 - 0.3, 'cur'], [L9, 'left0'], [L10, 'cur'], [L11, 'left1'], [MONT[0][0], 'board'], [NINE, 'left8'],
-          [CLEAR + 0.05, 'viewer'], [46.15, 'board'], [QT + 0.05, 'qm'], [SIGN + 0.4, 'sign'], [48.0, 'board']],
+          [M0, 'effort', 0.06], [NINE, 'sheepish', 0.1], [CLEAR + 0.05, 'effort', 0.06], [QT + 0.05, 'surprised', 0.04], [48.4, 'focus', 0.1]],
+        turn: [[0, -0.15], [T.old, -0.4, 0.12], [T.can, -0.1, 0.08], [ATT[0].t0 - 0.3, -0.4, 0.1], [CLEAR + 0.05, -0.15, 0.1], [46.25, -0.4, 0.1]],
+        gaze: [[0, 'viewer'], [T.old, 'old'], [5.8, 'board'], [T.cut + 0.5, 'fall'], [T.cut + 1.4, 'board'], [T.diag, 'diag'], [T.ask, 'ask'], [ROW_IN, 'row'],
+          [T.can, 'viewer'], [ATT[0].t0 - 0.3, 'cur'], [L9, 'left0'], [L10, 'cur'], [L11, 'left1'], [M0, 'board'], [NINE, 'left8'],
+          [CLEAR + 0.05, 'viewer'], [46.25, 'board'], [QT + 0.05, 'qm'], [SIGN + 0.3, 'sign'], [48.4, 'board']],
         squash: [[0, 1], [T.cut + 0.6, 1.07, 0.05], [T.cut + 0.66, 1, 0.2, 'back'], [T.can, 0.9, 0.05], [T.can + 0.05, 1.08, 0.08], [T.can + 0.15, 1, 0.2, 'back'],
           [L9, 0.95, 0.06], [L9 + 0.06, 1, 0.2, 'back'], [QT + 0.05, 1.1, 0.05], [QT + 0.11, 1, 0.22, 'back']],
       },
     },
-    targets: F => ({ old: [250, 210], board: M.at, fall: [600, 640], diag: DG.at, ask: [600, 100], row: [600, ROW_Y], cur: curCell(F.t),
-      left0: midLeft(0), left1: midLeft(1), left8: midLeft(8), qm: [960, 640], sign: [904, 560] }),
+    targets: F => ({ old: [300, 205], board: M.at, fall: [600, 640], diag: DG.at, ask: [600, 100], row: [600, ROW_Y], cur: curCell(F.t),
+      left0: midLeft(0), left1: midLeft(1), left8: midLeft(8), qm: [QP[0], 640], sign: [QP[0] - 56, 560] }),
     set: [{ type: 'floor' }],
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       // L1: a wink from the red pen
-      { type: 'label', id: 'd3d.wink', text: '（他还不知道）', at: [905, 360], rot: -3, t0: T.wink, t1: 4.3, target: { char: 'terry', part: 'headTop', dx: -30, dy: 6 }, bend: -0.25, gap: 14 },
+      { type: 'label', id: 'd3d.wink', text: '（他还不知道要卡住了）', at: [850, 380], rot: -3, size: 46, t0: T.wink, t1: 4.3, target: { char: 'terry', part: 'headTop', dx: -30, dy: 6 }, bend: -0.25, gap: 14 },
       // L2–L4: the old problem, the board, the cut
-      { type: 'd3_dTag', id: 'd3d.old', text: '老题目', at: [250, 205], rot: -5, size: 52, t0: T.old, t1: T.cut - 0.2, arrowT0: T.board + 0.25, targets: [[392, 330]], bends: [0.25], gap: 10 },
-      { type: 'd3_dDust', id: 'd3d.dust', at: [250, 205], t0: T.old + 0.15 },
-      { type: 'e3_board', id: 'd3d.b', at: M.at, cell: CS, t0: T.board, drawDur: 0.6, cut: T.cut, color: null,
+      { type: 'd3_dTag', id: 'd3d.old', text: '老题目', at: [300, 205], rot: -5, size: 52, t0: T.old, t1: 7.6, arrowT0: T.old + 0.1, targets: [[394, 300]], bends: [0.3], gap: 10 },
+      { type: 'e3_board', id: 'd3d.b', at: M.at, cell: CS, t0: T.board, drawDur: 0.5, cut: T.cut, color: null,
+        scale: [[0, 1], [T.size, 1.04, 0.1], [T.size + 0.1, 1, 0.25, 'back']],
         attempts: ATT.map((a, k) => ({ ...a, dom: TR[k] })),
         rings: [{ cells: leftOf(TR[8]), t0: L13 + 0.3, t1: CLEAR }] },
+      { type: 'd3_dDust', id: 'd3d.dust', at: [600, 215], t0: T.old + 0.15 },
+      { type: 'write', id: 'd3d.size', text: '4×4', x: 600, y: 636, size: 52, t0: T.size + 0.05, t1: T.cut - 0.3, speed: 2800, color: 'red', w: 6, sfx: 'pen', anchor: 'middle', z: Z.annot },
       // L5: one domino on its own
       { type: 'd3_dDiag', id: 'd3d.dg', t0: T.diag, t1: ATT[0].t0 - 0.3 },
-      { type: 'label', id: 'd3d.lbDom', text: ['骨牌：', '盖住相邻两格'], at: [200, 318], rot: -3, t0: T.drop + 0.35, t1: ATT[0].t0 - 0.3, target: [200, 428], bend: 0.15, gap: 8 },
+      { type: 'label', id: 'd3d.lbDom', text: ['骨牌：', '盖住相邻两格'], at: [215, 322], rot: -3, size: 52, t0: T.drop + 0.35, t1: ATT[0].t0 - 0.3, target: [205, 418], bend: 0.15, gap: 8 },
       // L6: the question + the seven dominoes
       { type: 'title', id: 'd3d.ask', text: '7 块骨牌，能盖满吗？', x: 600, y: 90, size: 56, t0: T.ask, t1: ATT[0].t0 - 0.3, color: 'ink' },
       { type: 'd3_dRow', id: 'd3d.row' },
       // L7: the (misleading) flash of insight
       { type: 'e3_bulb', id: 'd3d.bulb', char: 'terry', t0: T.can, t1: QT,
-        state: [[T.can, 'on'], [L9, 'flicker'], [L10, 'on'], [L11, 'flicker'], [NINE, 'off'], [L14, 'flicker']] },
+        state: [[T.can, 'on'], [L9, 'flicker'], [L10, 'on'], [L11, 'flicker'], [NINE, 'off'], [L14, 'flicker'], [DEAD, 'dead']] },
+      { type: 'd3_dPoof', id: 'd3d.poof', char: 'terry', t0: QT },
       { type: 'speech', id: 'd3d.can', text: '能！', at: [1000, 440], tail: [56, 30], speaker: 'terry', t0: T.can, t1: ATT[0].t0 - 0.2, size: 100, rot: -5 },
       // L9: two squares left, not side by side
       { type: 'd3_dTag', id: 'd3d.apart', text: '不挨着！', at: [960, 520], rot: -3, size: 46, t0: L9 + 1.3, t1: ATT[0].t1, targets: [cellC(0, 3), cellC(3, 2)], bends: [0.25, -0.2], gap: 46 },
@@ -230,10 +253,10 @@
       { type: 'title', id: 'd3d.nine', text: '9 次', x: XC[0], y: 470, size: 50, t0: NINE + 0.75, t1: CLEAR, color: 'red', rot: -4, sfx: 'pop' },
       { type: 'd3_dSweat', id: 'd3d.sw', char: 'terry', t0: 39.0, t1: QT },
       // L14: 小问号 bursts in
-      { type: 'qm', id: 'qm', size: 160, t0: QT, burst: true, signSide: 'left', pos: [[0, [960, 770]]],
-        act: [[0, 'idle'], [QT + 0.3, 'hop'], [QT + 0.75, 'idle'], [48.1, 'tap']], hopHz: 2.2,
+      { type: 'qm', id: 'qm', size: 160, signSize: QSIGN, t0: QT, burst: true, signSide: 'left', pos: [[0, QP]],
+        act: [[0, 'idle'], [QT + 0.3, 'hop'], [QT + 0.75, 'idle'], [48.5, 'tap']], hopHz: 2.2,
         mood: [[0, 'surprised'], [SIGN, 'doubt']],
-        gaze: [[0, 'terry'], [48.1, 'board']],
+        gaze: [[0, 'terry'], [48.5, 'board']],
         sign: [[0, null], [SIGN, '为什么总剩两格？']],
         sfxAt: [[QT, 'boing'], [SIGN, 'pop']] },
     ],

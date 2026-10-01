@@ -14,16 +14,16 @@
   const PAPER = [868, 654];                                    // the problem sheet lying on the table
   /* ---------------- times (scene clock) ---------------- */
   const WALK0 = 1.3, WALK1 = 4.0;
-  const HOUSE_T = 7.9, HOUSE_X = 8.45, HOUSE_T1 = 9.35;
+  const HOUSE_T = 7.9, HOUSE_X = 8.45, HOUSE_T1 = 10.4;
   const PUT0 = 9.3, PUT1 = 9.65, OPEN0 = 10.0, CLOSE0 = 12.25;
   const BEND = 12.85, EPS0 = 16.2, SHRINK = 18.9, LENS = 19.3, EPS_T1 = 21.25;
   const OPEN1 = 21.35, FLY0 = 21.45, FLY1 = 21.95, CLOSE1 = 22.3, LOOK = 21.85, POINT = 22.25;
-  const INSET0 = 22.45, INSET1 = 25.1;
+  const INSET0 = 22.45, INSET1 = 26.4;                         // the zoom-in stays up until just before the flash
   const VF0 = 25.2, FLASH = 26.6, SHR0 = 27.6, SHR1 = 28.2, TAPE = [28.32, 28.48], Y85 = 28.62;
-  const QUOTE = [31.45, 32.45, 33.65], ULINE = 33.4;
+  const QUOTE = [31.45, 32.4], ULINE = 33.5;
   const C0 = 35.6, C1 = 36.1;                                  // the photo moves to the corner
   const TWALK0 = 35.6, TWALK1 = 36.4, TCX = 150;               // Terry walks back in (part 3)
-  const TL0 = 39.6, TL_Y = 560, TL_X0 = 330, TL_X1 = 1250, TL_END = 1300;
+  const TL0 = 39.6, TL_Y = 600, TL_X0 = 330, TL_X1 = 1250, TL_END = 1300;
   const M_ENTER = 40.1, QM_T = 41.3;
   const PICK0 = 44.1, PIN0 = 44.6, PIN1 = 45.15, Y32 = 45.35;
   const TRAV0 = 47.8, TRAV1 = 49.4, TAO_IN = 48.5, Y15 = 49.0, BULB = 50.9, CHECK = 51.15;
@@ -47,8 +47,8 @@
     r3_carry: { armR: [14, 10], ikL: CARRY },
     r3_put: { lean: -14, tilt: -10, legL: [14, -26], legR: [8, -14], armScale: 1.2, armR: [30, 20],
       ikL: { w: 1, to: 'hip', dx: CASE_F[0] - EX, dy: 60, bend: 'down' } },   // hip-relative, so it blends smoothly from CARRY
-    r3_bendPoint: { lean: 22, tilt: 14, legL: [10, -6], legR: [6, -10], armScale: 1.2, armR: [84, 4], armL: [26, 18] },
-    r3_bendLook: { lean: 34, tilt: 18, legL: [12, -10], legR: [6, -14], armL: [34, 16], ikR: { w: 1, to: 'abs', dx: 762, dy: 657, bend: 'down' } },
+    r3_bendPoint: { lean: 22, tilt: -10, legL: [10, -6], legR: [6, -10], armScale: 1.2, armR: [84, 4], armL: [26, 18] },
+    r3_bendLook: { lean: 34, tilt: -20, legL: [12, -10], legR: [6, -14], armL: [34, 16], ikR: { w: 1, to: 'abs', dx: 762, dy: 657, bend: 'down' } },
     r3_tHuh: { tilt: -8, armScale: 1.4, armL: [55, 75], armR: [55, 75] },
     r3_tPoint: { lean: -5, tilt: -10, armScale: 1.55, armR: [16, 10], ikL: { w: 1, to: 'abs', dx: 896, dy: 650, bend: 'down' } },
     // the grown-up mathematicians on the timeline (stuck)
@@ -130,11 +130,12 @@
   };
 
   /* ---------------- "他没有家" ---------------- */
-  const HOUSE = [395, 330];
+  const HOUSE = [420, 290], HS = 1.4;                         // drawn 1.4× (house + red ✗), near Erdős's head
   COMP.r3_house = {
     draw(fx, t) {
       if (t < HOUSE_T || t >= HOUSE_T1) return;
-      const lt = t - HOUSE_T, [x, y] = HOUSE, z = Z.annot - 1, p = k => EASE.out(clamp((lt - k * 0.1) / 0.2));
+      const lt = t - HOUSE_T, x = 0, y = 0, z = Z.annot - 1, p = k => EASE.out(clamp((lt - k * 0.1) / 0.2));
+      DL.save(); DL.translate(HOUSE[0], HOUSE[1]); DL.scale(HS);
       stroke('r3hs.body', [[x - 46, y - 34], [x - 46, y + 44, 1], [x + 46, y + 44, 1], [x + 46, y - 34]], { z, w: 5, draw: p(0) });
       stroke('r3hs.roof', [[x - 64, y - 24], [x, y - 88, 1], [x + 64, y - 24]], { z, w: 5, draw: p(1) });
       stroke('r3hs.door', [[x - 13, y + 44], [x - 13, y + 8, 1], [x + 13, y + 8, 1], [x + 13, y + 44]], { z, w: 4, draw: p(2) });
@@ -142,6 +143,7 @@
       const a = EASE.out(clamp((t - HOUSE_X) / 0.14)), b = EASE.out(clamp((t - HOUSE_X - 0.16) / 0.14));
       stroke('r3hs.x0', [[x - 74, y - 92], [x + 74, y + 60]], { z: Z.annot, w: 8, color: C.red, draw: a });
       stroke('r3hs.x1', [[x + 74, y - 92], [x - 74, y + 60]], { z: Z.annot, w: 8, color: C.red, draw: b });
+      DL.restore();
     },
     cues: () => [[HOUSE_T, 'pen'], [HOUSE_X, 'pen'], [HOUSE_X + 0.16, 'pen']],
   };
@@ -172,22 +174,22 @@
   };
 
   /* ---------------- what they looked at: a zoom-in on the sheet (a few squares; not the whole problem) ---------------- */
-  const BOX = [PAPER[0] - 182, 124, PAPER[0] + 182, 330];
+  const BOX = [900, 110, 1264, 316], BOX_C = (BOX[0] + BOX[2]) / 2, LEAD = [[912, 634], [962, BOX[3]]];   // leader clears both heads
   COMP.r3_inset = {
     draw(fx, t) {
       if (t < INSET0 || t >= INSET1) return;
       const lt = t - INSET0, [x0, y0, x1, y1] = BOX;
-      stroke('r3in.ring', ringPts('r3in.ring', PAPER[0], PAPER[1] - 1, 66, 22, { n: 12, a0: -150, sweep: 380, rv: 0.05 }), { z: Z.annot, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.25)) });
-      stroke('r3in.line', [[PAPER[0], PAPER[1] - 25], [PAPER[0], y1]], { z: Z.annot, w: 2.6, color: C.pencil, draw: EASE.out(clamp((lt - 0.15) / 0.25)), boil: 0.5 });
+      stroke('r3in.ring', ringPts('r3in.ring', PAPER[0], PAPER[1] - 1, 66, 22, { n: 12, a0: -150, sweep: 380, rv: 0.05 }), { z: Z.desk + 0.5, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.25)) });   // under the hands
+      stroke('r3in.line', LEAD, { z: Z.annot, w: 2.6, color: C.pencil, draw: EASE.out(clamp((lt - 0.15) / 0.25)), boil: 0.5 });
       stroke('r3in.box', [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]], { z: Z.fx, w: 5, fill: C.paper, draw: EASE.out(clamp((lt - 0.3) / 0.3)) });
     },
     cues: () => [[INSET0, 'pen'], [INSET0 + 0.3, 'paper']],
   };
-  const SQ = { type: 'write', id: 'r3sq', text: '1, 4, 9, 16, …', x: PAPER[0], y: 146, size: 52, anchor: 'middle', t0: INSET0 + 0.55, t1: INSET1, speed: 3400, gap: 0.015, glyphGap: 0.015, w: 5.5, z: Z.fx + 1, sfx: 'pen' };
-  const BOXQ = 72, POW = 34, BOXQ_X = PAPER[0] - (writeWidth('□', BOXQ) + 4 + writeWidth('2', POW)) / 2;
-  const SQB = { type: 'write', id: 'r3box', text: '□', x: BOXQ_X, y: 214, size: BOXQ, t0: layoutWriting({ ...SQ }).tEnd + 0.15, t1: INSET1, speed: 3000, w: 6, z: Z.fx + 1, sfx: 'pen' };
+  const SQ = { type: 'write', id: 'r3sq', text: '1, 4, 9, 16, …', x: BOX_C, y: 132, size: 52, anchor: 'middle', t0: INSET0 + 0.55, t1: INSET1, speed: 3400, gap: 0.015, glyphGap: 0.015, w: 5.5, z: Z.fx + 1, sfx: 'pen' };
+  const BOXQ = 72, POW = 34, BOXQ_X = BOX_C - (writeWidth('□', BOXQ) + 4 + writeWidth('2', POW)) / 2;
+  const SQB = { type: 'write', id: 'r3box', text: '□', x: BOXQ_X, y: 200, size: BOXQ, t0: layoutWriting({ ...SQ }).tEnd + 0.15, t1: INSET1, speed: 3000, w: 6, z: Z.fx + 1, sfx: 'pen' };
   const INSET_W = [SQ, SQB,
-    { type: 'write', id: 'r3pow', text: '2', x: BOXQ_X + writeWidth('□', BOXQ) + 4, y: 224, size: POW, t0: layoutWriting({ ...SQB }).tEnd + 0.05, t1: INSET1, speed: 2200, w: 4.5, z: Z.fx + 1, sfx: 'pen' },
+    { type: 'write', id: 'r3pow', text: '2', x: BOXQ_X + writeWidth('□', BOXQ) + 4, y: 210, size: POW, t0: layoutWriting({ ...SQB }).tEnd + 0.05, t1: INSET1, speed: 2200, w: 4.5, z: Z.fx + 1, sfx: 'pen' },
   ];
 
   /* ---------------- the photo ---------------- */
@@ -196,7 +198,7 @@
   const MID = [800, 236], CORNER = [212, 230];
   const photoTf = t => {
     const u = EASE.io(clamp((t - SHR0) / (SHR1 - SHR0))), v = EASE.io(clamp((t - C0) / (C1 - C0)));
-    return { s: lerp(lerp(1, 0.62, u), 0.3, v), c: lerp2(lerp2(PC, MID, u), CORNER, v), rot: lerp(-2 * u, -5, v), mb: lerp(MS, MB, u) };
+    return { s: lerp(lerp(0.96, 0.62, u), 0.3, v), c: lerp2(lerp2([PC[0], PC[1] - 16], MID, u), CORNER, v), rot: lerp(-2 * u, -5, v), mb: lerp(MS, MB, u) };   // at the click: 4% smaller, 16 px up (hidden by the flash) so it clears the subtitle band
   };
   const toWorld = (p, t) => {
     const f = photoTf(t), r = f.rot * RAD, dx = (p[0] - PC[0]) * f.s, dy = (p[1] - PC[1]) * f.s;
@@ -236,7 +238,7 @@
     draw(fx, t) {
       if (t < VF0 || t >= FLASH) return;
       const u = EASE.out(clamp((t - VF0) / 0.3)), af = Math.sin(Math.PI * clamp((t - (FLASH - 0.55)) / 0.25)) * 12;
-      const d = 40 * (1 - u) - af, L = 50, [x0, y0, x1, y1] = IMG, yb = Math.min(y1 + d, 790);
+      const d = 40 * (1 - u) - af, L = 50, [x0, y0, x1, y1] = IMG, yb = Math.min(y1 + d, 776);
       [[x0 - d, y0 - d, 1, 1], [x1 + d, y0 - d, -1, 1], [x1 + d, yb, -1, -1], [x0 - d, yb, 1, -1]].forEach(([x, y, sx, sy], i) =>
         stroke('r3vf' + i, [[x, y + sy * L], [x, y, 1], [x + sx * L, y]], { z: Z.annot, w: 6, opacity: clamp((t - VF0) / 0.1) }));
     },
@@ -255,21 +257,21 @@
       }
     },
   };
-  /** red pen underline under "like an adult" */
-  const Q_SIZE = 58, Q_X = [800 - 425.5 / 2, 800 - 325.7 / 2, 800 - 361.1 / 2], Q_Y = [578, 646, 714];
+  /** red pen underline under "像对大人一样" (widths measured in ZCOOL KuaiLe at 66 px) */
+  const Q_SIZE = 66, Q_TEXT = ['“他跟我说话，', '像对大人一样。”'], Q_X = [800 - 418 / 2, 800 - 484 / 2], Q_Y = [595, 677];
   COMP.r3_uline = {
     draw(fx, t) {
       if (t < ULINE || t >= C0) return;
-      const p = EASE.out(clamp((t - ULINE) / 0.35)), x0 = Q_X[1] - 4, x1 = x0 + 318, y = Q_Y[1] + 36;
-      const pts = []; for (let i = 0; i <= 10; i++) pts.push([lerp(x0, x1, i / 10), y + (i % 2 ? -3 : 3) + i * 0.4]);
+      const p = EASE.out(clamp((t - ULINE) / 0.35)), x0 = Q_X[1] - 4, x1 = Q_X[1] + 400, y = Q_Y[1] + 42;
+      const pts = []; for (let i = 0; i <= 12; i++) pts.push([lerp(x0, x1, i / 12), y + (i % 2 ? -3 : 3) + i * 0.4]);
       stroke('r3ul', pts, { z: Z.annot, w: 5, color: C.red, draw: p });
     },
     cues: () => [[ULINE, 'pen']],
   };
 
   /* ---------------- Erdős's problems: cards fly out of the photo ---------------- */
-  const CARDS = [[480, 200, -7, 0], [630, 250, 5, 1], [780, 198, -3, 0], [930, 246, 7, 0], [1080, 204, -6, 1]];
-  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[260, -150], [1500, -40]];
+  const CARDS = [[480, 150, -7, 0], [630, 196, 5, 0], [780, 148, -3, 0], [930, 192, 7, 0], [1080, 154, -6, 0]];   // [x, y, rot, $tag] — tags off (prizes aren't in the fact list)
+  const PICK = 2, KW = 116, KH = 84, PIN = [330, 514], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[260, -150], [1500, -40]];
   const SRC = toWorld([700, 520], C1 + 1);                     // Erdős in the photo, once it sits in the corner
   const cardT = i => 36.2 + i * 0.17;
   function cardAt(i, t) {                                      // → [centre, rotation, scale] | null (pure)
@@ -328,7 +330,7 @@
     },
     cues: () => [[TL0, 'swish']],
   };
-  const MATH = { H: 190, head: 0.38, torso: 0.24, leg: 0.32, arm: 0.36, floor: TL_Y, noShadow: true };
+  const MATH = { H: 280, head: 0.3, torso: 0.27, leg: 0.37, arm: 0.36, floor: TL_Y, noShadow: true };
   const MATHS = [
     { id: 'r3m0', x: 520, def: { hair: 'messy', blink: [3.9, 0.3] }, pose: 'r3_mScratchR', face: 'puzzled', turn: 0.25 },
     { id: 'r3m1', x: 705, def: { hair: 'ponytail', blink: [4.3, 1.1] }, pose: 'r3_mChin', face: 'focus', turn: -0.2 },
@@ -362,7 +364,7 @@
       pose: [[0, m.pose], [RELAX, 'r3_mRelax', 0.15, 'back']],
       face: [[0, m.face], [TRAV0, 'surprised', 0.05], [TRAV1 + 0.1, 'focus', 0.08], [BULB, 'idea', 0.05], [RELAX, 'smile', 0.08]],
       turn: [[0, m.turn], [TRAV0, 0.45, 0.12]],
-      gaze: [[0, [m.x + (i % 2 ? -70 : 70), 230]], [TRAV0, 'card'], [TRAV1 + 0.1, 'tao']],
+      gaze: [[0, [m.x + (i % 2 ? -70 : 70), 190]], [TRAV0, 'card'], [TRAV1 + 0.1, 'tao']],
       squash: [[0, 1], [RELAX, 1.06, 0.06], [RELAX + 0.06, 1, 0.2, 'back']],
     };
   });
@@ -388,7 +390,7 @@
         squash: [[0, 1], [BEND, 1.04, 0.06], [BEND + 0.06, 1, 0.2, 'back']],
         face: [[0, 'smile'], [HOUSE_T, 'neutral', 0.08], [PUT0, 'focus', 0.08], [PUT1 + 0.2, 'smile', 0.08], [BEND, 'grin', 0.05],
           [EPS0, 'smile', 0.08], [LOOK, 'focus', 0.08], [24.0, 'smile', 0.1]],
-        turn: [[0, 0.5], [WALK1, 0.4, 0.12], [PUT0, -0.2, 0.15], [PUT1 + 0.2, 0.4, 0.15], [BEND, 0.6, 0.1], [EPS0, 0.35, 0.12], [LOOK, 0.5, 0.15]],
+        turn: [[0, 0.5], [WALK1, 0.4, 0.12], [PUT0, -0.2, 0.15], [PUT1 + 0.2, 0.4, 0.15], [BEND, 0.3, 0.1], [EPS0, 0.35, 0.12], [LOOK, 0.3, 0.15]],
         gaze: [[0, [1400, 450]], [WALK1, 'terry'], [HOUSE_T, 'viewer'], [PUT0, 'case'], [PUT1 + 0.2, 'terry'], [EPS0, 'eps'], [OPEN1, 'paperfly'], [LOOK, 'paper']],
       },
       terry: {
@@ -399,7 +401,7 @@
           [SHRINK + 0.3, 1.08, 0.05], [SHRINK + 0.35, 1, 0.2, 'back'], [GRIN, 1.08, 0.06], [GRIN + 0.06, 1, 0.25, 'back']],
         face: [[0, 'neutral'], [1.4, 'surprised', 0.05], [2.2, 'smile', 0.1], [HOUSE_T, 'puzzled', 0.08], [OPEN0, 'surprised', 0.05], [10.7, 'grin', 0.08],
           [12.4, 'smile', 0.08], [13.2, 'surprised', 0.05], [14.4, 'grin', 0.08], [EPS0, 'smile', 0.1], [SHRINK + 0.3, 'surprised', 0.05], [19.9, 'grin', 0.08],
-          [OPEN1, 'smile', 0.1], [POINT, 'focus', 0.1],
+          [OPEN1, 'smile', 0.1], [POINT, 'focus', 0.1], [24.6, 'smile', 0.1],
           [TWALK0, 'neutral', 0], [cardT(0) + 0.1, 'surprised', 0.05], [37.6, 'smile', 0.1], [M_ENTER + 0.5, 'focus', 0.1],
           [TRAV0, 'surprised', 0.05], [BULB, 'idea', 0.05], [SMILE, 'smile', 0.1], [GRIN, 'joy', 0.08]],
         turn: [[0, -0.4], [TWALK0, 0.45, 0]],
@@ -415,17 +417,17 @@
         turn: [[0, -0.45]],
         gaze: [[0, 'card'], [51.8, 'maths']],
       },
-      r3pE: { pos: [[0, [EX2, FL]]], pose: [[0, photoPose.erdos]], face: [[0, 'smile']], turn: [[0, 0.5]], gaze: [[0, PAPER]] },
-      r3pT: { pos: [[0, [TX, FL]]], pose: [[0, photoPose.terry]], face: [[0, 'focus']], turn: [[0, -0.4]], gaze: [[0, PAPER]] },
+      r3pE: { pos: [[0, [EX2, FL]]], pose: [[0, photoPose.erdos]], face: [[0, 'smile']], turn: [[0, 0.3]], gaze: [[0, PAPER]] },
+      r3pT: { pos: [[0, [TX, FL]]], pose: [[0, photoPose.terry]], face: [[0, 'smile']], turn: [[0, -0.4]], gaze: [[0, PAPER]] },
     },
     targets: F => {
       const t = F.t, b = caseBottom(t, F), c = cardAt(PICK, t);
       return { house: HOUSE, eps: EPS_C, paper: PAPER, paperfly: t < FLY1 ? paperPos(t) : PAPER, case: [b[0], b[1] - CHT / 2],
-        cards: [780, 225], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 420] };
+        cards: [780, 180], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 380] };
     },
     set: [
       { type: 'floor', t1: FLASH },
-      { type: 'desk', ...DESK, open: true, t1: FLASH },
+      { type: 'desk', ...DESK, open: true, t0: 1.0, t1: FLASH },
       { type: 'floor', t0: C0 },
     ],
     fx: [
@@ -435,7 +437,7 @@
       { type: 'r3_case', id: 'r3case' },
       { type: 'label', id: 'r3lbName', text: '埃尔德什', at: [345, 300], rot: -3, t0: 4.9, t1: 7.7, target: { char: 'erdos', part: 'headTop', dx: -36, dy: 6 }, bend: -0.25, gap: 14, size: 50 },
       { type: 'r3_house', id: 'r3house' },
-      { type: 'label', id: 'r3lbStuff', text: '（全部家当）', at: [275, 520], rot: -3, t0: 10.35, t1: 12.5, target: [478, 650], bend: 0.2, gap: 10 },
+      { type: 'label', id: 'r3lbStuff', text: '（全部家当）', at: [275, 520], rot: -3, t0: 10.35, t1: 12.2, target: [478, 650], bend: 0.2, gap: 10 },
       // ε
       { type: 'speech', id: 'r3say', text: '一个 ε！', at: [890, 318], tail: [-120, 36], speaker: 'erdos', t0: 13.0, t1: 16.0, size: 76, rot: -3 },
       { type: 'r3_eps', id: 'r3eps' },
@@ -449,7 +451,7 @@
       { type: 'r3_photo', id: 'r3photo' },
       { type: 'title', id: 'r3ka', text: '咔嚓！', x: KA[0], y: KA[1], size: 86, rot: 10, color: 'ink', t0: FLASH, t1: SHR0 + 0.15, sfx: 'r3_click' },
       { type: 'label', id: 'r3lb19', text: '陶哲轩 2019 年回忆', at: [800, 500], rot: -2, t0: 29.1, t1: C0, size: 40 },
-      ...['“He spoke to me', 'like an adult,', 'like an equal.”'].map((s, i) => ({ type: 'scribe', id: 'r3q' + i, text: s, x: Q_X[i], y: Q_Y[i], size: Q_SIZE, font: CFG.FONT_MIX, t0: QUOTE[i], t1: C0, cps: 16 })),
+      ...Q_TEXT.map((s, i) => ({ type: 'scribe', id: 'r3q' + i, text: s, x: Q_X[i], y: Q_Y[i], size: Q_SIZE, t0: QUOTE[i], t1: C0, cps: 8 })),
       { type: 'r3_uline', id: 'r3ul' },
       // part 3 · his problems; one of them, 1932 → 2015
       { type: 'r3_cards', id: 'r3cards' },
@@ -463,7 +465,7 @@
       { type: 'title', id: 'r3note', text: '（也用上了很多数学家一起攒下的线索）', x: 790, y: 708, size: 42, color: 'red', rot: -1, t0: NOTE, t1: DUR },
       { type: 'r3_flash', id: 'r3flash' },
     ],
-    sfx: [[13.0, 'boing'], ...MATHS.map((_, i) => [M_ENTER + i * 0.25, 'plip']), [TAO_IN, 'hop']],
+    sfx: [[1.0, 'pen'], [13.0, 'boing'], ...MATHS.map((_, i) => [M_ENTER + i * 0.25, 'plip']), [TAO_IN, 'hop']],
     steps: [{ t0: WALK0, t1: WALK1, hz: 4.4 }, { t0: TWALK0, t1: TWALK1, hz: 5.2 }],
     subs: [
       { t0: 0.3, t1: 4.7, text: '也是十岁那年，来了一位特别的客人：' },
