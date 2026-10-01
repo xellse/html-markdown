@@ -32,7 +32,9 @@ def build(ep, only=None, out=None, audio=True):
               f"EP.music = {json.dumps(au.get('music', {}))}; EP.think = {json.dumps(au.get('think'))};\n")
     pack = meta['out'].replace('.html', '.audio.js')
     pack_path = os.path.join(ROOT, pack)
-    audio_tag = f'<script src="{pack}"></script>' if audio and os.path.exists(pack_path) else ''
+    # the pack is linked by a relative path, so only pages written next to it get it (test pages built elsewhere stay silent)
+    next_to_pack = not out or os.path.dirname(os.path.abspath(out)) == ROOT
+    audio_tag = f'<script src="{pack}"></script>' if audio and next_to_pack and os.path.exists(pack_path) else ''
     if audio and not only and not out:
         if not os.path.exists(pack_path):
             print(f'note: no {pack} yet — the page will use the browser voice. Run: python3 tools/audio.py {ep}')

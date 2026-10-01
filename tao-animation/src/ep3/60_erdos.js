@@ -130,7 +130,7 @@
   };
 
   /* ---------------- "他没有家" ---------------- */
-  const HOUSE = [420, 290], HS = 1.4;                         // drawn 1.4× (house + red ✗), near Erdős's head
+  const HOUSE = [395, 268], HS = 1.4;                         // drawn 1.4× (house + red ✗), near Erdős's head
   COMP.r3_house = {
     draw(fx, t) {
       if (t < HOUSE_T || t >= HOUSE_T1) return;

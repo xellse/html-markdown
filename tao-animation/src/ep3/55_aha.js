@@ -26,6 +26,33 @@
   const boardAt = t => evalTrack(BPOS, t);
   const cellAt = (t, r, c) => { const p = boardAt(t); return [p[0] + (c - (N - 1) / 2) * CELL, p[1] + (r - (N - 1) / 2) * CELL]; };
 
+  /** a group of ordinary fx drawn together, with an optional moving transform (xf: t => DL ops) and a fade (op: t => 0..1) — for exits.
+   *  (same code in 58_proof.js, so each scene builds on its own) */
+  COMP.a3_grp = {
+    init(fx) { fx.items.forEach(it => { const c = COMP[it.type]; if (c.init) c.init(it); }); return fx; },
+    draw(fx, t, F) {
+      if ((fx.t0 !== undefined && t < fx.t0) || (fx.t1 !== undefined && t >= fx.t1)) return;
+      const n0 = DL.items.length;
+      DL.save(); if (fx.xf) fx.xf(t);
+      fx.items.forEach(it => COMP[it.type].draw(it, t, F));
+      DL.restore();
+      const op = fx.op ? fx.op(t) : 1;
+      if (op < 0.999) for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * op).toFixed(3); }
+    },
+    cues: fx => fx.items.flatMap(it => (COMP[it.type].cues ? COMP[it.type].cues(it) : [])),
+  };
+  const fadeOut = (t0, d = 0.3) => t => 1 - clamp((t - t0) / d);
+
+  /** the domino we look at: one red rounded outline round both its squares (red circles mean "left over" in this episode) */
+  COMP.a3_domMark = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const c = lerp2(cellAt(t, DOM[0], DOM[1]), cellAt(t, DOM[0], DOM[1] + 1), 0.5);
+      stroke('a3dm', superPts(c[0], c[1], 2 * CELL + 18, CELL + 18, 26, 5), { z: Z.annot, w: 5.5, color: C.red, closed: true, draw: EASE.out(clamp((t - fx.t0) / 0.4)) });
+    },
+    cues: fx => [[fx.t0, 'pen']],
+  };
+
   /* ---------------- L1–L3: one domino, blown up: two neighbours = one black + one white ---------------- */
   const ZC = [218, 316], ZS = 140;                           // the enlarged domino (left panel)
   const ZT = { lines: 3.45, cells: 3.55, dom: 4.3, hatch: 6.95 };
@@ -57,7 +84,7 @@
   };
 
   /* ---------------- L4–L6: count the squares (red numbers on the board) ---------------- */
-  const NS = 40;
+  const NS = 36, NR = 18;                                  // digit size, paper backing radius (small: the hatching stays visible)
   const glyphs = n => layoutWriting({ text: String(n), x: 0, y: -NS / 2, size: NS, t0: 0, speed: 1500, gap: 0.02, glyphGap: 0.02, anchor: 'middle' });
   const TB = 10.95, DTB = 0.19, TW = 12.45, DTW = 0.165;   // black 1–6, white 1–8
   const DIMB = 15.95, DIMW = 18.75;                        // "用光了": used squares fade (in the same order)
@@ -71,10 +98,12 @@
       COUNT.forEach((o, i) => {
         if (t < o.t) return;
         const p = F.targets[`${fx.board}.c${o.r}_${o.c}`]; if (!p) return;
-        const op = o.dim === null ? 1 : lerp(1, 0.22, clamp((t - o.dim) / 0.25));
+        // the black count steps back (0.4) before the white count starts, so the two counts never read as one jumble
+        const blk = E3B.black(o.r, o.c), pre = blk ? lerp(1, 0.4, clamp((t - TW + 0.25) / 0.2)) : 1;
+        const op = pre * (o.dim === null ? 1 : lerp(1, blk ? 0.35 : 0.22, clamp((t - o.dim) / 0.25)));
         const k = 'a3n' + i, pop = EASE.back(clamp((t - o.t) / 0.16));
         DL.save(); DL.translate(p[0], p[1]);
-        dot(k + '.bg', [0, 0], 25 * pop, C.paper, Z.annot - 1);
+        stroke(k + '.bg', ringPts(k + '.bg', 0, 0, NR * pop, NR * pop, { n: 10, closed: true }), { z: Z.annot - 1, closed: true, fill: C.paper, noStroke: true, w: 1, opacity: op });
         o.g.strokes.forEach((s, j) => {
           const u = clamp((t - o.t - s.t0) / s.dur);
           if (u > 0) stroke(k + '.s' + j, s.pts, { z: Z.annot, w: 4.6, color: C.red, draw: u, opacity: op, boil: 0.5 });
@@ -103,6 +132,8 @@
   const TS = 68, TXL = 105, TXN = 152, ROW = [300, 420];
   const XEQ = TXN + writeWidth('6', TS) + 0.36 * TS;
   const TALLY = { b: 12.2, w: 13.85, eqB: 15.3, eqW: 18.55, ring2: 19.75 };
+  const EQ8 = { type: 'write', id: 'a3e8', text: '- 6 = 2', x: XEQ, y: ROW[1] - TS / 2, size: TS, t0: TALLY.eqW, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' };
+  const END_FADE = 38.2;                                   // chain and bulb fade out before the cut to 58_proof
 
   /* ---------------- L7: 啊哈！ (jump, burst lines, the word itself) ---------------- */
   const jumpY = t => {
@@ -131,7 +162,7 @@
       });
       // the word
       const pp = EASE.back(clamp((t - fx.wordT) / 0.24));
-      if (t >= fx.wordT) text('a3aha.w', '啊哈！', 1000, 128, { size: 118, rot: -7, scale: lerp(0.3, 1, pp), opacity: clamp((t - fx.wordT) / 0.08), halo: 12, z: Z.annot });
+      if (t >= fx.wordT) text('a3aha.w', '啊哈！', 1000, 128, { size: 118, rot: -7, scale: lerp(0.3, 1, pp), opacity: clamp((t - fx.wordT) / 0.08) * (1 - clamp((t - EXIT) / 0.3)), halo: 12, z: Z.annot });
     },
   };
 
@@ -147,7 +178,7 @@
   };
 
   /* ---------------- L9: … didn't fall out of the sky (cloud drops a bulb — crossed out) ---------------- */
-  const SKY = { cloud: 29.55, drop: 30.05, land: 30.5, x1: 31.15, x2: 31.4, x: 620, cy: 175, by: 470 };
+  const SKY = { cloud: 28.5, drop: 29.6, land: 30.12, x1: 31.0, x2: 31.25, x: 620, cy: 175, by: 742, off: 32.15 };   // by: the bulb lands on the floor
   COMP.a3_sky = {
     draw(fx, t, F) {
       if (t < SKY.cloud || t >= fx.t1) return;
@@ -162,9 +193,10 @@
         const by = lerp(cy + 40, SKY.by, EASE.in(u)) - bounce;
         if (u < 1) [-18, 18].forEach((dx, i) => stroke('a3sky.fl' + i, [[x + dx, by - 150], [x + dx, by - 110 - 40 * u]], { z: z - 0.1, w: 3.5, opacity: 0.8 * (1 - u * 0.5), boil: 0.6 }));
         COMP.e3_bulb.draw({ id: 'a3sky.b', at: [x, by + 30], size: 92, t0: -1, state: [[-1, 'on']], z: z + 0.2 }, t, F);
+        if (u >= 1) shadow('a3sky.sh', x, FL + 4, 70, 1);
       }
       // a big red ✗ over the whole idea
-      [[[x - 190, cy - 70], [x + 190, SKY.by + 70]], [[x + 190, cy - 70], [x - 190, SKY.by + 70]]].forEach((seg, i) => {
+      [[[x - 190, cy - 70], [x + 190, FL]], [[x + 190, cy - 70], [x - 190, FL]]].forEach((seg, i) => {
         const u = EASE.out(clamp((t - (i ? SKY.x2 : SKY.x1)) / 0.2));
         if (u > 0) stroke('a3sky.x' + i, seg, { z: Z.annot, w: 11, color: C.red, draw: u });
       });
@@ -227,10 +259,10 @@
           [22.2, 'crouch', 0.1], [J0, 'a3_air', 0.07, 'back'], [J1 - 0.05, 'kidCheer', 0.06], [EXIT, 'stand', 0.2], [26.5, 'a3_proud', 0.15],
           [32.6, 'stand', 0.2], [BAND_T, 'a3_proud', 0.15]],
         face: [[0, 'idea'], [1.3, 'focus', 0.08], [7.55, 'smile', 0.08], [10.4, 'focus', 0.08], [19.9, 'surprised', 0.06],
-          [22.2, 'idea', 0.05], [J0, 'joy', 0.05], [EXIT, 'proudGrin', 0.08], [29.5, 'puzzled', 0.08], [31.15, 'neutral', 0.08], [32.8, 'smile', 0.08], [BAND_T, 'proudGrin', 0.08]],
+          [22.2, 'idea', 0.05], [J0, 'joy', 0.05], [EXIT, 'proudGrin', 0.08], [29.6, 'puzzled', 0.08], [31.0, 'neutral', 0.08], [32.8, 'smile', 0.08], [BAND_T, 'proudGrin', 0.08]],
         turn: [[0, -0.35], [J0, -0.05, 0.1], [EXIT, -0.3, 0.15]],
         gaze: [[0, 'dom'], [3.5, 'zoom'], [10.4, 'board'], [12.2, 'tallyB'], [12.45, 'board'], [13.85, 'tallyW'], [14.6, 'board'], [15.3, 'tallyB'],
-          [16.0, 'board'], [18.55, 'leftW'], [J0 - 0.3, 'viewer'], [26.4, 'bulb'], [29.55, 'sky'], [32.6, 'chain0'], [34.0, 'chain1'], [34.85, 'chain2'], [35.55, 'viewer']],
+          [16.0, 'board'], [18.55, 'leftW'], [J0 - 0.3, 'viewer'], [26.4, 'bulb'], [28.6, 'sky'], [SKY.drop + 0.2, 'skyLow'], [32.6, 'chain0'], [34.0, 'chain1'], [34.85, 'chain2'], [35.55, 'viewer']],
         squash: [[0, 1], [7.55, 1.05, 0.06], [7.62, 1, 0.2, 'back'], [19.9, 1.06, 0.05], [19.96, 1, 0.2, 'back'],
           [22.2, 0.86, 0.1], [J0, 1.14, 0.06], [J0 + 0.25, 1, 0.12], [J1, 0.84, 0.05], [J1 + 0.06, 1.04, 0.12, 'back'], [J1 + 0.2, 1, 0.15],
           [H0 - 0.08, 0.92, 0.06], [H0, 1.08, 0.06], [H1, 0.9, 0.04], [H1 + 0.05, 1, 0.2, 'back']],
@@ -240,7 +272,7 @@
       const c = (r, cc) => cellAt(F.t, r, cc);
       const d = lerp2(c(1, 0), c(1, 1), 0.5);
       return { dom: d, zoom: ZC, board: boardAt(F.t), tallyB: [TXN + 40, ROW[0]], tallyW: [TXN + 40, ROW[1]],
-        leftW: lerp2(c(2, 3), c(3, 2), 0.5), bulb: bulbAt(F), sky: [SKY.x, SKY.cy + 120],
+        leftW: lerp2(c(2, 3), c(3, 2), 0.5), bulb: bulbAt(F), sky: [SKY.x, SKY.cy + 120], skyLow: [SKY.x, 700],
         chain0: [CHAIN[0].x + CHAIN[0].w / 2, CY], chain1: [CHAIN[1].x + CHAIN[1].w / 2, CY], chain2: [CHAIN[2].x + CHAIN[2].w / 2, CY] };
     },
     set: [{ type: 'floor' }],
@@ -248,34 +280,43 @@
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       // the main board, exactly as scene 50 left it
       { type: 'e3_board', id: 'a3b', pos: BPOS, n: N, cell: CELL, t0: -5, t1: EXIT + 0.55, cut: -5, color: -5,
-        attempts: [{ t0: -5, dom: TRY }],
-        rings: [{ cells: E3B.domCells(DOM), t0: 1.5, t1: SLIDE }] },
-      // L1–L3
-      { type: 'a3_zoomDom', id: 'a3zd', t1: SLIDE },
+        attempts: [{ t0: -5, dom: TRY }] },
+      // L1–L3 (the whole panel fades out as the board slides)
+      { type: 'a3_grp', id: 'a3gZoom', t1: SLIDE + 0.3, op: fadeOut(SLIDE), items: [
+        { type: 'a3_domMark', id: 'a3dm', t0: 1.5, t1: SLIDE + 0.3 },
+        { type: 'a3_zoomDom', id: 'a3zd', t1: SLIDE + 0.3 },
+        { type: 'title', id: 'a3bw', text: '一黑一白', x: ZC[0], y: 468, size: 70, t0: 7.5, color: 'ink', sfx: 'pop' },
+        { type: 'band', id: 'a3bwHi', rect: [ZC[0] - 150, 430, 300, 78], t0: 8.1, dur: 0.45 },
+      ] },
       { type: 'label', id: 'a3lbNext', text: '挨在一起', at: [ZC[0], 182], rot: -3, t0: 5.0, t1: 6.65, target: [ZC[0], ZC[1] - ZS / 2 - 4], bend: 0.25, gap: 8 },
-      { type: 'title', id: 'a3bw', text: '一黑一白', x: ZC[0], y: 468, size: 70, t0: 7.5, t1: SLIDE, color: 'ink', sfx: 'pop' },
-      { type: 'band', id: 'a3bwHi', rect: [ZC[0] - 150, 430, 300, 78], t0: 8.1, t1: SLIDE, dur: 0.45 },
-      // L4–L6: count, tally, subtract
+      // L4–L6: count, tally, subtract (the tally slides off with the board)
       { type: 'a3_count', id: 'a3cnt', board: 'a3b', t1: EXIT + 0.55 },
-      { type: 'title', id: 'a3tB', text: '黑', x: TXL, y: ROW[0], size: TS, t0: TALLY.b, t1: EXIT, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n6', text: '6', x: TXN, y: ROW[0] - TS / 2, size: TS, t0: TALLY.b + 0.08, t1: EXIT, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'title', id: 'a3tW', text: '白', x: TXL, y: ROW[1], size: TS, t0: TALLY.w, t1: EXIT, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n8', text: '8', x: TXN, y: ROW[1] - TS / 2, size: TS, t0: TALLY.w + 0.08, t1: EXIT, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'write', id: 'a3e6', text: '- 6 = 0', x: XEQ, y: ROW[0] - TS / 2, size: TS, t0: TALLY.eqB, t1: EXIT, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'write', id: 'a3e8', text: '- 6 = 2', x: XEQ, y: ROW[1] - TS / 2, size: TS, t0: TALLY.eqW, t1: EXIT, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'ring', id: 'a3r2', of: 'a3e8', glyph: 6, t0: TALLY.ring2, t1: EXIT },
+      { type: 'a3_grp', id: 'a3gTally', t1: EXIT + 0.55, xf: t => { if (t >= EXIT) DL.translate(boardAt(t)[0] - B1[0], 0); }, items: [
+        { type: 'title', id: 'a3tB', text: '黑', x: TXL, y: ROW[0], size: TS, t0: TALLY.b, color: 'red', sfx: 'pop' },
+        { type: 'write', id: 'a3n6', text: '6', x: TXN, y: ROW[0] - TS / 2, size: TS, t0: TALLY.b + 0.08, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'title', id: 'a3tW', text: '白', x: TXL, y: ROW[1], size: TS, t0: TALLY.w, color: 'red', sfx: 'pop' },
+        { type: 'write', id: 'a3n8', text: '8', x: TXN, y: ROW[1] - TS / 2, size: TS, t0: TALLY.w + 0.08, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'write', id: 'a3e6', text: '- 6 = 0', x: XEQ, y: ROW[0] - TS / 2, size: TS, t0: TALLY.eqB, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'label', id: 'a3lb6', text: '6 块骨牌', at: [XEQ + 84, ROW[0] - 82], rot: -3, t0: TALLY.eqB + 0.3, t1: EXIT + 0.55, target: [XEQ + 84, ROW[0] - 36], bend: 0.2, gap: 6, size: 36 },
+        EQ8,
+        { type: 'ringRect', id: 'a3r2', rect: () => { const b = EQ8.boxes[6]; return [b.x, b.y, b.w, b.h]; }, t0: TALLY.ring2, pad: 16 },
+      ] },
       { type: 'a3_pulse', id: 'a3pl', board: 'a3b', cells: LEFT, at: [19.85, 20.3] },
       { type: 'label', id: 'a3lbNever', text: '永远不挨着', at: [905, 712], rot: -2, t0: 20.55, t1: 22.45, target: [B1[0] + CELL - 4, B1[1] + CELL - 4], bend: 0.2, gap: 10 },
       // L7: 啊哈！
-      { type: 'e3_bulb', id: 'a3bulb', char: 'terry', size: 130, t0: J0, state: [[J0, 'on'], [27.25, 'off'], [27.5, 'on']] },
-      { type: 'a3_aha', id: 'a3aha', wordT: J0 + 0.05, t1: EXIT },
+      { type: 'a3_grp', id: 'a3gBulb', op: fadeOut(END_FADE, 0.4), items: [
+        { type: 'e3_bulb', id: 'a3bulb', char: 'terry', size: 130, t0: J0, state: [[J0, 'on'], [27.25, 'off'], [27.5, 'on']] },
+      ] },
+      { type: 'a3_aha', id: 'a3aha', wordT: J0 + 0.05, t1: EXIT + 0.3 },
       // L8–L10
-      { type: 'a3_bulbRing', id: 'a3bring', t0: 26.65, t1: 29.4 },
-      { type: 'a3_sky', id: 'a3sky', t1: 32.45 },
-      { type: 'a3_chain', id: 'a3chain' },
-      { type: 'band', id: 'a3chHi', rect: [CHAIN[0].x, CY - 38, CHAIN_END - CHAIN[0].x, 76], t0: BAND_T, dur: 0.7, pad: 8 },
+      { type: 'a3_bulbRing', id: 'a3bring', t0: 26.65, t1: 28.45 },
+      { type: 'a3_grp', id: 'a3gSky', t1: SKY.off + 0.3, op: fadeOut(SKY.off), items: [{ type: 'a3_sky', id: 'a3sky', t1: SKY.off + 0.3 }] },
+      { type: 'a3_grp', id: 'a3gChain', op: fadeOut(END_FADE, 0.4), items: [
+        { type: 'a3_chain', id: 'a3chain' },
+        { type: 'band', id: 'a3chHi', rect: [CHAIN[0].x, CY - 38, CHAIN_END - CHAIN[0].x, 76], t0: BAND_T, dur: 0.7, pad: 8 },
+      ] },
     ],
-    sfx: [[1.5, 'pen'], [SLIDE, 'whoosh'], [22.2, 'swish'], [J0, 'hop'], [J1, 'thud'], [H0, 'hop'], [H1, 'thud'], [EXIT, 'whoosh']],
+    sfx: [[SLIDE, 'whoosh'], [22.2, 'swish'], [J0, 'hop'], [J1, 'thud'], [H0, 'hop'], [H1, 'thud'], [EXIT, 'whoosh']],
     subs: [
       { t0: 0.3, t1: 3.3, text: '为什么？看一块骨牌：' },
       { t0: 3.4, t1: 6.6, text: '它盖住的两格挨在一起，' },

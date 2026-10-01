@@ -191,8 +191,7 @@
       { type: 'desk', x: DX, top: DTOP, w: DW },
     ],
     fx: [
-      // t0/dockT far below zero: the engine's cue filter would otherwise play this stamp's sounds at the end of the previous scene
-      { type: 'ageStamp', age: 10, t0: -1000, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -999, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
+      { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       { type: 'f3_sheet', id: 'f3s.sheetC' },
       { type: 'f3_wclock', id: 'f3s.wclock' },
       { type: 'title', id: 'f3s.stuck', text: '卡住', x: CL[0], y: 290, size: 150, t0: 1.75, t1: 3.8, underline: true },
@@ -210,7 +209,7 @@
       // 习惯了“一眼看出来”：a memory of the old ding
       { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 238, ry: 138, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
       { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0] - 80, CL[1] + 56], t0: 13.85, t1: 17.95, drawDur: 0 },
-      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0] - 80, CL[1] - 34], size: 62, t0: 13.85, t1: 17.95, state: [[-1000, 'on']], z: Z.fx + 2 },   // already lit, and no ding leaking into the previous scene
+      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0] - 80, CL[1] - 34], size: 62, t0: 13.85, t1: 17.95, state: [[-1, 'on']], z: Z.fx + 2 },   // already lit (no ding)
       { type: 'f3_memoCard', id: 'f3s.memoCard', t1: 17.95 },
       // “我是不是……没那么聪明？”
       { type: 'f3_gloom', id: 'f3s.gloom', t0: 18.7, t1: 21.8 },
