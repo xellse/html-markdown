@@ -79,14 +79,14 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <p class="kicker">数学少年陶哲轩 · 10 岁</p>
   </header>
 
-  <div id="stage" role="img" aria-label="【待填写】">
+  <div id="stage" role="img" aria-label="动画第3集：十岁的陶哲轩做题一直靠“灵光一闪”，准备国际数学奥林匹克时碰到真正的难题，灵光不灵了。卡住曲线讲卡住谷和啊哈峰；骨牌盖残缺棋盘的难题，试了九次都失败，靠记录失败、问更好的问题、给棋盘涂上黑白两色想通；遇见数学家埃尔德什；陶哲轩长大后说解难题靠一步步试；结尾讲他早年的一次失利和“根还没扎深”。">
     <svg id="svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <rect width="1600" height="900" fill="#FBF8F1"/>
       <g id="layer"></g>
     </svg>
     <button id="poster" class="overlay" type="button" aria-label="播放动画">
       <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17l15-8.5z" fill="#FBF8F1"/></svg></span>
-      <span class="plabel">播放 · 第3集（约 7 分钟）</span>
+      <span class="plabel">播放 · 第3集（约 8 分钟）</span>
     </button>
     <button id="think" class="overlay think" type="button" aria-label="继续播放，看答案" hidden>
       <span class="plabel">想好了吗？点这里看答案 ▶</span>
@@ -693,10 +693,12 @@ function drawFace(L, F, key) {
     const k = key('eye' + i);
     if (blinking) {
       stroke(k, [hl(cx - rx * 0.85, cy + 0.04), hl(cx, cy + ry * 0.2), hl(cx + rx * 0.85, cy + 0.04)], { z: Z.front, w: 4.5 });
+      eyesW.push({ cx, cy, rx, ry });   // glasses stay on while blinking
       return;
     }
     if (face.eyes === 'happy') {
       stroke(k, [hl(cx - rx * 0.82, cy + ry * 0.18), hl(cx, cy - ry * 0.42), hl(cx + rx * 0.82, cy + ry * 0.18)], { z: Z.front, w: 5 });
+      eyesW.push({ cx, cy, rx, ry });
       return;
     }
     const ring = ringPts(k, cx, cy, rx, ry, { n: 11, a0: -100, sweep: 360, rv: 0.04, closed: true }).map(p => hl(p[0], p[1]));
@@ -738,7 +740,7 @@ function drawFace(L, F, key) {
     });
   }
   // glasses
-  if (def.glasses && !blinking) {
+  if (def.glasses) {
     eyesW.forEach((e, i) => stroke(key('gl' + i), superPts(e.cx, e.cy, e.rx * 2 + 0.16, e.ry * 1.75, 16, 4).map(p => hl(p[0], p[1])), { z: Z.front, w: 4, closed: true }));
     if (eyesW.length === 2) stroke(key('glb'), [hl(fu - 0.06, ey - 0.12), hl(fu + 0.06, ey - 0.12)], { z: Z.front, w: 4 });
   }
@@ -1678,7 +1680,7 @@ const MUSIC = (() => {
   };
 })();
 
-EP.series = "数学少年陶哲轩"; EP.poster = 0;
+EP.series = "数学少年陶哲轩"; EP.poster = 295.0;
 EP.music = {"title": "main", "recap": "main", "flash": "main", "stuck": "sneaky", "curve": "calm", "domino": "sneaky", "turn": "turn", "think": "calm", "aha": "turn", "proof": "calm", "erdos": "sneaky", "myth": "calm", "ending": "main", "end": "main"}; EP.think = "think";
 /* ---- _e3_shared.js ---- */
 // 第 3 集共用：角色造型、灵光一闪的灯泡、骨牌棋盘。下划线开头，总会排在最前面被构建带上。
@@ -1707,14 +1709,14 @@ COMP.e3_bulb = {
     const st = stepTrack(fx.state, t) || 'off';
     let sT = fx.t0; (fx.state || []).forEach(q => { if (q[0] <= t) sT = q[0]; });
     let lit = st === 'on';
-    if (st === 'flicker') lit = rnd(hstr(k), Math.floor(t * 11), 3) > 0.35; // mostly dark, with short sputters
+    const sputter = st === 'flicker' && rnd(hstr(k), Math.floor(t * 11), 3) > 0.35; // mostly dark, with short weak sputters
     const pop = fx.t0 < 0 ? 1 : EASE.back(clamp(lt / 0.26));
     const flash = st === 'on' ? 1 + 0.18 * Math.max(0, 1 - (t - sT) / 0.25) : 1;
     const tiltDead = st === 'dead' ? 14 * EASE.back(clamp((t - sT) / 0.35)) : 0;
     DL.save(); DL.translate(base[0], base[1]); DL.scale(pop * flash); DL.rotate(tiltDead);
     const z = fx.z ?? Z.fx, cy = -s * 0.62, R = s * 0.4;
-    if (lit) stroke(k + '.glow', ringPts(k + '.g', 0, cy, R * 0.98, R * 1.02, { n: 12, closed: true }), { z: z - 0.2, closed: true, fill: C.hi, noStroke: true, opacity: 0.9, blend: true, w: 1 });
-    stroke(k + '.glass', ringPts(k, 0, cy, R, R * 1.04, { n: 14, a0: 125, sweep: 290 }).concat([[s * 0.17, -s * 0.2], [-s * 0.17, -s * 0.2]]), { z, w: 4.5, closed: true, fill: lit ? 'none' : C.paper });
+    if (lit || sputter) stroke(k + '.glow', ringPts(k + '.g', 0, cy, R * 0.98, R * 1.02, { n: 12, closed: true }), { z: z - 0.2, closed: true, fill: C.hi, noStroke: true, opacity: lit ? 0.9 : 0.4, blend: true, w: 1 });
+    stroke(k + '.glass', ringPts(k, 0, cy, R, R * 1.04, { n: 14, a0: 125, sweep: 290 }).concat([[s * 0.17, -s * 0.2], [-s * 0.17, -s * 0.2]]), { z, w: 4.5, closed: true, fill: lit || sputter ? 'none' : C.paper });
     [-0.2, -0.1, 0].forEach((y, i) => stroke(k + '.neck' + i, [[-s * 0.17, y * s], [s * 0.17, y * s + 1]], { z, w: 4 }));
     stroke(k + '.tip', [[-s * 0.07, s * 0.02], [0, s * 0.07], [s * 0.07, s * 0.02]], { z, w: 4 });
     // filament: a little zigzag (droops when dead)
@@ -1747,6 +1749,7 @@ COMP.e3_bulb = {
  *       一次"摆骨牌"：从 t0 起每隔 step 秒放一块；fail 时把没盖住的格子用红圈圈出来；t1 时整组撤掉（不写 = 一直留着）
  *       t0 为负数 = 切进来时已经摆好。
  *   rings: [{ cells: [[r,c],…], t0, t1 }]   额外的红圈（例如只圈某一块骨牌的两格）
+ *   attempt 的 outDur（默认 0.3）：t1 之后骨牌撤掉用多久；domColor: "pencil" + domW: 0.6 画浅一点的骨牌（缩略图用）；ringW: 红圈线宽倍数
  *   hideLeft: true           不自动圈出剩下的格子
  * }
  * 发布命名点：'<id>.c<r>_<c>'（每个格子的中心，世界坐标）、'<id>.center'、'<id>.top'、'<id>.bottom'。 */
@@ -1792,7 +1795,7 @@ COMP.e3_board = {
     if (cutOn && fx.cut >= 0 && t >= fx.cut && t < fx.cut + 1.3) { // a negative cut = already cut when the scene opens
       [[0, 0], [n - 1, n - 1]].forEach(([r, c], i) => {
         const u = clamp((t - fx.cut - 0.55) / 0.7), fall = EASE.in(u);
-        const cx = x0 + (c + 0.5) * s + (i ? 1 : -1) * fall * 60, cy = y0 + (r + 0.5) * s + fall * 260;
+        const cx = x0 + (c + 0.5) * s + (i ? 1 : -1) * fall * 60, cy = y0 + (r + 0.5) * s + fall * Math.min(260, 2.2 * s);   // small cells fall a shorter way
         const h = s / 2, rot = (i ? 1 : -1) * 40 * fall, op = 1 - u;
         DL.save(); DL.translate(cx, cy); DL.rotate(rot);
         stroke(k + '.cut' + i, [[-h, -h], [h, -h, 1], [h, h, 1], [-h, h, 1], [-h, -h, 1]], { z: z + 0.5, w: 4.5, color: C.red, draw: EASE.out(clamp((t - fx.cut) / 0.4)), opacity: op, fill: u > 0 ? C.paper : 'none' });
@@ -1811,8 +1814,9 @@ COMP.e3_board = {
     // dominoes
     const doms = [];
     (fx.attempts || []).forEach((a, ai) => {
-      if (t < a.t0 || (a.t1 !== undefined && t >= a.t1 + 0.3)) return;
-      const out = a.t1 !== undefined ? clamp((t - a.t1) / 0.3) : 0;
+      const od = a.outDur ?? 0.3;   // how long the dominoes take to clear away after t1
+      if (t < a.t0 || (a.t1 !== undefined && t >= a.t1 + od)) return;
+      const out = a.t1 !== undefined ? clamp((t - a.t1) / od) : 0;
       a.dom.forEach((d, di) => {
         const td = a.t0 + di * (a.step ?? 0.32); if (t < td) return;
         const u = a.t0 < 0 ? 1 : EASE.back(clamp((t - td) / 0.16));
@@ -1823,7 +1827,7 @@ COMP.e3_board = {
       if (!fx.hideLeft && t >= failT && out < 1) {
         E3B.cells(n, true).filter(([r, c]) => !covered.has(r + '_' + c)).forEach(([r, c], j) => {
           const cx = x0 + (c + 0.5) * s, cy = y0 + (r + 0.5) * s, q = clamp((t - failT - j * 0.12) / 0.25);
-          if (q > 0) stroke(`${k}.a${ai}L${j}`, ringPts(`${k}.a${ai}L${j}`, cx, cy, s * 0.4, s * 0.4, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9, color: C.red, draw: EASE.out(q), opacity: 1 - out });
+          if (q > 0) stroke(`${k}.a${ai}L${j}`, ringPts(`${k}.a${ai}L${j}`, cx, cy, s * 0.4, s * 0.4, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9 * (fx.ringW || 1), color: C.red, draw: EASE.out(q), opacity: 1 - out });
         });
       }
     });
@@ -1832,9 +1836,10 @@ COMP.e3_board = {
       const cx = x0 + ((c1 + c2) / 2 + 0.5) * s, cy = y0 + ((r1 + r2) / 2 + 0.5) * s;
       const hw = (d[2] === 'h' ? s : s / 2) - s * 0.1, hh = (d[2] === 'h' ? s / 2 : s) - s * 0.1;
       DL.save(); DL.translate(cx, cy - out * 30); DL.scale(lerp(0.6, 1, u));
-      stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: z + 1, w: wOut * 0.95, closed: true, fill: 'none', opacity: 1 - out });
+      const dcol = fx.domColor === 'pencil' ? C.pencil : C.ink, dw = fx.domW || 1;   // thumbnails can draw lighter dominoes
+      stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: z + 1, w: wOut * 0.95 * dw, color: dcol, closed: true, fill: 'none', opacity: 1 - out });
       const tk = d[2] === 'h' ? [[0, -hh * 0.45], [0, hh * 0.45]] : [[-hw * 0.45, 0], [hw * 0.45, 0]];
-      stroke(key + '.m', tk, { z: z + 1, w: wIn, opacity: 1 - out });
+      stroke(key + '.m', tk, { z: z + 1, w: wIn * dw, color: dcol, opacity: 1 - out });
       DL.restore();
     });
     // extra red rings (e.g. the two squares under one domino)
@@ -1842,7 +1847,7 @@ COMP.e3_board = {
       if (t < g.t0 || (g.t1 !== undefined && t >= g.t1)) return;
       g.cells.forEach(([r, c], j) => {
         const cx = x0 + (c + 0.5) * s, cy = y0 + (r + 0.5) * s;
-        stroke(`${k}.R${gi}_${j}`, ringPts(`${k}.R${gi}_${j}`, cx, cy, s * 0.42, s * 0.42, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9, color: C.red, draw: EASE.out(clamp((t - g.t0 - j * 0.12) / 0.25)) });
+        stroke(`${k}.R${gi}_${j}`, ringPts(`${k}.R${gi}_${j}`, cx, cy, s * 0.42, s * 0.42, { n: 10, a0: -100, sweep: 380, rv: 0.06 }), { z: z + 2, w: wOut * 0.9 * (fx.ringW || 1), color: C.red, draw: EASE.out(clamp((t - g.t0 - j * 0.12) / 0.25)) });
       });
     });
     DL.restore();
@@ -1918,7 +1923,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       for (let i = 0; i <= N; i++) {
         const th = i / N * 6 * Math.PI + spin;
         const a = [cx + r * (0.62 * Math.sin(1.3 * th + 1) + 0.38 * Math.cos(2.7 * th)), cy + r * (0.62 * Math.cos(1.7 * th) + 0.38 * Math.sin(3.1 * th + 2))];
-        const b = [cx + lerp(-1.6, 1.6, i / N) * r, cy + Math.sin(i / N * Math.PI * 2) * 3];
+        const b = [cx + lerp(-1.2, 1.2, i / N) * r, cy + (i / N - 0.5) * 30 + Math.sin(i / N * Math.PI * 2) * 3];
         pts.push(lerp2(a, b, u));
       }
       stroke(fx.id, pts, { z: Z.fx, w: 4, draw: fx.t0 < 0 ? 1 : EASE.out(clamp(lt / 0.5)), boil: 0.8 });
@@ -1935,7 +1940,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
         pose: [[0, 'scratchStand'], [2.4, 'stand', 0.12], [3.7, 'kidCheer', 0.1, 'back'], [5.2, 'stand', 0.25]],
         face: [[0, 'puzzled'], [2.4, 'effort', 0.05], [3.7, 'joy', 0.05]],
         turn: [[0, -0.25]],
-        gaze: [[0, [HX, 330]], [3.7, 'viewer']],
+        gaze: [[0, [HX, 360]], [3.7, 'viewer']],
         squash: [[0, 1], [3.7, 1.1, 0.06], [3.76, 1, 0.25, 'back']],
       },
     },
@@ -1944,7 +1949,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'title', id: 'ep', text: '第 3 集', x: 640, y: 412, size: 64, t0: 0.6, color: 'red', rot: -3 },
       { type: 'title', id: 'a', text: '卡住，', x: 430, y: 556, size: 100, t0: 1.0, color: 'red', rot: -3 },
       { type: 'title', id: 'b', text: '然后想通', x: 790, y: 556, size: 100, t0: 3.7, color: 'red', rot: 1, sfx: 'tada' },
-      { type: 'h3_knot', id: 'knot', at: [HX, 330], r: 62, t0: 1.3, t1: 3.75, pull: 2.5, pullDur: 0.9 },
+      { type: 'h3_knot', id: 'knot', at: [HX, 360], r: 52, t0: 1.3, t1: 3.75, pull: 2.5, pullDur: 0.9 },
       { type: 'e3_bulb', id: 'bulb', char: 'terry', size: 96, t0: 3.6, state: [[0, 'on']] },
     ],
     sfx: [[1.0, 'hop']],
@@ -1956,43 +1961,41 @@ PROPS.e3_page = (fx, t, lt, p) => {
 // 上集回顾：小陶学会了把过程写出来（第 2 集结尾的那张纸）；可是要写清楚，先得想出来——要是怎么看都看不出来呢？
 (() => {
   const FL = 770, PG = [430, 380], TX = 1330;
-  const LINES = ['① 奇数：一对一对，多一个。', '② 两个奇数放在一起，', '③ 多的两个凑成一对。'];
+  const LINES = ['① 奇数：两个两个排，多一个。', '② 把两个奇数放在一起。', '③ 多的两个，凑成一对。', '所以：全部成对，是偶数。'];   // = ep2's last page
   defineScene({
     id: 'recap', chapter: '上集回顾', dur: 17.7, floor: FL,
     cast: { terry: E3.terry },
     tracks: {
       terry: {
-        enter: 0.2,
         pos: [[0, [TX, FL]]],
-        pose: [[0, 'stand'], [4.6, 'kidPoint', 0.12, 'back'], [9.0, 'thinkStand', 0.15], [12.95, { ...POSE.stand, lean: -5, tilt: -6 }, 0.1, 'back']],
-        face: [[0, 'smile'], [4.6, 'proud', 0.05], [9.0, 'focus', 0.05], [12.85, 'jaw', 0.05], [14.6, 'puzzled', 0.08]],
-        turn: [[0, -0.45], [4.6, 0.1, 0.1], [9.0, -0.2, 0.1], [12.95, -0.35, 0.08]],
-        gaze: [[0, 'page'], [4.6, 'viewer'], [9.0, 'chain'], [12.95, 'big']],
-        squash: [[0, 1], [12.95, 0.9, 0.05], [12.86, 1, 0.22, 'back']],
+        pose: [[0, 'stand'], [4.6, { ...POSE.stand, armScale: 1.5, armL: [128, 10] }, 0.12, 'back'], [9.0, 'thinkStand', 0.15], [13.2, { ...POSE.stand, lean: -5, tilt: -6 }, 0.1, 'back']],
+        face: [[0, 'smile'], [4.6, 'proud', 0.05], [9.0, 'focus', 0.05], [13.2, 'jaw', 0.05], [14.9, 'puzzled', 0.08]],
+        turn: [[0, -0.45], [9.0, -0.2, 0.1], [13.2, -0.35, 0.08]],
+        gaze: [[0, 'page'], [4.6, [1100, 210]], [6.7, 'viewer'], [9.0, 'chain'], [13.2, 'qmT']],
+        squash: [[0, 1], [13.2, 0.9, 0.05], [13.26, 1, 0.22, 'back']],
       },
     },
-    targets: () => ({ page: PG, chain: [760, 330], big: [600, 380] }),
+    targets: () => ({ page: PG, chain: [760, 330], qmT: [800, 640] }),
     fx: [
       { type: 'title', id: 'stampR', text: '上集回顾', x: 150, y: 110, size: 44, t0: -0.1, t1: 9.0, color: 'red', rot: -6 },
       // ep2's last page, already written and checked
-      { type: 'prop', kind: 'e3_page', id: 'pg', at: PG, rot: -2, t0: -0.3, t1: 9.0, w: 600, h: 400, lines: 4, title: '写出过程' },
-      ...LINES.map((s, i) => ({ type: 'scribe', id: 'ln' + i, text: s, x: PG[0] - 236, y: PG[1] - 60 + i * 80, size: 36, t0: -2, t1: 9.0, cps: 40, z: Z.set + 1 })),
-      ...LINES.map((s, i) => ({ type: 'write', id: 'ck' + i, text: '✓', x: PG[0] + 214, y: PG[1] - 90 + i * 80, size: 54, t0: 0.6 + i * 0.5, t1: 9.0, speed: 1800, color: 'red', w: 6, sfx: 'pen', z: Z.annot })),
-      { type: 'qm', id: 'qm', pos: [[0, [870, 700]], [12.95, [985, 760], 0.3, 'back']], size: 150, t0: -1, silent: true,
-        act: [[0, 'nod'], [3.2, 'idle'], [12.95, 'hop'], [13.8, 'tap']], mood: [[0, 'happy'], [12.95, 'doubt']],
-        sign: [[0, null], [13.2, '看不出来呢？']], gaze: [[0, 'page'], [4.6, 'terry'], [12.95, 'viewer']] },
+      { type: 'prop', kind: 'e3_page', id: 'pg', at: PG, rot: -2, t0: -0.3, t1: 9.0, w: 640, h: 440, lines: 4, title: '写出过程' },
+      ...LINES.map((s, i) => ({ type: 'scribe', id: 'ln' + i, text: s, x: PG[0] - 256, y: PG[1] - 66 + i * 72, size: 38, t0: -2, t1: 9.0, cps: 40, z: Z.set + 1 })),
+      ...LINES.map((s, i) => ({ type: 'write', id: 'ck' + i, text: '✓', x: PG[0] + 262, y: PG[1] - 96 + i * 72, size: 46, t0: 0.6 + i * 0.45, t1: 9.0, speed: 1800, color: 'red', w: 6, sfx: 'pen', z: Z.annot })),
+      { type: 'qm', id: 'qm', pos: [[0, [870, 770]], [13.0, [800, 770], 0.3, 'back']], size: 170, signSize: 52, t0: -1, silent: true,
+        act: [[0, 'nod'], [3.2, 'idle'], [13.0, 'hop'], [14.0, 'tap']], mood: [[0, 'happy'], [13.0, 'doubt']],
+        sign: [[0, null], [13.3, '看不出来呢？']], gaze: [[0, 'page'], [4.6, 'terry'], [13.0, 'viewer']] },
       // ep2's two golden lines
       { type: 'title', id: 'w1', text: '看出来，靠聪明；', x: 1100, y: 170, size: 56, t0: 4.7, t1: 9.0 },
       { type: 'title', id: 'w2', text: '写清楚，靠练习。', x: 1100, y: 250, size: 56, t0: 6.7, t1: 9.0, underline: true },
       // but first you have to figure it out
-      { type: 'title', id: 'c1', text: '想出来', x: 470, y: 330, size: 92, t0: 9.6, t1: 12.95, color: 'red', rot: -3 },
-      { type: 'h3_arrow', id: 'ar', from: [610, 330], to: [800, 330], t0: 10.1, t1: 12.95 },
-      { type: 'title', id: 'c2', text: '写清楚', x: 940, y: 330, size: 92, t0: 8.95, t1: 12.95 },
-      { type: 'label', id: 'lbFirst', text: '先得', at: [470, 180], rot: -4, t0: 10.6, t1: 12.95, target: [470, 268], gap: 8 },
+      { type: 'title', id: 'c1', text: '想出来', x: 470, y: 330, size: 92, t0: 11.2, t1: 12.95, color: 'red', rot: -3 },
+      { type: 'h3_arrow', id: 'ar', from: [610, 330], to: [800, 330], t0: 11.5, t1: 12.95 },
+      { type: 'title', id: 'c2', text: '写清楚', x: 940, y: 330, size: 92, t0: 9.8, t1: 12.95 },
+      { type: 'label', id: 'lbFirst', text: '先得', size: 56, at: [470, 170], rot: -4, t0: 11.3, t1: 12.95, target: [470, 268], gap: 8 },
       // the problem that doesn't give itself away
-      { type: 'h3_bigq', id: 'bq', at: [580, 400], t0: 12.95 },
+      { type: 'h3_qs', id: 'qs', t0: 13.6 },
     ],
-    sfx: [[0.2, 'hop']],
     subs: [
       { t0: 0.3, t1: 4.5, text: '上一集，小陶学会了把过程写出来。' },
       { t0: 4.6, t1: 8.9, text: '看出来，靠聪明；写清楚，靠练习。' },
@@ -2005,28 +2008,16 @@ PROPS.e3_page = (fx, t, lt, p) => {
     draw(fx, t) { if (t < fx.t0 || t >= fx.t1) return; arrow(fx.id, fx.from, fx.to, { p: EASE.out(clamp((t - fx.t0) / 0.3)), w: 6, bend: -0.12 }); },
     cues: fx => [[fx.t0, 'swish']],
   };
-  /** a big, blank problem sheet that thuds down, covered in scribbles and "?" — nothing you can see at a glance */
-  COMP.h3_bigq = {
-    draw(fx, t) {
-      if (t < fx.t0) return;
-      const lt = t - fx.t0, drop = EASE.in(clamp(lt / 0.25)), [cx, cy0] = fx.at, cy = lerp(cy0 - 500, cy0, drop);
-      const W = 560, H = 520, z = Z.set + 1, sq = lt > 0.25 && lt < 0.5 ? 1 - 0.06 * Math.sin(Math.PI * (lt - 0.25) / 0.25) : 1;
-      DL.save(); DL.translate(cx, cy + H / 2); DL.scale(1); DL.translate(0, -H / 2 * sq);
-      stroke(fx.id + '.sh', [[-W / 2, -H / 2], [W / 2, -H / 2 + 6, 1], [W / 2 - 4, H / 2, 1], [-W / 2 + 6, H / 2 - 4, 1], [-W / 2, -H / 2, 1]], { z, w: 6, fill: C.paper });
-      text(fx.id + '.t', '难题', -W / 2 + 40, -H / 2 + 52, { size: 44, anchor: 'start', z: z + 0.1 });
-      for (let i = 0; i < 5; i++) {
-        const y = -H / 2 + 120 + i * 62, x1 = W / 2 - 40 - (i % 2) * 70 - (i === 4 ? 160 : 0), pts = [];
-        for (let k = 0; k <= 10; k++) pts.push([lerp(-W / 2 + 40, x1, k / 10), y + (k % 2 ? -4 : 3)]);
-        stroke(fx.id + '.l' + i, pts, { z: z + 0.1, w: 3, boil: 0.6 });
-      }
-      DL.restore();
-      // question marks popping around it, in the red pen
-      [[-330, -150, 90, -12], [320, -200, 110, 10], [-300, 160, 76, 14], [-340, 20, 84, -8]].forEach(([dx, dy, s, r], i) => {
-        const q = clamp((lt - 0.6 - i * 0.35) / 0.2); if (q <= 0) return;
-        text(fx.id + '.q' + i, '？', cx + dx, cy0 + dy, { size: s, color: C.red, rot: r, scale: EASE.back(q), z: Z.annot });
+  /** red question marks popping around Terry's head, one after another */
+  COMP.h3_qs = {
+    draw(fx, t, F) {
+      const an = F.anchors.terry; if (!an || t < fx.t0) return;
+      [[-150, -40, 84, -12], [130, -90, 100, 10], [-60, -170, 70, 14]].forEach(([dx, dy, s, r], i) => {
+        const q = clamp((t - fx.t0 - i * 0.45) / 0.2); if (q <= 0) return;
+        text(fx.id + i, '？', an.head[0] + dx, an.head[1] + dy, { size: s, color: C.red, rot: r, scale: EASE.back(q), z: Z.annot });
       });
     },
-    cues: fx => [[fx.t0 + 0.25, 'thud'], ...[0, 1, 2, 3].map(i => [fx.t0 + 0.6 + i * 0.35, 'boop'])],
+    cues: fx => [0, 1, 2].map(i => [fx.t0 + i * 0.45, 'boop']),
   };
 })();
 
@@ -2041,26 +2032,26 @@ PROPS.e3_page = (fx, t, lt, p) => {
   /* ---------------- 题目卡片：一张张飞来，叮一声，答案写上去 ---------------- */
   const CW = 440, CH = 270, OUT_T = 14.65;
   const CARDS = [
-    { q: '12×12 =', a: '144', tIn: 0.7, at: [880, 455], rot: -5, tAns: 4.3 },
-    { q: '□+□+□=21', box7: true, qSize: 64, qy: -42, tIn: 6.0, at: [930, 432], rot: 3, tAns: 8.3 },
-    { q: '9×9 =', a: '81', tIn: 11.3, at: [868, 448], rot: -3, tAns: 11.75 },
-    { q: '1+2+…+10 =', a: '55', tIn: 12.4, at: [940, 426], rot: 4, tAns: 12.85 },
-    { q: '100-58 =', a: '42', tIn: 13.4, at: [902, 442], rot: -2, tAns: 13.85 },
+    { q: '12×12 =', a: '144', tIn: 0.7, at: [893, 447], rot: -4, tAns: 4.3 },
+    { q: '□+□+□=21', a: '□ = 7', box7: 8.95, qSize: 64, tIn: 6.0, at: [907, 434], rot: 3, tAns: 8.3 },
+    { q: '9×9 =', a: '81', tIn: 11.3, at: [889, 445], rot: -3, tAns: 11.75 },
+    { q: '1+2+…+10 =', a: '55', tIn: 12.4, at: [911, 436], rot: 3, tAns: 12.85 },
+    { q: '100-58 =', a: '42', tIn: 13.4, at: [900, 441], rot: -1, tAns: 13.85 },
   ];
   CARDS.forEach(c => {
     const qs = c.qSize || 60, qy = c.qy ?? -100;
     c.qL = layoutWriting({ text: c.q, x: 0, y: qy, size: qs, t0: 0, speed: 1, anchor: 'middle' });
-    if (c.a) c.aL = [layoutWriting({ text: c.a, x: 0, y: 2, size: 100, t0: c.tAns, speed: 2600, gap: 0.02, glyphGap: 0.02, anchor: 'middle' })];
-    // □+□+□=21: a 7 goes into each box
-    if (c.box7) c.aL = c.qL.boxes.filter(b => b.ch === '□').map((b, i) =>
-      layoutWriting({ text: '7', x: b.x + 0.39 * qs - 0.3 * 36, y: qy + 0.2 * qs + 8, size: 36, t0: c.tAns + i * 0.22, speed: 2200 }));
+    c.aL = [{ ...layoutWriting({ text: c.a, x: 0, y: 2, size: 100, t0: c.tAns, speed: 2600, gap: 0.02, glyphGap: 0.02, anchor: 'middle' }), w: 7 }];
+    // □+□+□=21: the big answer '□ = 7', then a 7 goes into each box
+    if (c.box7) c.qL.boxes.filter(b => b.ch === '□').forEach((b, i) =>
+      c.aL.push({ ...layoutWriting({ text: '7', x: b.x + 0.39 * qs - 0.3 * 40, y: qy + 0.2 * qs + 6, size: 40, t0: c.box7 + i * 0.16, speed: 2400 }), w: 5 }));
   });
   // the maths on the cards, checked
   if (12 * 12 !== 144 || 7 * 3 !== 21 || 9 * 9 !== 81 || 55 !== 10 * 11 / 2 || 100 - 58 !== 42) console.error('f3: card maths');
   function cardPose(c, i, t) {
     const u = clamp((t - c.tIn) / 0.42), e = EASE.out(u);
     let x = lerp(1880, c.at[0], e), y = lerp(c.at[1] + 40, c.at[1], e) - Math.sin(Math.PI * u) * 34, rot = c.rot + 34 * (1 - e);
-    const sc = lerp(0.85, 1, e), v = clamp((t - (OUT_T + i * 0.05)) / 0.35);
+    const sc = lerp(0.85, 1, e), v = clamp((t - (OUT_T + (CARDS.length - 1 - i) * 0.05)) / 0.35);   // top card leaves first
     if (v > 0) { const w = EASE.in(v); x += 1300 * w; y -= 160 * w; rot += 25 * w; }
     return { x, y, rot, sc, gone: v >= 1 };
   }
@@ -2076,7 +2067,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
         c.qL.strokes.forEach((s, j) => stroke(k + '.q' + j, s.pts, { z: z + 0.1, w: 5, boil: 0.5 }));
         (c.aL || []).forEach((L, m) => L.strokes.forEach((s, j) => {
           const q = clamp((t - s.t0) / s.dur);
-          if (q > 0) stroke(k + '.a' + m + '.' + j, s.pts, { z: z + 0.1, w: c.box7 ? 5.5 : 7, draw: q, boil: 0.55 });
+          if (q > 0) stroke(k + '.a' + m + '.' + j, s.pts, { z: z + 0.1, w: L.w, draw: q, boil: 0.55 });
         }));
         DL.restore();
       });
@@ -2095,28 +2086,35 @@ PROPS.e3_page = (fx, t, lt, p) => {
     { at: [1165, 350], rot: 2, tIn: 20.68, tc: 25.3 },
     { at: [1355, 336], rot: -2, tIn: 20.86, tc: 25.6 },
   ];
-  const EXAM_T1 = 38.5, PW = 150, PH = 200;
+  const EXAM_T1 = 38.5, PW = 150, PH = 200, DIM_T = 31.15;
+  const dim = t => 1 - 0.65 * clamp((t - DIM_T) / 0.35);     // the diagram steps back while Terry talks
+  const CNT = PAPERS.map((pp, i) => layoutWriting({ text: String(i + 1), x: pp.at[0], y: 158, size: 58, t0: pp.tc, speed: 2600, anchor: 'middle' }));
   COMP.f3_exam = {
     draw(fx, t) {
       if (t >= EXAM_T1) return;
+      const op = dim(t);
+      CNT.forEach((L, i) => L.strokes.forEach((st, j) => {
+        const q = clamp((t - st.t0) / st.dur);
+        if (q > 0) stroke('f3.cnt' + i + '.' + j, st.pts, { z: Z.annot, w: 6, color: C.red, draw: q, boil: 0.55, opacity: op });
+      }));
       PAPERS.forEach((pp, i) => {
         if (t < pp.tIn) return;
         const k = 'f3.ex' + i, u = clamp((t - pp.tIn) / 0.28), z = Z.set + 2;
         let sc = Math.max(0.01, EASE.back(u));
         const v = (t - pp.tc) / 0.32; if (v > 0 && v < 1) sc *= 1 + 0.12 * Math.sin(Math.PI * v);
         DL.save(); DL.translate(pp.at[0], pp.at[1] - (1 - EASE.out(u)) * 40); DL.rotate(pp.rot); DL.scale(sc);
-        stroke(k, [[-PW / 2, -PH / 2], [PW / 2, -PH / 2, 1], [PW / 2, PH / 2, 1], [-PW / 2, PH / 2, 1], [-PW / 2, -PH / 2, 1]], { z, w: 4.5, fill: C.paper });
-        stroke(k + '.sh', [[-PW / 2 + 10, PH / 2 + 6], [PW / 2 + 6, PH / 2 + 6, 1], [PW / 2 + 6, -PH / 2 + 10]], { z: z - 0.05, w: 2.2, color: C.pencil, opacity: 0.7, boil: 0.5 });
+        stroke(k, [[-PW / 2, -PH / 2], [PW / 2, -PH / 2, 1], [PW / 2, PH / 2, 1], [-PW / 2, PH / 2, 1], [-PW / 2, -PH / 2, 1]], { z, w: 4.5, fill: C.paper, opacity: op });
+        stroke(k + '.sh', [[-PW / 2 + 10, PH / 2 + 6], [PW / 2 + 6, PH / 2 + 6, 1], [PW / 2 + 6, -PH / 2 + 10]], { z: z - 0.05, w: 2.2, color: C.pencil, opacity: 0.7 * op, boil: 0.5 });
         // dense scribbled lines = a long, hard question
         for (let r = 0; r < 7; r++) {
           const y = -PH / 2 + 30 + r * 23, x0 = -PW / 2 + 16, len = (r === 0 ? 70 : 104) - (r === 6 ? 40 : 0) + rnd(hstr(k), r, 4) * 10, pts = [];
           for (let j = 0; j <= 7; j++) pts.push([x0 + len * j / 7, y + (j % 2 ? -3.5 : 3) + rnd(hstr(k), r, j) * 1.5]);
-          stroke(k + '.l' + r, pts, { z: z + 0.1, w: r === 0 ? 4 : 2.6, boil: 0.6 });
+          stroke(k + '.l' + r, pts, { z: z + 0.1, w: r === 0 ? 4 : 2.6, boil: 0.6, opacity: op });
         }
         DL.restore();
       });
     },
-    cues: () => PAPERS.flatMap(pp => [[pp.tIn, 'paper'], [pp.tc, 'boop']]),
+    cues: () => PAPERS.flatMap(pp => [[pp.tIn, 'paper'], [pp.tc, 'boop'], [pp.tc + 0.02, 'pen']]),
   };
   // the clock: 9:00 → 13:30 (four and a half hours) in a whirl, a red arc following the hour hand
   const CLK = { c: [655, 335], r: 112, t0: 23.4, s0: 23.65, s1: 24.75 };
@@ -2126,33 +2124,33 @@ PROPS.e3_page = (fx, t, lt, p) => {
     draw(fx, t) {
       if (t < CLK.t0 || t >= EXAM_T1) return;
       const lt = t - CLK.t0, pop = Math.max(0.01, EASE.back(clamp(lt / 0.3))), { r } = CLK, z = Z.set + 2, k = 'f3.clk';
-      const m = clkMin(t);
+      const m = clkMin(t), op = dim(t);
       DL.save(); DL.translate(CLK.c[0], CLK.c[1]); DL.scale(pop); DL.translate(-CLK.c[0], -CLK.c[1]);
       const [cx, cy] = CLK.c;
-      [-1, 1].forEach(s => stroke(k + '.ft' + s, [[cx + s * r * 0.5, cy + r * 0.86], [cx + s * r * 0.72, cy + r * 1.12]], { z, w: 6 }));
-      stroke(k + '.o', ringPts(k + '.o', cx, cy, r, r, { n: 14, a0: -110, sweep: 374, rv: 0.02 }), { z, w: 6.5, fill: C.paper });
-      stroke(k + '.i', ringPts(k + '.i', cx, cy, r * 0.9, r * 0.9, { n: 14, a0: 60, sweep: 366, rv: 0.02 }), { z: z + 0.1, w: 2.5 });
+      [-1, 1].forEach(s => stroke(k + '.ft' + s, [[cx + s * r * 0.5, cy + r * 0.86], [cx + s * r * 0.72, cy + r * 1.12]], { z, w: 6, opacity: op }));
+      stroke(k + '.o', ringPts(k + '.o', cx, cy, r, r, { n: 14, a0: -110, sweep: 374, rv: 0.02 }), { z, w: 6.5, fill: C.paper, opacity: op });
+      stroke(k + '.i', ringPts(k + '.i', cx, cy, r * 0.9, r * 0.9, { n: 14, a0: 60, sweep: 366, rv: 0.02 }), { z: z + 0.1, w: 2.5, opacity: op });
       for (let i = 0; i < 12; i++) {
         const a = i * 30, big = i % 3 === 0;
-        stroke(k + '.t' + i, [clockPt(a, r * (big ? 0.66 : 0.72)), clockPt(a, r * 0.82)], { z: z + 0.1, w: big ? 4.5 : 3 });
+        stroke(k + '.t' + i, [clockPt(a, r * (big ? 0.66 : 0.72)), clockPt(a, r * 0.82)], { z: z + 0.1, w: big ? 4.5 : 3, opacity: op });
       }
       // blur behind the minute hand while it whirls
       const spin = t > CLK.s0 && t < CLK.s1;
       if (spin) for (let j = 1; j <= 3; j++) stroke(k + '.bl' + j, [0, 1, 2, 3, 4].map(q => clockPt(m * 6 - j * 14 - q * 5, r * 0.62)), { z: z + 0.15, w: 2.4, color: C.pencil, opacity: 0.8 - j * 0.2, boil: 0.6 });
-      stroke(k + '.hh', [CLK.c, clockPt(hourA(m), r * 0.46)], { z: z + 0.2, w: 7 });
-      stroke(k + '.hm', [CLK.c, clockPt(m * 6, r * 0.7)], { z: z + 0.2, w: 4.5 });
-      dot(k + '.c', CLK.c, 6, C.ink, z + 0.3);
+      stroke(k + '.hh', [CLK.c, clockPt(hourA(m), r * 0.46)], { z: z + 0.2, w: 7, opacity: op });
+      stroke(k + '.hm', [CLK.c, clockPt(m * 6, r * 0.7)], { z: z + 0.2, w: 4.5, opacity: op });
+      stroke(k + '.c', ringPts(k + '.c', cx, cy, 6, 6, { n: 6, closed: true }), { z: z + 0.3, w: 1, closed: true, fill: C.ink, opacity: op });
       // red arc outside the rim: 9 o'clock round to where the hour hand is now
       const sweep = hourA(m) - 270;
       if (sweep > 2) {
         const R2 = r + 22, pts = [];
         for (let i = 0; i <= 14; i++) pts.push(clockPt(270 + sweep * i / 14, R2));
-        stroke(k + '.arc', pts, { z: Z.annot, w: 5, color: C.red, boil: 0.6 });
+        stroke(k + '.arc', pts, { z: Z.annot, w: 5, color: C.red, boil: 0.6, opacity: op });
         if (t >= CLK.s1) {
           const e = pts[14], b = clockPt(270 + sweep - 8, R2), L = dist(b, e) || 1, tx = (b[0] - e[0]) / L, ty = (b[1] - e[1]) / L, hl = 18;
           const r1 = [e[0] + (tx * Math.cos(0.5) - ty * Math.sin(0.5)) * hl, e[1] + (tx * Math.sin(0.5) + ty * Math.cos(0.5)) * hl];
           const r2 = [e[0] + (tx * Math.cos(-0.5) - ty * Math.sin(-0.5)) * hl, e[1] + (tx * Math.sin(-0.5) + ty * Math.cos(-0.5)) * hl];
-          stroke(k + '.arcH', [r1, [e[0], e[1], 1], r2], { z: Z.annot, w: 5, color: C.red, boil: 0.6 });
+          stroke(k + '.arcH', [r1, [e[0], e[1], 1], r2], { z: Z.annot, w: 5, color: C.red, boil: 0.6, opacity: op });
         }
       }
       DL.restore();
@@ -2202,7 +2200,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* the bulb sputters in shorter and shorter bursts, then dies (one fizz per burst) */
-  const BURSTS = [[45.85, 0.34], [46.8, 0.26], [47.65, 0.18], [48.4, 0.1]];
+  const BURSTS = [[45.85, 0.7], [46.8, 0.55], [47.65, 0.4], [48.35, 0.25]];
   const FLICK = [[41.85, 'off'], ...BURSTS.flatMap(([b, d]) => [[b, 'flicker'], [b + d, 'off']]), [49.1, 'dead']];
   /** a little curl of pencil smoke rising off the dead bulb */
   COMP.f3_smoke = {
@@ -2214,6 +2212,42 @@ PROPS.e3_page = (fx, t, lt, p) => {
         stroke('f3.smk' + j, pts, { z: Z.fx, w: 3, color: C.pencil, opacity: op, boil: 0.8 });
       });
     },
+  };
+
+  /** the first bulb, shrinking away (off) instead of vanishing in one frame */
+  COMP.f3_bulbOut = {
+    draw(fx, t, F) {
+      const a = F.anchors[fx.char]; if (!a) return;
+      const sc = 1 - EASE.in(clamp((t - fx.out) / 0.2)); if (sc <= 0.02) return;
+      const b = [a.headTop[0], a.headTop[1] - 26];
+      DL.save(); DL.translate(b[0], b[1]); DL.scale(sc); DL.translate(-b[0], -b[1]);
+      COMP.e3_bulb.draw(fx, t, F);
+      DL.restore();
+    },
+    cues: fx => COMP.e3_bulb.cues(fx),
+  };
+  /** waiting: three ink dots appear one by one beside the dark bulb */
+  COMP.f3_dots = {
+    draw(fx, t, F) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const b = F.targets['f3.bulb2.bulb']; if (!b) return;
+      [0, 1, 2].forEach(i => { const u = clamp((t - fx.t0 - i * 0.45) / 0.15); if (u > 0) dot('f3.dot' + i, [b[0] + 52 + i * 22, b[1] + 12], 5.5 * EASE.back(u), C.ink, Z.fx); });
+    },
+    cues: fx => [0, 1, 2].map(i => [fx.t0 + i * 0.45, 'tap']),
+  };
+  /** red label 'IMO = 国际数学奥林匹克' (IMO in Patrick Hand: the Chinese font draws the O as a square) */
+  COMP.f3_imo = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const lt = t - fx.t0, pp = EASE.back(clamp(lt / 0.2)), op = clamp(lt / 0.08), [x, y] = fx.at;
+      const s1 = 56, s2 = 46, w1 = 96, rest = '= 国际数学奥林匹克', x0 = x - (w1 + textWidth(rest, s2)) / 2;
+      DL.save(); DL.translate(x, y); DL.rotate(-2); DL.scale(lerp(0.6, 1, pp)); DL.translate(-x, -y);
+      text('f3.imo.a', 'IMO', x0, y + 2, { size: s1, font: CFG.FONT_MIX, anchor: 'start', color: C.red, z: Z.annot, opacity: op, halo: 8 });
+      text('f3.imo.b', rest, x0 + w1, y + 2, { size: s2, anchor: 'start', color: C.red, z: Z.annot, opacity: op, halo: 8 });
+      DL.restore();
+      arrow('f3.imo.ar', [x + 26, y - 32], fx.target, { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: 0.12, color: C.red });
+    },
+    cues: fx => [[fx.t0, 'pop']],
   };
 
   /* ---------------- poses ---------------- */
@@ -2235,14 +2269,14 @@ PROPS.e3_page = (fx, t, lt, p) => {
           [27.4, 'thinkStand', 0.15], [31.2, 'f3_shock', 0.08, 'back'], [33.95, 'f3_finger', 0.1, 'back'], [38.3, 'stand', 0.2],
           [38.95, 'f3_lean', 0.08, 'back'], [39.6, 'lookUp', 0.2], [45.8, 'thinkStand', 0.2], [49.2, 'scratchStand', 0.12, 'back']],
         face: [[0, 'smile'], [1.1, 'focus', 0.05], [1.9, 'proud', 0.05], [4.0, 'idea', 0.05], [4.6, 'grin', 0.05], [6.0, 'focus', 0.05],
-          [7.5, 'idea', 0.05], [8.3, 'grin', 0.05], [11.2, 'proudGrin', 0.05], [15.35, 'surprised', 0.05], [16.3, 'smile', 0.1], [17.45, 'grin', 0.05],
-          [20.3, 'neutral', 0.05], [21.3, 'surprised', 0.05], [22.4, 'focus', 0.1], [23.7, 'surprised', 0.05], [24.9, 'focus', 0.1],
-          [31.2, 'jaw', 0.06, 'back'], [33.95, 'proudGrin', 0.05], [38.95, 'surprised', 0.05], [39.9, 'focus', 0.1], [45.8, 'puzzled', 0.08],
+          [7.5, 'idea', 0.05], [8.3, 'grin', 0.05], [11.2, 'proudGrin', 0.05], [15.35, 'surprised', 0.05], [17.45, 'grin', 0.06],
+          [20.3, 'neutral', 0.05], [21.3, 'surprised', 0.05], [22.8, 'focus', 0.1], [23.7, 'surprised', 0.05], [25.25, 'focus', 0.1],
+          [31.2, 'jaw', 0.06, 'back'], [33.95, 'proudGrin', 0.05], [38.95, 'surprised', 0.05], [40.5, 'focus', 0.1], [45.8, 'puzzled', 0.08],
           [49.15, 'sheepish', 0.06]],
         turn: [[0, 0.35], [1.9, 0, 0.12], [4.0, 0.4, 0.1], [11.2, 0.1, 0.12], [15.35, 0.35, 0.12], [31.2, 0.1, 0.1], [33.95, 0, 0.1],
           [38.95, 0.45, 0.1], [41.9, 0.15, 0.15], [49.2, 0.1, 0.12]],
         gaze: [[0, 'viewer'], [0.8, 'card'], [1.9, 'viewer'], [3.9, 'card'], [11.2, 'viewer'], [15.35, 'stamp'], [20.3, 'papers'], [23.45, 'clock'],
-          [24.95, 'papers'], [27.4, 'eq'], [31.2, 'viewer'], [38.7, 'giant'], [41.9, 'bulbUp'], [49.3, 'viewer']],
+          [24.95, 'papers'], [27.4, 'eq'], [31.2, 'viewer'], [38.7, 'giant'], [41.9, 'bulbUp'], [43.0, 'giant'], [44.0, 'bulbUp'], [49.3, 'viewer']],
         squash: [[0, 1], ...dingPop(4.0), ...dingPop(7.5), ...dingPop(11.7), ...dingPop(12.8), ...dingPop(13.8),
           [15.85, 0.92, 0.05], [15.91, 1, 0.22, 'back'], [21.3, 1.06, 0.05], [21.36, 1, 0.2, 'back'],
           [31.2, 1.13, 0.06], [31.27, 1, 0.28, 'back'], [38.95, 0.86, 0.05], [39.0, 1.08, 0.08], [39.1, 1, 0.22, 'back'],
@@ -2256,26 +2290,26 @@ PROPS.e3_page = (fx, t, lt, p) => {
     fx: [
       { type: 'f3_cards', id: 'f3.cards' },
       { type: 'title', id: 'f3.title', text: '灵光一闪', x: 905, y: 150, size: 130, t0: 4.05, t1: OUT_T, underline: true },
-      { type: 'e3_bulb', id: 'f3.bulb', char: 'terry', t0: 4.0, t1: 14.95,
-        state: [[4.0, 'on'], [5.95, 'off'], [7.5, 'on'], [11.2, 'off'], [11.7, 'on'], [12.35, 'off'], [12.8, 'on'], [13.35, 'off'], [13.8, 'on']] },
+      { type: 'f3_bulbOut', id: 'f3.bulb', char: 'terry', t0: 4.0, out: 14.75, t1: 15.0,
+        state: [[4.0, 'on'], [5.95, 'off'], [7.5, 'on'], [11.2, 'off'], [11.7, 'on'], [12.35, 'off'], [12.8, 'on'], [13.35, 'off'], [13.8, 'on'], [14.55, 'off']] },
       // 10 岁的印章，先盖在中间，再停靠到右上角
       { type: 'ageStamp', age: 10, place: '准备奥数', t0: 15.35, center: E3.STAMP.center, R: E3.STAMP.R, dockT: 20.25, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale, pulse: [] },
-      { type: 'label', id: 'f3.lbIMO', text: 'IMO = 国际数学奥林匹克', at: [800, 692], rot: -2, size: 46, t0: 17.45, t1: 20.2, target: [836, 592], bend: 0.12, gap: 8 },
+      { type: 'f3_imo', id: 'f3.imo', at: [800, 692], t0: 17.45, t1: 20.2, target: [834, 600] },
       // the exam
       { type: 'f3_exam', id: 'f3.exam' },
-      ...PAPERS.map((pp, i) => ({ type: 'write', id: 'f3.cnt' + i, text: String(i + 1), x: pp.at[0], y: 158, size: 58, t0: pp.tc, t1: EXAM_T1, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'middle', z: Z.annot })),
       { type: 'f3_clock', id: 'f3.clock' },
-      { type: 'label', id: 'f3.lbHours', text: '4.5 小时', at: [455, 162], rot: -4, t0: 24.85, t1: EXAM_T1, target: clockPt(325, CLK.r + 30), bend: -0.2, gap: 8 },
+      { type: 'label', id: 'f3.lbHours', text: '4.5 小时', at: [455, 162], rot: -4, t0: 24.85, t1: DIM_T, target: clockPt(325, CLK.r + 30), bend: -0.2, gap: 8 },
       { type: 'write', id: 'f3.eq1', text: '4.5 ÷ 3 =', x: EQ_X, y: EQ_Y, size: EQ_S, t0: 27.45, t1: EXAM_T1, speed: 2400, gap: 0.03, glyphGap: 0.04, color: 'red', w: 6.5, sfx: 'pen', z: Z.annot },
       { type: 'write', id: 'f3.eq2', text: '1.5', x: EQ2_X, y: EQ_Y, size: EQ_S, t0: 28.95, t1: EXAM_T1, speed: 2400, gap: 0.03, glyphGap: 0.04, color: 'red', w: 7, sfx: 'pen', z: Z.annot },
       { type: 'highlight', id: 'f3.hi', of: 'f3.eq2', t0: 29.45, dur: 0.35, t1: EXAM_T1 },
       { type: 'label', id: 'f3.lbHr', text: '小时', at: [EQ2_X + w2 + 120, 700], rot: -4, t0: 29.75, t1: EXAM_T1, target: [EQ2_X + w2 * 0.6, EQ_Y + EQ_S + 18], bend: 0.25, gap: 8 },
       { type: 'speech', id: 'f3.say1', text: '一个半小时？', at: [300, 370], tail: [0, 44], speaker: 'terry', t0: 31.25, t1: 33.85, size: 64, rot: -3 },
-      { type: 'speech', id: 'f3.say2', text: ['我做一道题，', '一般只要一分钟！'], at: [318, 352], tail: [6, 74], speaker: 'terry', t0: 33.95, t1: 38.2, size: 54, rot: -2 },
+      { type: 'speech', id: 'f3.say2', text: ['我做一道题，', '一般只要一分钟！'], at: [318, 352], tail: [-70, 72], speaker: 'terry', t0: 33.95, t1: 38.2, size: 54, rot: -2 },
       // the first hard problem
       { type: 'f3_giant', id: 'f3.giant' },
       { type: 'e3_bulb', id: 'f3.bulb2', char: 'terry', t0: 41.85, state: FLICK },
       { type: 'f3_smoke', id: 'f3.smoke', t0: 49.35 },
+      { type: 'f3_dots', id: 'f3.dots', t0: 43.9, t1: 45.8 },
       { type: 'label', id: 'f3.lbDead', text: '（没电了）', at: [505, 318], rot: -4, size: 44, t0: 49.5, t1: 51.6, target: { target: 'f3.bulb2.bulb', dx: 28, dy: -10 }, bend: 0.2, gap: 12 },
     ],
     sfx: [[21.3, 'boing'], [31.2, 'boing'], ...BURSTS.map(([b]) => [b, 'f3_fizz'])],
@@ -2307,9 +2341,12 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const CL = [1065, 300];                                   // where the thought clouds and the big words live
 
   /* ---------------- the blank sheet on the desk (seen a little from above) ---------------- */
-  const SHEET = [[DX - 76, DTOP + 1], [DX - 62, DTOP - 22, 1], [DX + 62, DTOP - 22, 1], [DX + 76, DTOP + 1, 1], [DX - 76, DTOP + 1, 1]];
+  const SHEET = [[DX - 112, DTOP + 1], [DX - 90, DTOP - 40, 1], [DX + 90, DTOP - 40, 1], [DX + 112, DTOP + 1, 1], [DX - 112, DTOP + 1, 1]];
   COMP.f3_sheet = {
-    draw() { stroke('f3s.sheet', SHEET, { z: Z.desk + 1, w: 4, fill: C.paper }); },
+    draw() {
+      stroke('f3s.sheet', SHEET, { z: Z.desk + 1, w: 4.5, fill: C.paper });
+      stroke('f3s.sheetSh', [[DX - 104, DTOP + 6], [DX + 116, DTOP + 6, 1], [DX + 98, DTOP - 32]], { z: Z.desk + 0.9, w: 2.2, color: C.pencil, opacity: 0.7, boil: 0.5 });
+    },
   };
 
   /* ---------------- wall clock: 1 min → 10 min → 20 min, each a quick whirl ---------------- */
@@ -2367,6 +2404,22 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
   /** inside the memory cloud: a happy little Terry (the bulb above him is the shared e3_bulb) */
   PROPS.f3_memo = () => { portrait('f3s.memo', 0, 0, 44, { z: Z.fx + 1, happy: true }); };
+  /** …and one of the quick cards from before: 12×12 = 144, the answer written in a flash */
+  const MC = { at: [CL[0] + 92, CL[1] + 16], t0: 14.3, tA: 14.6, w: 190, h: 112 };
+  const MC_Q = layoutWriting({ text: '12×12 =', x: 0, y: -44, size: 32, t0: 0, speed: 1, anchor: 'middle' });
+  const MC_A = layoutWriting({ text: '144', x: 0, y: -4, size: 48, t0: MC.tA, speed: 2400, gap: 0.02, glyphGap: 0.02, anchor: 'middle' });
+  COMP.f3_memoCard = {
+    draw(fx, t) {
+      if (t < MC.t0 || t >= fx.t1) return;
+      const z = Z.fx + 1, k = 'f3s.mc', pp = Math.max(0.01, EASE.back(clamp((t - MC.t0) / 0.25)));
+      DL.save(); DL.translate(MC.at[0], MC.at[1]); DL.rotate(4); DL.scale(pp);
+      stroke(k, [[-MC.w / 2, -MC.h / 2], [MC.w / 2, -MC.h / 2, 1], [MC.w / 2, MC.h / 2, 1], [-MC.w / 2, MC.h / 2, 1], [-MC.w / 2, -MC.h / 2, 1]], { z, w: 3.6, fill: C.paper });
+      MC_Q.strokes.forEach((st, j) => stroke(k + '.q' + j, st.pts, { z: z + 0.1, w: 3.2, boil: 0.5 }));
+      MC_A.strokes.forEach((st, j) => { const q = clamp((t - st.t0) / st.dur); if (q > 0) stroke(k + '.a' + j, st.pts, { z: z + 0.1, w: 4.5, draw: q, boil: 0.5 }); });
+      DL.restore();
+    },
+    cues: () => [[MC.t0, 'plip'], [MC.tA, 'pen']],
+  };
 
   const cArc = (cx, cy, r, a0, a1, n = 5) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * RAD; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
   const GLOOM = [[-64, 22], ...cArc(-40, 4, 26, 150, 290), ...cArc(0, -10, 34, 215, 330), ...cArc(42, 4, 26, 250, 390), [64, 22, 1], [-64, 22, 1]];
@@ -2439,6 +2492,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const desk = (dx, dy = -3, bend = 'down') => ({ w: 1, to: 'desk', dx, dy, bend });
   Object.assign(POSE, {
     f3_sitPaper: { ...SIT, tilt: 6, ikL: desk(-48), ikR: desk(48) },
+    f3_cheeks: { ...SIT, lean: -1, tilt: 3, ikL: { w: 1, to: 'head', dx: -1.06, dy: 0.45, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 1.06, dy: 0.45, bend: 'out' } },
     f3_slump: { ...SIT, hop: 34, lean: 4, tilt: 24, armScale: 1.2, ikL: desk(-52), ikR: desk(38) },
     f3_hunch: { ...SIT, hop: 10, tilt: -4, ikL: desk(-36), ikR: desk(36) },
     f3_shrink: { ...SIT, hop: 22, tilt: 10, ikL: desk(-30, -3, 'out'), ikR: desk(30, -3, 'out') },
@@ -2452,7 +2506,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     tracks: {
       terry: {
         pos: [[0, [DX, SEAT]]],
-        pose: [[0, 'f3_sitPaper'], [3.85, 'thinkChin', 0.12, 'back'], [6.6, 'f3_sitPaper', 0.12], [9.3, 'chinHand', 0.12, 'back'],
+        pose: [[0, 'f3_sitPaper'], [3.85, 'thinkChin', 0.12, 'back'], [6.6, 'f3_cheeks', 0.12, 'back'], [9.3, 'chinHand', 0.12, 'back'],
           [10.3, 'sitScratch', 0.12, 'back'], [11.25, 'f3_slump', 0.14, 'back'], [13.65, 'f3_hunch', 0.2], [18.2, 'f3_shrink', 1.2],
           [26.55, 'sitUp', 0.07, 'back'], [28.7, 'f3_up', 0.2], [31.85, 'f3_fists', 0.1, 'back']],
         face: [[0, 'focus'], [1.75, 'puzzled', 0.06], [6.6, 'bored', 0.08], [9.3, 'bored'], [10.3, 'puzzled', 0.06], [11.25, 'sheepish', 0.08],
@@ -2472,8 +2526,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'desk', x: DX, top: DTOP, w: DW },
     ],
     fx: [
-      // t0/dockT far below zero: the engine's cue filter would otherwise play this stamp's sounds at the end of the previous scene
-      { type: 'ageStamp', age: 10, t0: -1000, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -999, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
+      { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       { type: 'f3_sheet', id: 'f3s.sheetC' },
       { type: 'f3_wclock', id: 'f3s.wclock' },
       { type: 'title', id: 'f3s.stuck', text: '卡住', x: CL[0], y: 290, size: 150, t0: 1.75, t1: 3.8, underline: true },
@@ -2481,7 +2534,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'thought', id: 'f3s.cloud1', at: CL, rx: 240, ry: 140, t0: 3.88, t1: 9.2, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
       { type: 'f3_tangle', id: 'f3s.tangle', at: [CL[0] - 10, CL[1] - 4], t0: 4.15, t1: 9.2 },
       // 纸上一片空白
-      { type: 'label', id: 'f3s.lbBlank', text: '（空白）', at: [800, 560], rot: 3, t0: 7.25, t1: 9.2, target: [DX + 50, DTOP - 12], bend: -0.25, gap: 8 },
+      { type: 'label', id: 'f3s.lbBlank', text: '（空白）', at: [800, 560], rot: 3, t0: 7.25, t1: 9.2, target: [DX + 62, DTOP - 20], bend: -0.25, gap: 10 },
       // 1 分钟，10 分钟，20 分钟……
       ...MINS.flatMap(([n, t0, y], i) => [
         { type: 'write', id: 'f3s.mn' + i, text: n, x: 384, y: y - 26, size: 52, t0, t1: 13.55, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'end', z: Z.annot },
@@ -2489,9 +2542,10 @@ PROPS.e3_page = (fx, t, lt, p) => {
       ]),
       { type: 'f3_balls', id: 'f3s.balls' },
       // 习惯了“一眼看出来”：a memory of the old ding
-      { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 185, ry: 135, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
-      { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0], CL[1] + 52], t0: 13.85, t1: 17.95, drawDur: 0 },
-      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0], CL[1] - 20], size: 62, t0: 13.85, t1: 17.95, state: [[-1000, 'on']], z: Z.fx + 2 },   // already lit, and no ding leaking into the previous scene
+      { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 238, ry: 138, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
+      { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0] - 80, CL[1] + 56], t0: 13.85, t1: 17.95, drawDur: 0 },
+      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0] - 80, CL[1] - 34], size: 62, t0: 13.85, t1: 17.95, state: [[-1, 'on']], z: Z.fx + 2 },   // already lit (no ding)
+      { type: 'f3_memoCard', id: 'f3s.memoCard', t1: 17.95 },
       // “我是不是……没那么聪明？”
       { type: 'f3_gloom', id: 'f3s.gloom', t0: 18.7, t1: 21.8 },
       { type: 'thought', id: 'f3s.cloud3', at: CL, rx: 262, ry: 132, t0: 21.85, t1: 26.5, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
@@ -2534,12 +2588,12 @@ PROPS.e3_page = (fx, t, lt, p) => {
 (() => {
   /* ---------------- the chart ---------------- */
   const OX = 180, AXY = 760, YTOP = 104, XEND = 1546;   // axes: origin x, time-axis y, top of the mood axis, end of the time axis
-  const X0 = 192, YB = 400;                             // every curve starts here (neutral mood)
+  const X0 = 240, YB = 400;                             // every curve starts here (neutral mood)
   const R = 46;                                         // the rider's head radius
-  const EASY_END = 450;
-  const easyY = x => YB - 18 * Math.exp(-(((x - 330) / 34) ** 2));                 // flat, one tiny bump
-  const HARD = { drop: [290, 420], floor: 620, valley: [420, 860], amp: 11, cycles: 5.5, climb: [860, 940], peak: 228, desc: [940, 1010], plateau: 322, end: 1040 };
-  const HARDER = { drop: [290, 440], floor: 725, valley: [440, 1130], amp: 8, cycles: 8.5, climb: [1130, 1210], peak: 125, desc: [1210, 1290], plateau: 286, end: 1340 };
+  const EASY_END = 480;
+  const easyY = x => YB - 18 * Math.exp(-(((x - 360) / 34) ** 2));                 // flat, one tiny bump
+  const HARD = { drop: [320, 420], floor: 620, valley: [420, 860], amp: 11, cycles: 5.5, climb: [860, 940], peak: 228, desc: [940, 1010], plateau: 322, end: 1040 };
+  const HARDER = { drop: [320, 440], floor: 725, valley: [440, 1130], amp: 8, cycles: 8.5, climb: [1130, 1210], peak: 125, desc: [1210, 1290], plateau: 286, end: 1340 };
   const sm = u => { u = clamp(u); return u * u * (3 - 2 * u); };
   /** the "stuck" curve: flat, drop into the valley, wiggle along the floor, rocket up to a sharp peak, settle a bit lower */
   function stuckY(c, x) {
@@ -2555,7 +2609,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   }
   const hardY = x => stuckY(HARD, x), harderY = x => stuckY(HARDER, x);
   // sanity: the harder problem's valley is deeper and its peak higher (smaller y = happier)
-  if (!(HARDER.floor > HARD.floor && HARDER.peak < HARD.peak && HARD.peak < easyY(330))) console.error('c3: curve shapes');
+  if (!(HARDER.floor > HARD.floor && HARDER.peak < HARD.peak && HARD.peak < easyY(360))) console.error('c3: curve shapes');
 
   /** sample a curve densely enough on steep parts; the peak is a sharp corner */
   function sample(fn, x0, x1, peakX) {
@@ -2649,7 +2703,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     [T.aha, { eyeSY: 1.14, pupil: 0.8, brow: 'arc', browY: 0.1, mouth: 'jaw', mo: 0.5, mw: 0.4 }], [T.sit, 'joy'],
     [34.9, 'surprised'], [36.6, { eyeSY: 1.16, pupil: 0.7, brow: 'arc', browY: 0.12, mouth: 'o' }], [37.6, 'grin'], [39.2, 'joy'], [T.laugh, 'laugh'],
     [41.6, 'joy'], [44.3, 'proud'], [46.6, 'smile']];
-  const QS = [[19.9, -76, -88, 64, -14], [21.7, 6, -140, 72, 8], [23.5, 80, -102, 66, 16]];   // [t0, dx, dy, size, rot] around the head
+  const QS = [[19.9, -78, -86, 62, -14], [21.7, 2, -110, 66, 8], [23.5, 82, -94, 62, 16]];   // kept below the 简单题 tag   // [t0, dx, dy, size, rot] around the head
   const PEN3 = [[34.1, X0], [34.25, HARDER.drop[0]], [34.6, HARDER.drop[1]], [36.25, HARDER.climb[0]], [36.6, HARDER.climb[1]], [36.95, HARDER.desc[1]], [37.1, HARDER.end]];
   const pen3 = t => {
     if (t <= PEN3[0][0]) return PEN3[0][1] - 1;
@@ -2669,7 +2723,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     if (t < T.sud) return [c[0] + 220, c[1] + 30];
     if (t < T.sit) return [TOP[0], TOP[1] - 120];
     if (t >= 34.1 && t < 37.3) { const x = pen3(t); return [x, harderY(x)]; }
-    if (t >= 44.3 && t < 46.6) return [330, YB];
+    if (t >= 44.3 && t < 46.6) return [440, YB];
     return null;
   }
 
@@ -2828,20 +2882,23 @@ PROPS.e3_page = (fx, t, lt, p) => {
       stroke(k, [[x0, y - 18], [x0 + 5, y - 3], [x0 + 18, y], [mid - 14, y], [mid - 3, y + 4], [mid, y + 15, 1], [mid + 3, y + 4], [mid + 14, y], [x1 - 18, y], [x1 - 5, y - 3], [x1, y - 18]],
         { z: Z.annot, w: 4, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.3)) });
       let lab = null, lt = 0; LONG.forEach(([t0, s]) => { if (t >= t0) { lab = s; lt = t0; } });
-      if (lab) text(k + '.t', lab, x0 + 4, y + 42, { size: 38, color: C.red, anchor: 'start', z: Z.annot, scale: lerp(1.25, 1, EASE.out(clamp((t - lt) / 0.2))) });
+      if (lab) text(k + '.t', lab, x0 + 4, y + 46, { size: 46, color: C.red, anchor: 'start', z: Z.annot, scale: lerp(1.25, 1, EASE.out(clamp((t - lt) / 0.2))) });
     },
     cues: fx => [[fx.t0, 'pen'], ...LONG.map(([t0]) => [t0, 'pen'])],
   };
   /** red note + arrow like `label`, but with no paper halo (so a highlighter band can sit under it) */
+  const val = (v, t) => (typeof v === 'function' ? v(t) : v);
   COMP.c3_cnote = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
-      const lt = t - fx.t0, size = fx.size || 44, pp = EASE.back(clamp(lt / 0.2));
-      text(fx.id, fx.text, fx.at[0], fx.at[1], { size, color: C.red, z: Z.annot, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), rot: fx.rot || 0 });
-      arrow(fx.id + '.a', fx.from, fx.to, { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: fx.bend ?? 0.2 });
+      const lt = t - fx.t0, size = fx.size || 44, pp = EASE.back(clamp(lt / 0.2)), at = val(fx.at, t);
+      text(fx.id, fx.text, at[0], at[1], { size, color: C.red, z: Z.annot, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), rot: fx.rot || 0, halo: fx.halo });
+      arrow(fx.id + '.a', val(fx.from, t), val(fx.to, t), { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: fx.bend ?? 0.2 });
     },
-    cues: fx => [[fx.t0, 'pop']],
+    cues: fx => [[fx.t0, 'pop'], ...(fx.sfxAt || [])],
   };
+  /** 卡住谷: first beside the drop (while the rider falls in), then it slides into the empty valley before the dashed curve's drop is drawn */
+  const VMOVE = 33.6, vU = t => EASE.io(clamp((t - VMOVE) / 0.4));
 
   const DUR = 48.4;
   defineScene({
@@ -2856,17 +2913,18 @@ PROPS.e3_page = (fx, t, lt, p) => {
         ext: t => (t < T.h0 ? X0 : Math.max(HX(t), t >= T.top ? HARD.climb[1] : 0, t >= T.after0 ? lerp(HARD.climb[1], HARD.end, EASE.io(clamp((t - T.after0) / (T.after1 - T.after0)))) : 0)) },
       { type: 'c3_ccurve', id: 'c3c.harder', fn: harderY, x1: HARDER.end, peakX: HARDER.climb[1], w: 4, dash: true, ext: pen3 },
       // tags at the ends of the lines (ink)
-      { type: 'title', id: 'c3c.tagE', text: '简单题', x: 510, y: 404, size: 40, t0: 6.9, anchor: 'start', color: 'ink' },
+      { type: 'title', id: 'c3c.tagE', text: '简单题', x: EASY_END + 52, y: 392, size: 40, t0: T.e1, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagH', text: '难题', x: HARD.end + 16, y: HARD.plateau, size: 40, t0: T.after1 + 0.05, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagX', text: '更难的题', x: HARDER.end + 14, y: HARDER.plateau, size: 40, t0: 37.15, anchor: 'start', color: 'ink' },
       // red notes on the chart
-      { type: 'label', id: 'c3c.lbValley', text: '卡住谷', at: [282, 600], rot: -4, t0: 19.3, t1: DUR, target: [500, 640], bend: 0.25, gap: 12, size: 46 },
+      { type: 'c3_cnote', id: 'c3c.lbValley', text: '卡住谷', rot: -4, size: 46, halo: 8, t0: 19.3, t1: DUR, bend: 0.2, sfxAt: [[VMOVE, 'whoosh']],
+        at: t => lerp2([282, 600], [640, 545], vU(t)), from: t => lerp2([352, 612], [640, 572], vU(t)), to: t => lerp2([486, 634], [640, 612], vU(t)) },
       { type: 'c3_cbrace', id: 'c3c.brace', t0: 21.0, t1: 34.0 },
       { type: 'band', id: 'c3c.hiPeak', rect: [652, 212, 138, 50], t0: 40.0, dur: 0.45, pad: 12 },
       { type: 'c3_cnote', id: 'c3c.lbPeak', text: '啊哈峰', at: [720, 236], rot: -2, size: 46, t0: 30.9, t1: DUR, from: [800, 246], to: [918, 262], bend: 0.25 },
       { type: 'label', id: 'c3c.lbDeep', text: '更深', at: [934, 684], rot: -3, t0: 35.65, t1: 39.1, target: [850, 728], bend: -0.25, gap: 12, size: 42 },
-      { type: 'label', id: 'c3c.lbHigh', text: '更高', at: [1352, 134], rot: 3, t0: 36.75, t1: 39.1, target: [1222, 128], bend: 0.25, gap: 12, size: 42 },
-      { type: 'label', id: 'c3c.lbNoPeak', text: '（没有峰）', at: [330, 292], rot: -3, t0: 44.6, t1: DUR, target: [338, 380], bend: 0.2, gap: 12, size: 40 },
+      { type: 'label', id: 'c3c.lbHigh', text: '更高', at: [1090, 150], rot: -3, t0: 36.75, t1: 39.1, target: [1198, 130], bend: -0.2, gap: 12, size: 42 },
+      { type: 'label', id: 'c3c.lbNoPeak', text: '（没有峰）', at: [430, 300], rot: -3, t0: 44.6, t1: DUR, target: [455, 398], bend: 0.2, gap: 12, size: 40 },
       // the rider, its bulb and its words
       { type: 'c3_crider', id: 'c3c.rider' },
       { type: 'e3_bulb', id: 'c3c.bulb', char: 'c3_head', size: 64, t0: T.aha, dy: 4, state: [[T.aha, 'on']] },
@@ -2896,7 +2954,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
 /* ---- 40_domino.js ---- */
 // 第 40 场 · 骨牌难题：4×4 棋盘剪掉对角两格，7 块骨牌能不能盖满？小陶“能！”，摆了九次，次次剩两格。
 // 演绎：“我们陪小陶一起卡一次”，不是他当年做过的某一道具体的题。九次摆法 = E3B.TRIES[0..8]（每次剩两个白格）。
-// 结尾画面交给第 45 场：主棋盘在 E3B.MAIN，剪过角、没涂色、空的；小问号 [960, 770]（size 160，牌子在左边）举牌“为什么总剩两格？”；小陶在 1180。
+// 结尾画面交给第 45 场：主棋盘在 E3B.MAIN，剪过角、没涂色、空的；小问号 [970, 770]（size 160，signSize 52，牌子在左边）举牌“为什么总剩两格？”；小陶在 1180。
 (() => {
   const FL = 780, TX = 1180, M = E3B.MAIN, CS = M.cell, TR = E3B.TRIES;
   const cellC = (r, c) => [M.at[0] + (c - 1.5) * CS, M.at[1] + (r - 1.5) * CS];
@@ -2909,16 +2967,24 @@ PROPS.e3_page = (fx, t, lt, p) => {
   });
 
   /* ---------------- timing ---------------- */
-  const T = { wink: 1.4, old: 4.5, board: 7.75, cut: 10.9, diag: 14.35, drop: 14.8, ask: 18.75, can: 23.2 };
-  const L9 = 28.55, L10 = 32.15, L11 = 35.55, L12 = 38.05, L13 = 42.35, L14 = 45.25;
-  const CLEAR = 45.0, QT = 46.7, SIGN = 47.25, DUR = 49.35;
+  const T = { wink: 1.4, old: 4.5, board: 4.5, size: 7.8, cut: 10.9, diag: 14.35, drop: 14.8, ask: 18.75, can: 23.2 };
+  const L9 = 28.55, L10 = 32.15, L11 = 35.55, L12 = 38.05, L13 = 42.6, L14 = 45.5;
+  const CLEAR = 45.25, DEAD = 46.7, QT = 47.3, SIGN = 47.85, DUR = 49.6;
+  const QP = [970, 770], QSIGN = 52;   // 小问号 at the end (= the start of scene 45)
   // the attempts: two careful ones, then the montage (3rd … 9th try), faster and faster
   const ATT = [
     { t0: 25.55, step: 0.38, fail: L9, t1: 32.0 },
     { t0: 32.6, step: 0.42, fail: L11, t1: 37.75 },
   ];
-  const MONT = [[37.99, 0.08], [38.96, 0.07], [39.81, 0.03], [40.28, 0.03], [40.75, 0.03], [41.22, 0.03], [41.69, 0.03]];
-  MONT.forEach(([t0, step], i) => ATT.push({ t0, step, fail: +(t0 + 5 * step + 0.16).toFixed(2), t1: i < MONT.length - 1 ? MONT[i + 1][0] - 0.02 : CLEAR }));
+  // montage: [step, how long the two left-over squares stay ringed]; each try is cleared fast (outDur 0.08) before the next starts
+  const MONT = [[0.08, 0.3], [0.06, 0.28], [0.04, 0.22], [0.04, 0.22], [0.04, 0.22], [0.04, 0.22], [0.03, null]];
+  { let tt = 37.99;
+    MONT.forEach(([step, hold]) => {
+      const fail = +(tt + 5 * step + 0.08).toFixed(2), a = { t0: tt, step, fail, outDur: 0.08, t1: CLEAR };
+      if (hold !== null) { a.t1 = +(fail + hold).toFixed(2); tt = +(a.t1 + 0.1).toFixed(2); }
+      ATT.push(a);
+    }); }
+  ATT[ATT.length - 1].outDur = 0.3;
   const FAILS = ATT.map(a => a.fail), NINE = FAILS[8];
   const tdOf = (k, i) => ATT[k].t0 + i * ATT[k].step;
 
@@ -2961,7 +3027,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* ---------------- L5: one domino, on its own: it covers two neighbouring squares ---------------- */
-  const DG = { at: [200, 472], s: 90 };
+  const DG = { at: [205, 472], s: 100 };   // same squares as the board
   function dominoShape(key, s, o) { // a domino lying flat, centred at the origin, s = one square
     const hw = s * 0.9, hh = s * 0.4;
     stroke(key, superPts(0, 0, hw * 2, hh * 2, 20, 6), { z: o.z, w: o.w, closed: true, fill: 'none', opacity: o.opacity });
@@ -3034,6 +3100,18 @@ PROPS.e3_page = (fx, t, lt, p) => {
     cues: fx => [[fx.ringT, 'pen'], [CLEAR, 'whoosh']],
   };
 
+  /* ---------------- a pencil puff where the (dead) bulb was ---------------- */
+  COMP.d3_dPoof = {
+    draw(fx, t, F) {
+      const lt = t - fx.t0; if (lt < 0 || lt > 0.5) return;
+      const a = F.anchors[fx.char]; if (!a) return;
+      const c = [a.headTop[0] + 8, a.headTop[1] - 26 - 56], u = EASE.out(lt / 0.5);
+      for (let i = 0; i < 6; i++) {
+        const ang = (i * 60 + 15) * RAD, r = (14 + 26 * u) * 0.45, q = [c[0] + Math.cos(ang) * (18 + 40 * u), c[1] + Math.sin(ang) * (18 + 40 * u)];
+        stroke(fx.id + i, ringPts(fx.id + i, q[0], q[1], r, r, { n: 8, closed: true }), { z: Z.fx, w: 2.6, color: C.pencil, closed: true, opacity: 1 - u, boil: 0.6 });
+      }
+    },
+  };
   /* ---------------- sweat drops (ink) ---------------- */
   COMP.d3_dSweat = {
     draw(fx, t, F) {
@@ -3066,7 +3144,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     d3_dReach: { lean: -6, tilt: -4, armScale: 1.55, armL: [86, 6], armR: [24, 16] },
     d3_dStartle: { lean: 4, tilt: 4, armScale: 1.45, armL: [62, 46], armR: [62, 46] },
   });
-  const firstFail = FAILS[0];
+  const M0 = ATT[2].t0;   // the montage starts
   const curCell = t => { // the domino being placed right now (for Terry's eyes)
     let c = null;
     [0, 1].forEach(k => TR[k].forEach((d, i) => { if (tdOf(k, i) - 0.25 <= t && t < ATT[k].fail) c = domC(d); }));
@@ -3083,41 +3161,44 @@ PROPS.e3_page = (fx, t, lt, p) => {
         pos: [[0, [TX, FL]]],
         pose: [[0, 'akimbo'], [T.old, 'stand', 0.15], [T.diag + 0.6, 'thinkStand', 0.15], [T.can, 'kidCheer', 0.1, 'back'],
           [ATT[0].t0 - 0.3, jab(placeTimes(0)), 0.15], [L9, 'stand', 0.15], [L10, 'akimbo', 0.12, 'back'], [ATT[1].t0 - 0.3, jab(placeTimes(1)), 0.15],
-          [L11 + 0.4, 'scratchStand', 0.12, 'back'], [MONT[0][0] - 0.1, flail, 0.12], [NINE, 'd3_dSlump', 0.2],
-          [CLEAR + 0.05, 'd3_dOneMore', 0.12, 'back'], [46.15, 'd3_dReach', 0.15], [QT + 0.05, 'd3_dStartle', 0.07, 'back'], [48.0, 'thinkStand', 0.25]],
-        face: [[0, 'proudGrin'], [T.old, 'neutral', 0.08], [T.board, 'focus', 0.08], [T.cut + 0.6, 'surprised', 0.05], [T.cut + 1.4, 'focus', 0.08],
+          [L11 + 0.4, 'scratchStand', 0.12, 'back'], [M0 - 0.1, flail, 0.12], [NINE, 'd3_dSlump', 0.2],
+          [CLEAR + 0.05, 'd3_dOneMore', 0.12, 'back'], [46.25, 'd3_dReach', 0.15], [QT + 0.05, 'd3_dStartle', 0.07, 'back'], [48.4, 'thinkStand', 0.25]],
+        face: [[0, 'proudGrin'], [T.old, 'neutral', 0.08], [T.size, 'focus', 0.08], [T.cut + 0.6, 'surprised', 0.05], [T.cut + 1.4, 'focus', 0.08],
           [T.can, 'proudGrin', 0.05], [ATT[0].t0, 'grin', 0.08], [L9, 'puzzled', 0.06], [L10, 'effort', 0.06], [L11, 'puzzled', 0.06], [L11 + 0.4, 'sheepish', 0.08],
-          [MONT[0][0], 'effort', 0.06], [NINE, 'sheepish', 0.1], [CLEAR + 0.05, 'effort', 0.06], [QT + 0.05, 'surprised', 0.04], [48.0, 'focus', 0.1]],
-        turn: [[0, -0.15], [T.old, -0.4, 0.12], [T.can, -0.1, 0.08], [ATT[0].t0 - 0.3, -0.4, 0.1], [CLEAR + 0.05, -0.15, 0.1], [46.15, -0.4, 0.1]],
-        gaze: [[0, 'viewer'], [T.old, 'old'], [T.board, 'board'], [T.cut + 0.5, 'fall'], [T.cut + 1.4, 'board'], [T.diag, 'diag'], [T.ask, 'ask'], [ROW_IN, 'row'],
-          [T.can, 'viewer'], [ATT[0].t0 - 0.3, 'cur'], [L9, 'left0'], [L10, 'cur'], [L11, 'left1'], [MONT[0][0], 'board'], [NINE, 'left8'],
-          [CLEAR + 0.05, 'viewer'], [46.15, 'board'], [QT + 0.05, 'qm'], [SIGN + 0.4, 'sign'], [48.0, 'board']],
+          [M0, 'effort', 0.06], [NINE, 'sheepish', 0.1], [CLEAR + 0.05, 'effort', 0.06], [QT + 0.05, 'surprised', 0.04], [48.4, 'focus', 0.1]],
+        turn: [[0, -0.15], [T.old, -0.4, 0.12], [T.can, -0.1, 0.08], [ATT[0].t0 - 0.3, -0.4, 0.1], [CLEAR + 0.05, -0.15, 0.1], [46.25, -0.4, 0.1]],
+        gaze: [[0, 'viewer'], [T.old, 'old'], [5.8, 'board'], [T.cut + 0.5, 'fall'], [T.cut + 1.4, 'board'], [T.diag, 'diag'], [T.ask, 'ask'], [ROW_IN, 'row'],
+          [T.can, 'viewer'], [ATT[0].t0 - 0.3, 'cur'], [L9, 'left0'], [L10, 'cur'], [L11, 'left1'], [M0, 'board'], [NINE, 'left8'],
+          [CLEAR + 0.05, 'viewer'], [46.25, 'board'], [QT + 0.05, 'qm'], [SIGN + 0.3, 'sign'], [48.4, 'board']],
         squash: [[0, 1], [T.cut + 0.6, 1.07, 0.05], [T.cut + 0.66, 1, 0.2, 'back'], [T.can, 0.9, 0.05], [T.can + 0.05, 1.08, 0.08], [T.can + 0.15, 1, 0.2, 'back'],
           [L9, 0.95, 0.06], [L9 + 0.06, 1, 0.2, 'back'], [QT + 0.05, 1.1, 0.05], [QT + 0.11, 1, 0.22, 'back']],
       },
     },
-    targets: F => ({ old: [250, 210], board: M.at, fall: [600, 640], diag: DG.at, ask: [600, 100], row: [600, ROW_Y], cur: curCell(F.t),
-      left0: midLeft(0), left1: midLeft(1), left8: midLeft(8), qm: [960, 640], sign: [904, 560] }),
+    targets: F => ({ old: [300, 205], board: M.at, fall: [600, 640], diag: DG.at, ask: [600, 100], row: [600, ROW_Y], cur: curCell(F.t),
+      left0: midLeft(0), left1: midLeft(1), left8: midLeft(8), qm: [QP[0], 640], sign: [QP[0] - 56, 560] }),
     set: [{ type: 'floor' }],
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       // L1: a wink from the red pen
-      { type: 'label', id: 'd3d.wink', text: '（他还不知道）', at: [905, 360], rot: -3, t0: T.wink, t1: 4.3, target: { char: 'terry', part: 'headTop', dx: -30, dy: 6 }, bend: -0.25, gap: 14 },
+      { type: 'label', id: 'd3d.wink', text: '（他还不知道要卡住了）', at: [850, 380], rot: -3, size: 46, t0: T.wink, t1: 4.3, target: { char: 'terry', part: 'headTop', dx: -30, dy: 6 }, bend: -0.25, gap: 14 },
       // L2–L4: the old problem, the board, the cut
-      { type: 'd3_dTag', id: 'd3d.old', text: '老题目', at: [250, 205], rot: -5, size: 52, t0: T.old, t1: T.cut - 0.2, arrowT0: T.board + 0.25, targets: [[392, 330]], bends: [0.25], gap: 10 },
-      { type: 'd3_dDust', id: 'd3d.dust', at: [250, 205], t0: T.old + 0.15 },
-      { type: 'e3_board', id: 'd3d.b', at: M.at, cell: CS, t0: T.board, drawDur: 0.6, cut: T.cut, color: null,
+      { type: 'd3_dTag', id: 'd3d.old', text: '老题目', at: [300, 205], rot: -5, size: 52, t0: T.old, t1: 7.6, arrowT0: T.old + 0.1, targets: [[394, 300]], bends: [0.3], gap: 10 },
+      { type: 'e3_board', id: 'd3d.b', at: M.at, cell: CS, t0: T.board, drawDur: 0.5, cut: T.cut, color: null,
+        scale: [[0, 1], [T.size, 1.04, 0.1], [T.size + 0.1, 1, 0.25, 'back']],
         attempts: ATT.map((a, k) => ({ ...a, dom: TR[k] })),
         rings: [{ cells: leftOf(TR[8]), t0: L13 + 0.3, t1: CLEAR }] },
+      { type: 'd3_dDust', id: 'd3d.dust', at: [600, 215], t0: T.old + 0.15 },
+      { type: 'write', id: 'd3d.size', text: '4×4', x: 600, y: 636, size: 52, t0: T.size + 0.05, t1: T.cut - 0.3, speed: 2800, color: 'red', w: 6, sfx: 'pen', anchor: 'middle', z: Z.annot },
       // L5: one domino on its own
       { type: 'd3_dDiag', id: 'd3d.dg', t0: T.diag, t1: ATT[0].t0 - 0.3 },
-      { type: 'label', id: 'd3d.lbDom', text: ['骨牌：', '盖住相邻两格'], at: [200, 318], rot: -3, t0: T.drop + 0.35, t1: ATT[0].t0 - 0.3, target: [200, 428], bend: 0.15, gap: 8 },
+      { type: 'label', id: 'd3d.lbDom', text: ['骨牌：', '盖住相邻两格'], at: [215, 322], rot: -3, size: 52, t0: T.drop + 0.35, t1: ATT[0].t0 - 0.3, target: [205, 418], bend: 0.15, gap: 8 },
       // L6: the question + the seven dominoes
       { type: 'title', id: 'd3d.ask', text: '7 块骨牌，能盖满吗？', x: 600, y: 90, size: 56, t0: T.ask, t1: ATT[0].t0 - 0.3, color: 'ink' },
       { type: 'd3_dRow', id: 'd3d.row' },
       // L7: the (misleading) flash of insight
       { type: 'e3_bulb', id: 'd3d.bulb', char: 'terry', t0: T.can, t1: QT,
-        state: [[T.can, 'on'], [L9, 'flicker'], [L10, 'on'], [L11, 'flicker'], [NINE, 'off'], [L14, 'flicker']] },
+        state: [[T.can, 'on'], [L9, 'flicker'], [L10, 'on'], [L11, 'flicker'], [NINE, 'off'], [L14, 'flicker'], [DEAD, 'dead']] },
+      { type: 'd3_dPoof', id: 'd3d.poof', char: 'terry', t0: QT },
       { type: 'speech', id: 'd3d.can', text: '能！', at: [1000, 440], tail: [56, 30], speaker: 'terry', t0: T.can, t1: ATT[0].t0 - 0.2, size: 100, rot: -5 },
       // L9: two squares left, not side by side
       { type: 'd3_dTag', id: 'd3d.apart', text: '不挨着！', at: [960, 520], rot: -3, size: 46, t0: L9 + 1.3, t1: ATT[0].t1, targets: [cellC(0, 3), cellC(3, 2)], bends: [0.25, -0.2], gap: 46 },
@@ -3126,10 +3207,10 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'title', id: 'd3d.nine', text: '9 次', x: XC[0], y: 470, size: 50, t0: NINE + 0.75, t1: CLEAR, color: 'red', rot: -4, sfx: 'pop' },
       { type: 'd3_dSweat', id: 'd3d.sw', char: 'terry', t0: 39.0, t1: QT },
       // L14: 小问号 bursts in
-      { type: 'qm', id: 'qm', size: 160, t0: QT, burst: true, signSide: 'left', pos: [[0, [960, 770]]],
-        act: [[0, 'idle'], [QT + 0.3, 'hop'], [QT + 0.75, 'idle'], [48.1, 'tap']], hopHz: 2.2,
+      { type: 'qm', id: 'qm', size: 160, signSize: QSIGN, t0: QT, burst: true, signSide: 'left', pos: [[0, QP]],
+        act: [[0, 'idle'], [QT + 0.3, 'hop'], [QT + 0.75, 'idle'], [48.5, 'tap']], hopHz: 2.2,
         mood: [[0, 'surprised'], [SIGN, 'doubt']],
-        gaze: [[0, 'terry'], [48.1, 'board']],
+        gaze: [[0, 'terry'], [48.5, 'board']],
         sign: [[0, null], [SIGN, '为什么总剩两格？']],
         sfxAt: [[QT, 'boing'], [SIGN, 'pop']] },
     ],
@@ -3162,20 +3243,21 @@ PROPS.e3_page = (fx, t, lt, p) => {
     tracks: {
       terry: {
         pos: [[0, [TX, FL]]],
-        pose: [[0, 'thinkStand'], [3.0, 'kidPoint', 0.12, 'back'], [5.7, 'thinkStand', 0.15], [12.3, 'scratchStand', 0.12, 'back']],
+        pose: [[0, 'thinkStand'], [3.0, { ...POSE.stand, armScale: 1.5, armL: [100, 12] }, 0.12, 'back'], [5.7, 'thinkStand', 0.15], [12.3, 'scratchStand', 0.12, 'back']],
         face: [[0, 'focus'], [3.0, 'grin', 0.05], [5.7, 'focus', 0.05], [12.3, 'sheepish', 0.05]],
         turn: [[0, -0.4], [3.0, 0, 0.1], [5.7, -0.4, 0.1], [12.3, 0, 0.1]],
         gaze: [[0, 'board'], [3.0, 'viewer'], [5.7, 'board'], [12.3, 'viewer']],
       },
     },
     targets: () => ({ board: E3B.MAIN.at }),
+    set: [{ type: 'floor', t0: -1 }],
     fx: [
       { ...E3B.MAIN, type: 'e3_board', id: 'bd', t0: -1, cut: -1, color: null },
       { type: 'ageStamp', age: 10, t0: -3, ...E3.STAMP, dockT: -2 },
       { type: 'title', id: 'yt', text: '轮到你了！', x: 600, y: 120, size: 84, t0: 0.3, color: 'red', rot: -3, sfx: 'stamp' },
-      { type: 'qm', id: 'qm', pos: [[0, [960, 770]]], size: 160, t0: -1, silent: true, signSide: 'left',
+      { type: 'qm', id: 'qm', pos: [[0, [970, 770]]], size: 160, signSize: 52, t0: -1, silent: true, signSide: 'left',
         act: [[0, 'tap'], [5.7, 'hop'], [6.8, 'idle'], [12.3, 'nod']], mood: [[0, 'doubt'], [12.3, 'happy']],
-        sign: [[-1, '为什么总剩两格？'], [5.7, '能盖满吗？为什么？'], [12.3, '为什么总剩两格？']], gaze: [[0, 'board'], [3.0, 'viewer'], [12.3, 'terry']] },
+        sign: [[-1, '为什么总剩两格？'], [5.7, '能不能盖满？为什么？'], [12.3, '为什么总剩两格？']], gaze: [[0, 'board'], [3.0, 'viewer'], [12.3, 'terry']] },
       { type: 'label', id: 'lbT', text: ['先自己', '卡一会儿'], at: [1040, 250], rot: 3, t0: 3.1, t1: 11.7, target: { char: 'terry', part: 'headTop', dy: -14 }, bend: 0.25, gap: 12 },
       { type: 'speech', id: 'sp', text: '卡住啦……', at: [1340, 330], tail: [-60, 70], speaker: 'terry', t0: 12.4, t1: 16.4, size: 52, rot: 4 },
     ],
@@ -3193,11 +3275,11 @@ PROPS.e3_page = (fx, t, lt, p) => {
 /* ---- 50_think.js ---- */
 // 第 50 场 · 换个办法想：灵光不来，就坐下来想。① 失败也是线索：九次失败排成 3×3，圈出每次剩下的两格；
 // ② 问一个更好的问题：不问“怎么摆”，问“剩下的两格，有什么共同点？”；③ 换个看法：把黑白涂回去——剩下的全是白格。
-// 开场接第 45 场：主棋盘在 E3B.MAIN（剪过角、没涂色、空的），小问号 [960, 770] 举牌“为什么总剩两格？”，小陶在 1180。
+// 开场接第 45 场：主棋盘在 E3B.MAIN（剪过角、没涂色、空的），小问号 [970, 770]（size 160，signSize 52，牌子在左边）举牌“为什么总剩两格？”，小陶在 1180。
 // 结尾交给第 55 场：主棋盘回到 E3B.MAIN，已涂色，摆着 E3B.TRIES[8]，(2,3)(3,2) 两个白格被圈着；小陶站在 1180，表情 idea。
 (() => {
   const FL = 780, TX = 1180, M = E3B.MAIN, CS = M.cell, TR = E3B.TRIES;
-  const TS = 0.33, GX = 575, GY = 445, GAP = 160;                // thumbnails: 33 px squares, 3×3
+  const TS = 0.42, GX = 610, GY = 450, GAP = 185;                // thumbnails: 42 px squares, 3×3 (x 341–879, y 181–719)
   const SLOT = k => [GX + (k % 3 - 1) * GAP, GY + (Math.floor(k / 3) - 1) * GAP];
   const leftOf = dom => { const cov = new Set(dom.flatMap(d => E3B.domCells(d).map(([r, c]) => r + '_' + c))); return E3B.cells(4, true).filter(([r, c]) => !cov.has(r + '_' + c)); };
   // what the scene shows: every one of the nine tries leaves two squares, and both are white
@@ -3211,18 +3293,19 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const HOW = 19.5, STRIKE = 20.55, HEAD = 22.35, ARROW = 24.3;
   const TILT = 27.65, CLOUD = 30.4, CB = 30.65, CLOUD_OFF = 34.3, COLOR_T = k => 34.45 + k * 0.1;
   const REDO_T = k => 37.8 + k * 0.12, REDO_OFF = 40.95, JAW = 37.9, WHITE = 38.9, STAND = 39.35;
-  const CHECK_T = k => 41.3 + k * 0.14, QEXIT = 42.8, GATHER = 43.55, DUR = 44.9;
-  const OFF = 43.3;                                            // the notes are tidied away
+  const CHECK_T = k => 41.3 + k * 0.14, QEXIT = 43.7, GATHER = 44.4, DUR = 45.8;
+  const OFF = 44.3, FADE = 0.25;                               // the notes are tidied away (a short fade)
+  const QP = [970, 770], QSIGN = 52, SWAPQ = 12.0;             // 小问号 (same spot and sign size as scenes 40/45)
 
   /* ---------------- the three steps, noted down on the left in red ---------------- */
   const STEPS = [['1', '失败也是线索'], ['2', '问更好的问题'], ['3', '换个看法']];
   COMP.d3_tSteps = {
     draw(fx, t) {
-      if (t >= fx.t1) return;
-      const size = 38;
+      if (t >= fx.fade + FADE) return;
+      const size = 38, fo = 1 - clamp((t - fx.fade) / FADE);
       STEPS.forEach(([n, s], i) => {
         const t0 = STEP[i], lt = t - t0; if (lt < 0) return;
-        const cur = i === STEPS.length - 1 || t < STEP[i + 1], op = cur ? 1 : 0.5, pp = EASE.back(clamp(lt / 0.22));
+        const cur = i === STEPS.length - 1 || t < STEP[i + 1], op = (cur ? 1 : 0.5) * fo, pp = EASE.back(clamp(lt / 0.22));
         const x = fx.x, y = fx.y + i * fx.dy, k = fx.id + i;
         DL.save(); DL.translate(x + 24, y); DL.scale(lerp(0.5, 1, pp));
         stroke(k + '.o', ringPts(k + '.o', 0, 0, 24, 24, { n: 10, a0: -110, sweep: 375, rv: 0.05 }), { z: Z.annot, w: 4, color: C.red, opacity: op, draw: EASE.out(clamp(lt / 0.3)) });
@@ -3289,15 +3372,26 @@ PROPS.e3_page = (fx, t, lt, p) => {
   /** "every time": a red ✓ beside each of the nine boards */
   COMP.d3_tChecks = {
     draw(fx, t) {
-      if (t >= fx.t1) return;
-      const g = GLYPH['✓'], s = 30, h = 1.5 * CS * TS;   // in the empty (cut-off) bottom-right corner of each board
+      if (t >= fx.fade + FADE) return;
+      const g = GLYPH['✓'], s = 40, h = 1.5 * CS * TS, fo = 1 - clamp((t - fx.fade) / FADE);   // in the empty (cut-off) bottom-right corner of each board
       TR.forEach((_, k) => {
         const u = clamp((t - CHECK_T(k)) / 0.16); if (u <= 0) return;
         const [x, y] = SLOT(k), x0 = x + h - s * 0.4, y0 = y + h - s * 0.55;
-        stroke(fx.id + k, g.s[0].map(([a, b, c]) => [x0 + a * s, y0 + b * s, c]), { z: Z.annot, w: 5, color: C.red, draw: u, boil: 0.6 });
+        stroke(fx.id + k, g.s[0].map(([a, b, c]) => [x0 + a * s, y0 + b * s, c]), { z: Z.annot, w: 5.5, color: C.red, draw: u, boil: 0.6, opacity: fo });
       });
     },
     cues: () => TR.map((_, k) => [CHECK_T(k), 'pen']),
+  };
+
+  /** fade any component out over FADE seconds from fx.fadeT (multiplies the opacity of what it draws) */
+  COMP.d3_tFade = {
+    init(fx) { const c = COMP[fx.inner.type]; fx.inner.t1 = fx.fadeT + FADE; if (c.init) c.init(fx.inner); return fx; },
+    draw(fx, t, F) {
+      const n0 = DL.items.length; COMP[fx.inner.type].draw(fx.inner, t, F);
+      const f = 1 - clamp((t - fx.fadeT) / FADE); if (f >= 1) return;
+      for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * f).toFixed(3); }
+    },
+    cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
   };
 
   /* ---------------- the boards ---------------- */
@@ -3305,14 +3399,19 @@ PROPS.e3_page = (fx, t, lt, p) => {
     pos: [[0, M.at], [SHRINK, SLOT(0), 0.6, 'io']], scale: [[0, 1], [SHRINK, TS, 0.6, 'io']] };
   const thumbs = TR.map((dom, k) => {
     const T0 = THUMB_T(k), last = k === TR.length - 1;
-    return { type: 'e3_board', id: 'd3t.b' + k, cell: CS, t0: T0, t1: last ? undefined : GATHER + 0.32, drawDur: 0.01,
-      cut: -1, color: COLOR_T(k), colorDur: 0.9,
-      pos: [[0, SLOT(k)], ...(last ? [[GATHER, M.at, 0.7, 'io']] : [])],
+    // thumbnails: light pencil dominoes, heavier red rings — the circled squares are what should stand out
+    return { type: 'e3_board', id: 'd3t.b' + k, cell: CS, t0: T0, t1: last ? GATHER : GATHER + 0.32, drawDur: 0.01,
+      cut: -1, color: COLOR_T(k), colorDur: 0.9, domColor: 'pencil', domW: 0.7, ringW: 1.5,
+      pos: [[0, SLOT(k)]],
       scale: [...(k ? [[0, 0.05], [T0, TS, 0.22, 'back']] : [[0, TS], [SWAP, TS * 1.12, 0.06], [SWAP + 0.06, TS, 0.2, 'back']]),
-        last ? [GATHER, 1, 0.7, 'io'] : [GATHER, 0.03, 0.3, 'in']],
+        ...(last ? [] : [[GATHER, 0.03, 0.3, 'in']])],
       attempts: [{ t0: -1, step: 0, dom, fail: RING_T(k) }],
       rings: [{ cells: leftOf(dom), t0: REDO_T(k), t1: REDO_OFF }] };
   });
+  // the ninth try becomes the main board again, drawn exactly as scene 55 opens (ink dominoes, normal rings)
+  const finalBoard = { type: 'e3_board', id: 'd3t.fin', cell: CS, t0: GATHER, drawDur: 0.01, cut: -1, color: -1,
+    pos: [[0, SLOT(8)], [GATHER + 0.08, M.at, 0.7, 'io']], scale: [[0, TS], [GATHER, TS * 1.1, 0.08], [GATHER + 0.08, 1, 0.7, 'io']],
+    attempts: [{ t0: -1, step: 0, dom: TR[8], fail: -1 }] };
 
   /* ---------------- Terry ---------------- */
   const KNEES = { sit: 1, legScale: 1, thigh: 0.5, legL: [118, -118], legR: [118, -118] };     // sitting on the floor, knees up
@@ -3322,7 +3421,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     d3_tChin: { ...KNEES, tilt: -7, armScale: 1.55, ikL: { w: 1, to: 'chin', dx: -0.2, dy: 0.05, bend: 'down' }, ikR: HUG.ikR },
     d3_tTilt: { ...KNEES, tilt: 30, lean: 3, armScale: 1.3, ...HUG },
     d3_tShock: { ...KNEES, lean: -4, armScale: 1.5, armL: [112, 34], armR: [112, 34] },
-    d3_tPointL: { lean: -3, tilt: -4, armScale: 1.5, armL: [84, 8], armR: [16, 10] },
+    d3_tPointL: { lean: -3, tilt: -4, armScale: 1.5, ikL: { w: 1, to: 'abs', dx: 1062, dy: 588, bend: 'down' }, armR: [16, 10] },   // aims up-left at the grid
     d3_tShrug: { tilt: 8, armScale: 1.5, armL: [64, -70], armR: [64, -70] },
   });
   const SIT_Y = 759;   // hip height when sitting with knees up (feet on the floor)
@@ -3345,7 +3444,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
           [STAND - 0.1, 0.88, 0.08], [STAND, 1.1, 0.08], [STAND + 0.12, 1, 0.22, 'back']],
       },
     },
-    targets: () => ({ bulb: [TX, 450], board: M.at, grid: [GX, GY], qm: [960, 640], head: [GX, 150], cloud: [1250, 370] }),
+    targets: () => ({ bulb: [TX, 450], board: M.at, grid: [GX, GY], qm: [QP[0], 640], head: [GX, 140], cloud: [1250, 370] }),
     set: [{ type: 'floor' }],
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
@@ -3356,28 +3455,35 @@ PROPS.e3_page = (fx, t, lt, p) => {
       // the boards: the empty main board shrinks into the first slot; the nine failed tries come back as clues
       mainBoard,
       ...thumbs,
-      { type: 'd3_tSteps', id: 'd3t.st', x: 40, y: 300, dy: 80, t1: OFF },
+      finalBoard,
+      { type: 'd3_tSteps', id: 'd3t.st', x: 30, y: 300, dy: 80, fade: OFF },
       // L5–L7: a better question
-      { type: 'qm', id: 'qm', size: 160, t0: -1, silent: true, signSide: 'left', t1: QEXIT + 0.5,
-        pos: [[0, [960, 770]], [QEXIT, t => { const u = clamp((t - QEXIT) / 0.45); return [lerp(960, 1050, u), 770 - Math.sin(Math.PI * Math.min(1, u * 1.4)) * 110 + EASE.in(u) * 330]; }, 0]],
-        act: [[0, 'nod'], [1.2, 'idle'], [SIT + 0.1, 'nod'], [5.6, 'idle'], [STEP[1], 'hop'], [STEP[1] + 0.9, 'idle'], [ARROW + 0.2, 'nod'], [ARROW + 1.4, 'idle'],
+      // 小问号: first holding its sign on the left (as scene 45 left it), then — swapped in place while idle — a twin that
+      // holds signs on the right, clear of the grid. It hops off to the right at floor level, behind Terry.
+      { type: 'qm', id: 'qm', size: 160, signSize: QSIGN, t0: -1, t1: SWAPQ, silent: true, signSide: 'left', pos: [[0, QP]],
+        act: [[0, 'nod'], [1.2, 'idle'], [SIT + 0.1, 'nod'], [5.6, 'idle']],
+        mood: [[0, 'happy'], [1.2, 'neutral'], [SIT + 0.1, 'happy'], [7.0, 'neutral']],
+        gaze: [[-1, 'terry'], [SHRINK, 'grid']],
+        sign: [[-1, '为什么总剩两格？'], [SIT, null]] },
+      { type: 'qm', id: 'qm2', size: 160, signSize: QSIGN, t0: -1, t1: QEXIT + 0.75, silent: true, z: Z.body - 2,
+        pos: [[0, [-600, 770]], [SWAPQ, QP, 0], [QEXIT, t => { const u = clamp((t - QEXIT) / 0.7); return [lerp(QP[0], 1750, u), 770 - Math.abs(Math.sin(2 * Math.PI * u)) * 70]; }, 0]],
+        act: [[0, 'idle'], [STEP[1], 'hop'], [STEP[1] + 0.9, 'idle'], [ARROW + 0.2, 'nod'], [ARROW + 1.4, 'idle'],
           [STAND, 'hop'], [STAND + 0.9, 'idle'], [CHECK_T(0), 'nod'], [CHECK_T(8) + 0.3, 'idle']],
-        mood: [[0, 'happy'], [1.2, 'neutral'], [SIT + 0.1, 'happy'], [7.0, 'neutral'], [HOW, 'doubt'], [HEAD, 'neutral'], [ARROW + 0.2, 'happy'], [26.6, 'neutral'],
-          [JAW, 'surprised'], [STAND, 'happy']],
-        gaze: [[-1, 'terry'], [SHRINK, 'grid'], [STEP[1], 'viewer'], [HEAD, 'head'], [ARROW + 0.2, 'terry'], [TILT, 'terry'], [CLOUD + 0.1, 'cloud'], [CLOUD_OFF, 'grid'], [STAND, 'terry'], [CHECK_T(0), 'grid']],
-        sign: [[-1, '为什么总剩两格？'], [SIT, null], [HOW, '怎么摆？'], [HEAD - 0.25, null]],
-        sfxAt: [[STEP[1], 'hop'], [HOW, 'pop'], [STAND, 'hop'], [QEXIT, 'hop']] },
-      { type: 'strike', id: 'd3t.strike', rect: [824, 533, 160, 53], t0: STRIKE, t1: HEAD - 0.25, dur: 0.25 },
-      { type: 'scribe', id: 'd3t.q', text: '剩下的两格，有什么共同点？', x: GX - 13 * 46 / 2, y: 150, size: 46, t0: HEAD, t1: OFF, cps: 7.5, color: 'red', halo: 8 },
-      { type: 'd3_tArrow', id: 'd3t.qa', from: [462, 180], to: [517, 254], t0: ARROW, t1: CLOUD_OFF, bend: -0.2 },
+        mood: [[0, 'neutral'], [HOW, 'doubt'], [HEAD, 'neutral'], [ARROW + 0.2, 'happy'], [26.6, 'neutral'], [JAW, 'surprised'], [STAND, 'happy']],
+        gaze: [[-1, 'grid'], [STEP[1], 'viewer'], [HEAD, 'head'], [ARROW + 0.2, 'terry'], [TILT, 'terry'], [CLOUD + 0.1, 'cloud'], [CLOUD_OFF, 'grid'], [STAND, 'terry'], [CHECK_T(0), 'grid'], [QEXIT, [1700, 700]]],
+        sign: [[-1, null], [HOW, '怎么摆？'], [HEAD - 0.25, null]],
+        sfxAt: [[STEP[1], 'hop'], [HOW, 'pop'], [STAND, 'hop'], [QEXIT, 'hop'], [QEXIT + 0.35, 'hop']] },
+      { type: 'strike', id: 'd3t.strike', rect: [927, 533, 198, 53], t0: STRIKE, t1: HEAD - 0.25, dur: 0.25 },
+      { type: 'd3_tFade', id: 'd3t.qF', fadeT: OFF, inner: { type: 'scribe', id: 'd3t.q', text: '剩下的两格，有什么共同点？', x: GX - 13 * 46 / 2, y: 140, size: 46, t0: HEAD, cps: 7.5, color: 'red', halo: 8 } },
+      { type: 'd3_tArrow', id: 'd3t.qa', from: [515, 166], to: [538, 224], t0: ARROW, t1: CLOUD_OFF, bend: -0.2 },
       // L8–L10: look at it another way — a chessboard is black and white
       { type: 'd3_tTurn', id: 'd3t.turn', char: 'terry', t0: TILT + 0.15, t1: 29.9 },
       { type: 'thought', id: 'd3t.cloud', at: [1250, 370], rx: 138, ry: 104, t0: CLOUD, t1: CLOUD_OFF, from: { char: 'terry', part: 'headTop', dy: -8 } },
       { type: 'e3_board', id: 'd3t.cb', at: [1250, 370], n: 4, cell: CS, scale: 0.27, t0: CB, t1: CLOUD_OFF, drawDur: 0.35, cut: null, color: CB + 0.4, colorDur: 0.8, z: Z.fx + 1 },
       // L11–L12: every circle sits on a white square
-      { type: 'title', id: 'd3t.white', text: '全是白的！', x: 1010, y: 300, size: 76, t0: WHITE, t1: OFF, color: 'ink', sfx: 'pop' },
-      { type: 'band', id: 'd3t.whiteHi', rect: [826, 282, 368, 54], t0: WHITE + 0.4, t1: OFF, dur: 0.4 },
-      { type: 'd3_tChecks', id: 'd3t.ck', t1: OFF },
+      { type: 'd3_tFade', id: 'd3t.whiteF', fadeT: OFF, inner: { type: 'title', id: 'd3t.white', text: '全是白的！', x: 1075, y: 300, size: 76, t0: WHITE, color: 'ink', sfx: 'pop' } },
+      { type: 'd3_tFade', id: 'd3t.whiteHiF', fadeT: OFF, inner: { type: 'band', id: 'd3t.whiteHi', rect: [893, 282, 368, 54], t0: WHITE + 0.4, dur: 0.4 } },
+      { type: 'd3_tChecks', id: 'd3t.ck', fade: OFF },
     ],
     sfx: [[SHRINK, 'whoosh'], [SWAP, 'tap'], [SWAP + 0.03, 'tap'], ...TR.map((_, k) => [RING_T(k), 'pen']), [SIT + 0.2, 'thud'],
       ...TR.map((_, k) => [REDO_T(k), 'plip']), [JAW, 'boing'], [GATHER, 'whoosh']],
@@ -3427,6 +3533,33 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const boardAt = t => evalTrack(BPOS, t);
   const cellAt = (t, r, c) => { const p = boardAt(t); return [p[0] + (c - (N - 1) / 2) * CELL, p[1] + (r - (N - 1) / 2) * CELL]; };
 
+  /** a group of ordinary fx drawn together, with an optional moving transform (xf: t => DL ops) and a fade (op: t => 0..1) — for exits.
+   *  (same code in 58_proof.js, so each scene builds on its own) */
+  COMP.a3_grp = {
+    init(fx) { fx.items.forEach(it => { const c = COMP[it.type]; if (c.init) c.init(it); }); return fx; },
+    draw(fx, t, F) {
+      if ((fx.t0 !== undefined && t < fx.t0) || (fx.t1 !== undefined && t >= fx.t1)) return;
+      const n0 = DL.items.length;
+      DL.save(); if (fx.xf) fx.xf(t);
+      fx.items.forEach(it => COMP[it.type].draw(it, t, F));
+      DL.restore();
+      const op = fx.op ? fx.op(t) : 1;
+      if (op < 0.999) for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * op).toFixed(3); }
+    },
+    cues: fx => fx.items.flatMap(it => (COMP[it.type].cues ? COMP[it.type].cues(it) : [])),
+  };
+  const fadeOut = (t0, d = 0.3) => t => 1 - clamp((t - t0) / d);
+
+  /** the domino we look at: one red rounded outline round both its squares (red circles mean "left over" in this episode) */
+  COMP.a3_domMark = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const c = lerp2(cellAt(t, DOM[0], DOM[1]), cellAt(t, DOM[0], DOM[1] + 1), 0.5);
+      stroke('a3dm', superPts(c[0], c[1], 2 * CELL + 18, CELL + 18, 26, 5), { z: Z.annot, w: 5.5, color: C.red, closed: true, draw: EASE.out(clamp((t - fx.t0) / 0.4)) });
+    },
+    cues: fx => [[fx.t0, 'pen']],
+  };
+
   /* ---------------- L1–L3: one domino, blown up: two neighbours = one black + one white ---------------- */
   const ZC = [218, 316], ZS = 140;                           // the enlarged domino (left panel)
   const ZT = { lines: 3.45, cells: 3.55, dom: 4.3, hatch: 6.95 };
@@ -3458,7 +3591,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* ---------------- L4–L6: count the squares (red numbers on the board) ---------------- */
-  const NS = 40;
+  const NS = 36, NR = 18;                                  // digit size, paper backing radius (small: the hatching stays visible)
   const glyphs = n => layoutWriting({ text: String(n), x: 0, y: -NS / 2, size: NS, t0: 0, speed: 1500, gap: 0.02, glyphGap: 0.02, anchor: 'middle' });
   const TB = 10.95, DTB = 0.19, TW = 12.45, DTW = 0.165;   // black 1–6, white 1–8
   const DIMB = 15.95, DIMW = 18.75;                        // "用光了": used squares fade (in the same order)
@@ -3472,10 +3605,12 @@ PROPS.e3_page = (fx, t, lt, p) => {
       COUNT.forEach((o, i) => {
         if (t < o.t) return;
         const p = F.targets[`${fx.board}.c${o.r}_${o.c}`]; if (!p) return;
-        const op = o.dim === null ? 1 : lerp(1, 0.22, clamp((t - o.dim) / 0.25));
+        // the black count steps back (0.4) before the white count starts, so the two counts never read as one jumble
+        const blk = E3B.black(o.r, o.c), pre = blk ? lerp(1, 0.4, clamp((t - TW + 0.25) / 0.2)) : 1;
+        const op = pre * (o.dim === null ? 1 : lerp(1, blk ? 0.35 : 0.22, clamp((t - o.dim) / 0.25)));
         const k = 'a3n' + i, pop = EASE.back(clamp((t - o.t) / 0.16));
         DL.save(); DL.translate(p[0], p[1]);
-        dot(k + '.bg', [0, 0], 25 * pop, C.paper, Z.annot - 1);
+        stroke(k + '.bg', ringPts(k + '.bg', 0, 0, NR * pop, NR * pop, { n: 10, closed: true }), { z: Z.annot - 1, closed: true, fill: C.paper, noStroke: true, w: 1, opacity: op });
         o.g.strokes.forEach((s, j) => {
           const u = clamp((t - o.t - s.t0) / s.dur);
           if (u > 0) stroke(k + '.s' + j, s.pts, { z: Z.annot, w: 4.6, color: C.red, draw: u, opacity: op, boil: 0.5 });
@@ -3504,6 +3639,8 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const TS = 68, TXL = 105, TXN = 152, ROW = [300, 420];
   const XEQ = TXN + writeWidth('6', TS) + 0.36 * TS;
   const TALLY = { b: 12.2, w: 13.85, eqB: 15.3, eqW: 18.55, ring2: 19.75 };
+  const EQ8 = { type: 'write', id: 'a3e8', text: '- 6 = 2', x: XEQ, y: ROW[1] - TS / 2, size: TS, t0: TALLY.eqW, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' };
+  const END_FADE = 38.2;                                   // chain and bulb fade out before the cut to 58_proof
 
   /* ---------------- L7: 啊哈！ (jump, burst lines, the word itself) ---------------- */
   const jumpY = t => {
@@ -3532,7 +3669,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       });
       // the word
       const pp = EASE.back(clamp((t - fx.wordT) / 0.24));
-      if (t >= fx.wordT) text('a3aha.w', '啊哈！', 1000, 128, { size: 118, rot: -7, scale: lerp(0.3, 1, pp), opacity: clamp((t - fx.wordT) / 0.08), halo: 12, z: Z.annot });
+      if (t >= fx.wordT) text('a3aha.w', '啊哈！', 1000, 128, { size: 118, rot: -7, scale: lerp(0.3, 1, pp), opacity: clamp((t - fx.wordT) / 0.08) * (1 - clamp((t - EXIT) / 0.3)), halo: 12, z: Z.annot });
     },
   };
 
@@ -3548,7 +3685,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* ---------------- L9: … didn't fall out of the sky (cloud drops a bulb — crossed out) ---------------- */
-  const SKY = { cloud: 29.55, drop: 30.05, land: 30.5, x1: 31.15, x2: 31.4, x: 620, cy: 175, by: 470 };
+  const SKY = { cloud: 28.5, drop: 29.6, land: 30.12, x1: 31.0, x2: 31.25, x: 620, cy: 175, by: 742, off: 32.15 };   // by: the bulb lands on the floor
   COMP.a3_sky = {
     draw(fx, t, F) {
       if (t < SKY.cloud || t >= fx.t1) return;
@@ -3563,9 +3700,10 @@ PROPS.e3_page = (fx, t, lt, p) => {
         const by = lerp(cy + 40, SKY.by, EASE.in(u)) - bounce;
         if (u < 1) [-18, 18].forEach((dx, i) => stroke('a3sky.fl' + i, [[x + dx, by - 150], [x + dx, by - 110 - 40 * u]], { z: z - 0.1, w: 3.5, opacity: 0.8 * (1 - u * 0.5), boil: 0.6 }));
         COMP.e3_bulb.draw({ id: 'a3sky.b', at: [x, by + 30], size: 92, t0: -1, state: [[-1, 'on']], z: z + 0.2 }, t, F);
+        if (u >= 1) shadow('a3sky.sh', x, FL + 4, 70, 1);
       }
       // a big red ✗ over the whole idea
-      [[[x - 190, cy - 70], [x + 190, SKY.by + 70]], [[x + 190, cy - 70], [x - 190, SKY.by + 70]]].forEach((seg, i) => {
+      [[[x - 190, cy - 70], [x + 190, FL]], [[x + 190, cy - 70], [x - 190, FL]]].forEach((seg, i) => {
         const u = EASE.out(clamp((t - (i ? SKY.x2 : SKY.x1)) / 0.2));
         if (u > 0) stroke('a3sky.x' + i, seg, { z: Z.annot, w: 11, color: C.red, draw: u });
       });
@@ -3628,10 +3766,10 @@ PROPS.e3_page = (fx, t, lt, p) => {
           [22.2, 'crouch', 0.1], [J0, 'a3_air', 0.07, 'back'], [J1 - 0.05, 'kidCheer', 0.06], [EXIT, 'stand', 0.2], [26.5, 'a3_proud', 0.15],
           [32.6, 'stand', 0.2], [BAND_T, 'a3_proud', 0.15]],
         face: [[0, 'idea'], [1.3, 'focus', 0.08], [7.55, 'smile', 0.08], [10.4, 'focus', 0.08], [19.9, 'surprised', 0.06],
-          [22.2, 'idea', 0.05], [J0, 'joy', 0.05], [EXIT, 'proudGrin', 0.08], [29.5, 'puzzled', 0.08], [31.15, 'neutral', 0.08], [32.8, 'smile', 0.08], [BAND_T, 'proudGrin', 0.08]],
+          [22.2, 'idea', 0.05], [J0, 'joy', 0.05], [EXIT, 'proudGrin', 0.08], [29.6, 'puzzled', 0.08], [31.0, 'neutral', 0.08], [32.8, 'smile', 0.08], [BAND_T, 'proudGrin', 0.08]],
         turn: [[0, -0.35], [J0, -0.05, 0.1], [EXIT, -0.3, 0.15]],
         gaze: [[0, 'dom'], [3.5, 'zoom'], [10.4, 'board'], [12.2, 'tallyB'], [12.45, 'board'], [13.85, 'tallyW'], [14.6, 'board'], [15.3, 'tallyB'],
-          [16.0, 'board'], [18.55, 'leftW'], [J0 - 0.3, 'viewer'], [26.4, 'bulb'], [29.55, 'sky'], [32.6, 'chain0'], [34.0, 'chain1'], [34.85, 'chain2'], [35.55, 'viewer']],
+          [16.0, 'board'], [18.55, 'leftW'], [J0 - 0.3, 'viewer'], [26.4, 'bulb'], [28.6, 'sky'], [SKY.drop + 0.2, 'skyLow'], [32.6, 'chain0'], [34.0, 'chain1'], [34.85, 'chain2'], [35.55, 'viewer']],
         squash: [[0, 1], [7.55, 1.05, 0.06], [7.62, 1, 0.2, 'back'], [19.9, 1.06, 0.05], [19.96, 1, 0.2, 'back'],
           [22.2, 0.86, 0.1], [J0, 1.14, 0.06], [J0 + 0.25, 1, 0.12], [J1, 0.84, 0.05], [J1 + 0.06, 1.04, 0.12, 'back'], [J1 + 0.2, 1, 0.15],
           [H0 - 0.08, 0.92, 0.06], [H0, 1.08, 0.06], [H1, 0.9, 0.04], [H1 + 0.05, 1, 0.2, 'back']],
@@ -3641,7 +3779,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       const c = (r, cc) => cellAt(F.t, r, cc);
       const d = lerp2(c(1, 0), c(1, 1), 0.5);
       return { dom: d, zoom: ZC, board: boardAt(F.t), tallyB: [TXN + 40, ROW[0]], tallyW: [TXN + 40, ROW[1]],
-        leftW: lerp2(c(2, 3), c(3, 2), 0.5), bulb: bulbAt(F), sky: [SKY.x, SKY.cy + 120],
+        leftW: lerp2(c(2, 3), c(3, 2), 0.5), bulb: bulbAt(F), sky: [SKY.x, SKY.cy + 120], skyLow: [SKY.x, 700],
         chain0: [CHAIN[0].x + CHAIN[0].w / 2, CY], chain1: [CHAIN[1].x + CHAIN[1].w / 2, CY], chain2: [CHAIN[2].x + CHAIN[2].w / 2, CY] };
     },
     set: [{ type: 'floor' }],
@@ -3649,34 +3787,43 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       // the main board, exactly as scene 50 left it
       { type: 'e3_board', id: 'a3b', pos: BPOS, n: N, cell: CELL, t0: -5, t1: EXIT + 0.55, cut: -5, color: -5,
-        attempts: [{ t0: -5, dom: TRY }],
-        rings: [{ cells: E3B.domCells(DOM), t0: 1.5, t1: SLIDE }] },
-      // L1–L3
-      { type: 'a3_zoomDom', id: 'a3zd', t1: SLIDE },
+        attempts: [{ t0: -5, dom: TRY }] },
+      // L1–L3 (the whole panel fades out as the board slides)
+      { type: 'a3_grp', id: 'a3gZoom', t1: SLIDE + 0.3, op: fadeOut(SLIDE), items: [
+        { type: 'a3_domMark', id: 'a3dm', t0: 1.5, t1: SLIDE + 0.3 },
+        { type: 'a3_zoomDom', id: 'a3zd', t1: SLIDE + 0.3 },
+        { type: 'title', id: 'a3bw', text: '一黑一白', x: ZC[0], y: 468, size: 70, t0: 7.5, color: 'ink', sfx: 'pop' },
+        { type: 'band', id: 'a3bwHi', rect: [ZC[0] - 150, 430, 300, 78], t0: 8.1, dur: 0.45 },
+      ] },
       { type: 'label', id: 'a3lbNext', text: '挨在一起', at: [ZC[0], 182], rot: -3, t0: 5.0, t1: 6.65, target: [ZC[0], ZC[1] - ZS / 2 - 4], bend: 0.25, gap: 8 },
-      { type: 'title', id: 'a3bw', text: '一黑一白', x: ZC[0], y: 468, size: 70, t0: 7.5, t1: SLIDE, color: 'ink', sfx: 'pop' },
-      { type: 'band', id: 'a3bwHi', rect: [ZC[0] - 150, 430, 300, 78], t0: 8.1, t1: SLIDE, dur: 0.45 },
-      // L4–L6: count, tally, subtract
+      // L4–L6: count, tally, subtract (the tally slides off with the board)
       { type: 'a3_count', id: 'a3cnt', board: 'a3b', t1: EXIT + 0.55 },
-      { type: 'title', id: 'a3tB', text: '黑', x: TXL, y: ROW[0], size: TS, t0: TALLY.b, t1: EXIT, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n6', text: '6', x: TXN, y: ROW[0] - TS / 2, size: TS, t0: TALLY.b + 0.08, t1: EXIT, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'title', id: 'a3tW', text: '白', x: TXL, y: ROW[1], size: TS, t0: TALLY.w, t1: EXIT, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n8', text: '8', x: TXN, y: ROW[1] - TS / 2, size: TS, t0: TALLY.w + 0.08, t1: EXIT, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'write', id: 'a3e6', text: '- 6 = 0', x: XEQ, y: ROW[0] - TS / 2, size: TS, t0: TALLY.eqB, t1: EXIT, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'write', id: 'a3e8', text: '- 6 = 2', x: XEQ, y: ROW[1] - TS / 2, size: TS, t0: TALLY.eqW, t1: EXIT, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'ring', id: 'a3r2', of: 'a3e8', glyph: 6, t0: TALLY.ring2, t1: EXIT },
+      { type: 'a3_grp', id: 'a3gTally', t1: EXIT + 0.55, xf: t => { if (t >= EXIT) DL.translate(boardAt(t)[0] - B1[0], 0); }, items: [
+        { type: 'title', id: 'a3tB', text: '黑', x: TXL, y: ROW[0], size: TS, t0: TALLY.b, color: 'red', sfx: 'pop' },
+        { type: 'write', id: 'a3n6', text: '6', x: TXN, y: ROW[0] - TS / 2, size: TS, t0: TALLY.b + 0.08, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'title', id: 'a3tW', text: '白', x: TXL, y: ROW[1], size: TS, t0: TALLY.w, color: 'red', sfx: 'pop' },
+        { type: 'write', id: 'a3n8', text: '8', x: TXN, y: ROW[1] - TS / 2, size: TS, t0: TALLY.w + 0.08, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'write', id: 'a3e6', text: '- 6 = 0', x: XEQ, y: ROW[0] - TS / 2, size: TS, t0: TALLY.eqB, speed: 1900, gap: 0.05, glyphGap: 0.1, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+        { type: 'label', id: 'a3lb6', text: '6 块骨牌', at: [XEQ + 84, ROW[0] - 82], rot: -3, t0: TALLY.eqB + 0.3, t1: EXIT + 0.55, target: [XEQ + 84, ROW[0] - 36], bend: 0.2, gap: 6, size: 36 },
+        EQ8,
+        { type: 'ringRect', id: 'a3r2', rect: () => { const b = EQ8.boxes[6]; return [b.x, b.y, b.w, b.h]; }, t0: TALLY.ring2, pad: 16 },
+      ] },
       { type: 'a3_pulse', id: 'a3pl', board: 'a3b', cells: LEFT, at: [19.85, 20.3] },
       { type: 'label', id: 'a3lbNever', text: '永远不挨着', at: [905, 712], rot: -2, t0: 20.55, t1: 22.45, target: [B1[0] + CELL - 4, B1[1] + CELL - 4], bend: 0.2, gap: 10 },
       // L7: 啊哈！
-      { type: 'e3_bulb', id: 'a3bulb', char: 'terry', size: 130, t0: J0, state: [[J0, 'on'], [27.25, 'off'], [27.5, 'on']] },
-      { type: 'a3_aha', id: 'a3aha', wordT: J0 + 0.05, t1: EXIT },
+      { type: 'a3_grp', id: 'a3gBulb', op: fadeOut(END_FADE, 0.4), items: [
+        { type: 'e3_bulb', id: 'a3bulb', char: 'terry', size: 130, t0: J0, state: [[J0, 'on'], [27.25, 'off'], [27.5, 'on']] },
+      ] },
+      { type: 'a3_aha', id: 'a3aha', wordT: J0 + 0.05, t1: EXIT + 0.3 },
       // L8–L10
-      { type: 'a3_bulbRing', id: 'a3bring', t0: 26.65, t1: 29.4 },
-      { type: 'a3_sky', id: 'a3sky', t1: 32.45 },
-      { type: 'a3_chain', id: 'a3chain' },
-      { type: 'band', id: 'a3chHi', rect: [CHAIN[0].x, CY - 38, CHAIN_END - CHAIN[0].x, 76], t0: BAND_T, dur: 0.7, pad: 8 },
+      { type: 'a3_bulbRing', id: 'a3bring', t0: 26.65, t1: 28.45 },
+      { type: 'a3_grp', id: 'a3gSky', t1: SKY.off + 0.3, op: fadeOut(SKY.off), items: [{ type: 'a3_sky', id: 'a3sky', t1: SKY.off + 0.3 }] },
+      { type: 'a3_grp', id: 'a3gChain', op: fadeOut(END_FADE, 0.4), items: [
+        { type: 'a3_chain', id: 'a3chain' },
+        { type: 'band', id: 'a3chHi', rect: [CHAIN[0].x, CY - 38, CHAIN_END - CHAIN[0].x, 76], t0: BAND_T, dur: 0.7, pad: 8 },
+      ] },
     ],
-    sfx: [[1.5, 'pen'], [SLIDE, 'whoosh'], [22.2, 'swish'], [J0, 'hop'], [J1, 'thud'], [H0, 'hop'], [H1, 'thud'], [EXIT, 'whoosh']],
+    sfx: [[SLIDE, 'whoosh'], [22.2, 'swish'], [J0, 'hop'], [J1, 'thud'], [H0, 'hop'], [H1, 'thud'], [EXIT, 'whoosh']],
     subs: [
       { t0: 0.3, t1: 3.3, text: '为什么？看一块骨牌：' },
       { t0: 3.4, t1: 6.6, text: '它盖住的两格挨在一起，' },
@@ -3700,6 +3847,27 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const DESK = { x: 1270, w: 300 }, PAPER = [1238, TOP - 4];   // the little sheet Terry writes on
   const PAGE = [548, 385], PW = 900, PH = 560;                    // the same sheet, blown up
   const CUT_T = 13.45;                                            // the page goes, the 8×8 board comes
+  const ZIN = 0.15, ZDUR = 0.35, PAPER_C = [PAPER[0], PAPER[1] - 5];  // the page zooms up out of the little sheet, and back into it at CUT_T
+
+  /** a group of ordinary fx drawn together, with an optional moving transform (xf: t => DL ops) and a fade (op: t => 0..1) — for exits.
+   *  (same code in 55_aha.js, so each scene builds on its own) */
+  COMP.a3_grp = {
+    init(fx) { fx.items.forEach(it => { const c = COMP[it.type]; if (c.init) c.init(it); }); return fx; },
+    draw(fx, t, F) {
+      if ((fx.t0 !== undefined && t < fx.t0) || (fx.t1 !== undefined && t >= fx.t1)) return;
+      const n0 = DL.items.length;
+      DL.save(); if (fx.xf) fx.xf(t);
+      fx.items.forEach(it => COMP[it.type].draw(it, t, F));
+      DL.restore();
+      const op = fx.op ? fx.op(t) : 1;
+      if (op < 0.999) for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * op).toFixed(3); }
+    },
+    cues: fx => fx.items.flatMap(it => (COMP[it.type].cues ? COMP[it.type].cues(it) : [])),
+  };
+  const fadeOut = (t0, d = 0.3) => t => 1 - clamp((t - t0) / d);
+  /** page zoom: 0 = shrunk onto the desk sheet, 1 = full size */
+  const zoomK = t => EASE.out(clamp((t - ZIN) / ZDUR)) * (1 - EASE.in(clamp((t - CUT_T + ZDUR) / ZDUR)));
+  const pageXf = t => { const k = zoomK(t), c = lerp2(PAPER_C, PAGE, k); DL.translate(c[0], c[1]); DL.scale(lerp(0.06, 1, k)); DL.translate(-PAGE[0], -PAGE[1]); };
 
   /* ---------------- the page: a loose sheet of notebook paper (same look as ep2's) ---------------- */
   PROPS.a3_page = (fx, t, lt, p) => {
@@ -3729,7 +3897,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       const z = Z.desk + 1;
       stroke('a3dp.p', [[PAPER[0] - 34, PAPER[1]], [PAPER[0] - 28, PAPER[1] - 9, 1], [PAPER[0] + 30, PAPER[1] - 9, 1], [PAPER[0] + 36, PAPER[1], 1], [PAPER[0] - 34, PAPER[1], 1]], { z, w: 3.5, fill: C.paper });
       if (t < fx.t1) {
-        const p = EASE.out(clamp((t - fx.t0) / 0.4)), x1 = PAGE[0] + PW / 2;
+        const p = EASE.out(clamp((t - fx.t0) / 0.3)), x1 = PAGE[0] + PW / 2;
         stroke('a3dp.z0', [[PAPER[0] - 30, PAPER[1] - 9], [x1 + 2, PAGE[1] - PH / 2 + 6]], { z: Z.set - 1, w: 2, color: C.pencil, opacity: 0.8, draw: p, boil: 0.5 });
         stroke('a3dp.z1', [[PAPER[0] - 34, PAPER[1]], [x1 + 2, PAGE[1] + PH / 2 - 4]], { z: Z.set - 1, w: 2, color: C.pencil, opacity: 0.8, draw: p, boil: 0.5 });
       }
@@ -3743,7 +3911,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
 
   /* ---------------- the real 8×8 board, and lots of ways to tile it ---------------- */
   const BC = [520, 400], BS = 64, N8 = 8;
-  const BOARD_T = CUT_T + 0.1, TCUT = 25.35, TCOLOR = 26.0;
+  const BOARD_T = CUT_T + 0.1, TCUT = 25.3, TCOLOR = TCUT + 1.3;   // colouring starts once both corners have fallen away
   // tilings of the full board: every 2×2 block holds two horizontal or two vertical dominoes (picked by a fixed hash)
   const tiling = seed => {
     const dom = [];
@@ -3754,9 +3922,9 @@ PROPS.e3_page = (fx, t, lt, p) => {
     return dom;
   };
   // when each tiling shows up: a few at once for "一千多万种", then one a second for "一秒试一种"
-  const TILE_T = [17.15, 18.45, 19.45, 20.15, 20.7, 21.15, 21.8, 22.8, 23.8, 24.8];
-  const TILE_END = 25.3;
-  const TILINGS = TILE_T.map((t0, i) => ({ t0, t1: TILE_T[i + 1] ?? TILE_END, dom: tiling(i + 3) }));
+  const TILE_T = [17.15, 18.45, 19.45, 20.15, 20.7, 21.15, 21.8, 22.8, 23.8];
+  const TILE_END = 25.0, TILE_OUT = TILE_END + 0.3;               // tilings, the number and its labels fade out together
+  const TILINGS = TILE_T.map((t0, i) => ({ t0, t1: TILE_T[i + 1] ?? TILE_OUT, dom: tiling(i + 3) }));
   TILINGS.forEach((T, i) => {
     const seen = new Set();
     T.dom.forEach(d => E3B.domCells(d).forEach(([r, c]) => { const k = r + '_' + c; if (r >= N8 || c >= N8 || seen.has(k)) console.error('a3_proof: bad tiling', i, d); seen.add(k); }));
@@ -3780,6 +3948,20 @@ PROPS.e3_page = (fx, t, lt, p) => {
       });
     },
     cues: () => TILINGS.map((T, i) => [T.t0, i < 6 ? 'swish' : 'tap']),
+  };
+
+  /* ---------------- "剪掉两个角": the 8×8 puzzle board is the cut one (the 12,988,816 was for the full board) ---------------- */
+  const CUTLBL_OUT = 27.3, TALLY_T = 27.75;
+  const C00 = [BC[0] - 3.5 * BS, BC[1] - 3.5 * BS], C77 = [BC[0] + 3.5 * BS, BC[1] + 3.5 * BS];
+  COMP.a3_cutLbl = {
+    draw(fx, t) {
+      if (t < fx.t0) return;
+      const lt = t - fx.t0, pp = EASE.back(clamp(lt / 0.2)), at = [BC[0] + 10, 96];
+      text('a3cl.t', '剪掉两个角', at[0], at[1], { size: 44, color: C.red, rot: -2, scale: lerp(0.6, 1, pp), opacity: clamp(lt / 0.08), halo: 8, z: Z.annot });
+      arrow('a3cl.a0', [at[0] - 118, at[1] + 6], [C00[0] + 6, C00[1] - 22], { p: EASE.out(clamp((lt - 0.12) / 0.3)), bend: 0.25, color: C.red });
+      arrow('a3cl.a1', [at[0] + 118, at[1] + 8], [C77[0] + 42, C77[1] - 6], { p: EASE.out(clamp((lt - 0.22) / 0.4)), bend: -0.33, color: C.red });
+    },
+    cues: fx => [[fx.t0, 'pop']],
   };
 
   /* ---------------- the verdict: a red rubber stamp ---------------- */
@@ -3822,12 +4004,12 @@ PROPS.e3_page = (fx, t, lt, p) => {
     tracks: {
       terry: {
         pos: [[0, [TX, STOOL - 6]]],
-        pose: [[0, writeOrRest], [27.3, 'sitHands', 0.15], [28.85, 'a3_sitCheer', 0.1, 'back']],
+        pose: [[0, writeOrRest], [27.7, 'sitHands', 0.15], [28.85, 'a3_sitCheer', 0.1, 'back']],
         face: [[0, 'focus'], [LINES[0].ck, 'smile', 0.05], [LINES[1].t0, 'focus', 0.05], [LINES[1].ck, 'smile', 0.05], [LINES[2].t0, 'focus', 0.05],
           [LINES[2].ck, 'proud', 0.05], [9.8, 'smile', 0.05], [BOARD_T, 'neutral', 0.05], [19.3, 'jaw', 0.06, 'back'], [21.2, 'surprised', 0.1],
           [22.6, 'sheepish', 0.08], [TCOLOR, 'idea', 0.06], [28.85, 'proudGrin', 0.05]],
         turn: [[0, -0.45], [9.8, -0.3, 0.12]],
-        gaze: [[0, 'pen'], [9.8, 'qm'], [11.8, 'viewer'], [BOARD_T, 'board'], [19.0, 'num'], [21.8, 'board'], [27.4, 'tally'], [28.85, 'viewer']],
+        gaze: [[0, 'pen'], [9.8, 'qm'], [11.8, 'viewer'], [BOARD_T, 'board'], [19.0, 'num'], [21.8, 'board'], [27.75, 'tally'], [28.85, 'viewer']],
         squash: [[0, 1], [19.3, 1.08, 0.05], [19.36, 1, 0.2, 'back'], [28.85, 1.08, 0.05], [28.92, 1, 0.22, 'back']],
       },
     },
@@ -3840,11 +4022,13 @@ PROPS.e3_page = (fx, t, lt, p) => {
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       // L1: the proof, written line by line; 小问号 reads along and nods; red ticks
-      { type: 'prop', kind: 'a3_page', id: 'a3pg', at: PAGE, rot: -1, t0: 0.2, t1: CUT_T, w: PW, h: PH, lines: 5, drawDur: 0.5, sfxAt: [[0.2, 'paper']] },
-      { type: 'a3_deskPaper', id: 'a3dp', t0: 0.3, t1: CUT_T },
-      ...LINES.map((L, i) => ({ type: 'scribe', id: 'a3ln' + i, text: L.text, x: LX, y: LY[i], size: LS, t0: L.t0, t1: CUT_T, cps: CPS, z: Z.board })),
-      ...LINES.map((L, i) => ({ type: 'write', id: 'a3ck' + i, text: '✓', x: 918, y: LY[i] - 36, size: 64, t0: L.ck + (i === 2 ? 0.25 : 0), t1: CUT_T, speed: 1600, color: 'red', w: 6, sfx: 'pen', z: Z.annot })),
-      { type: 'qm', id: 'a3qm', pos: [[0, [1052, FL]]], size: 165, t0: -1, silent: true,
+      { type: 'a3_grp', id: 'a3gPage', t0: ZIN, t1: CUT_T, xf: pageXf, items: [
+        { type: 'prop', kind: 'a3_page', id: 'a3pg', at: PAGE, rot: -1, t0: ZIN, w: PW, h: PH, lines: 5, drawDur: 0, sfxAt: [[ZIN, 'paper']] },
+        ...LINES.map((L, i) => ({ type: 'scribe', id: 'a3ln' + i, text: L.text, x: LX, y: LY[i], size: LS, t0: L.t0, cps: CPS, z: Z.board })),
+        ...LINES.map((L, i) => ({ type: 'write', id: 'a3ck' + i, text: '✓', x: 918, y: LY[i] - 36, size: 64, t0: L.ck + (i === 2 ? 0.25 : 0), speed: 1600, color: 'red', w: 6, sfx: 'pen', z: Z.annot })),
+      ] },
+      { type: 'a3_deskPaper', id: 'a3dp', t0: ZIN + ZDUR, t1: CUT_T - ZDUR },
+      { type: 'qm', id: 'a3qm', pos: [[0, [1052, FL]]], size: 165, t0: 0.35, burst: true,
         act: [[0, 'idle'], [LINES[0].ck + 0.1, 'nod'], [LINES[0].ck + 0.9, 'idle'], [LINES[1].ck + 0.1, 'nod'], [LINES[1].ck + 0.9, 'idle'],
           [LINES[2].ck + 0.35, 'nod'], [LINES[2].ck + 1.1, 'idle'], [9.85, 'nod'], [11.6, 'idle'], [19.3, 'idle'], [28.85, 'hop'], [30.2, 'idle']],
         mood: [[0, 'neutral'], [9.85, 'happy'], [BOARD_T, 'neutral'], [19.3, 'surprised'], [22.6, 'doubt'], [TCOLOR + 0.6, 'neutral'], [28.85, 'happy']],
@@ -3852,18 +4036,21 @@ PROPS.e3_page = (fx, t, lt, p) => {
         sfxAt: [[9.85, 'boop'], [28.85, 'hop']] },
       // L3–L5: the real 8×8 board; how many ways to tile the full one; how long that would take
       { type: 'e3_board', id: 'a3b8', at: BC, n: N8, cell: BS, t0: BOARD_T, drawDur: 0.7, cut: TCUT, color: TCOLOR, colorDur: 0.8, w: 5 },
-      { type: 'a3_tilings', id: 'a3tl' },
-      { type: 'label', id: 'a3lbFull', text: '完整棋盘的摆法', at: [RX + 200, 300], rot: -2, t0: 18.0, t1: TILE_END, target: [BC[0] + N8 * BS / 2 + 6, 330], bend: 0.2, gap: 8 },
-      { type: 'write', id: 'a3num', text: '12,988,816', x: RX, y: 160, size: RS, t0: 18.95, t1: TILE_END, speed: 2900, gap: 0.03, glyphGap: 0.04, color: 'red', w: 6.5, z: Z.annot, sfx: 'pen' },
-      { type: 'label', id: 'a3lbDays', text: ['一秒一种', '≈ 150 天 ≈ 5 个月'], at: [RX + 200, 436], rot: -2, t0: 22.4, t1: TILE_END, size: 48 },
-      // L6: cut, colour, count, verdict
-      { type: 'title', id: 'a3tB', text: '黑', x: RX + 20, y: 230, size: RS, t0: 27.35, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n30', text: '30', x: RX + 66, y: 230 - RS / 2, size: RS, t0: 27.45, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'title', id: 'a3tW', text: '白', x: RX + 20, y: 340, size: RS, t0: 27.95, color: 'red', sfx: 'pop' },
-      { type: 'write', id: 'a3n32', text: '32', x: RX + 66, y: 340 - RS / 2, size: RS, t0: 28.05, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+      { type: 'a3_grp', id: 'a3gCount', t1: TILE_OUT, op: fadeOut(TILE_END), items: [
+        { type: 'a3_tilings', id: 'a3tl' },
+        { type: 'label', id: 'a3lbFull', text: '完整棋盘的摆法', at: [RX + 200, 300], rot: -2, t0: 18.0, t1: TILE_OUT, target: [BC[0] + N8 * BS / 2 + 6, 330], bend: 0.2, gap: 8 },
+        { type: 'write', id: 'a3num', text: '12,988,816', x: RX, y: 160, size: RS, t0: 18.95, speed: 2900, gap: 0.03, glyphGap: 0.04, color: 'red', w: 6.5, z: Z.annot, sfx: 'pen' },
+        { type: 'label', id: 'a3lbDays', text: ['一秒一种', '≈ 150 天 ≈ 5 个月'], at: [RX + 200, 436], rot: -2, t0: 22.4, t1: TILE_OUT, size: 48 },
+      ] },
+      // L6: cut (now the real puzzle board), colour, count, verdict
+      { type: 'a3_grp', id: 'a3gCutLbl', t1: CUTLBL_OUT + 0.3, op: fadeOut(CUTLBL_OUT), items: [{ type: 'a3_cutLbl', id: 'a3cl', t0: TCUT + 0.05 }] },
+      { type: 'title', id: 'a3tB', text: '黑', x: RX + 20, y: 230, size: RS, t0: TALLY_T, color: 'red', sfx: 'pop' },
+      { type: 'write', id: 'a3n30', text: '30', x: RX + 66, y: 230 - RS / 2, size: RS, t0: TALLY_T + 0.1, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
+      { type: 'title', id: 'a3tW', text: '白', x: RX + 20, y: 340, size: RS, t0: TALLY_T + 0.45, color: 'red', sfx: 'pop' },
+      { type: 'write', id: 'a3n32', text: '32', x: RX + 66, y: 340 - RS / 2, size: RS, t0: TALLY_T + 0.55, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
       { type: 'a3_stamp', id: 'a3st', text: '盖不满！', at: [BC[0], BC[1] + 10], size: 104, rot: -8, t0: 29.2 },
     ],
-    sfx: [[CUT_T, 'whoosh']],
+    sfx: [[CUT_T - ZDUR, 'whoosh']],
     subs: [
       { t0: 0.3, t1: 3.7, text: '小陶把想通的过程写下来：' },
       { t0: 9.8, t1: 13.0, text: '小问号读完，点了点头。' },
@@ -3892,16 +4079,16 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const PAPER = [868, 654];                                    // the problem sheet lying on the table
   /* ---------------- times (scene clock) ---------------- */
   const WALK0 = 1.3, WALK1 = 4.0;
-  const HOUSE_T = 7.9, HOUSE_X = 8.45, HOUSE_T1 = 9.35;
+  const HOUSE_T = 7.9, HOUSE_X = 8.45, HOUSE_T1 = 10.4;
   const PUT0 = 9.3, PUT1 = 9.65, OPEN0 = 10.0, CLOSE0 = 12.25;
   const BEND = 12.85, EPS0 = 16.2, SHRINK = 18.9, LENS = 19.3, EPS_T1 = 21.25;
   const OPEN1 = 21.35, FLY0 = 21.45, FLY1 = 21.95, CLOSE1 = 22.3, LOOK = 21.85, POINT = 22.25;
-  const INSET0 = 22.45, INSET1 = 25.1;
+  const INSET0 = 22.45, INSET1 = 26.4;                         // the zoom-in stays up until just before the flash
   const VF0 = 25.2, FLASH = 26.6, SHR0 = 27.6, SHR1 = 28.2, TAPE = [28.32, 28.48], Y85 = 28.62;
-  const QUOTE = [31.45, 32.45, 33.65], ULINE = 33.4;
+  const QUOTE = [31.45, 32.4], ULINE = 33.5;
   const C0 = 35.6, C1 = 36.1;                                  // the photo moves to the corner
   const TWALK0 = 35.6, TWALK1 = 36.4, TCX = 150;               // Terry walks back in (part 3)
-  const TL0 = 39.6, TL_Y = 560, TL_X0 = 330, TL_X1 = 1250, TL_END = 1300;
+  const TL0 = 39.6, TL_Y = 600, TL_X0 = 330, TL_X1 = 1250, TL_END = 1300;
   const M_ENTER = 40.1, QM_T = 41.3;
   const PICK0 = 44.1, PIN0 = 44.6, PIN1 = 45.15, Y32 = 45.35;
   const TRAV0 = 47.8, TRAV1 = 49.4, TAO_IN = 48.5, Y15 = 49.0, BULB = 50.9, CHECK = 51.15;
@@ -3925,8 +4112,8 @@ PROPS.e3_page = (fx, t, lt, p) => {
     r3_carry: { armR: [14, 10], ikL: CARRY },
     r3_put: { lean: -14, tilt: -10, legL: [14, -26], legR: [8, -14], armScale: 1.2, armR: [30, 20],
       ikL: { w: 1, to: 'hip', dx: CASE_F[0] - EX, dy: 60, bend: 'down' } },   // hip-relative, so it blends smoothly from CARRY
-    r3_bendPoint: { lean: 22, tilt: 14, legL: [10, -6], legR: [6, -10], armScale: 1.2, armR: [84, 4], armL: [26, 18] },
-    r3_bendLook: { lean: 34, tilt: 18, legL: [12, -10], legR: [6, -14], armL: [34, 16], ikR: { w: 1, to: 'abs', dx: 762, dy: 657, bend: 'down' } },
+    r3_bendPoint: { lean: 22, tilt: -10, legL: [10, -6], legR: [6, -10], armScale: 1.2, armR: [84, 4], armL: [26, 18] },
+    r3_bendLook: { lean: 34, tilt: -20, legL: [12, -10], legR: [6, -14], armL: [34, 16], ikR: { w: 1, to: 'abs', dx: 762, dy: 657, bend: 'down' } },
     r3_tHuh: { tilt: -8, armScale: 1.4, armL: [55, 75], armR: [55, 75] },
     r3_tPoint: { lean: -5, tilt: -10, armScale: 1.55, armR: [16, 10], ikL: { w: 1, to: 'abs', dx: 896, dy: 650, bend: 'down' } },
     // the grown-up mathematicians on the timeline (stuck)
@@ -4008,11 +4195,12 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* ---------------- "他没有家" ---------------- */
-  const HOUSE = [395, 330];
+  const HOUSE = [395, 268], HS = 1.4;                         // drawn 1.4× (house + red ✗), near Erdős's head
   COMP.r3_house = {
     draw(fx, t) {
       if (t < HOUSE_T || t >= HOUSE_T1) return;
-      const lt = t - HOUSE_T, [x, y] = HOUSE, z = Z.annot - 1, p = k => EASE.out(clamp((lt - k * 0.1) / 0.2));
+      const lt = t - HOUSE_T, x = 0, y = 0, z = Z.annot - 1, p = k => EASE.out(clamp((lt - k * 0.1) / 0.2));
+      DL.save(); DL.translate(HOUSE[0], HOUSE[1]); DL.scale(HS);
       stroke('r3hs.body', [[x - 46, y - 34], [x - 46, y + 44, 1], [x + 46, y + 44, 1], [x + 46, y - 34]], { z, w: 5, draw: p(0) });
       stroke('r3hs.roof', [[x - 64, y - 24], [x, y - 88, 1], [x + 64, y - 24]], { z, w: 5, draw: p(1) });
       stroke('r3hs.door', [[x - 13, y + 44], [x - 13, y + 8, 1], [x + 13, y + 8, 1], [x + 13, y + 44]], { z, w: 4, draw: p(2) });
@@ -4020,6 +4208,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       const a = EASE.out(clamp((t - HOUSE_X) / 0.14)), b = EASE.out(clamp((t - HOUSE_X - 0.16) / 0.14));
       stroke('r3hs.x0', [[x - 74, y - 92], [x + 74, y + 60]], { z: Z.annot, w: 8, color: C.red, draw: a });
       stroke('r3hs.x1', [[x + 74, y - 92], [x - 74, y + 60]], { z: Z.annot, w: 8, color: C.red, draw: b });
+      DL.restore();
     },
     cues: () => [[HOUSE_T, 'pen'], [HOUSE_X, 'pen'], [HOUSE_X + 0.16, 'pen']],
   };
@@ -4050,22 +4239,22 @@ PROPS.e3_page = (fx, t, lt, p) => {
   };
 
   /* ---------------- what they looked at: a zoom-in on the sheet (a few squares; not the whole problem) ---------------- */
-  const BOX = [PAPER[0] - 182, 124, PAPER[0] + 182, 330];
+  const BOX = [900, 110, 1264, 316], BOX_C = (BOX[0] + BOX[2]) / 2, LEAD = [[912, 634], [962, BOX[3]]];   // leader clears both heads
   COMP.r3_inset = {
     draw(fx, t) {
       if (t < INSET0 || t >= INSET1) return;
       const lt = t - INSET0, [x0, y0, x1, y1] = BOX;
-      stroke('r3in.ring', ringPts('r3in.ring', PAPER[0], PAPER[1] - 1, 66, 22, { n: 12, a0: -150, sweep: 380, rv: 0.05 }), { z: Z.annot, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.25)) });
-      stroke('r3in.line', [[PAPER[0], PAPER[1] - 25], [PAPER[0], y1]], { z: Z.annot, w: 2.6, color: C.pencil, draw: EASE.out(clamp((lt - 0.15) / 0.25)), boil: 0.5 });
+      stroke('r3in.ring', ringPts('r3in.ring', PAPER[0], PAPER[1] - 1, 66, 22, { n: 12, a0: -150, sweep: 380, rv: 0.05 }), { z: Z.desk + 0.5, w: 3, color: C.pencil, draw: EASE.out(clamp(lt / 0.25)) });   // under the hands
+      stroke('r3in.line', LEAD, { z: Z.annot, w: 2.6, color: C.pencil, draw: EASE.out(clamp((lt - 0.15) / 0.25)), boil: 0.5 });
       stroke('r3in.box', [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]], { z: Z.fx, w: 5, fill: C.paper, draw: EASE.out(clamp((lt - 0.3) / 0.3)) });
     },
     cues: () => [[INSET0, 'pen'], [INSET0 + 0.3, 'paper']],
   };
-  const SQ = { type: 'write', id: 'r3sq', text: '1, 4, 9, 16, …', x: PAPER[0], y: 146, size: 52, anchor: 'middle', t0: INSET0 + 0.55, t1: INSET1, speed: 3400, gap: 0.015, glyphGap: 0.015, w: 5.5, z: Z.fx + 1, sfx: 'pen' };
-  const BOXQ = 72, POW = 34, BOXQ_X = PAPER[0] - (writeWidth('□', BOXQ) + 4 + writeWidth('2', POW)) / 2;
-  const SQB = { type: 'write', id: 'r3box', text: '□', x: BOXQ_X, y: 214, size: BOXQ, t0: layoutWriting({ ...SQ }).tEnd + 0.15, t1: INSET1, speed: 3000, w: 6, z: Z.fx + 1, sfx: 'pen' };
+  const SQ = { type: 'write', id: 'r3sq', text: '1, 4, 9, 16, …', x: BOX_C, y: 132, size: 52, anchor: 'middle', t0: INSET0 + 0.55, t1: INSET1, speed: 3400, gap: 0.015, glyphGap: 0.015, w: 5.5, z: Z.fx + 1, sfx: 'pen' };
+  const BOXQ = 72, POW = 34, BOXQ_X = BOX_C - (writeWidth('□', BOXQ) + 4 + writeWidth('2', POW)) / 2;
+  const SQB = { type: 'write', id: 'r3box', text: '□', x: BOXQ_X, y: 200, size: BOXQ, t0: layoutWriting({ ...SQ }).tEnd + 0.15, t1: INSET1, speed: 3000, w: 6, z: Z.fx + 1, sfx: 'pen' };
   const INSET_W = [SQ, SQB,
-    { type: 'write', id: 'r3pow', text: '2', x: BOXQ_X + writeWidth('□', BOXQ) + 4, y: 224, size: POW, t0: layoutWriting({ ...SQB }).tEnd + 0.05, t1: INSET1, speed: 2200, w: 4.5, z: Z.fx + 1, sfx: 'pen' },
+    { type: 'write', id: 'r3pow', text: '2', x: BOXQ_X + writeWidth('□', BOXQ) + 4, y: 210, size: POW, t0: layoutWriting({ ...SQB }).tEnd + 0.05, t1: INSET1, speed: 2200, w: 4.5, z: Z.fx + 1, sfx: 'pen' },
   ];
 
   /* ---------------- the photo ---------------- */
@@ -4074,7 +4263,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   const MID = [800, 236], CORNER = [212, 230];
   const photoTf = t => {
     const u = EASE.io(clamp((t - SHR0) / (SHR1 - SHR0))), v = EASE.io(clamp((t - C0) / (C1 - C0)));
-    return { s: lerp(lerp(1, 0.62, u), 0.3, v), c: lerp2(lerp2(PC, MID, u), CORNER, v), rot: lerp(-2 * u, -5, v), mb: lerp(MS, MB, u) };
+    return { s: lerp(lerp(0.96, 0.62, u), 0.3, v), c: lerp2(lerp2([PC[0], PC[1] - 16], MID, u), CORNER, v), rot: lerp(-2 * u, -5, v), mb: lerp(MS, MB, u) };   // at the click: 4% smaller, 16 px up (hidden by the flash) so it clears the subtitle band
   };
   const toWorld = (p, t) => {
     const f = photoTf(t), r = f.rot * RAD, dx = (p[0] - PC[0]) * f.s, dy = (p[1] - PC[1]) * f.s;
@@ -4114,7 +4303,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     draw(fx, t) {
       if (t < VF0 || t >= FLASH) return;
       const u = EASE.out(clamp((t - VF0) / 0.3)), af = Math.sin(Math.PI * clamp((t - (FLASH - 0.55)) / 0.25)) * 12;
-      const d = 40 * (1 - u) - af, L = 50, [x0, y0, x1, y1] = IMG, yb = Math.min(y1 + d, 790);
+      const d = 40 * (1 - u) - af, L = 50, [x0, y0, x1, y1] = IMG, yb = Math.min(y1 + d, 776);
       [[x0 - d, y0 - d, 1, 1], [x1 + d, y0 - d, -1, 1], [x1 + d, yb, -1, -1], [x0 - d, yb, 1, -1]].forEach(([x, y, sx, sy], i) =>
         stroke('r3vf' + i, [[x, y + sy * L], [x, y, 1], [x + sx * L, y]], { z: Z.annot, w: 6, opacity: clamp((t - VF0) / 0.1) }));
     },
@@ -4133,21 +4322,21 @@ PROPS.e3_page = (fx, t, lt, p) => {
       }
     },
   };
-  /** red pen underline under "like an adult" */
-  const Q_SIZE = 58, Q_X = [800 - 425.5 / 2, 800 - 325.7 / 2, 800 - 361.1 / 2], Q_Y = [578, 646, 714];
+  /** red pen underline under "像对大人一样" (widths measured in ZCOOL KuaiLe at 66 px) */
+  const Q_SIZE = 66, Q_TEXT = ['“他跟我说话，', '像对大人一样。”'], Q_X = [800 - 418 / 2, 800 - 484 / 2], Q_Y = [595, 677];
   COMP.r3_uline = {
     draw(fx, t) {
       if (t < ULINE || t >= C0) return;
-      const p = EASE.out(clamp((t - ULINE) / 0.35)), x0 = Q_X[1] - 4, x1 = x0 + 318, y = Q_Y[1] + 36;
-      const pts = []; for (let i = 0; i <= 10; i++) pts.push([lerp(x0, x1, i / 10), y + (i % 2 ? -3 : 3) + i * 0.4]);
+      const p = EASE.out(clamp((t - ULINE) / 0.35)), x0 = Q_X[1] - 4, x1 = Q_X[1] + 400, y = Q_Y[1] + 42;
+      const pts = []; for (let i = 0; i <= 12; i++) pts.push([lerp(x0, x1, i / 12), y + (i % 2 ? -3 : 3) + i * 0.4]);
       stroke('r3ul', pts, { z: Z.annot, w: 5, color: C.red, draw: p });
     },
     cues: () => [[ULINE, 'pen']],
   };
 
   /* ---------------- Erdős's problems: cards fly out of the photo ---------------- */
-  const CARDS = [[480, 200, -7, 0], [630, 250, 5, 1], [780, 198, -3, 0], [930, 246, 7, 0], [1080, 204, -6, 1]];
-  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[260, -150], [1500, -40]];
+  const CARDS = [[480, 150, -7, 0], [630, 196, 5, 0], [780, 148, -3, 0], [930, 192, 7, 0], [1080, 154, -6, 0]];   // [x, y, rot, $tag] — tags off (prizes aren't in the fact list)
+  const PICK = 2, KW = 116, KH = 84, PIN = [330, 514], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[260, -150], [1500, -40]];
   const SRC = toWorld([700, 520], C1 + 1);                     // Erdős in the photo, once it sits in the corner
   const cardT = i => 36.2 + i * 0.17;
   function cardAt(i, t) {                                      // → [centre, rotation, scale] | null (pure)
@@ -4206,7 +4395,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     },
     cues: () => [[TL0, 'swish']],
   };
-  const MATH = { H: 190, head: 0.38, torso: 0.24, leg: 0.32, arm: 0.36, floor: TL_Y, noShadow: true };
+  const MATH = { H: 280, head: 0.3, torso: 0.27, leg: 0.37, arm: 0.36, floor: TL_Y, noShadow: true };
   const MATHS = [
     { id: 'r3m0', x: 520, def: { hair: 'messy', blink: [3.9, 0.3] }, pose: 'r3_mScratchR', face: 'puzzled', turn: 0.25 },
     { id: 'r3m1', x: 705, def: { hair: 'ponytail', blink: [4.3, 1.1] }, pose: 'r3_mChin', face: 'focus', turn: -0.2 },
@@ -4240,7 +4429,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       pose: [[0, m.pose], [RELAX, 'r3_mRelax', 0.15, 'back']],
       face: [[0, m.face], [TRAV0, 'surprised', 0.05], [TRAV1 + 0.1, 'focus', 0.08], [BULB, 'idea', 0.05], [RELAX, 'smile', 0.08]],
       turn: [[0, m.turn], [TRAV0, 0.45, 0.12]],
-      gaze: [[0, [m.x + (i % 2 ? -70 : 70), 230]], [TRAV0, 'card'], [TRAV1 + 0.1, 'tao']],
+      gaze: [[0, [m.x + (i % 2 ? -70 : 70), 190]], [TRAV0, 'card'], [TRAV1 + 0.1, 'tao']],
       squash: [[0, 1], [RELAX, 1.06, 0.06], [RELAX + 0.06, 1, 0.2, 'back']],
     };
   });
@@ -4266,7 +4455,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
         squash: [[0, 1], [BEND, 1.04, 0.06], [BEND + 0.06, 1, 0.2, 'back']],
         face: [[0, 'smile'], [HOUSE_T, 'neutral', 0.08], [PUT0, 'focus', 0.08], [PUT1 + 0.2, 'smile', 0.08], [BEND, 'grin', 0.05],
           [EPS0, 'smile', 0.08], [LOOK, 'focus', 0.08], [24.0, 'smile', 0.1]],
-        turn: [[0, 0.5], [WALK1, 0.4, 0.12], [PUT0, -0.2, 0.15], [PUT1 + 0.2, 0.4, 0.15], [BEND, 0.6, 0.1], [EPS0, 0.35, 0.12], [LOOK, 0.5, 0.15]],
+        turn: [[0, 0.5], [WALK1, 0.4, 0.12], [PUT0, -0.2, 0.15], [PUT1 + 0.2, 0.4, 0.15], [BEND, 0.3, 0.1], [EPS0, 0.35, 0.12], [LOOK, 0.3, 0.15]],
         gaze: [[0, [1400, 450]], [WALK1, 'terry'], [HOUSE_T, 'viewer'], [PUT0, 'case'], [PUT1 + 0.2, 'terry'], [EPS0, 'eps'], [OPEN1, 'paperfly'], [LOOK, 'paper']],
       },
       terry: {
@@ -4277,7 +4466,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
           [SHRINK + 0.3, 1.08, 0.05], [SHRINK + 0.35, 1, 0.2, 'back'], [GRIN, 1.08, 0.06], [GRIN + 0.06, 1, 0.25, 'back']],
         face: [[0, 'neutral'], [1.4, 'surprised', 0.05], [2.2, 'smile', 0.1], [HOUSE_T, 'puzzled', 0.08], [OPEN0, 'surprised', 0.05], [10.7, 'grin', 0.08],
           [12.4, 'smile', 0.08], [13.2, 'surprised', 0.05], [14.4, 'grin', 0.08], [EPS0, 'smile', 0.1], [SHRINK + 0.3, 'surprised', 0.05], [19.9, 'grin', 0.08],
-          [OPEN1, 'smile', 0.1], [POINT, 'focus', 0.1],
+          [OPEN1, 'smile', 0.1], [POINT, 'focus', 0.1], [24.6, 'smile', 0.1],
           [TWALK0, 'neutral', 0], [cardT(0) + 0.1, 'surprised', 0.05], [37.6, 'smile', 0.1], [M_ENTER + 0.5, 'focus', 0.1],
           [TRAV0, 'surprised', 0.05], [BULB, 'idea', 0.05], [SMILE, 'smile', 0.1], [GRIN, 'joy', 0.08]],
         turn: [[0, -0.4], [TWALK0, 0.45, 0]],
@@ -4293,17 +4482,17 @@ PROPS.e3_page = (fx, t, lt, p) => {
         turn: [[0, -0.45]],
         gaze: [[0, 'card'], [51.8, 'maths']],
       },
-      r3pE: { pos: [[0, [EX2, FL]]], pose: [[0, photoPose.erdos]], face: [[0, 'smile']], turn: [[0, 0.5]], gaze: [[0, PAPER]] },
-      r3pT: { pos: [[0, [TX, FL]]], pose: [[0, photoPose.terry]], face: [[0, 'focus']], turn: [[0, -0.4]], gaze: [[0, PAPER]] },
+      r3pE: { pos: [[0, [EX2, FL]]], pose: [[0, photoPose.erdos]], face: [[0, 'smile']], turn: [[0, 0.3]], gaze: [[0, PAPER]] },
+      r3pT: { pos: [[0, [TX, FL]]], pose: [[0, photoPose.terry]], face: [[0, 'smile']], turn: [[0, -0.4]], gaze: [[0, PAPER]] },
     },
     targets: F => {
       const t = F.t, b = caseBottom(t, F), c = cardAt(PICK, t);
       return { house: HOUSE, eps: EPS_C, paper: PAPER, paperfly: t < FLY1 ? paperPos(t) : PAPER, case: [b[0], b[1] - CHT / 2],
-        cards: [780, 225], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 420] };
+        cards: [780, 180], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 380] };
     },
     set: [
       { type: 'floor', t1: FLASH },
-      { type: 'desk', ...DESK, open: true, t1: FLASH },
+      { type: 'desk', ...DESK, open: true, t0: 1.0, t1: FLASH },
       { type: 'floor', t0: C0 },
     ],
     fx: [
@@ -4313,7 +4502,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'r3_case', id: 'r3case' },
       { type: 'label', id: 'r3lbName', text: '埃尔德什', at: [345, 300], rot: -3, t0: 4.9, t1: 7.7, target: { char: 'erdos', part: 'headTop', dx: -36, dy: 6 }, bend: -0.25, gap: 14, size: 50 },
       { type: 'r3_house', id: 'r3house' },
-      { type: 'label', id: 'r3lbStuff', text: '（全部家当）', at: [275, 520], rot: -3, t0: 10.35, t1: 12.5, target: [478, 650], bend: 0.2, gap: 10 },
+      { type: 'label', id: 'r3lbStuff', text: '（全部家当）', at: [275, 520], rot: -3, t0: 10.35, t1: 12.2, target: [478, 650], bend: 0.2, gap: 10 },
       // ε
       { type: 'speech', id: 'r3say', text: '一个 ε！', at: [890, 318], tail: [-120, 36], speaker: 'erdos', t0: 13.0, t1: 16.0, size: 76, rot: -3 },
       { type: 'r3_eps', id: 'r3eps' },
@@ -4327,7 +4516,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'r3_photo', id: 'r3photo' },
       { type: 'title', id: 'r3ka', text: '咔嚓！', x: KA[0], y: KA[1], size: 86, rot: 10, color: 'ink', t0: FLASH, t1: SHR0 + 0.15, sfx: 'r3_click' },
       { type: 'label', id: 'r3lb19', text: '陶哲轩 2019 年回忆', at: [800, 500], rot: -2, t0: 29.1, t1: C0, size: 40 },
-      ...['“He spoke to me', 'like an adult,', 'like an equal.”'].map((s, i) => ({ type: 'scribe', id: 'r3q' + i, text: s, x: Q_X[i], y: Q_Y[i], size: Q_SIZE, font: CFG.FONT_MIX, t0: QUOTE[i], t1: C0, cps: 16 })),
+      ...Q_TEXT.map((s, i) => ({ type: 'scribe', id: 'r3q' + i, text: s, x: Q_X[i], y: Q_Y[i], size: Q_SIZE, t0: QUOTE[i], t1: C0, cps: 8 })),
       { type: 'r3_uline', id: 'r3ul' },
       // part 3 · his problems; one of them, 1932 → 2015
       { type: 'r3_cards', id: 'r3cards' },
@@ -4341,7 +4530,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'title', id: 'r3note', text: '（也用上了很多数学家一起攒下的线索）', x: 790, y: 708, size: 42, color: 'red', rot: -1, t0: NOTE, t1: DUR },
       { type: 'r3_flash', id: 'r3flash' },
     ],
-    sfx: [[13.0, 'boing'], ...MATHS.map((_, i) => [M_ENTER + i * 0.25, 'plip']), [TAO_IN, 'hop']],
+    sfx: [[1.0, 'pen'], [13.0, 'boing'], ...MATHS.map((_, i) => [M_ENTER + i * 0.25, 'plip']), [TAO_IN, 'hop']],
     steps: [{ t0: WALK0, t1: WALK1, hz: 4.4 }, { t0: TWALK0, t1: TWALK1, hz: 5.2 }],
     subs: [
       { t0: 0.3, t1: 4.7, text: '也是十岁那年，来了一位特别的客人：' },
@@ -4378,22 +4567,23 @@ PROPS.e3_page = (fx, t, lt, p) => {
   /* ---------------- the cliff (group coords; the whole group shrinks into the corner at TM.shrink) ---------------- */
   // a craggy rock: every vertex a sharp corner
   const OUTLINE = [[640, 768], [662, 692], [702, 642], [694, 590], [738, 522], [730, 470], [782, 420], [832, 394], [852, 346], [930, 320], [990, 298],
-    [1050, 304], [1118, 264], [1170, 260], [1210, 236], [1252, 256], [1312, 262], [1352, 302], [1420, 330], [1442, 382], [1492, 432], [1502, 520],
+    [1050, 304], [1118, 290], [1170, 284], [1210, 270], [1252, 286], [1312, 292], [1352, 318], [1420, 340], [1442, 382], [1492, 432], [1502, 520],
     [1532, 562], [1528, 662], [1556, 768]].map((p, i) => (i ? [p[0], p[1], 1] : p));
   const PIV = [1548, 770], SHRINK = 0.6;
   const groupS = t => lerp(1, SHRINK, EASE.io(clamp((t - TM.shrink) / 0.5)));
   const G = (p, t) => { const s = groupS(t); return [PIV[0] + (p[0] - PIV[0]) * s, PIV[1] + (p[1] - PIV[1]) * s]; };
-  const S0 = [760, 752], LA = [840, 650], DEAD = [905, 560], LB = [1050, 548], LC = [1170, 410], DOOR = [1350, 392], SUM = [1210, 238];
+  const S0 = [760, 752], LA = [840, 650], DEAD = [905, 560], LB = [1050, 548], LC = [1170, 440], DOOR = [1345, 462], SUM = [1210, 270];
+  const FS = 1.3;                                   // the climber's scale (feet at the route point)
   const SEGS = [
     { t0: 11.2, t1: 12.6, pts: [S0, [790, 695], LA], mode: 'climb', trail: 0 },
     { t0: 12.8, t1: 14.0, pts: [LA, [872, 605], DEAD], mode: 'climb', trail: 1 },
     { t0: 15.4, t1: 16.0, pts: [DEAD, [872, 605], LA], mode: 'slide', ease: 'in' },
     { t0: 16.25, t1: 17.9, pts: [LA, [930, 645], [1010, 610], LB], mode: 'climb', trail: 2 },
     { t0: 20.2, t1: 20.6, pts: [LB, LC], mode: 'zip', ease: 'io' },
-    { t0: 21.8, t1: 24.3, pts: [LC, [1240, 440], [1320, 470], [1400, 450], [1420, 410], [1390, 392], DOOR], mode: 'plod', trail: 3 },
+    { t0: 21.8, t1: 24.3, pts: [LC, [1235, 470], [1305, 500], [1372, 492], DOOR], mode: 'plod', trail: 3 },
   ];
   SEGS.forEach(s => { s.len = polyLen(s.pts); });
-  const INSIDE = [[1350, 378], [1322, 340], [1272, 330], [1242, 292], [1213, 262]];
+  const INSIDE = [[1345, 440], [1318, 392], [1270, 372], [1240, 330], [1213, 300]];
   /** where the climber's feet are, and what it is doing */
   function climberAt(t) {
     if (t < TM.pop || (t >= TM.inside && t < TM.summit)) return null;
@@ -4419,7 +4609,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     [19.8, 'grin'], [20.7, 'smile'], [21.8, 'focus'], [22.6, 'effort'], [24.2, 'smile'], [TM.summit, 'puzzled'], [TM.ohTop, 'surprised'], [TM.flag, 'grin'], [TM.solved, 'joy']];
   function climberGaze(t, st) {
     const [x, y] = st.p;
-    if (t >= 14.0 && t < 15.4) return [930, 440];
+    if (t >= 14.0 && t < 15.4) return [930, 390];
     if (t >= TM.oh && t < 20.2) return LC;
     if (t >= TM.summit + 0.2 && t < TM.ohTop) return [x + (Math.floor((t - TM.summit) / 0.45) % 2 ? 160 : -160), y - 60];
     if (t >= TM.ohTop) return null;
@@ -4489,7 +4679,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
   }
   function climberFig(k, st, t) {
     const L = limbsFor(st, t), z = Z.front, op = st.op, sq = 1 + (st.mode === 'cheer' ? -0.12 * Math.exp(-8 * (t - TM.solved)) * Math.cos(18 * (t - TM.solved)) : 0);
-    DL.save(); DL.translate(st.p[0], st.p[1]); DL.scale(st.pop * (1 + (1 - sq) * 0.6), st.pop * sq); DL.rotate(L.lean);
+    DL.save(); DL.translate(st.p[0], st.p[1]); DL.scale(st.pop * FS * (1 + (1 - sq) * 0.6), st.pop * FS * sq); DL.rotate(L.lean);
     const hip = [0, -40], sh = [0, -70], neck = [0, -74], head = [0, -94];
     const lw = { z, w: 4.5, opacity: op };
     L.feet.forEach((f, i) => { const s = i ? 1 : -1, [kn, ft] = solveIK(hip, f, LEG, LEG, (a, b) => (s * a[0] > s * b[0] ? a : b)); stroke(k + '.leg' + i, [hip, kn, ft], lw); });
@@ -4515,10 +4705,10 @@ PROPS.e3_page = (fx, t, lt, p) => {
     if (t < t0) return;
     const lt = t - t0, pp = EASE.back(clamp(lt / 0.2)), op = clamp(lt / 0.08) * (1 - clamp((t - TM.shrink) / 0.3));
     if (op <= 0.01) return;
-    text(k, str, at[0], at[1], { size: o.size || 40, color: C.red, z: Z.annot, rot, scale: lerp(0.6, 1, pp), opacity: op, halo: 8 });
+    text(k, str, at[0], at[1], { size: o.size || 46, color: C.red, z: Z.annot, rot, scale: lerp(0.6, 1, pp), opacity: op, halo: 8 });
     if (target) arrow(k + '.a', o.from, target, { p: EASE.out(clamp((lt - 0.12) / 0.3)) * (op > 0.9 ? 1 : 0), bend: o.bend ?? 0.2, head: 16 });
   }
-  const BULB = { id: 'c3m.bulbTop', t0: TM.solved, size: 52, state: [[TM.solved, 'on']], at: [0, 0] };
+  const BULB = { id: 'c3m.bulbTop', t0: TM.solved, size: 58, state: [[TM.solved, 'on']], at: [0, 0] };
 
   COMP.c3_mcliff = {
     draw(fx, t, F) {
@@ -4529,17 +4719,17 @@ PROPS.e3_page = (fx, t, lt, p) => {
       stroke('c3m.rock', OUTLINE, { z, w: 6, fill: C.paper, draw: stag(p, 0, 3) });
       stroke('c3m.ground', [[600, 770], [1080, 772], [1590, 769]], { z, w: 2.2, color: C.pencil, opacity: 0.8, draw: stag(p, 0, 3) });
       // ledges: a shelf line with pencil shading under it
-      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 413], [1206, 411]]].forEach((pts, i) => {
+      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 443], [1206, 441]]].forEach((pts, i) => {
         stroke('c3m.ledge' + i, pts, { z: z + 0.2, w: 4.5, draw: stag(p, 1, 3) });
         for (let j = 0; j < 4; j++) { const x = lerp(pts[0][0] + 10, pts[1][0] - 4, j / 3), y = lerp(pts[0][1], pts[1][1], j / 3);
           stroke('c3m.lh' + i + '_' + j, [[x, y + 5], [x - 10, y + 17]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
       });
       for (let j = 0; j < 6; j++) { const x = 872 + j * 21;
-        stroke('c3m.oh' + j, [[x, 452 - j * 0.6], [x - 11, 466 - j * 0.6]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
+        stroke('c3m.oh' + j, [[x, 402 - j * 0.6], [x - 11, 416 - j * 0.6]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
       [[[720, 700], [745, 682], [750, 662]], [[1100, 705], [1132, 692]], [[1420, 560], [1440, 598], [1434, 630]], [[985, 372], [1008, 362]], [[1300, 640], [1322, 610]], [[1210, 560], [1236, 572]],
         [[1352, 330], [1390, 352]], [[1458, 470], [1470, 500]], [[700, 742], [722, 730]], [[1240, 690], [1278, 680], [1290, 700]]]
         .forEach((pts, i) => stroke('c3m.crack' + i, pts, { z: z + 0.2, w: 2.4, color: C.pencil, draw: stag(p, 2, 3), boil: 0.5 }));
-      stroke('c3m.over', [[858, 446, 1], [915, 426], [990, 432, 1], [986, 446, 1], [930, 441], [868, 452, 1], [858, 446, 1]], { z: z + 0.3, w: 5, fill: C.paper, draw: stag(p, 1, 3) });
+      stroke('c3m.over', [[858, 396, 1], [915, 376], [990, 382, 1], [986, 396, 1], [930, 391], [868, 402, 1], [858, 396, 1]], { z: z + 0.3, w: 5, fill: C.paper, draw: stag(p, 1, 3) });
       // trails (dashed ink): each one grows behind the climber
       SEGS.forEach(sg => { if (sg.trail !== undefined) dashedTo('c3m.tr' + sg.trail, sg.pts, segU(sg, t), {}); });
       // the shortcut, spotted before it is taken
@@ -4551,7 +4741,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       // the back door: pops in, swings open, swallows the climber, shuts
       if (t >= TM.door) {
         const dp = EASE.back(clamp((t - TM.door) / 0.3)), open = clamp((t - TM.doorOpen) / 0.15) * (1 - clamp((t - TM.doorShut) / 0.15));
-        DL.save(); DL.translate(DOOR[0], DOOR[1]); DL.scale(dp);
+        DL.save(); DL.translate(DOOR[0], DOOR[1]); DL.scale(dp * FS);
         const fr = [[-21, 0], [-21, -42, 1], [-14, -56], [0, -61], [14, -56], [21, -42, 1], [21, 0]];
         stroke('c3m.doorF', fr, { z: z + 0.5, w: 4.5, fill: open > 0.05 ? C.ink : C.paper });
         const lw = 42 * (1 - 0.8 * open);
@@ -4564,24 +4754,25 @@ PROPS.e3_page = (fx, t, lt, p) => {
       // flag on the summit
       if (t >= TM.flag) {
         const u = EASE.in(clamp((t - TM.flag) / 0.16)), dy = -70 * (1 - u), wave = Math.sin(t * 7) * 4;
-        stroke('c3m.pole', [[1252, 240 + dy], [1252, 128 + dy]], { z: Z.front - 1, w: 5 });
-        stroke('c3m.flag', [[1252, 130 + dy], [1306, 146 + dy + wave, 1], [1252, 164 + dy, 1]], { z: Z.front - 1, w: 4.5, fill: C.paper });
+        const fx0 = SUM[0] + 44, fy = SUM[1];
+        stroke('c3m.pole', [[fx0, fy + 2 + dy], [fx0, fy - 132 + dy]], { z: Z.front - 1, w: 5.5 });
+        stroke('c3m.flag', [[fx0, fy - 130 + dy], [fx0 + 64, fy - 110 + dy + wave, 1], [fx0, fy - 88 + dy, 1]], { z: Z.front - 1, w: 4.5, fill: C.paper });
       }
       // red notes along the way
-      note('c3m.n0', '试试这个', [588, 636], -4, 11.1, t, [780, 700], { from: [662, 650], bend: 0.15 });
-      note('c3m.n1', '再试试那个', [985, 714], -3, 15.95, t, [975, 640], { from: [985, 692], bend: 0.15 });
-      note('c3m.n2', '小捷径', [1218, 522], 3, 19.85, t, [1118, 482], { from: [1158, 512], bend: -0.2 });
-      note('c3m.n3', '后门', [1468, 296], 4, 23.9, t, [1376, 352], { from: [1440, 312], bend: -0.2 });
+      note('c3m.n0', '试试这个', [584, 636], -4, 11.1, t, [780, 700], { from: [672, 652], bend: 0.15 });
+      note('c3m.n1', '再试试那个', [985, 718], -3, 15.95, t, [975, 640], { from: [985, 692], bend: 0.15 });
+      note('c3m.n2', '小捷径', [1224, 550], 3, 19.85, t, [1114, 500], { from: [1158, 540], bend: -0.2 });
+      note('c3m.n3', '后门', [1498, 352], 4, 23.9, t, [1374, 428], { from: [1452, 362], bend: -0.2 });
       // the climber, its "!" and speed lines, sweat while plodding, the bulb at the top
       const st = climberAt(t);
       if (st) {
         climberFig('c3m.cl', st, t);
-        const hd = [st.p[0], st.p[1] - 94];
-        if (t >= TM.oh && t < 19.6) text('c3m.bang', '!', hd[0] + 30, hd[1] - 56, { size: 60, font: CFG.FONT_MIX, z: Z.fx, scale: lerp(0.3, 1, EASE.back(clamp((t - TM.oh) / 0.2))), rot: 8 });
+        const hd = [st.p[0], st.p[1] - 94 * FS];
+        if (t >= TM.oh && t < 19.6) text('c3m.bang', '!', hd[0] + 36, hd[1] - 70, { size: 60, font: CFG.FONT_MIX, z: Z.fx, scale: lerp(0.3, 1, EASE.back(clamp((t - TM.oh) / 0.2))), rot: 8 });
         if (st.mode === 'zip') [0, 1, 2].forEach(i => { const a = [hd[0] - 34 - i * 4, hd[1] + 30 + i * 22]; stroke('c3m.sp' + i, [a, [a[0] - 52, a[1] + 58]], { z: Z.fx, w: 3.5, boil: 0.6 }); });
-        if (t >= 22.6 && t < 24.2) { const ph = ((t - 22.6) * 1.3) % 1, d = [hd[0] - 30 - ph * 16, hd[1] - 10 + ph * ph * 30];
+        if (t >= 22.6 && t < 24.2) { const ph = ((t - 22.6) * 1.3) % 1, d = [hd[0] - 38 - ph * 16, hd[1] - 10 + ph * ph * 30];
           stroke('c3m.sw', [[d[0], d[1] - 12], [d[0] + 7, d[1] + 2], [d[0], d[1] + 8], [d[0] - 7, d[1] + 2], [d[0], d[1] - 12]], { z: Z.fx, w: 3, fill: C.paper, opacity: Math.sin(Math.PI * ph) }); }
-        if (t >= TM.solved) { BULB.at = [SUM[0] + 2, SUM[1] - 94 - 20 - 18]; COMP.e3_bulb.draw(BULB, t, F); }
+        if (t >= TM.solved) { BULB.at = [SUM[0] + 2, SUM[1] - 114 * FS - 18]; COMP.e3_bulb.draw(BULB, t, F); }
       }
       DL.restore();
     },
@@ -4647,7 +4838,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
     c3_cheerA: { armScale: 1.35, armL: [128, 20], armR: [128, 20] },
     c3_kidSitCheer: { ...POSE.sitFloor, armScale: 1.75, armL: [140, 18], armR: [140, 18] },
   });
-  const climberWorld = t => { const st = climberAt(t); return st ? G([st.p[0], st.p[1] - 94], t) : G(SUM, t); };
+  const climberWorld = t => { const st = climberAt(t); return st ? G([st.p[0], st.p[1] - 94 * FS], t) : G(SUM, t); };
 
   defineScene({
     id: 'myth', chapter: '他自己说', dur: DUR, floor: FL,
@@ -4755,39 +4946,66 @@ PROPS.e3_page = (fx, t, lt, p) => {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const [x, y] = fx.at, p = EASE.out(clamp((t - fx.t0) / 0.3));
-      stroke(fx.id, [[x - 26, y], [x - 20, y - 16], [x - 4, y - 24], [x + 16, y - 18], [x + 26, y]], { z: Z.set + 1, w: 4.5, fill: C.paper, draw: p });
+      stroke(fx.id, [[x - 40, y], [x - 30, y - 24], [x - 6, y - 36], [x + 24, y - 27], [x + 40, y]], { z: Z.set + 1, w: 4.5, fill: C.paper, draw: p });
     },
+  };
+  /** 选拔名次卡：前 6 名进国家队；小陶原来是第 6，后来掉到线下。{at, t0, t1, slide} */
+  COMP.h3_rank = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const [cx, cy] = fx.at, lt = t - fx.t0, p = EASE.out(clamp(lt / 0.4)), k = fx.id, z = Z.set + 1, W = 470, RH = 60, top = cy - 200;
+      const op = 1 - clamp((t - fx.t1 + 0.25) / 0.25);
+      stroke(k + '.card', superPts(cx, cy + 10, W, 500, 24, 12), { z, w: 5, closed: true, fill: C.paper, draw: p, opacity: op });
+      const u = EASE.io(clamp((t - fx.slide) / 0.6));
+      for (let i = 0; i < 7; i++) {
+        const y = top + i * RH + (i === 6 ? 30 : 0), q = clamp((lt - 0.3 - i * 0.12) / 0.2); if (q <= 0) continue;
+        text(k + '.n' + i, String(i + 1), cx - W / 2 + 50, y, { size: 50, font: CFG.FONT_MIX, z: z + 0.2, opacity: q * op });
+        // other names: pencil scribbles. Row 6 holds 小陶 until the slide, then someone else's scribble moves in.
+        const scr = (key, y0, o) => { const pts = []; for (let j = 0; j <= 8; j++) pts.push([cx - W / 2 + 100 + j * 30, y0 + (j % 2 ? -8 : 6)]); stroke(key, pts, { z: z + 0.1, w: 3, color: C.pencil, opacity: o * op, boil: 0.6 }); };
+        if (i < 5) scr(k + '.s' + i, y, q);
+        if (i === 5) scr(k + '.s5', y, q * u);
+      }
+      const cut = top + 5 * RH + 36;
+      if (lt > 1.2) {
+        const dp = EASE.out(clamp((lt - 1.2) / 0.4));
+        for (let d = 0; d < 11; d++) { const x0 = cx - W / 2 + 20 + d * 42; stroke(k + '.cut' + d, [[x0, cut], [x0 + 26, cut]], { z: z + 0.3, w: 4, color: C.red, draw: clamp(dp * 11 - d), opacity: op }); }
+        text(k + '.cutT', '前 6 名 → 国家队', cx + W / 2 + 24, cut, { size: 46, color: C.red, anchor: 'start', z: Z.annot, opacity: dp * op });
+      }
+      // 小陶's name: row 6, then sliding below the line to row 7
+      const ny = lerp(top + 5 * RH, top + 6 * RH + 30, u), nq = clamp((lt - 1.0) / 0.2);
+      if (nq > 0) text(k + '.me', '小陶', cx - W / 2 + 104, ny, { size: 50, anchor: 'start', z: z + 0.4, opacity: nq * op, scale: lerp(0.6, 1, EASE.back(nq)) });
+    },
+    cues: fx => [[fx.t0, 'paper'], [fx.t0 + 1.2, 'pen'], [fx.slide, 'whoosh']],
   };
   defineScene({
     id: 'ending', chapter: '尾声', dur: 40.3, floor: FL,
     cast: { terry: E3.terry },
     tracks: {
       terry: {
-        pos: [[0, [TX, FL]], [35.6, [TX - 30, FL - 2], 0.25]],
+        pos: [[0, [TX + 120, FL]], [0.3, [1010, FL], 1.3, 'lin'], [4.4, [TX, FL], 1.0, 'io'], [35.6, [TX - 30, FL - 2], 0.25]],
         // trips at "跌过一跤", sits up sheepish, gets up; at the end sits down on purpose to "先卡一会儿"
-        pose: [[0, 'stand'], [1.6, { ...POSE.stand, lean: 16, tilt: 10, armL: [120, 20], armR: [130, 20] }, 0.1], [2.0, { ...POSE.sitFloor, lean: -6 }, 0.12, 'back'],
-          [4.4, 'stand', 0.25], [8.6, { ...POSE.stand, lean: 4, tilt: 10 }, 0.15], [11.6, 'thinkStand', 0.2], [18.6, 'stand', 0.2], [22.7, 'akimbo', 0.15, 'back'],
+        pose: [[0, makeWalk(0.3, 1.6, 5.2)], [1.6, { ...POSE.stand, lean: -20, tilt: -14, armL: [100, 30], armR: [95, 30], legL: [10, 0], legR: [-30, 20] }, 0.08], [2.0, { ...POSE.sitFloor, lean: -6 }, 0.12, 'back'],
+          [4.4, makeWalk(4.4, 5.4, 5.2)], [5.4, 'stand', 0.15], [8.6, { ...POSE.stand, lean: 4, tilt: 10 }, 0.15], [11.6, 'thinkStand', 0.2], [18.6, 'stand', 0.2], [22.7, 'akimbo', 0.15, 'back'],
           [26.6, 'stand', 0.2], [35.6, { ...POSE.sitFloor, armScale: 1.5, ikR: { w: 1, to: 'head', dx: 0.85, dy: 0.5, bend: 'down' } }, 0.25, 'back']],
         face: [[0, 'smile'], [1.6, 'surprised', 0.04], [2.0, 'sheepish', 0.06], [4.4, 'focus', 0.05], [8.6, 'sheepish', 0.06], [11.6, 'neutral', 0.06], [18.6, 'focus', 0.05], [22.7, 'proud', 0.05], [26.6, 'smile', 0.06], [35.6, 'grin', 0.05]],
-        turn: [[0, -0.4], [11.6, -0.5, 0.1], [26.6, -0.25, 0.1], [35.6, 0, 0.1]],
-        gaze: [[0, 'viewer'], [1.6, [TX - 80, FL]], [4.4, 'sign'], [11.6, 'plant'], [22.7, 'viewer'], [26.6, 'gold'], [35.6, 'viewer']],
+        turn: [[0, -0.5], [4.4, 0.5, 0.08], [5.4, -0.45, 0.12], [11.6, -0.5, 0.1], [26.6, -0.25, 0.1], [35.6, 0, 0.1]],
+        gaze: [[0, [880, FL]], [2.4, 'viewer'], [5.4, 'sign'], [11.6, 'plant'], [22.7, 'viewer'], [26.6, 'gold'], [35.6, 'viewer']],
         squash: [[0, 1], [2.0, 0.86, 0.06], [2.06, 1, 0.25, 'back'], [35.6, 0.92, 0.05], [35.66, 1, 0.22, 'back']],
       },
     },
-    targets: () => ({ sign: [560, 240], plant: [G[0], G[1] - 160], gold: [560, 330] }),
+    targets: () => ({ sign: [560, 420], plant: [G[0], G[1] - 160], gold: [560, 330] }),
     fx: [
-      { type: 'ageStamp', age: 10, t0: -1000, ...E3.STAMP, dockT: -999, pulse: [22.9] },
-      { type: 'speedLines', char: 'terry', part: 'footL', t0: 1.6, t1: 2.2 },
+      // the setback was before ten (probably age 9), so the 10岁 stamp only comes in at “十岁这年”
+      { type: 'ageStamp', age: 10, t0: 22.75, ...E3.STAMP, center: [1250, 300], dockT: 24.6 },
       // the selection exam and the team it didn't get him into
-      { type: 'title', id: 'amo', text: '澳大利亚数学奥林匹克', x: 560, y: 200, size: 62, t0: 4.5, t1: 11.5, underline: true, ucolor: 'ink' },
-      { type: 'title', id: 'team', text: '国家队 →', x: 560, y: 330, size: 70, t0: 8.6, t1: 11.5 },
-      { type: 'strike', id: 'nx', rect: [430, 300, 230, 64], t0: 9.0, t1: 11.5, dur: 0.25 },
-      { type: 'title', id: 'nope', text: '没进', x: 760, y: 322, size: 60, t0: 9.3, t1: 11.5, color: 'red', rot: 8, sfx: 'stamp' },
-      { type: 'h3_rock', id: 'rock', at: [TX - 96, FL], t0: 0.2, t1: 4.4 },
+      { type: 'title', id: 'amo', text: '澳大利亚数学奥林匹克', x: 560, y: 120, size: 60, t0: 4.5, t1: 11.5, underline: true, ucolor: 'ink' },
+      { type: 'h3_rank', id: 'rank', at: [480, 450], t0: 4.9, t1: 11.5, slide: 8.7 },
+      { type: 'title', id: 'nope', text: '没进！', x: 860, y: 680, size: 60, t0: 9.3, t1: 11.5, color: 'red', rot: 8, sfx: 'stamp' },
+      { type: 'h3_rock', id: 'rock', at: [948, FL], t0: 0.1, t1: 4.4 },
       // "progressed extraordinarily fast … had not set down deep roots"
       { type: 'h3_plant', id: 'pl', at: G, t0: 11.6, t1: 26.6, h: [[0, 0], [11.7, 0], [12.4, 330, 0.9, 'out'], [18.6, 330], [19.0, 360, 6, 'io']], root: [[0, 0], [12.4, 22, 0.6], [18.6, 22], [19.0, 190, 6.5, 'io']] },
       { type: 'label', id: 'lbFast', text: '跑得飞快', at: [560, 230], rot: -4, t0: 12.6, t1: 26.6, target: [G[0] - 14, G[1] - 260], bend: 0.2, gap: 12 },
-      { type: 'label', id: 'lbRoot', text: ['根还', '没扎深'], at: [520, 640], rot: 3, t0: 15.2, t1: 18.6, target: [G[0] - 10, G[1] + 26], bend: -0.25, gap: 12 },
+      { type: 'label', id: 'lbRoot', text: '根还没扎深', size: 46, at: [470, 640], rot: 3, t0: 15.2, t1: 18.6, target: [G[0] - 10, G[1] + 26], bend: -0.25, gap: 12 },
       { type: 'title', id: 'mama', text: '（爸爸妈妈说）', x: 1100, y: 150, size: 40, t0: 11.7, t1: 18.6, color: 'red', rot: 3 },
       { type: 'label', id: 'lbYears', text: '很多年', at: [520, 660], rot: 3, t0: 19.2, t1: 26.6, target: [G[0] - 30, G[1] + 120], bend: -0.25, gap: 12 },
       // the series' golden lines
@@ -4796,7 +5014,7 @@ PROPS.e3_page = (fx, t, lt, p) => {
       { type: 'qm', id: 'qm', pos: [[0, [1020, 770]]], size: 150, t0: 35.6, burst: true, act: [[0, 'hop'], [1.2, 'nod']], mood: [[0, 'happy']], gaze: [[0, 'terry']] },
       { type: 'speech', id: 'yay', text: ['卡住了？没关系，', '先卡一会儿！'], at: [1300, 380], tail: [-40, 110], speaker: 'terry', t0: 35.7, t1: 40.3, size: 52, rot: -3 },
     ],
-    sfx: [[2.0, 'thud'], [9.0, 'buzz'], [12.4, 'whoosh'], [35.6, 'hop']],
+    sfx: [[1.65, 'thud'], [8.7, 'buzz'], [12.4, 'whoosh'], [35.6, 'hop']],
     subs: [
       { t0: 0.3, t1: 4.3, text: '其实在这之前，小陶就跌过一跤：' },
       { t0: 4.4, t1: 8.2, text: '他去考澳大利亚数学奥林匹克，' },
@@ -4822,7 +5040,7 @@ defineScene({
     terry: {
       enter: 1.6,
       pos: [[0, [1330, 700]]],
-      pose: [[0, 'stand'], [2.0, t => ({ ...POSE.wave, armR: [118, 40 + 28 * Math.sin((t - 2) * 11)] }), 0.12]],
+      pose: [[0, 'stand'], [2.0, t => ({ ...POSE.wave, armScale: 1.85, armR: [118, 22 + 25 * Math.sin((t - 2) * 11)] }), 0.12]],
       face: [[0, 'smile'], [2.0, 'joy', 0.05]],
       turn: [[0, -0.3]],
     },
@@ -4832,7 +5050,7 @@ defineScene({
     { type: 'title', id: 'nx', text: '下一集', x: 620, y: 200, size: 72, t0: 0, color: 'red', rot: -3 },
     { type: 'title', id: 'a', text: '第一次站上世界赛场', x: 640, y: 380, size: 96, t0: 0.5 },
     { type: 'qm', id: 'qm', pos: [[0, [200, 700]]], size: 200, t0: 2.2, act: [[0, 'hop'], [3.2, 'wave']], mood: [[0, 'happy']] },
-    { type: 'speech', id: 'bye', text: '下集见！', at: [1410, 380], tail: [-40, 40], speaker: 'terry', t0: 4.3, t1: 7.2, rot: 5 },
+    { type: 'speech', id: 'bye', text: '下集见！', at: [1440, 345], tail: [-40, 40], speaker: 'terry', t0: 4.3, t1: 7.2, rot: 5 },
   ],
   subs: [
     { t0: 0.3, t1: 4.1, text: '下一集：第一次站上世界赛场。' },
