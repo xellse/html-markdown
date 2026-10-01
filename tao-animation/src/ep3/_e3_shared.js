@@ -106,7 +106,7 @@ COMP.e3_board = {
     for (let c = 0; c <= n; c++) for (let r = 0; r < n; r++) { const a = present(r, c - 1), b = present(r, c); if (a || b) edges.push({ key: `v${c}_${r}`, pts: [[x0 + c * s, y0 + r * s], [x0 + c * s, y0 + (r + 1) * s]], outer: a !== b }); }
     edges.forEach((e, i) => stroke(k + '.' + e.key, e.pts, { z: z + (e.outer ? 0.3 : 0.2), w: e.outer ? wOut : wIn, draw: clamp(p * 1.6 - (i / edges.length) * 0.6), bow: 0.3 }));
     // the two corners being cut away: red dashed outline, then the square falls off
-    if (cutOn && t >= fx.cut && t < fx.cut + 1.3) {
+    if (cutOn && fx.cut >= 0 && t >= fx.cut && t < fx.cut + 1.3) { // a negative cut = already cut when the scene opens
       [[0, 0], [n - 1, n - 1]].forEach(([r, c], i) => {
         const u = clamp((t - fx.cut - 0.55) / 0.7), fall = EASE.in(u);
         const cx = x0 + (c + 0.5) * s + (i ? 1 : -1) * fall * 60, cy = y0 + (r + 0.5) * s + fall * 260;
