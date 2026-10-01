@@ -269,7 +269,7 @@
 
   /* ---------------- Erdős's problems: cards fly out of the photo ---------------- */
   const CARDS = [[470, 200, -7, 0], [610, 250, 5, 1], [750, 198, -3, 0], [890, 246, 7, 0], [1030, 204, -6, 1], [1170, 250, 4, 0]];
-  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [830, 236];
+  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[360, 180], [1150, 180]];
   const SRC = toWorld([700, 520], C1 + 1);                     // Erdős in the photo, once it sits in the corner
   const cardT = i => 36.2 + i * 0.17;
   function cardAt(i, t) {                                      // → [centre, rotation, scale] | null (pure)
@@ -281,8 +281,10 @@
     const v = EASE.io(clamp((t - PIN0) / (PIN1 - PIN0)));
     c = [lerp(x, PIN[0], v), lerp(y, PIN[1], v) - Math.sin(Math.PI * v) * 70]; rot = lerp(r, -4, v);
     if (t < TRAV0) return [c, rot, 1];
-    const w = EASE.io(clamp((t - TRAV0) / (TRAV1 - TRAV0))), a = (1 - w) * (1 - w), b = 2 * (1 - w) * w, d = w * w;
-    return [[a * PIN[0] + b * ARC[0] + d * HELD[0], a * PIN[1] + b * ARC[1] + d * HELD[1]], lerp(-4, 12, w) + Math.sin(Math.PI * w) * 24, lerp(1, 0.92, w)];
+    // cubic arc: up off the pin, over the stuck grown-ups' heads (through its own empty slot in the row), down into Tao's hand
+    const w = EASE.io(clamp((t - TRAV0) / (TRAV1 - TRAV0))), q = 1 - w, k = [q * q * q, 3 * q * q * w, 3 * q * w * w, w * w * w];
+    const P = [PIN, ARC[0], ARC[1], HELD], at = j => k[0] * P[0][j] + k[1] * P[1][j] + k[2] * P[2][j] + k[3] * P[3][j];
+    return [[at(0), at(1)], lerp(-4, 12, w) + Math.sin(Math.PI * w) * 24, lerp(1, 0.92, w)];
   }
   function drawCard(k, i, c, rot, sc, t) {
     const z = Z.fx + 2, w = KW / 2, h = KH / 2;
