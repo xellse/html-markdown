@@ -36,7 +36,7 @@
       stroke(k + '.hm', [c, wcPt(m * 6, r * 0.68)], { z: z + 0.2, w: 4.5 });
       dot(k + '.cd', c, 5, C.ink, z + 0.3);
     },
-    cues: () => JUMPS.flatMap(([tj]) => [[tj, 'f3s_tick'], [tj + 0.05, 'whip']]),
+    cues: () => JUMPS.map(([tj]) => [tj, 'f3s_tick']),
   };
   SFX.define('f3s_tick', tone => { tone('sine', 1500, 900, 0.03, 0.12); tone('sine', 1300, 800, 0.03, 0.1, null, 0.12); });
   // the red time notes beside the clock: number hand-written, "分钟" in the pen font
@@ -48,7 +48,7 @@
     const pts = [[-190, 64], [-150, 40], [-112, 46]];                       // a loose end
     for (let i = 0; i <= 96; i++) {
       const th = i * 0.5, r = 1 - 0.38 * Math.abs(Math.sin(i * 0.131 + 0.7)) - 0.16 * Math.sin(i * 0.057);
-      pts.push([118 * r * Math.cos(th) + 20 * Math.sin(i * 0.23), 80 * r * Math.sin(th * 1.07 + 0.4) + 14 * Math.cos(i * 0.19)]);
+      pts.push([104 * r * Math.cos(th) + 42 * Math.sin(i * 0.23), 70 * r * Math.sin(th * 1.07 + 0.4) + 26 * Math.cos(i * 0.19 + 1)]);
     }
     const e = pts[pts.length - 1];
     pts.push([e[0] + 46, e[1] + 30], [e[0] + 84, e[1] + 22], [e[0] + 116, e[1] + 52]);   // and another
@@ -67,6 +67,8 @@
   /** inside the memory cloud: a happy little Terry (the bulb above him is the shared e3_bulb) */
   PROPS.f3_memo = () => { portrait('f3s.memo', 0, 0, 44, { z: Z.fx + 1, happy: true }); };
 
+  const cArc = (cx, cy, r, a0, a1, n = 5) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * RAD; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
+  const GLOOM = [[-64, 22], ...cArc(-40, 4, 26, 150, 290), ...cArc(0, -10, 34, 215, 330), ...cArc(42, 4, 26, 250, 390), [64, 22, 1], [-64, 22, 1]];
   /** a little pencil rain cloud over his head while he shrinks */
   COMP.f3_gloom = {
     draw(fx, t, F) {
@@ -74,12 +76,12 @@
       const a = F.anchors.terry; if (!a) return;
       const lt = t - fx.t0, p = EASE.back(clamp(lt / 0.35)), op = clamp((fx.t1 - t) / 0.2), c = [a.headTop[0] + 6, a.headTop[1] - 92], k = 'f3s.gl';
       DL.save(); DL.translate(c[0], c[1]); DL.scale(p);
-      stroke(k, ringPts(k, 0, 0, 74, 30, { n: 11, closed: true, rv: 0.2 }), { z: Z.fx, w: 3.4, closed: true, fill: C.paper, opacity: op });
-      [[-40, -6, 30], [-12, 4, 44], [18, -8, 36], [44, 2, 24]].forEach(([x, y, l], i) => stroke(k + '.h' + i, [[x - l / 2, y + 8], [x + l / 2, y - 8]], { z: Z.fx + 0.1, w: 2.2, color: C.pencil, opacity: op, boil: 0.7 }));
+      stroke(k, GLOOM, { z: Z.fx, w: 3.6, fill: C.paper, opacity: op });
+      [[-40, 6, 22], [-14, 0, 40], [14, -4, 44], [40, 6, 26]].forEach(([x, y, l], i) => stroke(k + '.h' + i, [[x - l / 3, y + l / 3], [x + l / 3, y - l / 3]], { z: Z.fx + 0.1, w: 2.4, color: C.pencil, opacity: op, boil: 0.7 }));
       DL.restore();
       [-44, -14, 16, 46].forEach((dx, i) => {
         const ph = ((lt * 1.6 + i * 0.27) % 1), y = c[1] + 36 + ph * 46;
-        stroke(k + '.r' + i, [[c[0] + dx, y], [c[0] + dx - 4, y + 14]], { z: Z.fx, w: 2.6, color: C.pencil, opacity: op * Math.sin(Math.PI * ph) * clamp(lt / 0.4) });
+        stroke(k + '.r' + i, [[c[0] + dx, y], [c[0] + dx - 4, y + 16]], { z: Z.fx, w: 3.2, color: C.pencil, opacity: op * Math.sin(Math.PI * ph) * clamp(lt / 0.4) });
       });
     },
     cues: fx => [[fx.t0, 'boop']],
@@ -112,7 +114,7 @@
   COMP.f3_slam = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
-      const lt = t - fx.t0, u = clamp(lt / 0.16), sc = lerp(2.3, 1, EASE.in(u));
+      const lt = t - fx.t0, u = clamp(lt / 0.16), sc = lerp(1.7, 1, EASE.in(u));
       text('f3s.slam', fx.text, fx.x, fx.y, { size: fx.size, color: C.red, z: Z.annot, rot: fx.rot, scale: sc, opacity: clamp(u * 2.5), halo: 12 });
       const q = (lt - 0.16) / 0.35;
       if (q > 0 && q < 1) [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy], i) => {
@@ -169,7 +171,8 @@
       { type: 'desk', x: DX, top: DTOP, w: DW },
     ],
     fx: [
-      { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
+      // t0/dockT far below zero: the engine's cue filter would otherwise play this stamp's sounds at the end of the previous scene
+      { type: 'ageStamp', age: 10, t0: -1000, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -999, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
       { type: 'f3_sheet', id: 'f3s.sheetC' },
       { type: 'f3_wclock', id: 'f3s.wclock' },
       { type: 'title', id: 'f3s.stuck', text: '卡住', x: CL[0], y: 290, size: 150, t0: 1.75, t1: 3.8, underline: true },
@@ -181,13 +184,13 @@
       // 1 分钟，10 分钟，20 分钟……
       ...MINS.flatMap(([n, t0, y], i) => [
         { type: 'write', id: 'f3s.mn' + i, text: n, x: 384, y: y - 26, size: 52, t0, t1: 13.55, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'end', z: Z.annot },
-        { type: 'title', id: 'f3s.mt' + i, text: '分钟', x: 398, y: y + 2, size: 46, t0: t0 + 0.12, t1: 13.55, color: 'red', anchor: 'start', dur: 0.2, sfx: 'pen' },
+        { type: 'title', id: 'f3s.mt' + i, text: '分钟', x: 398, y: y + 2, size: 46, t0: t0 + 0.12, t1: 13.55, color: 'red', anchor: 'start', dur: 0.2, sfx: 'f3s_none' },
       ]),
       { type: 'f3_balls', id: 'f3s.balls' },
       // 习惯了“一眼看出来”：a memory of the old ding
       { type: 'thought', id: 'f3s.cloud2', at: CL, rx: 185, ry: 135, t0: 13.72, t1: 17.95, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },
       { type: 'prop', kind: 'f3_memo', id: 'f3s.memo', at: [CL[0], CL[1] + 52], t0: 13.85, t1: 17.95, drawDur: 0 },
-      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0], CL[1] - 20], size: 62, t0: 13.85, t1: 17.95, state: [[-1, 'on']], z: Z.fx + 2 },
+      { type: 'e3_bulb', id: 'f3s.memoBulb', at: [CL[0], CL[1] - 20], size: 62, t0: 13.85, t1: 17.95, state: [[-1000, 'on']], z: Z.fx + 2 },   // already lit, and no ding leaking into the previous scene
       // “我是不是……没那么聪明？”
       { type: 'f3_gloom', id: 'f3s.gloom', t0: 18.7, t1: 21.8 },
       { type: 'thought', id: 'f3s.cloud3', at: CL, rx: 262, ry: 132, t0: 21.85, t1: 26.5, from: { char: 'terry', part: 'headTop', dx: 24, dy: -8 } },

@@ -227,7 +227,7 @@
         state: [[4.0, 'on'], [5.95, 'off'], [7.5, 'on'], [11.2, 'off'], [11.7, 'on'], [12.35, 'off'], [12.8, 'on'], [13.35, 'off'], [13.8, 'on']] },
       // 10 岁的印章，先盖在中间，再停靠到右上角
       { type: 'ageStamp', age: 10, place: '准备奥数', t0: 15.35, center: E3.STAMP.center, R: E3.STAMP.R, dockT: 20.25, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale, pulse: [] },
-      { type: 'label', id: 'f3.lbIMO', text: 'IMO = 国际数学奥林匹克', at: [800, 690], rot: -2, t0: 17.45, t1: 20.2, target: [836, 592], bend: 0.12, gap: 8 },
+      { type: 'label', id: 'f3.lbIMO', text: 'IMO = 国际数学奥林匹克', at: [800, 692], rot: -2, size: 46, t0: 17.45, t1: 20.2, target: [836, 592], bend: 0.12, gap: 8 },
       // the exam
       { type: 'f3_exam', id: 'f3.exam' },
       ...PAPERS.map((pp, i) => ({ type: 'write', id: 'f3.cnt' + i, text: String(i + 1), x: pp.at[0], y: 158, size: 58, t0: pp.tc, t1: EXAM_T1, speed: 2600, color: 'red', w: 6, sfx: 'pen', anchor: 'middle', z: Z.annot })),
@@ -243,13 +243,13 @@
       { type: 'f3_giant', id: 'f3.giant' },
       { type: 'e3_bulb', id: 'f3.bulb2', char: 'terry', t0: 41.85, state: FLICK },
       { type: 'f3_smoke', id: 'f3.smoke', t0: 49.35 },
-      { type: 'label', id: 'f3.lbDead', text: '（没电了）', at: [505, 318], rot: -4, t0: 49.5, t1: 51.6, target: { target: 'f3.bulb2.bulb', dx: 28, dy: -10 }, bend: 0.2, gap: 12 },
+      { type: 'label', id: 'f3.lbDead', text: '（没电了）', at: [505, 318], rot: -4, size: 44, t0: 49.5, t1: 51.6, target: { target: 'f3.bulb2.bulb', dx: 28, dy: -10 }, bend: 0.2, gap: 12 },
     ],
     sfx: [[21.3, 'boing'], [31.2, 'boing'], ...BURSTS.map(([b]) => [b, 'f3_fizz'])],
     subs: [
       { t0: 0.3, t1: 3.7, text: '小陶做题，一直有个法宝：' },
       { t0: 3.8, t1: 5.8, text: '灵光一闪。' },
-      { t0: 5.9, t1: 11.1, text: '题目一来，脑子里“叮”一声，答案就出来了。' },
+      { t0: 5.9, t1: 11.1, text: '题目一来，脑子里“叮”一声，答案就来了。' },
       { t0: 11.5, t1: 15.25, text: '叮！叮！叮！' },
       { t0: 15.35, t1: 20.15, text: '十岁这年，他开始准备国际数学奥林匹克。' },
       { t0: 20.25, t1: 23.25, text: '这里的题，可不一样。' },

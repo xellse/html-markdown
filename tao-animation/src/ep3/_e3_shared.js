@@ -24,7 +24,7 @@ COMP.e3_bulb = {
     const st = stepTrack(fx.state, t) || 'off';
     let sT = fx.t0; (fx.state || []).forEach(q => { if (q[0] <= t) sT = q[0]; });
     let lit = st === 'on';
-    if (st === 'flicker') lit = rnd(k, Math.floor(t * 13), 3) > 0.15;
+    if (st === 'flicker') lit = rnd(hstr(k), Math.floor(t * 11), 3) > 0.35; // mostly dark, with short sputters
     const pop = fx.t0 < 0 ? 1 : EASE.back(clamp(lt / 0.26));
     const flash = st === 'on' ? 1 + 0.18 * Math.max(0, 1 - (t - sT) / 0.25) : 1;
     const tiltDead = st === 'dead' ? 14 * EASE.back(clamp((t - sT) / 0.35)) : 0;

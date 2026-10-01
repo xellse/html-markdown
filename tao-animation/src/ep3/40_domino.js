@@ -56,9 +56,9 @@
       const lt = t - fx.t0; if (lt < 0 || lt > 1.5) return;
       [[-120, -10, 1], [115, -24, -1], [-70, 34, 1], [92, 30, -1], [5, -44, 1]].forEach(([dx, dy, s], i) => {
         const u = clamp((lt - i * 0.07) / 1.2); if (u <= 0 || u >= 1) return;
-        const c = [fx.at[0] + dx * (1 + u * 0.5), fx.at[1] + dy - u * 50], r = 7 + u * 12, op = Math.sin(Math.PI * u);
+        const c = [fx.at[0] + dx * (1 + u * 0.5), fx.at[1] + dy - u * 50], r = 10 + u * 16, op = Math.sin(Math.PI * u);
         const pts = []; for (let j = 0; j <= 10; j++) { const a = (s * j * 62) * RAD, rr = r * (0.35 + j * 0.065); pts.push([c[0] + Math.cos(a) * rr, c[1] + Math.sin(a) * rr]); }
-        stroke(fx.id + '.p' + i, pts, { z: Z.annot - 1, w: 2.4, color: C.pencil, opacity: op, boil: 0.7 });
+        stroke(fx.id + '.p' + i, pts, { z: Z.annot - 1, w: 3, color: C.pencil, opacity: op, boil: 0.7 });
       });
     },
     cues: fx => [[fx.t0, 'swish']],
@@ -166,7 +166,7 @@
   };
   Object.assign(POSE, {
     d3_dSlump: { lean: -3, tilt: -14, sq: 0.93, armScale: 1.1, armL: [5, 4], armR: [5, 4] },
-    d3_dOneMore: { lean: 2, tilt: 6, armScale: 1.5, armR: [158, 8], armL: [18, 12] },
+    d3_dOneMore: { lean: 2, tilt: 6, armScale: 1.6, armR: [128, 26], armL: [18, 12] },
     d3_dReach: { lean: -6, tilt: -4, armScale: 1.55, armL: [86, 6], armR: [24, 16] },
     d3_dStartle: { lean: 4, tilt: 4, armScale: 1.45, armL: [62, 46], armR: [62, 46] },
   });

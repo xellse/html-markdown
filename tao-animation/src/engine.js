@@ -1341,13 +1341,14 @@ function prepareEpisode() {
   const c = [];
   EP.scenes.forEach(sc => {
     const o = sc.start;
-    (sc.steps || []).forEach(w => { for (let k = 0; ; k++) { const tt = w.t0 + (k + 0.5) / w.hz; if (tt >= w.t1) break; c.push({ t: o + tt, sfx: w.sfx || 'step' }); } });
-    sc.fx.forEach(fx => { const comp = COMP[fx.type]; if (comp.cues) comp.cues(fx).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n })); });
-    (sc.sfx || []).forEach(([tt, n]) => c.push({ t: o + tt, sfx: n }));
+    // a scene may pre-draw things with negative start times: keep only sounds that fall inside the scene's own clock
+    const add = (tt, n) => { if (tt >= -1e-6 && tt < sc.dur) c.push({ t: o + tt, sfx: n }); };
+    (sc.steps || []).forEach(w => { for (let k = 0; ; k++) { const tt = w.t0 + (k + 0.5) / w.hz; if (tt >= w.t1) break; add(tt, w.sfx || 'step'); } });
+    sc.fx.forEach(fx => { const comp = COMP[fx.type]; if (comp.cues) comp.cues(fx).forEach(([tt, n]) => add(tt, n)); });
+    (sc.sfx || []).forEach(([tt, n]) => add(tt, n));
     sc.subs.forEach((s, i) => { if (s.say !== false) c.push({ t: o + s.t0, say: (typeof s.say === 'string' ? s.say : s.text).replace(/\n/g, ''), key: `${sc.id}#${i}`, voice: s.voice || 'narr' }); });
   });
-  // a scene may pre-draw things with negative start times; their sounds must not leak into the previous scene
-  EP.cues = c.filter(q => q.say || EP.scenes.some(sc => q.t >= sc.start - 1e-6 && q.t < sc.start + sc.dur && q.t - sc.start >= -1e-6)).sort((a, b) => a.t - b.t);
+  EP.cues = c.sort((a, b) => a.t - b.t);
   EP.pauses = EP.scenes.flatMap(sc => (sc.pauses || []).map(p => sc.start + p)).sort((a, b) => a - b);
   EP.syncs = [...new Set(EP.cues.filter(q => q.say).map(q => q.t).concat(EP.scenes.slice(1).map(s => s.start)))].sort((a, b) => a - b);
 }
