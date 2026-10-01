@@ -208,7 +208,7 @@
     stroke(k + '.m', m.map(([u, v]) => [u * r, v * r]), { z, w: 3.4 });
     DL.restore();
   }
-  COMP.c3c_axes = {
+  COMP.c3_caxes = {
     draw(fx, t) {
       const p = EASE.io(clamp((t - 0.45) / 1.0)); if (p <= 0) return;
       const z = Z.set + 1;
@@ -229,7 +229,7 @@
     cues: () => [[0.45, 'pen'], [0.95, 'pen'], [3.4, 'pop'], [4.9, 'pop'], [5.35, 'boop'], [5.65, 'boop'], [5.95, 'boop']],
   };
   /** a mood curve, drawn up to ext(t); dash: true for the dashed "harder problem" */
-  COMP.c3c_curve = {
+  COMP.c3_ccurve = {
     init(fx) { fx.pts = sample(fx.fn, X0, fx.x1, fx.peakX); if (fx.dash) fx.dashes = dashes(fx.pts, 24, 15); return fx; },
     draw(fx, t) {
       const xe = fx.ext(t); if (xe <= X0 + 0.5) return;
@@ -240,7 +240,7 @@
   };
   /** the rider: Terry's head riding the pen tip, plus its sweat, question marks, speed lines and the burst at the top.
    *  Publishes F.anchors.c3_head (for the bulb and the speech tails). */
-  COMP.c3c_rider = {
+  COMP.c3_crider = {
     draw(fx, t, F) {
       const st = riderAt(t); if (!st) return;
       const { c, s, pop } = st, k = 'c3c.head';
@@ -294,7 +294,7 @@
   };
   /** red brace under the valley that keeps growing with the rider: "很久……" → "很久很久很久很久……" */
   const LONG = [[21.2, '很久……'], [22.6, '很久很久……'], [24.3, '很久很久很久……'], [25.7, '很久很久很久很久……']];
-  COMP.c3c_brace = {
+  COMP.c3_cbrace = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const x0 = HARD.valley[0] + 6, x1 = Math.max(x0 + 40, Math.min(HX(t), HARD.valley[1])), y = 668, mid = (x0 + x1) / 2, k = fx.id;
@@ -306,7 +306,7 @@
     cues: fx => [[fx.t0, 'pen'], ...LONG.map(([t0]) => [t0, 'pen'])],
   };
   /** red note + arrow like `label`, but with no paper halo (so a highlighter band can sit under it) */
-  COMP.c3c_note = {
+  COMP.c3_cnote = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const lt = t - fx.t0, size = fx.size || 44, pp = EASE.back(clamp(lt / 0.2));
@@ -322,26 +322,26 @@
     cast: {},
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
-      { type: 'c3c_axes', id: 'c3c.axes' },
+      { type: 'c3_caxes', id: 'c3c.axes' },
       // the three curves
-      { type: 'c3c_curve', id: 'c3c.easy', fn: easyY, x1: EASY_END, ext: t => (t < T.hop0 ? easyX(t) : EASY_END), w: 5.5 },
-      { type: 'c3c_curve', id: 'c3c.hard', fn: hardY, x1: HARD.end, peakX: HARD.climb[1], w: 5.5,
+      { type: 'c3_ccurve', id: 'c3c.easy', fn: easyY, x1: EASY_END, ext: t => (t < T.hop0 ? easyX(t) : EASY_END), w: 5.5 },
+      { type: 'c3_ccurve', id: 'c3c.hard', fn: hardY, x1: HARD.end, peakX: HARD.climb[1], w: 5.5,
         ext: t => (t < T.h0 ? X0 : Math.max(HX(t), t >= T.top ? HARD.climb[1] : 0, t >= T.after0 ? lerp(HARD.climb[1], HARD.end, EASE.io(clamp((t - T.after0) / (T.after1 - T.after0)))) : 0)) },
-      { type: 'c3c_curve', id: 'c3c.harder', fn: harderY, x1: HARDER.end, peakX: HARDER.climb[1], w: 4, dash: true, ext: pen3 },
+      { type: 'c3_ccurve', id: 'c3c.harder', fn: harderY, x1: HARDER.end, peakX: HARDER.climb[1], w: 4, dash: true, ext: pen3 },
       // tags at the ends of the lines (ink)
       { type: 'title', id: 'c3c.tagE', text: '简单题', x: 510, y: 404, size: 40, t0: 6.9, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagH', text: '难题', x: HARD.end + 16, y: HARD.plateau, size: 40, t0: T.after1 + 0.05, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagX', text: '更难的题', x: HARDER.end + 14, y: HARDER.plateau, size: 40, t0: 37.15, anchor: 'start', color: 'ink' },
       // red notes on the chart
       { type: 'label', id: 'c3c.lbValley', text: '卡住谷', at: [282, 600], rot: -4, t0: 19.3, t1: DUR, target: [500, 640], bend: 0.25, gap: 12, size: 46 },
-      { type: 'c3c_brace', id: 'c3c.brace', t0: 21.0, t1: 34.0 },
+      { type: 'c3_cbrace', id: 'c3c.brace', t0: 21.0, t1: 34.0 },
       { type: 'band', id: 'c3c.hiPeak', rect: [652, 212, 138, 50], t0: 40.0, dur: 0.45, pad: 12 },
-      { type: 'c3c_note', id: 'c3c.lbPeak', text: '啊哈峰', at: [720, 236], rot: -2, size: 46, t0: 30.9, t1: DUR, from: [800, 246], to: [918, 262], bend: 0.25 },
+      { type: 'c3_cnote', id: 'c3c.lbPeak', text: '啊哈峰', at: [720, 236], rot: -2, size: 46, t0: 30.9, t1: DUR, from: [800, 246], to: [918, 262], bend: 0.25 },
       { type: 'label', id: 'c3c.lbDeep', text: '更深', at: [934, 684], rot: -3, t0: 35.65, t1: 39.1, target: [850, 728], bend: -0.25, gap: 12, size: 42 },
       { type: 'label', id: 'c3c.lbHigh', text: '更高', at: [1352, 134], rot: 3, t0: 36.75, t1: 39.1, target: [1222, 128], bend: 0.25, gap: 12, size: 42 },
       { type: 'label', id: 'c3c.lbNoPeak', text: '（没有峰）', at: [330, 292], rot: -3, t0: 44.6, t1: DUR, target: [338, 380], bend: 0.2, gap: 12, size: 40 },
       // the rider, its bulb and its words
-      { type: 'c3c_rider', id: 'c3c.rider' },
+      { type: 'c3_crider', id: 'c3c.rider' },
       { type: 'e3_bulb', id: 'c3c.bulb', char: 'c3_head', size: 64, t0: T.aha, dy: 4, state: [[T.aha, 'on']] },
       { type: 'speech', id: 'c3c.done', text: '嗯，做完了。', at: [700, 250], tail: [-170, 40], speaker: 'c3_head', t0: 11.2, t1: 13.9, size: 52, rot: -2 },
       { type: 'speech', id: 'c3c.aha', text: '啊哈！', at: [1150, 122], tail: [-120, 34], speaker: 'c3_head', t0: T.top + 0.02, t1: 31.4, size: 84, rot: -4 },

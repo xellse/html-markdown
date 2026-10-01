@@ -155,7 +155,7 @@
   }
   const BULB = { id: 'c3m.bulbTop', t0: TM.solved, size: 52, state: [[TM.solved, 'on']], at: [0, 0] };
 
-  COMP.c3m_cliff = {
+  COMP.c3_mcliff = {
     draw(fx, t, F) {
       if (t < TM.cut) return;
       const lt = t - TM.cut, p = EASE.out(clamp(lt / 0.6)), s = groupS(t), z = Z.set;
@@ -231,7 +231,7 @@
   const CL = { c: [880, 420], rx: 360, ry: 228 }, KID = [950, 560];
   const BULB2 = { id: 'c3m.bulbSky', t0: TM.fall0, size: 80, state: [[TM.fall1, 'on']], at: [0, 0] };
   const fallY = (t, landY) => lerp(-60, landY, EASE.in(clamp((t - TM.fall0) / (TM.fall1 - TM.fall0))));
-  COMP.c3m_dream = {
+  COMP.c3_mdream = {
     draw(fx, t, F) {
       if (t < TM.cloud || t >= TM.cut) return;
       const pp = EASE.back(clamp((t - TM.cloud) / 0.3)), z = Z.set + 1;
@@ -261,7 +261,7 @@
   };
 
   /* ---------------- the interviewer's microphone, poking in from the left ---------------- */
-  COMP.c3m_mic = {
+  COMP.c3_mmic = {
     draw(fx, t) {
       const u = EASE.out(clamp((t - fx.t0) / 0.3)) * (1 - EASE.in(clamp((t - fx.t1) / 0.3))); if (u <= 0) return;
       const off = (1 - u) * 180, d = [0.77, -0.64], z = Z.front + 2;
@@ -317,19 +317,19 @@
     },
     targets: F => {
       const a = F.anchors.kid;
-      return { cloud: CL.c, climber: climberWorld(F.t), line9: [760, 290],
+      return { cloud: CL.c, climber: climberWorld(F.t), line9: [790, 290],
         bulbSky: a ? [a.headTop[0], fallY(F.t, a.headTop[1] - 26) - 50] : [950, 200] };
     },
     fx: [
-      { type: 'c3m_mic', id: 'c3m.mic', at: [110, 566], t0: 0.8, t1: 35.0 },
+      { type: 'c3_mmic', id: 'c3m.mic', at: [110, 566], t0: 0.8, t1: 35.0 },
       { type: 'label', id: 'c3m.when', text: '2006 年接受采访时', at: [232, 300], rot: -3, size: 36, t0: 1.1, t1: DUR },
-      { type: 'c3m_dream', id: 'c3m.dream' },
+      { type: 'c3_mdream', id: 'c3m.dream' },
       { type: 'label', id: 'c3m.thought', text: '小时候以为……', at: [700, 318], rot: -3, size: 38, t0: TM.think, t1: TM.cut },
-      { type: 'c3m_cliff', id: 'c3m.cliff' },
-      { type: 'title', id: 'c3m.key', text: '“关键不在聪明，也不在快。”', x: 760, y: 160, size: 54, t0: TM.l8, color: 'ink', rot: -1 },
-      { type: 'band', id: 'c3m.hi', rect: [690, 376, 280, 70], t0: TM.hi, dur: 0.45, pad: 10 },
-      { type: 'title', id: 'c3m.l9', text: '大数学家也会卡住。', x: 760, y: 290, size: 70, t0: TM.l9, color: 'ink' },
-      { type: 'title', id: 'c3m.l10', text: '他只是不怕卡住。', x: 760, y: 410, size: 70, t0: TM.l10, color: 'ink' },
+      { type: 'c3_mcliff', id: 'c3m.cliff' },
+      { type: 'title', id: 'c3m.key', text: '“关键不在聪明，也不在快。”', x: 790, y: 160, size: 60, t0: TM.l8, color: 'ink', rot: -1 },
+      { type: 'band', id: 'c3m.hi', rect: [714, 372, 304, 76], t0: TM.hi, dur: 0.45, pad: 10 },
+      { type: 'title', id: 'c3m.l9', text: '大数学家也会卡住。', x: 790, y: 290, size: 76, t0: TM.l9, color: 'ink' },
+      { type: 'title', id: 'c3m.l10', text: '他只是不怕卡住。', x: 790, y: 410, size: 76, t0: TM.l10, color: 'ink' },
     ],
     sfx: [[0.25, 'pop'], [TM.kid, 'pop'], [TM.solved + 0.02, 'tada'], [TM.l10, 'boing']],
     subs: [
