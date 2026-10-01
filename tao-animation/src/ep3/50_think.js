@@ -1,10 +1,10 @@
 // 第 50 场 · 换个办法想：灵光不来，就坐下来想。① 失败也是线索：九次失败排成 3×3，圈出每次剩下的两格；
 // ② 问一个更好的问题：不问“怎么摆”，问“剩下的两格，有什么共同点？”；③ 换个看法：把黑白涂回去——剩下的全是白格。
-// 开场接第 45 场：主棋盘在 E3B.MAIN（剪过角、没涂色、空的），小问号 [960, 770] 举牌“为什么总剩两格？”，小陶在 1180。
+// 开场接第 45 场：主棋盘在 E3B.MAIN（剪过角、没涂色、空的），小问号 [970, 770]（size 160，signSize 52，牌子在左边）举牌“为什么总剩两格？”，小陶在 1180。
 // 结尾交给第 55 场：主棋盘回到 E3B.MAIN，已涂色，摆着 E3B.TRIES[8]，(2,3)(3,2) 两个白格被圈着；小陶站在 1180，表情 idea。
 (() => {
   const FL = 780, TX = 1180, M = E3B.MAIN, CS = M.cell, TR = E3B.TRIES;
-  const TS = 0.33, GX = 575, GY = 445, GAP = 160;                // thumbnails: 33 px squares, 3×3
+  const TS = 0.42, GX = 610, GY = 450, GAP = 185;                // thumbnails: 42 px squares, 3×3 (x 341–879, y 181–719)
   const SLOT = k => [GX + (k % 3 - 1) * GAP, GY + (Math.floor(k / 3) - 1) * GAP];
   const leftOf = dom => { const cov = new Set(dom.flatMap(d => E3B.domCells(d).map(([r, c]) => r + '_' + c))); return E3B.cells(4, true).filter(([r, c]) => !cov.has(r + '_' + c)); };
   // what the scene shows: every one of the nine tries leaves two squares, and both are white
@@ -18,18 +18,19 @@
   const HOW = 19.5, STRIKE = 20.55, HEAD = 22.35, ARROW = 24.3;
   const TILT = 27.65, CLOUD = 30.4, CB = 30.65, CLOUD_OFF = 34.3, COLOR_T = k => 34.45 + k * 0.1;
   const REDO_T = k => 37.8 + k * 0.12, REDO_OFF = 40.95, JAW = 37.9, WHITE = 38.9, STAND = 39.35;
-  const CHECK_T = k => 41.3 + k * 0.14, QEXIT = 42.8, GATHER = 43.55, DUR = 44.9;
-  const OFF = 43.3;                                            // the notes are tidied away
+  const CHECK_T = k => 41.3 + k * 0.14, QEXIT = 43.7, GATHER = 44.4, DUR = 45.8;
+  const OFF = 44.3, FADE = 0.25;                               // the notes are tidied away (a short fade)
+  const QP = [970, 770], QSIGN = 52, SWAPQ = 12.0;             // 小问号 (same spot and sign size as scenes 40/45)
 
   /* ---------------- the three steps, noted down on the left in red ---------------- */
   const STEPS = [['1', '失败也是线索'], ['2', '问更好的问题'], ['3', '换个看法']];
   COMP.d3_tSteps = {
     draw(fx, t) {
-      if (t >= fx.t1) return;
-      const size = 38;
+      if (t >= fx.fade + FADE) return;
+      const size = 38, fo = 1 - clamp((t - fx.fade) / FADE);
       STEPS.forEach(([n, s], i) => {
         const t0 = STEP[i], lt = t - t0; if (lt < 0) return;
-        const cur = i === STEPS.length - 1 || t < STEP[i + 1], op = cur ? 1 : 0.5, pp = EASE.back(clamp(lt / 0.22));
+        const cur = i === STEPS.length - 1 || t < STEP[i + 1], op = (cur ? 1 : 0.5) * fo, pp = EASE.back(clamp(lt / 0.22));
         const x = fx.x, y = fx.y + i * fx.dy, k = fx.id + i;
         DL.save(); DL.translate(x + 24, y); DL.scale(lerp(0.5, 1, pp));
         stroke(k + '.o', ringPts(k + '.o', 0, 0, 24, 24, { n: 10, a0: -110, sweep: 375, rv: 0.05 }), { z: Z.annot, w: 4, color: C.red, opacity: op, draw: EASE.out(clamp(lt / 0.3)) });
@@ -96,15 +97,26 @@
   /** "every time": a red ✓ beside each of the nine boards */
   COMP.d3_tChecks = {
     draw(fx, t) {
-      if (t >= fx.t1) return;
-      const g = GLYPH['✓'], s = 30, h = 1.5 * CS * TS;   // in the empty (cut-off) bottom-right corner of each board
+      if (t >= fx.fade + FADE) return;
+      const g = GLYPH['✓'], s = 40, h = 1.5 * CS * TS, fo = 1 - clamp((t - fx.fade) / FADE);   // in the empty (cut-off) bottom-right corner of each board
       TR.forEach((_, k) => {
         const u = clamp((t - CHECK_T(k)) / 0.16); if (u <= 0) return;
         const [x, y] = SLOT(k), x0 = x + h - s * 0.4, y0 = y + h - s * 0.55;
-        stroke(fx.id + k, g.s[0].map(([a, b, c]) => [x0 + a * s, y0 + b * s, c]), { z: Z.annot, w: 5, color: C.red, draw: u, boil: 0.6 });
+        stroke(fx.id + k, g.s[0].map(([a, b, c]) => [x0 + a * s, y0 + b * s, c]), { z: Z.annot, w: 5.5, color: C.red, draw: u, boil: 0.6, opacity: fo });
       });
     },
     cues: () => TR.map((_, k) => [CHECK_T(k), 'pen']),
+  };
+
+  /** fade any component out over FADE seconds from fx.fadeT (multiplies the opacity of what it draws) */
+  COMP.d3_tFade = {
+    init(fx) { const c = COMP[fx.inner.type]; fx.inner.t1 = fx.fadeT + FADE; if (c.init) c.init(fx.inner); return fx; },
+    draw(fx, t, F) {
+      const n0 = DL.items.length; COMP[fx.inner.type].draw(fx.inner, t, F);
+      const f = 1 - clamp((t - fx.fadeT) / FADE); if (f >= 1) return;
+      for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * f).toFixed(3); }
+    },
+    cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
   };
 
   /* ---------------- the boards ---------------- */
@@ -112,14 +124,19 @@
     pos: [[0, M.at], [SHRINK, SLOT(0), 0.6, 'io']], scale: [[0, 1], [SHRINK, TS, 0.6, 'io']] };
   const thumbs = TR.map((dom, k) => {
     const T0 = THUMB_T(k), last = k === TR.length - 1;
-    return { type: 'e3_board', id: 'd3t.b' + k, cell: CS, t0: T0, t1: last ? undefined : GATHER + 0.32, drawDur: 0.01,
-      cut: -1, color: COLOR_T(k), colorDur: 0.9,
-      pos: [[0, SLOT(k)], ...(last ? [[GATHER, M.at, 0.7, 'io']] : [])],
+    // thumbnails: light pencil dominoes, heavier red rings — the circled squares are what should stand out
+    return { type: 'e3_board', id: 'd3t.b' + k, cell: CS, t0: T0, t1: last ? GATHER : GATHER + 0.32, drawDur: 0.01,
+      cut: -1, color: COLOR_T(k), colorDur: 0.9, domColor: 'pencil', domW: 0.7, ringW: 1.5,
+      pos: [[0, SLOT(k)]],
       scale: [...(k ? [[0, 0.05], [T0, TS, 0.22, 'back']] : [[0, TS], [SWAP, TS * 1.12, 0.06], [SWAP + 0.06, TS, 0.2, 'back']]),
-        last ? [GATHER, 1, 0.7, 'io'] : [GATHER, 0.03, 0.3, 'in']],
+        ...(last ? [] : [[GATHER, 0.03, 0.3, 'in']])],
       attempts: [{ t0: -1, step: 0, dom, fail: RING_T(k) }],
       rings: [{ cells: leftOf(dom), t0: REDO_T(k), t1: REDO_OFF }] };
   });
+  // the ninth try becomes the main board again, drawn exactly as scene 55 opens (ink dominoes, normal rings)
+  const finalBoard = { type: 'e3_board', id: 'd3t.fin', cell: CS, t0: GATHER, drawDur: 0.01, cut: -1, color: -1,
+    pos: [[0, SLOT(8)], [GATHER + 0.08, M.at, 0.7, 'io']], scale: [[0, TS], [GATHER, TS * 1.1, 0.08], [GATHER + 0.08, 1, 0.7, 'io']],
+    attempts: [{ t0: -1, step: 0, dom: TR[8], fail: -1 }] };
 
   /* ---------------- Terry ---------------- */
   const KNEES = { sit: 1, legScale: 1, thigh: 0.5, legL: [118, -118], legR: [118, -118] };     // sitting on the floor, knees up
@@ -129,7 +146,7 @@
     d3_tChin: { ...KNEES, tilt: -7, armScale: 1.55, ikL: { w: 1, to: 'chin', dx: -0.2, dy: 0.05, bend: 'down' }, ikR: HUG.ikR },
     d3_tTilt: { ...KNEES, tilt: 30, lean: 3, armScale: 1.3, ...HUG },
     d3_tShock: { ...KNEES, lean: -4, armScale: 1.5, armL: [112, 34], armR: [112, 34] },
-    d3_tPointL: { lean: -3, tilt: -4, armScale: 1.5, armL: [84, 8], armR: [16, 10] },
+    d3_tPointL: { lean: -3, tilt: -4, armScale: 1.5, ikL: { w: 1, to: 'abs', dx: 1062, dy: 588, bend: 'down' }, armR: [16, 10] },   // aims up-left at the grid
     d3_tShrug: { tilt: 8, armScale: 1.5, armL: [64, -70], armR: [64, -70] },
   });
   const SIT_Y = 759;   // hip height when sitting with knees up (feet on the floor)
@@ -152,7 +169,7 @@
           [STAND - 0.1, 0.88, 0.08], [STAND, 1.1, 0.08], [STAND + 0.12, 1, 0.22, 'back']],
       },
     },
-    targets: () => ({ bulb: [TX, 450], board: M.at, grid: [GX, GY], qm: [960, 640], head: [GX, 150], cloud: [1250, 370] }),
+    targets: () => ({ bulb: [TX, 450], board: M.at, grid: [GX, GY], qm: [QP[0], 640], head: [GX, 140], cloud: [1250, 370] }),
     set: [{ type: 'floor' }],
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, center: E3.STAMP.center, R: E3.STAMP.R, dockT: -2, dock: E3.STAMP.dock, dockScale: E3.STAMP.dockScale },
@@ -163,28 +180,35 @@
       // the boards: the empty main board shrinks into the first slot; the nine failed tries come back as clues
       mainBoard,
       ...thumbs,
-      { type: 'd3_tSteps', id: 'd3t.st', x: 40, y: 300, dy: 80, t1: OFF },
+      finalBoard,
+      { type: 'd3_tSteps', id: 'd3t.st', x: 30, y: 300, dy: 80, fade: OFF },
       // L5–L7: a better question
-      { type: 'qm', id: 'qm', size: 160, t0: -1, silent: true, signSide: 'left', t1: QEXIT + 0.5,
-        pos: [[0, [960, 770]], [QEXIT, t => { const u = clamp((t - QEXIT) / 0.45); return [lerp(960, 1050, u), 770 - Math.sin(Math.PI * Math.min(1, u * 1.4)) * 110 + EASE.in(u) * 330]; }, 0]],
-        act: [[0, 'nod'], [1.2, 'idle'], [SIT + 0.1, 'nod'], [5.6, 'idle'], [STEP[1], 'hop'], [STEP[1] + 0.9, 'idle'], [ARROW + 0.2, 'nod'], [ARROW + 1.4, 'idle'],
+      // 小问号: first holding its sign on the left (as scene 45 left it), then — swapped in place while idle — a twin that
+      // holds signs on the right, clear of the grid. It hops off to the right at floor level, behind Terry.
+      { type: 'qm', id: 'qm', size: 160, signSize: QSIGN, t0: -1, t1: SWAPQ, silent: true, signSide: 'left', pos: [[0, QP]],
+        act: [[0, 'nod'], [1.2, 'idle'], [SIT + 0.1, 'nod'], [5.6, 'idle']],
+        mood: [[0, 'happy'], [1.2, 'neutral'], [SIT + 0.1, 'happy'], [7.0, 'neutral']],
+        gaze: [[-1, 'terry'], [SHRINK, 'grid']],
+        sign: [[-1, '为什么总剩两格？'], [SIT, null]] },
+      { type: 'qm', id: 'qm2', size: 160, signSize: QSIGN, t0: -1, t1: QEXIT + 0.75, silent: true, z: Z.body - 2,
+        pos: [[0, [-600, 770]], [SWAPQ, QP, 0], [QEXIT, t => { const u = clamp((t - QEXIT) / 0.7); return [lerp(QP[0], 1750, u), 770 - Math.abs(Math.sin(2 * Math.PI * u)) * 70]; }, 0]],
+        act: [[0, 'idle'], [STEP[1], 'hop'], [STEP[1] + 0.9, 'idle'], [ARROW + 0.2, 'nod'], [ARROW + 1.4, 'idle'],
           [STAND, 'hop'], [STAND + 0.9, 'idle'], [CHECK_T(0), 'nod'], [CHECK_T(8) + 0.3, 'idle']],
-        mood: [[0, 'happy'], [1.2, 'neutral'], [SIT + 0.1, 'happy'], [7.0, 'neutral'], [HOW, 'doubt'], [HEAD, 'neutral'], [ARROW + 0.2, 'happy'], [26.6, 'neutral'],
-          [JAW, 'surprised'], [STAND, 'happy']],
-        gaze: [[-1, 'terry'], [SHRINK, 'grid'], [STEP[1], 'viewer'], [HEAD, 'head'], [ARROW + 0.2, 'terry'], [TILT, 'terry'], [CLOUD + 0.1, 'cloud'], [CLOUD_OFF, 'grid'], [STAND, 'terry'], [CHECK_T(0), 'grid']],
-        sign: [[-1, '为什么总剩两格？'], [SIT, null], [HOW, '怎么摆？'], [HEAD - 0.25, null]],
-        sfxAt: [[STEP[1], 'hop'], [HOW, 'pop'], [STAND, 'hop'], [QEXIT, 'hop']] },
-      { type: 'strike', id: 'd3t.strike', rect: [824, 533, 160, 53], t0: STRIKE, t1: HEAD - 0.25, dur: 0.25 },
-      { type: 'scribe', id: 'd3t.q', text: '剩下的两格，有什么共同点？', x: GX - 13 * 46 / 2, y: 150, size: 46, t0: HEAD, t1: OFF, cps: 7.5, color: 'red', halo: 8 },
-      { type: 'd3_tArrow', id: 'd3t.qa', from: [462, 180], to: [517, 254], t0: ARROW, t1: CLOUD_OFF, bend: -0.2 },
+        mood: [[0, 'neutral'], [HOW, 'doubt'], [HEAD, 'neutral'], [ARROW + 0.2, 'happy'], [26.6, 'neutral'], [JAW, 'surprised'], [STAND, 'happy']],
+        gaze: [[-1, 'grid'], [STEP[1], 'viewer'], [HEAD, 'head'], [ARROW + 0.2, 'terry'], [TILT, 'terry'], [CLOUD + 0.1, 'cloud'], [CLOUD_OFF, 'grid'], [STAND, 'terry'], [CHECK_T(0), 'grid'], [QEXIT, [1700, 700]]],
+        sign: [[-1, null], [HOW, '怎么摆？'], [HEAD - 0.25, null]],
+        sfxAt: [[STEP[1], 'hop'], [HOW, 'pop'], [STAND, 'hop'], [QEXIT, 'hop'], [QEXIT + 0.35, 'hop']] },
+      { type: 'strike', id: 'd3t.strike', rect: [927, 533, 198, 53], t0: STRIKE, t1: HEAD - 0.25, dur: 0.25 },
+      { type: 'd3_tFade', id: 'd3t.qF', fadeT: OFF, inner: { type: 'scribe', id: 'd3t.q', text: '剩下的两格，有什么共同点？', x: GX - 13 * 46 / 2, y: 140, size: 46, t0: HEAD, cps: 7.5, color: 'red', halo: 8 } },
+      { type: 'd3_tArrow', id: 'd3t.qa', from: [515, 166], to: [538, 224], t0: ARROW, t1: CLOUD_OFF, bend: -0.2 },
       // L8–L10: look at it another way — a chessboard is black and white
       { type: 'd3_tTurn', id: 'd3t.turn', char: 'terry', t0: TILT + 0.15, t1: 29.9 },
       { type: 'thought', id: 'd3t.cloud', at: [1250, 370], rx: 138, ry: 104, t0: CLOUD, t1: CLOUD_OFF, from: { char: 'terry', part: 'headTop', dy: -8 } },
       { type: 'e3_board', id: 'd3t.cb', at: [1250, 370], n: 4, cell: CS, scale: 0.27, t0: CB, t1: CLOUD_OFF, drawDur: 0.35, cut: null, color: CB + 0.4, colorDur: 0.8, z: Z.fx + 1 },
       // L11–L12: every circle sits on a white square
-      { type: 'title', id: 'd3t.white', text: '全是白的！', x: 1010, y: 300, size: 76, t0: WHITE, t1: OFF, color: 'ink', sfx: 'pop' },
-      { type: 'band', id: 'd3t.whiteHi', rect: [826, 282, 368, 54], t0: WHITE + 0.4, t1: OFF, dur: 0.4 },
-      { type: 'd3_tChecks', id: 'd3t.ck', t1: OFF },
+      { type: 'd3_tFade', id: 'd3t.whiteF', fadeT: OFF, inner: { type: 'title', id: 'd3t.white', text: '全是白的！', x: 1075, y: 300, size: 76, t0: WHITE, color: 'ink', sfx: 'pop' } },
+      { type: 'd3_tFade', id: 'd3t.whiteHiF', fadeT: OFF, inner: { type: 'band', id: 'd3t.whiteHi', rect: [893, 282, 368, 54], t0: WHITE + 0.4, dur: 0.4 } },
+      { type: 'd3_tChecks', id: 'd3t.ck', fade: OFF },
     ],
     sfx: [[SHRINK, 'whoosh'], [SWAP, 'tap'], [SWAP + 0.03, 'tap'], ...TR.map((_, k) => [RING_T(k), 'pen']), [SIT + 0.2, 'thud'],
       ...TR.map((_, k) => [REDO_T(k), 'plip']), [JAW, 'boing'], [GATHER, 'whoosh']],

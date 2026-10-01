@@ -122,7 +122,7 @@
     [T.aha, { eyeSY: 1.14, pupil: 0.8, brow: 'arc', browY: 0.1, mouth: 'jaw', mo: 0.5, mw: 0.4 }], [T.sit, 'joy'],
     [34.9, 'surprised'], [36.6, { eyeSY: 1.16, pupil: 0.7, brow: 'arc', browY: 0.12, mouth: 'o' }], [37.6, 'grin'], [39.2, 'joy'], [T.laugh, 'laugh'],
     [41.6, 'joy'], [44.3, 'proud'], [46.6, 'smile']];
-  const QS = [[19.9, -76, -88, 64, -14], [21.7, 6, -140, 72, 8], [23.5, 80, -102, 66, 16]];   // [t0, dx, dy, size, rot] around the head
+  const QS = [[19.9, -78, -86, 62, -14], [21.7, 2, -110, 66, 8], [23.5, 82, -94, 62, 16]];   // kept below the 简单题 tag   // [t0, dx, dy, size, rot] around the head
   const PEN3 = [[34.1, X0], [34.25, HARDER.drop[0]], [34.6, HARDER.drop[1]], [36.25, HARDER.climb[0]], [36.6, HARDER.climb[1]], [36.95, HARDER.desc[1]], [37.1, HARDER.end]];
   const pen3 = t => {
     if (t <= PEN3[0][0]) return PEN3[0][1] - 1;
@@ -332,7 +332,7 @@
         ext: t => (t < T.h0 ? X0 : Math.max(HX(t), t >= T.top ? HARD.climb[1] : 0, t >= T.after0 ? lerp(HARD.climb[1], HARD.end, EASE.io(clamp((t - T.after0) / (T.after1 - T.after0)))) : 0)) },
       { type: 'c3_ccurve', id: 'c3c.harder', fn: harderY, x1: HARDER.end, peakX: HARDER.climb[1], w: 4, dash: true, ext: pen3 },
       // tags at the ends of the lines (ink)
-      { type: 'title', id: 'c3c.tagE', text: '简单题', x: EASY_END + 60, y: 404, size: 40, t0: T.e1, anchor: 'start', color: 'ink' },
+      { type: 'title', id: 'c3c.tagE', text: '简单题', x: EASY_END + 52, y: 392, size: 40, t0: T.e1, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagH', text: '难题', x: HARD.end + 16, y: HARD.plateau, size: 40, t0: T.after1 + 0.05, anchor: 'start', color: 'ink' },
       { type: 'title', id: 'c3c.tagX', text: '更难的题', x: HARDER.end + 14, y: HARDER.plateau, size: 40, t0: 37.15, anchor: 'start', color: 'ink' },
       // red notes on the chart
