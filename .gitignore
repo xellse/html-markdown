@@ -20,3 +20,4 @@ build/
 
 # episode build scratch
 tao-animation/.*-lines.html
+__pycache__/
