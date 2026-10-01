@@ -110,8 +110,8 @@
   /** the problem sheet: hops out of the suitcase onto the table, then lies there */
   const FLY_FROM = [CASE_F[0] + 52, FL - CHT - 40];
   const paperPos = t => {
-    const u = EASE.io(clamp((t - FLY0) / (FLY1 - FLY0)));
-    return [lerp(FLY_FROM[0], PAPER[0], u), lerp(FLY_FROM[1], PAPER[1] - 4, u) - Math.sin(Math.PI * u) * 330];
+    const u = clamp((t - FLY0) / (FLY1 - FLY0));             // up first (clear of Erdős's head), then across
+    return [lerp(FLY_FROM[0], PAPER[0], u * u), lerp(FLY_FROM[1], PAPER[1] - 4, u) - Math.sin(Math.PI * u) * 480];
   };
   function sheetFlat(k, z) {
     const [x, y] = PAPER;
@@ -123,7 +123,7 @@
       if (t >= FLY1) { sheetFlat('r3sheet', Z.desk + 1); return; }
       const u = clamp((t - FLY0) / (FLY1 - FLY0)), c = paperPos(t);
       DL.save(); DL.translate(c[0], c[1]); DL.rotate(-20 + 400 * EASE.io(u)); DL.scale(1, lerp(1, 0.4, u * u));
-      stroke('r3sheet', [[-26, -34], [26, -34, 1], [26, 34, 1], [-26, 34, 1], [-26, -34, 1]], { z: Z.fx, w: 4, fill: C.paper });
+      stroke('r3sheet', [[-26, -34], [26, -34, 1], [26, 34, 1], [-26, 34, 1], [-26, -34, 1]], { z: Z.body - 1, w: 4, fill: C.paper });   // flies behind Erdős
       DL.restore();
     },
     cues: () => [[FLY0, 'whoosh'], [FLY1, 'paper']],
@@ -268,8 +268,8 @@
   };
 
   /* ---------------- Erdős's problems: cards fly out of the photo ---------------- */
-  const CARDS = [[470, 200, -7, 0], [610, 250, 5, 1], [750, 198, -3, 0], [890, 246, 7, 0], [1030, 204, -6, 1], [1170, 250, 4, 0]];
-  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[360, 180], [1150, 180]];
+  const CARDS = [[480, 200, -7, 0], [630, 250, 5, 1], [780, 198, -3, 0], [930, 246, 7, 0], [1080, 204, -6, 1]];
+  const PICK = 2, KW = 116, KH = 84, PIN = [330, 474], HELD = [HAND_T[0] - 12, HAND_T[1] - 46], ARC = [[260, -150], [1500, -40]];
   const SRC = toWorld([700, 520], C1 + 1);                     // Erdős in the photo, once it sits in the corner
   const cardT = i => 36.2 + i * 0.17;
   function cardAt(i, t) {                                      // → [centre, rotation, scale] | null (pure)
@@ -281,13 +281,13 @@
     const v = EASE.io(clamp((t - PIN0) / (PIN1 - PIN0)));
     c = [lerp(x, PIN[0], v), lerp(y, PIN[1], v) - Math.sin(Math.PI * v) * 70]; rot = lerp(r, -4, v);
     if (t < TRAV0) return [c, rot, 1];
-    // cubic arc: up off the pin, over the stuck grown-ups' heads (through its own empty slot in the row), down into Tao's hand
+    // cubic arc: straight up off the pin, high over the whole pile, down into Tao's hand
     const w = EASE.io(clamp((t - TRAV0) / (TRAV1 - TRAV0))), q = 1 - w, k = [q * q * q, 3 * q * q * w, 3 * q * w * w, w * w * w];
     const P = [PIN, ARC[0], ARC[1], HELD], at = j => k[0] * P[0][j] + k[1] * P[1][j] + k[2] * P[2][j] + k[3] * P[3][j];
     return [[at(0), at(1)], lerp(-4, 12, w) + Math.sin(Math.PI * w) * 24, lerp(1, 0.92, w)];
   }
   function drawCard(k, i, c, rot, sc, t) {
-    const z = Z.fx + 2, w = KW / 2, h = KH / 2;
+    const z = Z.fx + (i === PICK && t >= PIN0 ? 4 : 2), w = KW / 2, h = KH / 2;
     DL.save(); DL.translate(c[0], c[1]); DL.rotate(rot); DL.scale(sc);
     stroke(k, [[-w, -h], [w, -h, 1], [w, h, 1], [-w, h, 1], [-w, -h, 1]], { z, w: 4, fill: C.paper });
     stroke(k + '.l0', [[-w + 14, -h + 16], [w - 14, -h + 16]], { z: z + 0.1, w: 2.2, color: C.pencil, opacity: 0.85, boil: 0.4 });
@@ -421,7 +421,7 @@
     targets: F => {
       const t = F.t, b = caseBottom(t, F), c = cardAt(PICK, t);
       return { house: HOUSE, eps: EPS_C, paper: PAPER, paperfly: t < FLY1 ? paperPos(t) : PAPER, case: [b[0], b[1] - CHT / 2],
-        cards: [820, 225], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 420] };
+        cards: [780, 225], tl: [790, TL_Y], card: c ? c[0] : [750, 198], maths: [790, 420] };
     },
     set: [
       { type: 'floor', t1: FLASH },
@@ -460,7 +460,7 @@
       { type: 'write', id: 'r3y15', text: '2015', x: TL_X1, y: TL_Y + 28, size: 52, anchor: 'middle', t0: Y15, speed: 2400, gap: 0.03, glyphGap: 0.03, w: 6, z: Z.annot, sfx: 'pen' },
       { type: 'e3_bulb', id: 'r3bulb', char: 'tao', t0: BULB, state: [[BULB, 'on']], size: 90 },
       { type: 'r3_clues', id: 'r3clues' },
-      { type: 'title', id: 'r3note', text: '（也用上了很多数学家一起攒下的线索）', x: 790, y: 708, size: 38, color: 'red', rot: -1, t0: NOTE, t1: DUR },
+      { type: 'title', id: 'r3note', text: '（也用上了很多数学家一起攒下的线索）', x: 790, y: 708, size: 42, color: 'red', rot: -1, t0: NOTE, t1: DUR },
       { type: 'r3_flash', id: 'r3flash' },
     ],
     sfx: [[13.0, 'boing'], ...MATHS.map((_, i) => [M_ENTER + i * 0.25, 'plip']), [TAO_IN, 'hop']],

@@ -5,6 +5,8 @@
 **年龄**：10 岁（1985–1986）。**时长**：约 7 分半，和第 2 集相当，另有一处“轮到你了”停顿。
 
 ## 事实（只能用这些；都核查过）
+- 他早年在澳大利亚数学奥林匹克（IMO 国家队选拔考试）上失利：先在一项全国数学竞赛里拿第 6 名获得资格，可在奥林匹克上掉出了第 6 名，没能进国家队。父母认为：他进步飞快，但"根还没扎深"（had not set down deep roots），这也是他们推迟让他全日制上大学的原因之一。出处：M. U. M. Gross (1986), *Radical acceleration in Australia: Terence Tao*, Gifted Child Today 9(4)，见 Gross & van Vliet (2003) 的摘要。年份没写，推断是 1985 年（9 岁）。片中只说"在这之前"。
+- 父亲说，他从"短跑选手"变成耐心的"马拉松选手"，真正的转折在普林斯顿读研究生时（17–20 岁）。所以片中只说"十岁这年，才刚刚开始"，不说他从此就学会了。出处：Billy Tao (2003)，引自 Muratori et al. (2006), Gifted Child Quarterly 50(4)。
 - 1986 年 7 月 IMO 时他还不满 11 岁（生于 1975 年 7 月 17 日）。所以 10 岁这年他在准备国际数学奥林匹克。
 - IMO 赛制：考两天，每天 4 个半小时、3 道题，每题 7 分。平均一道题约一个半小时。
 - 1985 年，大数学家埃尔德什到阿德莱德，和 10 岁的陶哲轩一起看题，留下了著名的照片（Wikimedia Commons：Paul Erdős teaching Terence Tao in 1985, at the University of Adelaide；照片由陶的父母拍摄）。
@@ -15,7 +17,7 @@
 - 陶哲轩谈解题（UCLA Newsroom, Stuart Wolpert, 2006-08-22）："When I was a kid, I had a romanticized notion of mathematics, that hard problems were solved in 'Eureka' moments of inspiration. With me, it's always, 'Let's try this. That gets me part of the way, or that doesn't work. Now let's try this. Oh, there's a little shortcut here.' You work on it long enough and you happen to make progress towards a hard problem by a back door at some point. At the end, it's usually, 'Oh, I've solved the problem.'" 以及 "It's not about being smart or even fast. It's like climbing a cliff… you need to devise a good route to get up there." 同一篇文章："I don't have any magical ability. I look at a problem, and it looks something like one I've done before; I think maybe the idea that worked before will work here. Nothing's working out; then you think of a small trick that makes it a little better but still is not quite right. I play with the problem, and after a while, I figure out what's going on."
 - 残缺棋盘：4×4 去掉对角两格，剩黑 6 白 8，7 块骨牌盖不满；8×8 去掉对角剩黑 30 白 32。完整 8×8 棋盘的骨牌铺法共 12,988,816 种（Fisher、Temperley、Kasteleyn，1961）。
 
-**演绎**：骨牌题是“我们陪小陶一起卡一次”的示范，不是他当年做过的某一道具体的题；“等那一声叮”“纸团”“我是不是没那么聪明”是对“卡住”这种普遍感受的演绎。
+**演绎**：“第一道难题摆在面前，等不来那一声叮”是对他准备奥数时碰到难题的概括演绎（1986 年 IMO 他有几道题只拿了 0 分、1 分，见第 4 集），不是某一次具体记录。骨牌题是“我们陪小陶一起卡一次”的示范，不是他当年做过的某一道具体的题；“等那一声叮”“纸团”“我是不是没那么聪明”是对“卡住”这种普遍感受的演绎。
 
 ## 共用素材（`src/ep3/_e3_shared.js`）
 - `E3.terry`（10 岁小陶）、`E3.taoAdult`（长大的陶哲轩）、`E3.erdos`（埃尔德什）、`E3.STAMP`。
@@ -300,20 +302,23 @@ subs: [
 ],
 ```
 
-### 80_ending.js · id `ending` · 章节“尾声” · 约 28.5 秒 · 负责：主持人
+### 80_ending.js · id `ending` · 章节“尾声” · 约 40.3 秒 · 负责：主持人（已改版：用有记录的真实挫折收尾）
 
-小陶坐下，先卡一会儿；“看出来/写清楚/想通”三行金句逐行出现；小问号和他一起欢呼。
+小陶被石头绊一跤（“跌过一跤”）；“澳大利亚数学奥林匹克 / 国家队 →”被红笔划掉，“没进”；一棵小苗蹿得飞快、根很浅、风一吹就晃（“跑得飞快 / 根还没扎深”），然后根慢慢扎深（“很多年”）；三句金句；小陶坐下来“先卡一会儿”，小问号陪着。
 
 ```js
 subs: [
-  {t0: 0.3, t1: 3.7, text: "从那以后，小陶碰到难题，"},
-  {t0: 3.8, t1: 7.0, text: "不再干等那一声“叮”。"},
-  {t0: 7.1, t1: 10.5, text: "他会坐下来，先卡一会儿："},
-  {t0: 10.6, t1: 14.2, text: "试例子，找线索，问好问题。"},
-  {t0: 14.8, t1: 17.4, text: "看出来，靠聪明；"},
-  {t0: 17.5, t1: 20.1, text: "写清楚，靠练习；"},
-  {t0: 20.2, t1: 23.2, text: "想通，靠的是不放弃。"},
-  {t0: 23.8, t1: 27.99, text: "“卡住了？太好了，这题有意思！”", voice: "kid"},
+  {t0: 0.3, t1: 4.3, text: "其实在这之前，小陶就跌过一跤："},
+  {t0: 4.4, t1: 8.2, text: "他去考澳大利亚数学奥林匹克，"},
+  {t0: 8.6, t1: 11.0, text: "没能进国家队。"},
+  {t0: 11.6, t1: 15.0, text: "爸爸妈妈说：他跑得飞快，"},
+  {t0: 15.1, t1: 17.9, text: "可是根，还没扎深。"},
+  {t0: 18.6, t1: 22.6, text: "学会面对卡住，他还要花很多年。"},
+  {t0: 22.7, t1: 25.9, text: "十岁这年，才刚刚开始。"},
+  {t0: 26.6, t1: 29.2, text: "看出来，靠聪明；"},
+  {t0: 29.3, t1: 31.9, text: "写清楚，靠练习；"},
+  {t0: 32.0, t1: 35.0, text: "想通，靠的是不放弃。"},
+  {t0: 35.6, t1: 39.79, text: "“卡住了？没关系，先卡一会儿！”", voice: "kid"},
 ],
 ```
 
