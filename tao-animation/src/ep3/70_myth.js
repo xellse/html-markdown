@@ -11,8 +11,10 @@
     l8: 30.75, l9: 36.0, l10: 38.85, hi: 39.6 };
 
   /* ---------------- the cliff (group coords; the whole group shrinks into the corner at TM.shrink) ---------------- */
-  const OUTLINE = [[650, 768], [680, 640], [710, 520], [760, 420], [840, 340], [950, 290], [1070, 268], [1160, 250], [1210, 238, 1], [1270, 252],
-    [1360, 285], [1440, 360], [1500, 480], [1530, 620], [1548, 768]];
+  // a craggy rock: every vertex a sharp corner
+  const OUTLINE = [[640, 768], [662, 692], [702, 642], [694, 590], [738, 522], [730, 470], [782, 420], [832, 394], [852, 346], [930, 320], [990, 298],
+    [1050, 304], [1118, 264], [1170, 260], [1210, 236], [1252, 256], [1312, 262], [1352, 302], [1420, 330], [1442, 382], [1492, 432], [1502, 520],
+    [1532, 562], [1528, 662], [1556, 768]].map((p, i) => (i ? [p[0], p[1], 1] : p));
   const PIV = [1548, 770], SHRINK = 0.6;
   const groupS = t => lerp(1, SHRINK, EASE.io(clamp((t - TM.shrink) / 0.5)));
   const G = (p, t) => { const s = groupS(t); return [PIV[0] + (p[0] - PIV[0]) * s, PIV[1] + (p[1] - PIV[1]) * s]; };
@@ -162,7 +164,8 @@
       stroke('c3m.rock', OUTLINE, { z, w: 6, fill: C.paper, draw: stag(p, 0, 3) });
       stroke('c3m.ground', [[600, 770], [1080, 772], [1590, 769]], { z, w: 2.2, color: C.pencil, opacity: 0.8, draw: stag(p, 0, 3) });
       [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 413], [1206, 411]]].forEach((pts, i) => stroke('c3m.ledge' + i, pts, { z: z + 0.2, w: 4.5, draw: stag(p, 1, 3) }));
-      [[[720, 700], [745, 682], [750, 662]], [[1100, 705], [1132, 692]], [[1420, 560], [1440, 598], [1434, 630]], [[985, 372], [1008, 362]], [[1300, 640], [1322, 610]], [[1210, 560], [1236, 572]]]
+      [[[720, 700], [745, 682], [750, 662]], [[1100, 705], [1132, 692]], [[1420, 560], [1440, 598], [1434, 630]], [[985, 372], [1008, 362]], [[1300, 640], [1322, 610]], [[1210, 560], [1236, 572]],
+        [[1352, 330], [1390, 352]], [[1458, 470], [1470, 500]], [[700, 742], [722, 730]], [[1240, 690], [1278, 680], [1290, 700]]]
         .forEach((pts, i) => stroke('c3m.crack' + i, pts, { z: z + 0.2, w: 2.4, color: C.pencil, draw: stag(p, 2, 3), boil: 0.5 }));
       stroke('c3m.over', [[858, 446, 1], [915, 426], [990, 432, 1], [986, 446, 1], [930, 441], [868, 452, 1], [858, 446, 1]], { z: z + 0.3, w: 5, fill: C.paper, draw: stag(p, 1, 3) });
       // trails (dashed ink): each one grows behind the climber
@@ -218,7 +221,7 @@
   };
 
   /* ---------------- the romantic idea: a dream where a lit bulb drops from the sky ---------------- */
-  const CL = { c: [880, 420], rx: 360, ry: 228 }, KID = [900, 560];
+  const CL = { c: [880, 420], rx: 360, ry: 228 }, KID = [950, 560];
   const BULB2 = { id: 'c3m.bulbSky', t0: TM.fall0, size: 80, state: [[TM.fall1, 'on']], at: [0, 0] };
   const fallY = (t, landY) => lerp(-60, landY, EASE.in(clamp((t - TM.fall0) / (TM.fall1 - TM.fall0))));
   COMP.c3m_dream = {
@@ -235,7 +238,7 @@
       stroke('c3m.cloud', pts, { z, w: 5, closed: true, fill: C.paper });
       if (pp > 0.9) stroke('c3m.cground', [[KID[0] - 170, KID[1] + 12], [KID[0], KID[1] + 14], [KID[0] + 170, KID[1] + 11]], { z: z + 0.1, w: 2.2, color: C.pencil, opacity: 0.8 });
       // sparkles around the dream
-      if (t >= TM.fall1) [[740, 330], [1060, 300], [1080, 470], [730, 470]].forEach(([x, y], i) => {
+      if (t >= TM.fall1) [[1100, 300], [1140, 470], [700, 470], [790, 560]].forEach(([x, y], i) => {
         const tw = 0.6 + 0.4 * Math.sin(t * 6 + i * 1.7), r = 14 * tw;
         stroke('c3m.sk' + i, [[x - r, y], [x + r, y]], { z: z + 0.2, w: 3 }); stroke('c3m.sk' + i + 'v', [[x, y - r], [x, y + r]], { z: z + 0.2, w: 3 });
       });
@@ -269,6 +272,7 @@
     c3_present: { armR: [92, 10], armL: [12, 8], lean: -1 },
     c3_recall: { tilt: -7, armScale: 1.2, ikR: { w: 1, to: 'hip', dx: 28, dy: -4, bend: 'out' }, ikL: { w: 1, to: 'chin', dx: -0.25, dy: 0.05, bend: 'down' } },
     c3_scratchA: { tilt: 8, armScale: 1.25, ikL: { w: 1, to: 'hip', dx: -28, dy: -4, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' } },
+    c3_cheerA: { armScale: 1.35, armL: [128, 20], armR: [128, 20] },
     c3_kidSitCheer: { ...POSE.sitFloor, armScale: 1.75, armL: [140, 18], armR: [140, 18] },
   });
   const climberWorld = t => { const st = climberAt(t); return st ? G([st.p[0], st.p[1] - 94], t) : G(SUM, t); };
@@ -285,7 +289,7 @@
         enter: 0.25,
         pos: [[0, [TAOX, FL]]],
         pose: [[0, 'stand'], [3.5, 'c3_recall', 0.2], [TM.cross, 'stand', 0.2], [TM.cut + 0.4, 'c3_present', 0.15], [12.0, 'stand', 0.25],
-          [19.85, 'c3_present', 0.15], [21.5, 'stand', 0.25], [TM.solved, 'cheer', 0.12, 'back'], [29.6, 'stand', 0.25],
+          [19.85, 'c3_present', 0.15], [21.5, 'stand', 0.25], [TM.solved, 'c3_cheerA', 0.12, 'back'], [29.6, 'stand', 0.25],
           [TM.l8, 'c3_present', 0.15], [35.9, 'c3_scratchA', 0.15, 'back'], [TM.l10, 'akimbo', 0.15, 'back']],
         face: [[0, 'smile'], [3.5, { lidL: 0.25, lidR: 0.25, mouth: 'smile', mw: 0.3, brow: 'arc', browY: 0.04 }, 0.1], [TM.cross, 'laugh', 0.08],
           [TM.cut + 0.4, 'smile', 0.1], [TM.bump, 'puzzled', 0.08], [15.9, 'smile', 0.1], [TM.oh, 'idea', 0.08], [19.6, 'grin', 0.1],
@@ -300,22 +304,22 @@
         pose: [[0, 'sitFloor'], [TM.fall1 + 0.05, 'c3_kidSitCheer', 0.1, 'back'], [8.2, 'sitFloor', 0.25]],
         face: [[0, 'smile'], [TM.fall0, 'surprised', 0.06], [TM.fall1, 'joy', 0.05], [TM.cross, 'jaw', 0.06, 'back']],
         turn: [[0, -0.2]],
-        gaze: [[0, [900, 200]], [TM.fall0, 'bulbSky'], [TM.fall1 + 0.2, 'viewer']],
+        gaze: [[0, [950, 200]], [TM.fall0, 'bulbSky'], [TM.fall1 + 0.2, 'viewer']],
         squash: [[0, 1], [TM.fall1, 0.88, 0.05], [TM.fall1 + 0.05, 1.06, 0.1], [TM.fall1 + 0.15, 1, 0.2, 'back'], [TM.cross, 0.9, 0.05], [TM.cross + 0.05, 1, 0.2, 'back']],
       },
     },
     targets: F => {
       const a = F.anchors.kid;
       return { cloud: CL.c, climber: climberWorld(F.t), line9: [760, 290],
-        bulbSky: a ? [a.headTop[0], fallY(F.t, a.headTop[1] - 26) - 50] : [900, 200] };
+        bulbSky: a ? [a.headTop[0], fallY(F.t, a.headTop[1] - 26) - 50] : [950, 200] };
     },
     fx: [
       { type: 'c3m_mic', id: 'c3m.mic', at: [110, 566], t0: 0.8, t1: 35.0 },
       { type: 'label', id: 'c3m.when', text: '2006 年接受采访时', at: [232, 300], rot: -3, size: 36, t0: 1.1, t1: DUR },
       { type: 'c3m_dream', id: 'c3m.dream' },
-      { type: 'label', id: 'c3m.thought', text: '小时候以为……', at: [740, 270], rot: -3, size: 40, t0: TM.think, t1: TM.cut },
+      { type: 'label', id: 'c3m.thought', text: '小时候以为……', at: [700, 318], rot: -3, size: 38, t0: TM.think, t1: TM.cut },
       { type: 'c3m_cliff', id: 'c3m.cliff' },
-      { type: 'speech', id: 'c3m.key', text: '关键不在聪明，也不在快。', at: [760, 150], tail: [-330, 50], speaker: 'tao', t0: TM.l8, t1: DUR, size: 54, rot: -2 },
+      { type: 'title', id: 'c3m.key', text: '“关键不在聪明，也不在快。”', x: 760, y: 160, size: 54, t0: TM.l8, color: 'ink', rot: -1 },
       { type: 'band', id: 'c3m.hi', rect: [690, 376, 280, 70], t0: TM.hi, dur: 0.45, pad: 10 },
       { type: 'title', id: 'c3m.l9', text: '大数学家也会卡住。', x: 760, y: 290, size: 70, t0: TM.l9, color: 'ink' },
       { type: 'title', id: 'c3m.l10', text: '他只是不怕卡住。', x: 760, y: 410, size: 70, t0: TM.l10, color: 'ink' },
