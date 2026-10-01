@@ -1,0 +1,79 @@
+{
+  "series": "数学少年陶哲轩",
+  "title": "数学少年陶哲轩 第3集",
+  "desc": "第3集《卡住，然后想通》：陶哲轩 10 岁，题目难了，灵光一闪不灵了——学会面对卡住，一步步想通。",
+  "h1": "第3集 · 卡住，然后想通",
+  "kicker": "数学少年陶哲轩 · 10 岁",
+  "aria": "【待填写】",
+  "poster_label": "播放 · 第3集（约 7 分钟）",
+  "poster": 0,
+  "out": "episode-3.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      },
+      "think": {
+        "file": "Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "secs": 45
+      }
+    },
+    "music": {
+      "title": "main",
+      "recap": "main",
+      "flash": "main",
+      "stuck": "sneaky",
+      "curve": "calm",
+      "domino": "sneaky",
+      "turn": "turn",
+      "think": "calm",
+      "aha": "turn",
+      "proof": "calm",
+      "erdos": "sneaky",
+      "myth": "calm",
+      "ending": "main",
+      "end": "main"
+    },
+    "think": "think"
+  }
+}
