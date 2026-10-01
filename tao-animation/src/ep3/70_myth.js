@@ -163,7 +163,14 @@
       // rock, ledges, cracks, overhang
       stroke('c3m.rock', OUTLINE, { z, w: 6, fill: C.paper, draw: stag(p, 0, 3) });
       stroke('c3m.ground', [[600, 770], [1080, 772], [1590, 769]], { z, w: 2.2, color: C.pencil, opacity: 0.8, draw: stag(p, 0, 3) });
-      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 413], [1206, 411]]].forEach((pts, i) => stroke('c3m.ledge' + i, pts, { z: z + 0.2, w: 4.5, draw: stag(p, 1, 3) }));
+      // ledges: a shelf line with pencil shading under it
+      [[[810, 653], [872, 651]], [[1018, 551], [1086, 549]], [[1138, 413], [1206, 411]]].forEach((pts, i) => {
+        stroke('c3m.ledge' + i, pts, { z: z + 0.2, w: 4.5, draw: stag(p, 1, 3) });
+        for (let j = 0; j < 4; j++) { const x = lerp(pts[0][0] + 10, pts[1][0] - 4, j / 3), y = lerp(pts[0][1], pts[1][1], j / 3);
+          stroke('c3m.lh' + i + '_' + j, [[x, y + 5], [x - 10, y + 17]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
+      });
+      for (let j = 0; j < 6; j++) { const x = 872 + j * 21;
+        stroke('c3m.oh' + j, [[x, 452 - j * 0.6], [x - 11, 466 - j * 0.6]], { z: z + 0.2, w: 2.2, color: C.pencil, draw: stag(p, 2, 3), boil: 0.4 }); }
       [[[720, 700], [745, 682], [750, 662]], [[1100, 705], [1132, 692]], [[1420, 560], [1440, 598], [1434, 630]], [[985, 372], [1008, 362]], [[1300, 640], [1322, 610]], [[1210, 560], [1236, 572]],
         [[1352, 330], [1390, 352]], [[1458, 470], [1470, 500]], [[700, 742], [722, 730]], [[1240, 690], [1278, 680], [1290, 700]]]
         .forEach((pts, i) => stroke('c3m.crack' + i, pts, { z: z + 0.2, w: 2.4, color: C.pencil, draw: stag(p, 2, 3), boil: 0.5 }));
