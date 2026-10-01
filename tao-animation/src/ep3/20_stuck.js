@@ -160,6 +160,7 @@
     f3_cheeks: { ...SIT, lean: -1, tilt: 3, ikL: { w: 1, to: 'head', dx: -1.06, dy: 0.45, bend: 'out' }, ikR: { w: 1, to: 'head', dx: 1.06, dy: 0.45, bend: 'out' } },
     f3_slump: { ...SIT, hop: 34, lean: 4, tilt: 24, armScale: 1.2, ikL: desk(-52), ikR: desk(38) },
     f3_hunch: { ...SIT, hop: 10, tilt: -4, ikL: desk(-36), ikR: desk(36) },
+    f3_scratch: { ...POSE.sitScratch, ikL: desk(-44) },   // free hand rests on the desk instead of hanging through it
     f3_shrink: { ...SIT, hop: 22, tilt: 10, ikL: desk(-30, -3, 'out'), ikR: desk(30, -3, 'out') },
     f3_up: { ...SIT, lean: -2, tilt: -8, ikL: desk(-46), ikR: desk(46) },
     f3_fists: { ...SIT, lean: 1, tilt: 3, armScale: 1.1, ikL: desk(-40, -10, 'out'), ikR: desk(40, -10, 'out') },
@@ -172,7 +173,7 @@
       terry: {
         pos: [[0, [DX, SEAT]]],
         pose: [[0, 'f3_sitPaper'], [3.85, 'thinkChin', 0.12, 'back'], [6.6, 'f3_cheeks', 0.12, 'back'], [9.3, 'chinHand', 0.12, 'back'],
-          [10.3, 'sitScratch', 0.12, 'back'], [11.25, 'f3_slump', 0.14, 'back'], [13.65, 'f3_hunch', 0.2], [18.2, 'f3_shrink', 1.2],
+          [10.3, 'f3_scratch', 0.12, 'back'], [11.25, 'f3_slump', 0.14, 'back'], [13.65, 'f3_hunch', 0.2], [18.2, 'f3_shrink', 1.2],
           [26.55, 'sitUp', 0.07, 'back'], [28.7, 'f3_up', 0.2], [31.85, 'f3_fists', 0.1, 'back']],
         face: [[0, 'focus'], [1.75, 'puzzled', 0.06], [6.6, 'bored', 0.08], [9.3, 'bored'], [10.3, 'puzzled', 0.06], [11.25, 'sheepish', 0.08],
           [13.65, 'neutral', 0.1], [18.2, 'sheepish', 0.3], [26.55, 'surprised', 0.05], [28.7, 'focus', 0.1], [31.85, 'effort', 0.06]],

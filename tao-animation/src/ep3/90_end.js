@@ -6,7 +6,7 @@ defineScene({
     terry: {
       enter: 1.6,
       pos: [[0, [1330, 700]]],
-      pose: [[0, 'stand'], [2.0, t => ({ ...POSE.wave, armScale: 1.85, armR: [118, 22 + 25 * Math.sin((t - 2) * 11)] }), 0.12]],
+      pose: [[0, 'stand'], [2.0, t => ({ ...POSE.wave, armScale: 1.85, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, armR: [118, 22 + 25 * Math.sin((t - 2) * 11)] }), 0.12]],
       face: [[0, 'smile'], [2.0, 'joy', 0.05]],
       turn: [[0, -0.3]],
     },
