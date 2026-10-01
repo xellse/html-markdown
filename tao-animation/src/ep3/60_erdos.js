@@ -9,7 +9,7 @@
 // 由 COMP.r3_photo 在照片自己的坐标系里画（DL 变换），所以整张照片可以连人带桌子一起缩小、挪到角落。
 (() => {
   const FL = 780;
-  const EX = 620, EX2 = 670, TX = 1030;                      // Erdős stops at EX, steps up to the table (EX2)                                   // Erdős stops here; Terry stands here
+  const EX = 620, EX2 = 670, TX = 1030;                        // Erdős stops at EX, steps up to the table (EX2); Terry stands at TX
   const DESK = { x: 830, top: 660, w: 260 };
   const PAPER = [868, 654];                                    // the problem sheet lying on the table
   /* ---------------- times (scene clock) ---------------- */
