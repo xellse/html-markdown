@@ -56,7 +56,7 @@
       const nq = clamp((lt - 0.35) / 0.2) * fo;
       rulerNum(k + '.n0', '0', RX + RW / 2 + 16, Y0 - 4, 42, 'start', nq, 4.5);
       rulerNum(k + '.n42', '42', RX + RW / 2 + 16, YT + 2, 42, 'start', nq, 4.5);
-      text(k + '.full', '满分', RX + RW / 2 + 106, YT + 4, { size: 38, color: C.ink, z: z + 0.2, opacity: nq });
+      text(k + '.full', '满分', RX + RW / 2 + 124, YT + 4, { size: 38, color: C.ink, z: z + 0.2, opacity: nq });
       // the three medal lines (ink), each with a little medal disc and its number
       MEDALS.forEach(([ch, v], i) => {
         const tl = LINES_T[i]; if (t < tl) return;
@@ -78,7 +78,7 @@
         DL.save(); DL.translate(RX - RW / 2 - 4, y); DL.scale(Math.max(0.01, pop * fo));
         stroke(k + '.tri', [[0, 0], [-30, -15, 1], [-30, 15, 1], [0, 0, 1]], { z: Z.front, w: 4, fill: C.ink });
         portrait('b4b.r.me', -66, -6 + hop, 24, { z: Z.front, happy: landed });
-        rulerNum(k + '.mv', String(Math.round(v)), -104, 0, 48, 'end', fo, 5);
+        rulerNum(k + '.mv', String(Math.round(v)), -112, 0, 48, 'end', fo, 5);
         DL.restore();
         // a little burst when it lands on 19
         const q = (t - LAND + 0.15) / 0.45;
