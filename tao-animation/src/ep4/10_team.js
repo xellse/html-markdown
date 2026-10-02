@@ -388,8 +388,8 @@
     draw(fx, t) {
       const v = (t - fx.t0) / 0.35; if (v < 0 || v >= 1) return;
       const [x, y] = fx.at;
-      for (let i = 0; i < 7; i++) {
-        const a = (-180 + i * 30) * RAD, r0 = 20 + 26 * v, L = 22 * Math.sin(Math.PI * Math.min(1, v * 1.3));
+      for (let i = 0; i < 6; i++) {                              // fanned up and to the left, away from m1's face
+        const a = (-170 + i * 21) * RAD, r0 = 20 + 26 * v, L = 22 * Math.sin(Math.PI * Math.min(1, v * 1.3));
         stroke('t4.h5.' + i, [[x + Math.cos(a) * r0, y + Math.sin(a) * r0], [x + Math.cos(a) * (r0 + L), y + Math.sin(a) * (r0 + L)]], { z: Z.fx, w: 4 });
       }
     },
@@ -449,7 +449,7 @@
   };
 
   /* ---------------- poses ---------------- */
-  const HI5 = [TXE + 72, 500];                                 // where Terry's and m1's hands meet
+  const HI5 = [TXE + 80, 520];                                 // where Terry's and m1's hands meet (clear of both heads)
   const ldHold = { w: 1, to: 'abs', dx: CLIP[0] - 40, dy: CLIP[1] + 14, bend: 'down' };
   const camHands = { ikL: { w: 1, to: 'abs', dx: CAM_UP[0] - 14, dy: CAM_UP[1] + 18, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: CAM_UP[0] + 20, dy: CAM_UP[1] + 18, bend: 'out' } };
   const mapHands = { ikL: { w: 1, to: 'abs', dx: TMAP[0] - 56, dy: TMAP[1] + 18, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: TMAP[0] + 56, dy: TMAP[1] + 18, bend: 'down' } };
@@ -465,8 +465,8 @@
     t4_ld2Peek: { lean: -7, tilt: -12, armScale: 1.1, ikR: { w: 1, to: 'chin', dx: 0.28, dy: 0.05, bend: 'down' }, ikL: { w: 1, to: 'hip', dx: -24, dy: -4, bend: 'out' } },
     t4_ld2Scratch: { tilt: -9, armScale: 1.15, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' }, ikL: { w: 1, to: 'hip', dx: -24, dy: -4, bend: 'out' } },
     t4_lookDown: { tilt: -8, lean: -2 },
-    t4_hi5: { lean: -2, tilt: -8, armScale: 1.9, armL: [16, 10], ikR: { w: 1, to: 'abs', dx: HI5[0] - 4, dy: HI5[1] + 6, bend: 'out' } },
-    t4_m1hi5: { lean: -4, tilt: 4, armR: [16, 10], ikL: { w: 1, to: 'abs', dx: HI5[0] + 8, dy: HI5[1] - 4, bend: 'down' } },
+    t4_hi5: { lean: -2, tilt: -6, armScale: 1.8, ikL: { w: 1, to: 'hip', dx: -22, dy: -4, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: HI5[0] - 4, dy: HI5[1] + 6, bend: 'out' } },
+    t4_m1hi5: { lean: -4, tilt: 6, armR: [16, 10], ikL: { w: 1, to: 'abs', dx: HI5[0] + 8, dy: HI5[1] - 2, bend: 'down' } },
     t4_m1up: { armScale: 1.4, armR: [140, 20], armL: [14, 10] },          // cheers on his own side, clear of Terry
     t4_mapHold: { tilt: 8, lean: 1, ...mapHands },
     t4_mapHuh: { tilt: 28, lean: 3, ...mapHands },
@@ -479,7 +479,7 @@
   /* ---------------- tracks ---------------- */
   // line-up order (left → right after Terry) and Warsaw spots
   const LX = { m2: 520, m1: 700, m4: 880, m3: 1060, m5: 1240 };
-  const SX = { m4: 400, m2: 600, m1: 960 };
+  const SX = { m4: 400, m2: 600, m1: 1000 };
   const OUTS = [['m5', 0], ['m3', 1], ['m4', 2], ['m1', 3], ['m2', 4]].map(([id, i]) => [id, OUT0 + i * OUT_DT]);
   const OUT_T = Object.fromEntries(OUTS);
   const teenPos = id => [[0, [LX[id], FL]], [OUT_T[id], OFF, 0], ...(SX[id] ? [[ST, [SX[id] + 260, FL], 0], [ST, [SX[id], FL], STOP - ST, 'lin']] : [])];
