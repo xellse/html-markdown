@@ -146,7 +146,8 @@
       if (t < fx.t0 || t >= fx.t1) return;
       const a = F.anchors[fx.char]; if (!a) return;
       const c = [a.handL[0] + 40, a.handL[1] - 14], k = fx.id, z = Z.front + 1, W = 86, H = 112;
-      DL.save(); DL.translate(c[0], c[1]); DL.rotate(-6);
+      const pop = Math.max(0.01, EASE.back(clamp((t - fx.t0) / 0.2)));   // comes in once ld1 has popped in
+      DL.save(); DL.translate(c[0], c[1]); DL.rotate(-6); DL.scale(pop);
       stroke(k + '.b', [[-W / 2, -H / 2], [W / 2, -H / 2, 1], [W / 2, H / 2, 1], [-W / 2, H / 2, 1], [-W / 2, -H / 2, 1]], { z, w: 4, fill: C.paper });
       stroke(k + '.c', [[-16, -H / 2 - 8], [16, -H / 2 - 8, 1], [16, -H / 2 + 8, 1], [-16, -H / 2 + 8, 1], [-16, -H / 2 - 8, 1]], { z: z + 0.1, w: 3.5, fill: C.paper });
       for (let i = 0; i < 6; i++) {
@@ -545,7 +546,7 @@
       { type: 't4_brace', id: 't4.br16', text: '16、17 岁', x0: 440, x1: 1320, y: 352, t0: LB16, t1: LEAD },
       { type: 't4_hline', id: 't4.hl', x0: 262, x1: 600, y: 401, t0: TIP, t1: LEAD },
       // the team leaders
-      { type: 't4_clip', id: 't4.clip', char: 'ld1', t0: LEAD, t1: MAP },
+      { type: 't4_clip', id: 't4.clip', char: 'ld1', t0: LEAD + 0.36, t1: MAP },
       { type: 'title', id: 't4.src', text: '（澳大利亚奥数委员会的记录）', x: 470, y: 300, size: 40, color: 'red', rot: -2, t0: LEAD + 0.5, t1: MAP },
       { type: 'thought', id: 't4.cloud', at: CLOUD_AT, rx: 228, ry: 116, t0: CLOUD, t1: MAP, from: { char: 'ld1', part: 'headTop', dx: 10, dy: -6 } },
       { type: 't4_mind', id: 't4.mind', at: CLOUD_AT, t0: CLOUD + 0.15, t1: MAP, tg: GAUGE },

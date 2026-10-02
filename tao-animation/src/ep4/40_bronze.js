@@ -16,8 +16,8 @@
   const T_IN = 10.55, PULSE = 10.75, MEDAL = 12.55;
   const MATES_IN = 14.55, COUNT = [15.2, 15.55, 15.9, 16.25, 16.6], CUT2 = 18.9;
   const ZJ = 19.25, YOUNG = 20.3, CAP2 = 21.15, CUT3 = 24.6;
-  const UL19 = 24.85, COLS = 25.0, FILL1 = 25.45, FILL_DT = 0.085, BR17 = 27.05, N17 = 27.35;
-  const FILL2 = [29.3, 29.55], BR2 = 29.8, N2 = 30.05, EMPTY = 30.35;
+  const UL19 = 24.85, COLS = 25.0, FILL1 = 25.45, FILL_DT = 0.085, BR17 = 27.05;
+  const FILL2 = [29.3, 29.55], BR2 = 29.75, EMPTY = 30.35;      // shared braces write their number 0.3 s after t0
   const DUR = 32.5;
 
   SFX.define('b4_none', () => {});
@@ -177,8 +177,8 @@
     cues: () => [[ZJ, 'pop'], [YOUNG, 'whoosh'], [YOUNG + 0.15, 'stamp'], [CAP2, 'pop']],
   };
 
-  /* ---------------- 19 = 17 + 2：每道题一列 7 格（1 格 = 1 分），第一天满满、第二天空空 ---------------- */
-  const CW = 72, CH = 30, CG = 5, CBOT = 548;
+  /* ---------------- 19 = 17 + 2：成绩单自己的红括号写 17 和 2；下面每道题一列 7 格（1 格 = 1 分），第一天满满、第二天空空（铅笔灰） ---------------- */
+  const CW = 72, CH = 30, CG = 5, CBOT = 628;                   // below the sheet's own braces (y ≈ 248–342)
   const cellY = j => CBOT - CH / 2 - j * (CH + CG);
   const FILLS = (() => {      // when each scored cell fills in: day 1 one column after another, bottom-up; day 2 the two single points
     const f = [];
@@ -189,13 +189,6 @@
     return f;
   })();
   if (FILLS.length !== 19 || FILLS.filter(f => f.i < 3).length !== 17) console.error('b4b: the columns must hold 17 + 2 points');
-  function b4bBrace(k, x0, x1, y, d, o) {
-    const m = (x0 + x1) / 2, q = 16, hy = y + d * 0.55;
-    stroke(k, [[x0, y], [x0 + 4, hy - 2], [x0 + q, hy], [m - q, hy], [m - 4, hy + 2], [m, y + d, 1], [m + 4, hy + 2], [m + q, hy], [x1 - q, hy], [x1 - 4, hy - 2], [x1, y]],
-      { z: Z.annot, w: o.w || 5, color: o.color, draw: o.draw, boil: 0.6 });
-  }
-  const N_17 = layoutWriting({ text: '17', x: 0, y: 0, size: 66, t0: N17, speed: 2600, anchor: 'middle' });
-  const N_2 = layoutWriting({ text: '2', x: 0, y: 0, size: 66, t0: N2, speed: 2600, anchor: 'middle' });
   // "19" inside "= 19" (same layout as e4_scores: it writes the total at the right of box 6, size cell × 0.62)
   const TOT_L = layoutWriting({ text: '= 19', x: 0, y: 0, size: C0 * 0.62, t0: 0, speed: 1, track: 0.1 });
   COMP.b4_cols = {
@@ -221,25 +214,8 @@
           DL.restore();
         }
       }
-      const a0 = F.targets[SC + '.s0'], a2 = F.targets[SC + '.s2'], a3 = F.targets[SC + '.s3'], a5 = F.targets[SC + '.s5'];
-      if (!a0 || !a5) return;
-      const by = CBOT + 20;
-      if (t >= BR17) {
-        const x0 = a0[0] - C0 / 2 + 8, x1 = a2[0] + C0 / 2 - 8;
-        b4bBrace(k + '.br1', x0, x1, by, 28, { color: C.red, draw: EASE.out(clamp((t - BR17) / 0.35)) });
-        DL.save(); DL.translate((x0 + x1) / 2, by + 40);
-        N_17.strokes.forEach((s, j) => { const q = clamp((t - s.t0) / s.dur); if (q > 0) stroke(k + '.n17.' + j, s.pts, { z: Z.annot, w: 7, color: C.red, draw: q, boil: 0.55 }); });
-        DL.restore();
-      }
-      if (t >= BR2) {      // day two: the same brace, in pencil grey
-        const x0 = a3[0] - C0 / 2 + 8, x1 = a5[0] + C0 / 2 - 8;
-        b4bBrace(k + '.br2', x0, x1, by, 28, { color: C.pencil, draw: EASE.out(clamp((t - BR2) / 0.35)) });
-        DL.save(); DL.translate((x0 + x1) / 2, by + 40);
-        N_2.strokes.forEach((s, j) => { const q = clamp((t - s.t0) / s.dur); if (q > 0) stroke(k + '.n2.' + j, s.pts, { z: Z.annot, w: 7, color: C.pencil, draw: q, boil: 0.55 }); });
-        DL.restore();
-      }
     },
-    cues: () => [[UL19, 'pen'], [COLS, 'paper'], ...FILLS.filter((f, n) => n % 2 === 0 || f.i >= 3).map(f => [f.t, 'tap']), [BR17, 'pen'], [N17, 'pen'], [BR2, 'pen'], [N2, 'pen']],
+    cues: () => [[UL19, 'pen'], [COLS, 'paper'], ...FILLS.filter((f, n) => n % 2 === 0 || f.i >= 3).map(f => [f.t, 'tap'])],
   };
 
   /* ---------------- cast & poses ---------------- */
@@ -282,7 +258,8 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2, pulse: [PULSE] },
       // 7 + 7 + 3 + 1 + 0 + 1 = 19
-      { type: 'e4_scores', id: SC, at: AT, cell: C0, t0: -1, scores: E4.SCORES.map(v => [v, -5]), total: [19, TOTAL] },
+      { type: 'e4_scores', id: SC, at: AT, cell: C0, t0: -1, scores: E4.SCORES.map(v => [v, -5]), total: [19, TOTAL],
+        braces: [{ from: 0, to: 2, label: '17', t0: BR17 }, { from: 3, to: 5, label: '2', t0: BR2 }] },
       { type: 'b4_sweep', id: 'b4b.sweep', t0: SWEEP, t1: RULER - 0.1 },
       // the medal lines
       { type: 'b4_ruler', id: 'b4b.ruler', t0: RULER, t1: R_END },
@@ -300,7 +277,7 @@
       { type: 'b4_young', id: 'b4b.young', at: [1170, 470], t0: ZJ, t1: CUT3 },
       // 19 = 17 + 2
       { type: 'b4_cols', id: 'b4b.cols', t0: UL19 },
-      { type: 'label', id: 'b4b.lbEmpty', text: '几乎空白', at: [1310, 440], rot: 4, size: 52, t0: EMPTY, t1: DUR + 1, target: [1094, 420], bend: -0.15, gap: 10 },
+      { type: 'label', id: 'b4b.lbEmpty', text: '几乎空白', at: [1310, 500], rot: 4, size: 52, t0: EMPTY, t1: DUR + 1, target: [1094, 480], bend: -0.15, gap: 10 },
     ],
     sfx: [[T_IN, 'pop'], [MATES_IN, 'pop'], [CUT2, 'whoosh']],
     subs: [
