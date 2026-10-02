@@ -5117,7 +5117,7 @@ E4.SCORES = [7, 7, 3, 1, 0, 1];
       if (t < fx.t0 || t >= fx.t1) return;
       const goIn = EASE.out(clamp((t - fx.t0) / 0.6)), shake = t > fx.stop && t < fx.stop + 0.5 ? Math.sin((t - fx.stop) * 50) * 6 : 0;
       const out = EASE.in(clamp((t - fx.back) / 0.5));
-      const x = lerp(1180, 1010, goIn) + shake + out * 320, y = 400, k = fx.id;   // halts just right of the ringed answer
+      const x = lerp(1220, 1020, goIn) + shake + out * 320, y = lerp(560, 470, goIn) - out * 40, k = fx.id;   // comes in low from the right, toward the ringed answer
       DL.save(); DL.translate(x, y); DL.rotate(-18);
       stroke(k + '.b', superPts(0, 0, 150, 70, 18, 8), { z: Z.fx, w: 5, closed: true, fill: C.paper });
       stroke(k + '.s', [[-20, -35], [-20, 35]], { z: Z.fx + 0.1, w: 4 });
@@ -5150,7 +5150,7 @@ E4.SCORES = [7, 7, 3, 1, 0, 1];
     draw(fx, t, F) {
       if (t < fx.t0) return;
       const tg = F.targets.bug, a = F.anchors.terry; if (!tg || !a) return;
-      const u = EASE.io(clamp((t - fx.t0) / (fx.caught - fx.t0))), p = lerp2(a.handR, tg, u), k = fx.id, z = Z.fx + 2, sc = EASE.back(clamp((t - fx.t0) / 0.25));
+      const u = EASE.io(clamp((t - fx.t0 - 0.3) / (fx.caught - fx.t0 - 0.3))), p = lerp2(a.handL, tg, u), k = fx.id, z = Z.fx + 2, sc = EASE.back(clamp((t - fx.t0) / 0.25));
       DL.save(); DL.about(p[0], p[1], () => DL.scale(sc));
       stroke(k + '.ring', ringPts(k, p[0], p[1], 52, 52, { n: 14, closed: true }), { z, w: 6, closed: true });
       stroke(k + '.h', [[p[0] + 37, p[1] + 37], [p[0] + 90, p[1] + 90]], { z, w: 9 });
@@ -5163,9 +5163,9 @@ E4.SCORES = [7, 7, 3, 1, 0, 1];
     cast: { terry: E4.terry },
     tracks: {
       terry: {
-        pos: [[0, [TX, FL]], [CLEAR, [1100, FL], 0.6, 'io']],
-        pose: [[0, 'stand'], [8.7, 'akimbo', 0.15, 'back'], [CLEAR, 'stand', 0.2], [15.0, { ...POSE.stand, lean: -4, armScale: 1.7, ikL: { w: 1, to: [1060, 452], bend: 'down' } }, 0.1, 'back'],
-          [16.5, { ...POSE.stand, armScale: 1.5, armL: [85, 8] }, 0.15], [19.1, { ...POSE.stand, armScale: 1.5, armR: [70, 40] }, 0.2], [21.0, 'kidCheer', 0.12, 'back']],
+        pos: [[0, [TX, FL]], [CLEAR, [1100, FL], 0.6, 'io'], [14.7, [1075, FL], 0.3, 'io']],
+        pose: [[0, 'stand'], [8.7, 'akimbo', 0.15, 'back'], [CLEAR, 'stand', 0.2], [15.0, { ...POSE.stand, lean: -4, armScale: 1.8, ikL: { w: 1, to: [1040, 492], bend: 'down' } }, 0.1, 'back'],
+          [16.5, { ...POSE.stand, armScale: 1.5, armL: [85, 8] }, 0.15], [19.1, { ...POSE.stand, armScale: 1.6, ikL: { w: 1, to: [985, 575], bend: 'down' } }, 0.2], [21.0, 'kidCheer', 0.12, 'back']],   // 15.0 palm meets the eraser; 19.1 holds the magnifier out toward the page
         face: [[0, 'smile'], [8.7, 'proud', 0.05], [CLEAR, 'focus', 0.05], [15.0, 'surprised', 0.05], [16.5, 'focus', 0.06], [20.3, 'idea', 0.05], [21.0, 'joy', 0.05]],
         turn: [[0, -0.3], [CLEAR, -0.45, 0.1], [21.0, 0, 0.1]],
         gaze: [[0, 'gold'], [CLEAR, 'page'], [20.3, 'bug'], [21.0, 'viewer']],
