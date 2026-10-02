@@ -58,7 +58,20 @@
         "secs": 45
       }
     },
-    "music": {},
+    "music": {
+      "title": "main",
+      "recap": "main",
+      "team": "main",
+      "day1": "calm",
+      "pentagon": "sneaky",
+      "day2": "sneaky",
+      "bronze": "turn",
+      "mirror": "calm",
+      "detective": "sneaky",
+      "arc": "calm",
+      "ending": "main",
+      "end": "main"
+    },
     "think": "think"
   }
 }
