@@ -8,7 +8,7 @@
   const FL = 780, TX = 1330;
   const BD = { x0: 40, y0: 86, x1: 1150, y1: 664 };
   const LX = 100, RCX = 888;                                   // left column (the sum) / right column (the checks)
-  const QP = [600, BD.y1 + 12];                                // 小问号 stands on the chalk tray, next to 420
+  const QP = [630, BD.y1 + 12];                                // 小问号 stands on the chalk tray, next to 420
 
   /* ---------------- the maths, checked ---------------- */
   const N = 20, PAIR = N + 1, NPAIRS = N / 2;
@@ -40,8 +40,8 @@
   };
 
   /* ---------------- board layout (handwritten rows) ---------------- */
-  const SZ = { A: 60, B: 60, U: 44, C: 46, D: 64 };
-  const Y = { A: 112, B: 212, BR21: 284, U: 300, BRL: 358, C: 382, D: 446, E: 548 };
+  const SZ = { A: 60, B: 60, U: 44, C: 60, D: 64 };
+  const Y = { A: 112, B: 212, BR21: 284, U: 300, BRL: 358, C: 382, D: 476, E: 572 };
   const lay = fx => layoutWriting({ ...fx });
   const W = (id, text, x, y, size, t0, o = {}) => ({ type: 'write', id, text, x, y, size, t0, speed: 2300, w: 6, ...o });
   const wA = W('x4a', S.rowA, LX, Y.A, SZ.A, T.A, { speed: 2700 });
@@ -57,10 +57,10 @@
   const w21 = PAIRS.map(([x0, x1], i) => W('x4u' + i, String(PAIR), (x0 + x1) / 2, Y.U, SZ.U, i ? T.U2 + 0.12 : T.U1 + 0.12, { anchor: 'middle', speed: 2400, w: 5.5 }));
   // “20 对” (red, under the long brace): the digits are written, 对 is lettered; later struck and corrected to “→10 对”
   const C20W = writeWidth(String(N), SZ.C), C_X = BMID - (C20W + 8 + SZ.C) / 2;
-  const wC20 = W('x4c20', String(N), C_X, Y.C, SZ.C, T.C20, { color: 'red', speed: 2600, w: 5.5, z: Z.annot, sfx: 'pen' });
+  const wC20 = W('x4c20', String(N), C_X, Y.C, SZ.C, T.C20, { speed: 2600 });
   const DUI1 = [C_X + C20W + 8 + SZ.C / 2, Y.C + SZ.C / 2];
   const TEN_X = DUI1[0] + SZ.C / 2 + 22;
-  const wTen = W('x4ten', '→' + NPAIRS, TEN_X, Y.C, SZ.C, T.TEN, { color: 'red', speed: 2800, w: 5.5, z: Z.annot, sfx: 'pen' });
+  const wTen = W('x4ten', '→' + NPAIRS, TEN_X, Y.C, SZ.C, T.TEN, { color: 'red', speed: 2800, w: 6, z: Z.annot, sfx: 'pen' });
   const TEN = lay(wTen), DUI2 = [TEN.x + TEN.width + 8 + SZ.C / 2, DUI1[1]];
   const wD1 = W('x4d1', S.d1, LX, Y.D, SZ.D, T.D1);
   const D1 = lay(wD1);
@@ -88,6 +88,17 @@
     for (let i = 0; i < 4; i++) stroke('x4bd.dust' + i, [[x0 + 60 + i * 13, y1 - 30], [x0 + 84 + i * 13, y1 - 58]], { z, w: 1.8, color: C.pencil, opacity: 0.5 * stag(p, 2, 3), boil: 0.5 });
   };
 
+  /** fade any component out over 0.3 s from fx.fadeT (multiplies the opacity of what it draws) */
+  COMP.x4_fade = {
+    init(fx) { const c = COMP[fx.inner.type]; fx.inner.t1 = fx.fadeT + 0.3; if (c.init) c.init(fx.inner); return fx; },
+    draw(fx, t, F) {
+      const n0 = DL.items.length; COMP[fx.inner.type].draw(fx.inner, t, F);
+      const f = 1 - clamp((t - fx.fadeT) / 0.3); if (f >= 1) return;
+      for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * f).toFixed(3); }
+    },
+    cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
+  };
+
   /* ---------------- curly braces (ink under each pair, red under all of them) ---------------- */
   COMP.x4_brace = {
     draw(fx, t) {
@@ -100,7 +111,7 @@
   };
 
   /* ---------------- 20 boxes, 2 rows × 10 columns: first the upper bound, later the pairs ---------------- */
-  const G = { x0: RCX - 210, y0: 150, cell: 42 }, GC = c => G.x0 + (c + 0.5) * G.cell;
+  const G = { x0: RCX - 230, y0: 150, cell: 46 }, GC = c => G.x0 + (c + 0.5) * G.cell;
   COMP.x4_grid = {
     draw(fx, t) {
       if (t < T.GRID) return;
@@ -111,10 +122,10 @@
         stroke('x4g.b' + i, [[x, y], [x + c, y, 1], [x + c, y + c, 1], [x, y + c, 1], [x, y, 1]], { z, w: 3.5, draw: p, boil: 0.6 });
         // “at most 20” in every box (pencil), until step 2
         const m = clamp((t - T.MAX - i * 0.03) / 0.1) * fadeMax;
-        if (m > 0) text('x4g.m' + i, String(N), x + c / 2, y + c / 2 + 1, { size: 26, font: CFG.FONT_MIX, color: C.pencil, opacity: m, z: z + 0.1 });
+        if (m > 0) text('x4g.m' + i, String(N), x + c / 2, y + c / 2 + 1, { size: 30, font: CFG.FONT_MIX, color: C.pencil, opacity: m, z: z + 0.1 });
         // the real numbers: top row 1…10, bottom row 20…11 — every column is one pair
         const v = row === 0 ? COLS[col][0] : COLS[col][1], q = clamp((t - T.NUM - col * 0.07) / 0.1);
-        if (q > 0) text('x4g.n' + i, String(v), x + c / 2, y + c / 2 + 1, { size: 28, font: CFG.FONT_MIX, opacity: q, z: z + 0.1, scale: lerp(1.4, 1, EASE.out(q)) });
+        if (q > 0) text('x4g.n' + i, String(v), x + c / 2, y + c / 2 + 1, { size: 32, font: CFG.FONT_MIX, opacity: q, z: z + 0.1, scale: lerp(1.4, 1, EASE.out(q)) });
       }
       COLS.forEach((_, col) => {
         const p = EASE.out(clamp((t - T.OVAL - col * 0.1) / 0.15)); if (p <= 0) return;
@@ -124,9 +135,10 @@
         const lt = t - t0; if (lt < 0 || op <= 0) return;
         text(k, s, RCX, y, { size: 38, color: C.red, z: Z.annot, opacity: clamp(lt / 0.08) * op, scale: lerp(0.6, 1, EASE.back(clamp(lt / 0.2))), halo: 8 });
       };
-      lab('x4g.l0', N + ' 个数', 124, T.GRID + 0.15);
-      lab('x4g.l1', '每个最多 ' + N, 263, T.MAX + 0.1, fadeMax);
-      lab('x4g.l2', '两个两个配：' + NPAIRS + ' 对', 263, T.PAIRS10);
+      const tidy = 1 - clamp((t - T.E) / 0.3);                     // once 10×21 is written, the grid's labels step back
+      lab('x4g.l0', N + ' 个数', 126, T.GRID + 0.15, tidy);
+      lab('x4g.l1', '每个最多 ' + N, 270, T.MAX + 0.1, fadeMax);
+      lab('x4g.l2', '两个两个配：' + NPAIRS + ' 对', 270, T.PAIRS10, tidy);
     },
     cues: () => [[T.GRID + 0.15, 'pop'], [T.MAX + 0.1, 'pop'], ...COLS.map((_, i) => [T.NUM + i * 0.07, 'tap']), ...COLS.map((_, i) => [T.OVAL + i * 0.1, 'plip']), [T.PAIRS10, 'pop']],
   };
@@ -138,12 +150,13 @@
       STEPS.forEach(([n, s, t0], i) => {
         const lt = t - t0; if (lt < 0) return;
         const y = fx.y + i * fx.dy, k = fx.id + i, pp = EASE.back(clamp(lt / 0.22));
-        DL.save(); DL.translate(fx.x + 22, y); DL.scale(lerp(0.5, 1, pp));
-        stroke(k + '.o', ringPts(k + '.o', 0, 0, 22, 22, { n: 10, a0: -110, sweep: 375, rv: 0.05 }), { z: Z.annot, w: 4, color: C.red, draw: EASE.out(clamp(lt / 0.3)) });
-        const g = GLYPH[n], gs = 30;
+        DL.save(); DL.translate(fx.x + fx.size * 0.56, y); DL.scale(lerp(0.5, 1, pp));
+        const rr = fx.size * 0.56;
+        stroke(k + '.o', ringPts(k + '.o', 0, 0, rr, rr, { n: 10, a0: -110, sweep: 375, rv: 0.05 }), { z: Z.annot, w: 4.5, color: C.red, draw: EASE.out(clamp(lt / 0.3)) });
+        const g = GLYPH[n], gs = fx.size * 0.78;
         g.s.forEach((st, j) => stroke(k + '.n' + j, st.map(([u, v, c]) => [(u - g.w / 2) * gs, (v - 0.5) * gs, c]), { z: Z.annot, w: 4.5, color: C.red, draw: clamp((lt - 0.1) / 0.18), boil: 0.6 }));
         DL.restore();
-        text(k + '.t', s, fx.x + 56, y + 2, { size: fx.size, anchor: 'start', color: C.red, opacity: clamp((lt - 0.12) / 0.12), halo: 8 });
+        text(k + '.t', s, fx.x + fx.size * 1.32, y + 2, { size: fx.size, anchor: 'start', color: C.red, opacity: clamp((lt - 0.12) / 0.12), halo: 8 });
       });
     },
     cues: () => STEPS.map(([, , t0]) => [t0, 'pop']),
@@ -198,7 +211,7 @@
   /* ---------------- the magnifying glass ----------------
    * in Terry's left hand (small); over his left eye for a peek (the eye inside looks huge); then it flies to the board,
    * gets big and moves back along the working; after "10 对" it flies back to his hand. */
-  const LN = { Rh: 30, Lh: 42, Re: 40, Rf: 64, Lf: 82 };
+  const LN = { Rh: 30, Lh: 42, Re: 40, Rf: 78, Lf: 86 };
   const HANDDIR = [[0, -112]];
   const ROWA_C = [LX + lay(wA).width / 2, Y.A + SZ.A / 2], ROWB_C = [BMID, Y.B + SZ.B / 2];
   const P420 = [R420[0] + R420[2] / 2, Y.D + SZ.D / 2], PD1 = [LX + D1.width / 2, Y.D + SZ.D / 2];
@@ -328,16 +341,16 @@
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       // L1: the hat drops on, the magnifying glass comes out — 错误侦探
       { type: 'x4_hat', id: 'x4hat', char: 'terry', t0: T.HAT0, land: T.HAT1 },
-      { type: 'title', id: 'x4ttl', text: '错误侦探', x: 1368, y: 222, size: 64, t0: T.TITLE, color: 'red', rot: -3, underline: true, sfx: 'stamp' },
-      { type: 'title', id: 'x4hyp', text: '（假设的例子）', x: 860, y: 58, size: 36, t0: T.HYPO, color: 'red', rot: -2 },
+      { type: 'title', id: 'x4ttl', text: '错误侦探', x: 1335, y: 206, size: 62, t0: T.TITLE, color: 'red', rot: -3, underline: true, sfx: 'stamp' },
+      { type: 'title', id: 'x4hyp', text: '（假设的例子）', x: 452, y: 56, size: 46, t0: T.HYPO, color: 'red', rot: -2 },
       // L2–L5: the working, written on the board
       wA, wB1, wB2, wB3,
       { type: 'x4_brace', id: 'x4ub0', x0: PAIRS[0][0] + 4, x1: PAIRS[0][1] - 4, y: Y.BR21, d: 14, t0: T.U1 },
       { type: 'x4_brace', id: 'x4ub1', x0: PAIRS[1][0] + 4, x1: PAIRS[1][1] - 4, y: Y.BR21, d: 14, t0: T.U2 },
       ...w21,
-      { type: 'x4_brace', id: 'x4ubR', x0: LX, x1: BEND, y: Y.BRL, d: 18, t0: T.BR, color: 'red', w: 4 },
+      { type: 'x4_brace', id: 'x4ubR', x0: LX, x1: BEND, y: Y.BRL, d: 18, t0: T.BR, w: 4 },
       wC20,
-      { type: 'title', id: 'x4dui1', text: '对', x: DUI1[0], y: DUI1[1], size: SZ.C, t0: T.C20 + 0.3, color: 'red', dur: 0.15, sfx: 'pen' },
+      { type: 'title', id: 'x4dui1', text: '对', x: DUI1[0], y: DUI1[1], size: SZ.C, t0: T.C20 + 0.3, z: Z.board, dur: 0.15, sfx: 'chalk' },
       wD1, wD2,
       // L6: 小问号
       { type: 'qm', id: 'x4qm', size: 160, signSize: 46, t0: T.QIN, t1: T.QEND, silent: true,
@@ -353,15 +366,15 @@
       { type: 'x4_eraser', id: 'x4er' },
       { type: 'title', id: 'x4nox', text: '先别擦！', x: 1494, y: 488, size: 46, t0: T.NOERASE, t1: T.EREND + 0.1, color: 'red', rot: -5 },
       // the three steps
-      { type: 'x4_steps', id: 'x4st', x: 1176, y: 300, dy: 58, size: 38 },
+      { type: 'x4_steps', id: 'x4st', x: 1170, y: 282, dy: 62, size: 48 },
       // L8: step 1 — admit it: ring 420
       { type: 'ringRect', id: 'x4r420', rect: R420, t0: T.RING, pad: 14 },
       { type: 'title', id: 'x4cuo', text: '错了', x: DEND + 70, y: Y.D + SZ.D / 2, size: 44, t0: T.CUO, color: 'red', rot: -4, sfx: 'pen' },
       // L9–L11: the upper bound
       { type: 'x4_grid', id: 'x4g' },
-      { type: 'highlight', id: 'x4hi', of: 'x4w400', t0: T.HI, dur: 0.4 },
+      { type: 'x4_fade', id: 'x4hiF', fadeT: T.FADE, inner: { type: 'highlight', id: 'x4hi', of: 'x4w400', t0: T.HI, dur: 0.4 } },
       wMax, wGt,
-      { type: 'ringRect', id: 'x4r420b', rect: R420, t0: T.RING2, pad: 26 },
+      { type: 'ringRect', id: 'x4r420b', rect: R420, t0: T.RING2, pad: 18 },
       // L12–L13: step 2 — the magnifying glass goes back along the working; your turn
       { type: 'title', id: 'x4turn', text: '轮到你了！', x: RCX, y: 568, size: 80, t0: T.TURN, t1: T.TURN1, color: 'red', rot: -3, sfx: 'stamp' },
       // L14–L15: each pair is 21 ✓ — but 20 numbers make only 10 pairs
@@ -369,6 +382,7 @@
       { type: 'ringRect', id: 'x4r20', rect: [C_X, Y.C, DUI1[0] + SZ.C / 2 - C_X, SZ.C], t0: T.RING20, pad: 12 },
       { type: 'strike', id: 'x4s20', rect: { write: 'x4c20' }, t0: T.STRIKE20, dur: 0.2 },
       wTen,
+      { type: 'band', id: 'x4hi10', rect: [TEN.x, Y.C, DUI2[0] + SZ.C / 2 - TEN.x, SZ.C], t0: T.TEN + 0.65, dur: 0.4, pad: 12 },
       { type: 'title', id: 'x4dui2', text: '对', x: DUI2[0], y: DUI2[1], size: SZ.C, t0: T.TEN + 0.5, color: 'red', dur: 0.15, sfx: 'pen' },
       // L16–L17: step 3 — fix it, check again
       { type: 'strike', id: 'x4sD', rect: [LX, Y.D, DEND - LX, SZ.D], t0: T.STRIKED, dur: 0.3 },

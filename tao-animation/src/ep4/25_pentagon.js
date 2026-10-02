@@ -27,6 +27,7 @@
   const negs = STATES.map(s => s.filter(v => v < 0).length);
   if (negs.join() !== '1,2,1,2,1,0') console.error('d4_pentagon: negatives per step', negs);
   if (7 + 7 + 3 !== 17) console.error('d4_pentagon: day one should be 17');
+  if (P0.reduce((a, b) => a + b, 0) !== 2) console.error('d4_pentagon: the five numbers should add up to 2');
 
   /* ---------------- geometry of the pentagon ---------------- */
   const PC = [800, 505],   // top node sits between the sheet's 第一天 / 第二天 labels
@@ -43,6 +44,7 @@
   ];
   /** a struck number: strike drawn (sd), held (hold), then floats up and fades (FLOAT); the new number is written from tw */
   const STRIKE = slow => (slow ? { sd: 0.25, hold: 0.25, nw: 0.15 } : { sd: 0.1, hold: 0.1, nw: 0.1 }), FLOAT = 0.3;
+  const SUM_T = 4.5;                            // “加起来 = 2（是正数）”: the condition that makes the game stop
   const STOP_T = 19.25, MORE_T = 11.5, MORE_T1 = 13.95;
   const SURE_T = 21.35, PROOF_T = 23.15, MTN_T = 23.8, MTN_LAND = 24.06;
 
@@ -69,9 +71,20 @@
     if (n[0] * m[0] + n[1] * m[1] < 0) n = [-n[0], -n[1]];
     return { from: [P[0] + u[0] * (NR + 6) + n[0] * off, P[1] + u[1] * (NR + 6) + n[1] * off], to: [Q[0] - u[0] * (NR + 10) + n[0] * off, Q[1] - u[1] * (NR + 10) + n[1] * off], n, mid: [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2] };
   };
-  // "+(-2)" beside both arrows in the slow first step
-  const ADD_LB = [(PICK[0] + 4) % 5, (PICK[0] + 1) % 5].map((k, j) => {
-    const e = edgeArrow(PICK[0], k), c = [e.mid[0] + e.n[0] * 78, e.mid[1] + e.n[1] * 78];
+  // Step 1 spells the rule out: the struck −2 does not float away but steps inside the pentagon (GHOST), and both red arrows
+  // start from it, each with "+(−2)" — so what goes to the neighbours is visibly the old negative number, not the new 2.
+  const G0 = HIST[PICK[0]][0];                                  // C's first value (−2), struck in step 1
+  const GHOST = lerp2(NODE[PICK[0]], PC, 0.58);
+  G0.ghost = { at: GHOST, end: STEPS[0].end };
+  const ghostArrow = nb => {
+    const Q = NODE[nb], d = dist(GHOST, Q), u = [(Q[0] - GHOST[0]) / d, (Q[1] - GHOST[1]) / d];
+    return { from: [GHOST[0] + u[0] * 40, GHOST[1] + u[1] * 40], to: [Q[0] - u[0] * (NR + 12), Q[1] - u[1] * (NR + 12)] };
+  };
+  const NB0 = [(PICK[0] + 4) % 5, (PICK[0] + 1) % 5];
+  // "+(−2)" written just outside each receiving neighbour (B: to its right, D: up-left, clear of the edges and the floor)
+  const ADD_AT = { 1: [NODE[1][0] + NR + 66, NODE[1][1] + 8], 3: [NODE[3][0] - NR - 66, NODE[3][1] - 70] };
+  const ADD_LB = NB0.map((k, j) => {
+    const c = ADD_AT[k] || [NODE[k][0], NODE[k][1] - NR - 50];
     return layoutWriting({ text: '+(' + P0[PICK[0]] + ')', x: c[0], y: c[1] - 22, size: 44, t0: STEPS[0].arr + 0.3 + j * 0.25, speed: 2800, gap: 0.02, glyphGap: 0.02, anchor: 'middle' });
   });
 
@@ -94,10 +107,18 @@
       // values: the current one, and the one just struck out floating away
       HIST.forEach((H, n) => H.forEach((e, j) => {
         if (j > 0 && t < e.tw - 0.001) return;
-        let fu = 0;
-        if (e.ts !== undefined) { fu = clamp((t - e.ts - e.X.sd - e.X.hold) / FLOAT); if (fu >= 1) return; }
-        const op = 1 - fu, c = NODE[n];
-        DL.save(); DL.translate(c[0] + 30 * EASE.out(fu), c[1] - 70 * EASE.out(fu)); DL.scale(1 - 0.35 * fu); DL.translate(-c[0], -c[1]);
+        let fu = 0, op = 1;
+        const c = NODE[n];
+        DL.save();
+        if (e.ghost) {            // step 1's −2: slides inside the pentagon and waits there until the step ends
+          const gu = EASE.out(clamp((t - e.ts - e.X.sd - e.X.hold) / 0.35)), g = lerp2(c, e.ghost.at, gu);
+          op = 1 - clamp((t - e.ghost.end) / 0.25); if (op <= 0) { DL.restore(); return; }
+          DL.translate(g[0], g[1]); DL.scale(1 - 0.2 * gu); DL.translate(-c[0], -c[1]);
+        } else {
+          if (e.ts !== undefined) { fu = clamp((t - e.ts - e.X.sd - e.X.hold) / FLOAT); if (fu >= 1) { DL.restore(); return; } }
+          op = 1 - fu;
+          DL.translate(c[0] + 30 * EASE.out(fu), c[1] - 70 * EASE.out(fu)); DL.scale(1 - 0.35 * fu); DL.translate(-c[0], -c[1]);
+        }
         e.L.strokes.forEach((st, m) => { const q = clamp((t - st.t0) / st.dur); if (q > 0) stroke(`${k}.v${n}.${j}.${m}`, st.pts, { z: z + 0.3, w: 6.5, draw: q, boil: 0.55, opacity: op }); });
         if (e.ts !== undefined && t >= e.ts) {
           const L = e.L;
@@ -111,7 +132,7 @@
         const st = STEPS[j], i = PICK[j], c = NODE[i];
         stroke(`${k}.ring${j}`, ringPts(`${k}.ring${j}`, c[0], c[1], NR + 17, NR + 17, { n: 12, a0: -130, sweep: 385, rv: 0.05 }), { z: Z.annot, w: 5.5, color: C.red, draw: EASE.out(clamp((t - st.s) / (st.slow ? 0.35 : 0.2))) });
         if (t >= st.arr) [(i + 4) % 5, (i + 1) % 5].forEach((nb, m) => {
-          const e = edgeArrow(i, nb);
+          const e = st.slow ? ghostArrow(nb) : edgeArrow(i, nb);
           arrow(`${k}.ar${j}.${m}`, e.from, e.to, { p: EASE.out(clamp((t - st.arr - m * 0.05) / (st.slow ? 0.3 : 0.18))), bend: 0.08, color: C.red, w: 4.5, head: 18 });
         });
         if (st.slow && t >= st.arr) ADD_LB.forEach((L, m) => L.strokes.forEach((s, q) => { const u = clamp((t - s.t0) / s.dur); if (u > 0) stroke(`${k}.add${m}.${q}`, s.pts, { z: Z.annot, w: 4.5, color: C.red, draw: u, boil: 0.55 }); }));
@@ -268,10 +289,10 @@
     tracks: {
       terry: {
         pos: [[0, [DX, SEAT]], [CUT, [-900, SEAT], 0]],
-        pose: [[0, REST], [13.0, CHIN, 0.14, 'back'], [STOP_T, UP, 0.1, 'back'], [21.3, REST, 0.2]],
-        face: [[0, 'focus'], [13.0, 'puzzled', 0.08], [STOP_T, 'surprised', 0.05], [20.7, 'focus', 0.1]],
+        pose: [[0, REST], [13.0, CHIN, 0.14, 'back'], [STOP_T, UP, 0.1, 'back'], [21.4, REST, 0.2]],
+        face: [[0, 'focus'], [13.0, 'puzzled', 0.08], [STOP_T, 'surprised', 0.05], [20.9, 'focus', 0.1]],
         turn: [[0, 0.3], [0.6, 0.35, 0.12]],
-        gaze: [[0, [1090, 500]], [0.6, 'pent'], [5.75, 'sel'], [STOP_T, 'pent'], [SURE_T, [1275, 360]], [PROOF_T, [1275, 600]]],
+        gaze: [[0, [1090, 500]], [0.6, 'pent'], [5.75, 'sel'], [STOP_T, 'pent'], [SURE_T, [1300, 366]], [PROOF_T, [1275, 600]]],
         squash: [[0, 1], [STOP_T, 1.07, 0.05], [STOP_T + 0.06, 1, 0.22, 'back']],
       },
     },
@@ -293,10 +314,11 @@
       // the game
       { type: 'label', id: 'd4p5.lbP3', text: '第 3 题', at: [592, 330], rot: -3, t0: 1.2, t1: 4.95, target: [cellX(2) - 6, CELL_BOT + 6], bend: -0.2, gap: 10 },
       { type: 'd4_p5pent', id: 'd4p5.pent', t0: 0.55, t1: CUT },
+      { type: 'label', id: 'd4p5.lbSum', text: ['加起来 = 2', '（是正数）'], at: [1300, 596], rot: -2, size: 46, t0: SUM_T, t1: SURE_T },
       { type: 'd4_p5count', id: 'd4p5.cnt', at: [1270, 300], t1: STEPS[4].end + 0.1 },
       { type: 'label', id: 'd4p5.lbMore', text: ['负数', '反而变多了？'], at: [1275, 470], rot: 3, size: 54, t0: MORE_T, t1: MORE_T1 },
       { type: 'd4_p5slam', id: 'd4p5.stop', text: '停！', at: [PC[0] + 8, PC[1] + 6], size: 130, rot: -6, t0: STOP_T, t1: 20.8 },
-      { type: 'label', id: 'd4p5.lbSure', text: '一定会停', at: [1275, 360], rot: -4, size: 56, t0: SURE_T, t1: CUT },
+      { type: 'label', id: 'd4p5.lbSure', text: ['一定会停', '（只要总和是正数）'], at: [1300, 366], rot: -4, size: 56, t0: SURE_T, t1: CUT },
       { type: 'd4_p5proof', id: 'd4p5.proof', t1: CUT },
       // 210 contestants, 12 full marks
       { type: 'd4_p5grid', id: 'd4p5.grid' },

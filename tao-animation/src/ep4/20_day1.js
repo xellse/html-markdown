@@ -92,13 +92,16 @@
     stroke(k + '.pp', [[x - 40 * s, top + 1], [x - 32 * s, top - 9 * s, 1], [x + 36 * s, top - 9 * s, 1], [x + 44 * s, top + 1, 1]], { z: zd + 0.05, w: 2.6, fill: C.paper, draw: p });
     [-1, 1].forEach(sd => stroke(k + '.arm' + sd, [[x + sd * 6 * s, hc[1] + r + 16 * s], [x + sd * 50 * s, top - 22 * s], [x + sd * 26 * s, top - 2]], { z: zd + 0.1, w: 3.6, draw: p }));
   }
+  /** the room steps back (fades to 40 %) once the clock and the papers take over, so they are the one focus */
   COMP.d4_d1room = {
     draw(fx, t) {
       if (t >= fx.t1) return;
+      const n0 = DL.items.length, op = 1 - 0.6 * EASE.io(clamp((t - fx.dim) / 0.3));
       ROWS.forEach((R, ri) => R.xs.forEach((x, i) => {
         const p = EASE.out(clamp((t - 0.05 - ri * 0.12 - i * 0.05) / 0.38)); if (p <= 0) return;
         miniKid(`d4d1.m${ri}_${i}`, x, R.top, R.s, R.hair[i], Z.set + 1 + ri * 0.5, p);
       }));
+      if (op < 0.999) for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * op).toFixed(3); }
     },
   };
 
@@ -142,7 +145,7 @@
   COMP.d4_d1cal = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
-      const lt = t - fx.t0, pop = Math.max(0.01, EASE.back(clamp(lt / 0.3))), { c, w, h } = CAL, z = Z.set + 2, k = 'd4d1.cal';
+      const lt = t - fx.t0, pop = Math.max(0.01, EASE.back(clamp(lt / 0.3)) * (1 - EASE.in(clamp((t - fx.out) / 0.18)))), { c, w, h } = CAL, z = Z.set + 2, k = 'd4d1.cal';
       DL.save(); DL.translate(c[0], c[1]); DL.scale(pop); DL.rotate(-3); DL.translate(-c[0], -c[1]);
       const x0 = c[0] - w / 2, y0 = c[1] - h / 2;
       stroke(k, [[x0, y0], [x0 + w, y0, 1], [x0 + w, y0 + h, 1], [x0, y0 + h, 1], [x0, y0, 1]], { z, w: 4.5, fill: C.paper });
@@ -153,7 +156,7 @@
       if (t > 1.0) text(k + '.r', '日', c[0] + 40, c[1] + 45, { size: 26, z: z + 0.2, opacity: clamp((t - 1.0) / 0.15) });
       DL.restore();
     },
-    cues: fx => [[fx.t0, 'pop'], [0.75, 'pen']],
+    cues: fx => [[fx.t0, 'pop'], [0.75, 'pen'], [fx.out, 'whoosh']],
   };
   const CLK = { c: [1440, 300], r: 70, t0: 3.7, s0: 3.95, s1: 5.0 };
   const clkMin = t => 270 * EASE.io(clamp((t - CLK.s0) / (CLK.s1 - CLK.s0)));
@@ -284,8 +287,8 @@
     ],
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
-      { type: 'd4_d1room', id: 'd4d1.room', t1: ROOM_T1 },
-      { type: 'd4_d1cal', id: 'd4d1.cal', t0: 0.35, t1: ROOM_T1 },
+      { type: 'd4_d1room', id: 'd4d1.room', dim: 3.6, t1: ROOM_T1 },
+      { type: 'd4_d1cal', id: 'd4d1.cal', t0: 0.35, out: 3.45, t1: 3.65 },   // the date goes as the clock comes
       { type: 'd4_d1clock', id: 'd4d1.clock', t1: ROOM_T1 },
       { type: 'label', id: 'd4d1.lbHours', text: '4½ 小时', at: [1238, 236], rot: -4, t0: 4.95, t1: ROOM_T1, target: clockPt(300, CLK.r + 26), bend: -0.25, gap: 8 },
       { type: 'd4_d1papers', id: 'd4d1.papers', t1: DUR + 1 },
@@ -306,7 +309,7 @@
       { type: 'd4_d1stamp', id: 'd4d1.no', text: '不能', at: NO_AT, size: 92, rot: -7, t0: NO_T, t1: Q_T1 },
       // proved: full marks
       { type: 'write', id: 'd4d1.tick', text: '✓', x: 452, y: 470, size: 118, t0: TICK_T, t1: 38.45, speed: 2600, w: 8, color: 'red', sfx: 'pen', z: Z.annot },
-      { type: 'label', id: 'd4d1.lbFull', text: '满分！', at: [650, 330], rot: -4, size: 50, t0: FULL_T, t1: 38.45, target: [cellX(0) + 10, CELL_BOT + 8], bend: 0.2, gap: 10 },
+      { type: 'label', id: 'd4d1.lbFull', text: '满分！', at: [470, 318], rot: -4, size: 50, t0: FULL_T, t1: 38.45, target: [cellX(0) - 8, CELL_BOT + 6], bend: -0.2, gap: 10 },
       // problem 2: geometry
       { type: 'd4_d1geo', id: 'd4d1.geo', t0: GEO_T, arcT: GEO_T + 0.6 },
       { type: 'label', id: 'd4d1.lbGeo', text: '几何', at: GEO_LB_AT, rot: -4, size: 50, t0: GEO_LB, t1: DUR + 1, target: GEO_LB_TG, bend: -0.25, gap: 12 },
