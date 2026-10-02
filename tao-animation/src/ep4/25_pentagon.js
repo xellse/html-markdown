@@ -316,7 +316,7 @@
       { type: 'd4_p5pent', id: 'd4p5.pent', t0: 0.55, t1: CUT },
       { type: 'label', id: 'd4p5.lbSum', text: ['加起来 = 2', '（是正数）'], at: [1300, 596], rot: -2, size: 46, t0: SUM_T, t1: SURE_T },
       { type: 'd4_p5count', id: 'd4p5.cnt', at: [1270, 300], t1: STEPS[4].end + 0.1 },
-      { type: 'label', id: 'd4p5.lbMore', text: ['负数', '反而变多了？'], at: [1275, 470], rot: 3, size: 54, t0: MORE_T, t1: MORE_T1 },
+      { type: 'label', id: 'd4p5.lbMore', text: ['负数', '反而变多了？'], at: [1350, 470], rot: 3, size: 54, t0: MORE_T, t1: MORE_T1 },
       { type: 'd4_p5slam', id: 'd4p5.stop', text: '停！', at: [PC[0] + 8, PC[1] + 6], size: 130, rot: -6, t0: STOP_T, t1: 20.8 },
       { type: 'label', id: 'd4p5.lbSure', text: ['一定会停', '（只要总和是正数）'], at: [1300, 366], rot: -4, size: 56, t0: SURE_T, t1: CUT },
       { type: 'd4_p5proof', id: 'd4p5.proof', t1: CUT },

@@ -14,8 +14,10 @@
   const BR0 = 14.0, BR_OUT = 16.2, A_END = 16.45;              // "2" brace (its number is written 0.3 s later, on "两分"); both braces fade; the exam room goes away
   const GRID0 = 16.5, FILL0 = 17.85, FILL_DT = 0.025, LB57 = 19.3, RING5 = 21.65, B_END = 24.6;
   const G_IN = 24.65, LBG = 24.95, TK = [25.95, 26.65], GAP = 27.3, CARET = 28.5, QM = 28.85, MINUS = 29.85, LBM = 30.05;
-  const C_END = 31.45, DUR = 31.9;
+  const C_END = 31.75, FADE0 = C_END - 0.3, DUR = 31.9;          // the proof and its marks fade out, the grader zips off
 
+  const EXAMPLE = G_IN + 0.5;
+  const fadeOut = t => 1 - clamp((t - FADE0) / 0.3);
   SFX.define('b4_none', () => {});
   SFX.define('b4_tick', tone => { tone('sine', 1400, 1100, 0.03, 0.08); });
   const box = (x0, y0, x1, y1) => [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]];
@@ -135,20 +137,23 @@
   };
 
   /* ---------------- 阅卷：一份缺了一步的证明 ---------------- */
-  const PP = { x0: 500, y0: 286, x1: 1070, y1: 742 };
-  const LINES = [{ y: 418, words: [120, 64, 150] }, { y: 486, words: [92, '=', 170] }, { y: 624, words: ['→', 110, 140] }, { y: 692, words: [150, 70, '□'] }];
-  const GAP_Y = 555, MARGIN_X = 538, SCORE = [932, 302, 1042, 372];
+  const PP = { x0: 500, y0: 324, x1: 1070, y1: 760 };
+  const LINES = [{ y: 466, words: [120, 64, 150] }, { y: 528, words: [92, '=', 170] }, { y: 664, words: ['→', 110, 140] }, { y: 724, words: [150, 70, '□'] }];
+  const GAP_Y = 596, MARGIN_X = 538, SCORE = [932, 338, 1042, 404];
   const SLOT = [624, GAP_Y - 30, 900, GAP_Y + 30];                // the empty place where a step should be
   COMP.b4_proof = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
-      const lt = t - fx.t0, p = EASE.out(clamp(lt / 0.4)), z = Z.set + 1, k = 'b4d.pf', { x0, y0, x1, y1 } = PP;
-      stroke(k, box(x0, y0, x1, y1), { z, w: 5, fill: C.paper, draw: p });
-      stroke(k + '.sh', [[x0 + 14, y1 + 8], [x1 + 8, y1 + 8, 1], [x1 + 8, y0 + 14]], { z: z - 0.1, w: 2.5, color: C.pencil, opacity: 0.7 * p, boil: 0.5 });
-      stroke(k + '.mg', [[MARGIN_X + 22, y0 + 100], [MARGIN_X + 22, y1 - 18]], { z: z + 0.1, w: 2, color: C.pencil, opacity: 0.6 * p, boil: 0.4 });
+      const lt = t - fx.t0, fo = fadeOut(t), p = EASE.out(clamp(lt / 0.4)), z = Z.set + 1, k = 'b4d.pf', { x0, y0, x1, y1 } = PP;
+      stroke(k, box(x0, y0, x1, y1), { z, w: 5, fill: C.paper, draw: p, opacity: fo });
+      stroke(k + '.sh', [[x0 + 14, y1 + 8], [x1 + 8, y1 + 8, 1], [x1 + 8, y0 + 14]], { z: z - 0.1, w: 2.5, color: C.pencil, opacity: 0.7 * p * fo, boil: 0.5 });
+      stroke(k + '.mg', [[MARGIN_X + 22, y0 + 100], [MARGIN_X + 22, y1 - 18]], { z: z + 0.1, w: 2, color: C.pencil, opacity: 0.6 * p * fo, boil: 0.4 });
       if (lt < 0.25) return;
-      const q = clamp((lt - 0.25) / 0.2);
-      text(k + '.t', '证明', x0 + 60, y0 + 50, { size: 50, anchor: 'start', z: z + 0.2, opacity: q });
+      const q = clamp((lt - 0.25) / 0.2) * fo;
+      text(k + '.t', '证明', x0 + 60, y0 + 48, { size: 50, anchor: 'start', z: z + 0.2, opacity: q });
+      // not his paper: just an example of how marking works
+      const eq = clamp((t - EXAMPLE) / 0.2) * fo;
+      if (eq > 0) text(k + '.ex', '（举个例子）', x0 + 172, y0 + 50, { size: 40, anchor: 'start', color: C.red, z: Z.annot, opacity: eq, scale: lerp(0.7, 1, EASE.back(clamp((t - EXAMPLE) / 0.2))) });
       stroke(k + '.sc', box(...SCORE), { z: z + 0.2, w: 3.5, opacity: q });
       // the written lines: little scribbled "words" with a few maths signs; the third line is missing
       LINES.forEach((L, li) => {
@@ -173,7 +178,7 @@
         const [a, b, c, d] = SLOT, segs = [];
         for (let xx = a; xx < c - 4; xx += 26) segs.push([[xx, b], [Math.min(c, xx + 14), b]], [[xx, d], [Math.min(c, xx + 14), d]]);
         for (let yy = b; yy < d - 4; yy += 26) segs.push([[a, yy], [a, Math.min(d, yy + 14)]], [[c, yy], [c, Math.min(d, yy + 14)]]);
-        segs.forEach((sg, i) => stroke(k + '.slot' + i, sg, { z: z + 0.2, w: 3, color: C.pencil, opacity: sp, boil: 0.5 }));
+        segs.forEach((sg, i) => stroke(k + '.slot' + i, sg, { z: z + 0.2, w: 3, color: C.pencil, opacity: sp * fo, boil: 0.5 }));
       }
     },
     cues: fx => [[fx.t0, 'paper']],
@@ -183,9 +188,19 @@
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const [x, y] = fx.at;
-      stroke('b4d.caret', [[x - 20, y + 22], [x, y - 22, 1], [x + 20, y + 22]], { z: Z.annot, w: 6, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.22)) });
+      stroke('b4d.caret', [[x - 20, y + 22], [x, y - 22, 1], [x + 20, y + 22]], { z: Z.annot, w: 6, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.22)), opacity: fadeOut(t) });
     },
     cues: fx => [[fx.t0, 'pen']],
+  };
+  /** a red hand-written mark (✓ ? −) that fades out with the proof */
+  COMP.b4_mark = {
+    init: layoutWriting,
+    draw(fx, t) {
+      if (t >= fx.t1) return;
+      const op = fadeOut(t);
+      fx.strokes.forEach((s, i) => { const q = clamp((t - s.t0) / s.dur); if (q > 0) stroke(fx.id + '.s' + i, s.pts, { z: Z.annot, w: fx.w || 6, color: C.red, draw: q < 1 ? q : undefined, boil: 0.55, opacity: op }); });
+    },
+    cues: fx => fx.strokes.map(s => [s.t0, fx.sfx || 'pen']),
   };
   /** the grader's red pen (red barrel, ink outline), held in his right hand with the nib down toward the paper */
   const PEN_D = [16, 26], PEN_U = (() => { const l = Math.hypot(...PEN_D); return [PEN_D[0] / l, PEN_D[1] / l]; })();
@@ -194,17 +209,22 @@
       const a = F.anchors.grader; if (!a || t >= fx.t1) return;
       const h = a.handR, [ux, uy] = PEN_U, nx = -uy * 6, ny = ux * 6;
       const top = [h[0] - ux * 30, h[1] - uy * 30], nib = [h[0] + ux * 20, h[1] + uy * 20], tip = [h[0] + PEN_D[0] + ux * 4, h[1] + PEN_D[1] + uy * 4];
-      stroke('b4d.pen', [[top[0] + nx, top[1] + ny], [nib[0] + nx, nib[1] + ny, 1], [nib[0] - nx, nib[1] - ny, 1], [top[0] - nx, top[1] - ny, 1], [top[0] + nx, top[1] + ny, 1]], { z: Z.front + 1, w: 3, fill: C.red });
-      stroke('b4d.penTip', [[nib[0] + nx * 0.8, nib[1] + ny * 0.8], [tip[0], tip[1], 1], [nib[0] - nx * 0.8, nib[1] - ny * 0.8]], { z: Z.front + 1, w: 3, fill: C.paper });
+      const op = fadeOut(t);
+      stroke('b4d.pen', [[top[0] + nx, top[1] + ny], [nib[0] + nx, nib[1] + ny, 1], [nib[0] - nx, nib[1] - ny, 1], [top[0] - nx, top[1] - ny, 1], [top[0] + nx, top[1] + ny, 1]], { z: Z.front + 1, w: 3, fill: C.red, opacity: op });
+      stroke('b4d.penTip', [[nib[0] + nx * 0.8, nib[1] + ny * 0.8], [tip[0], tip[1], 1], [nib[0] - nx * 0.8, nib[1] - ny * 0.8]], { z: Z.front + 1, w: 3, fill: C.paper, opacity: op });
     },
   };
   // where the pen tip is (absolute); the hand follows it with IK
-  const TIP = [[0, [560, 640]], [TK[0] - 0.3, [MARGIN_X, 410], 0.25], [TK[1] - 0.3, [MARGIN_X, 478], 0.25], [GAP, [598, GAP_Y - 6], 0.3],
-    [CARET - 0.05, [606, GAP_Y + 8], 0.15], [QM - 0.05, [640, GAP_Y], 0.2], [MINUS - 0.3, [576, 650], 0.3]];
+  const TIP = [[0, [556, 700]], [TK[0] - 0.3, [MARGIN_X, LINES[0].y - 8], 0.25], [TK[1] - 0.3, [MARGIN_X, LINES[1].y - 8], 0.25], [GAP, [572, GAP_Y + 4], 0.3],
+    [CARET - 0.05, [584, GAP_Y + 14], 0.15], [QM - 0.05, [600, GAP_Y + 8], 0.2], [MINUS - 0.3, [556, 700], 0.3]];
   const tipAt = t => evalTrack(TIP, t);
-  // the free hand steadies the paper at its left edge
-  const GR_BASE = { lean: 8, tilt: 6, armScale: 1.4, ikL: { w: 1, to: 'abs', dx: PP.x0 + 6, dy: 700, bend: 'down' } };
-  const graderPose = t => { const p = tipAt(t); return { ...GR_BASE, ikR: { w: 1, to: 'abs', dx: p[0] - PEN_D[0], dy: p[1] - PEN_D[1], bend: 'down' } }; };
+  // he stands well to the left of the paper (face clear of it) and reaches across from the side, elbow down, so the
+  // pen arm never crosses his face; the free hand steadies the paper's lower left edge
+  const GX = 330, GR_BASE = { lean: 6, tilt: 4, armScale: 1.65, ikL: { w: 1, to: 'abs', dx: PP.x0 + 6, dy: 712, bend: 'down' } };
+  const graderPose = t => {
+    const p = tipAt(t), w = 1 - clamp((t - (C_END - 0.35)) / 0.12);      // lets go of the pen target as he zips off
+    return { ...GR_BASE, ikL: { ...GR_BASE.ikL, w }, ikR: { w, to: 'abs', dx: p[0] - PEN_D[0], dy: p[1] - PEN_D[1], bend: 'down' }, armL: [20, 14], armR: [20, 14] };
+  };
 
   /* ---------------- poses ---------------- */
   const SIT = POSE.sitBase;
@@ -224,14 +244,14 @@
       terry: {
         pos: [[0, [DX, SEAT]], [A_END, [-600, SEAT], 0]],
         pose: [[0, writing(3, 12)], [W5 - 0.9, 'b4_think', 0.14, 'back'], [W6 - 0.9, writing(6, 15), 0.14, 'back']],
-        face: [[0, 'focus'], [W6 - 0.9, 'b4_hard', 0.08], [12.6, 'focus', 0.1]],
+        face: [[0, 'focus'], [W6 - 0.9, 'b4_hard', 0.08], [12.6, 'neutral', 0.1]],
         turn: [[0, 0.15], [W5 - 0.9, -0.1, 0.14], [W6 - 0.9, 0.15, 0.14]],
         gaze: [[0, 'paper'], [W5 - 0.9, 'up'], [W6 - 0.9, 'paper']],
         squash: [[0, 1], [W5 - 0.9, 1.04, 0.05], [W5 - 0.84, 1, 0.2, 'back'], [W6 - 0.9, 0.96, 0.05], [W6 - 0.84, 1, 0.2, 'back']],
       },
       grader: {
         enter: G_IN,
-        pos: [[0, [392, FL]], [C_END, [-700, FL], 0]],
+        pos: [[0, [GX, FL]], [C_END - 0.35, [-700, FL], 0.35, 'in']],
         pose: [[0, graderPose]],
         face: [[0, 'neutral'], [TK[0], 'focus', 0.06], [GAP + 0.1, 'puzzled', 0.06], [CARET, 'focus', 0.06]],
         turn: [[0, 0.4], [MINUS - 0.2, 0.15, 0.15]],
@@ -263,12 +283,12 @@
       { type: 'label', id: 'b4d.lb57', text: '57 人满分', at: [262, 470], rot: -4, t0: LB57, t1: B_END, target: cellC(GR.cols + 3), bend: -0.2, gap: 18, size: 46 },
       // the grader: only a complete proof counts
       { type: 'b4_proof', id: 'b4d.proof', t0: G_IN, t1: C_END },
-      { type: 'label', id: 'b4d.lbG', text: '阅卷老师', at: [190, 318], rot: -4, t0: LBG, t1: GAP + 0.6, target: { char: 'grader', part: 'headTop', dx: -10, dy: 6 }, bend: 0.2, gap: 14 },
-      ...TK.map((tt, i) => ({ type: 'write', id: 'b4d.tk' + i, text: '✓', x: MARGIN_X, y: LINES[i].y - 32, size: 46, t0: tt, t1: C_END, speed: 2800, color: 'red', anchor: 'middle', w: 5.5, z: Z.annot, sfx: 'b4_tick' })),
+      { type: 'label', id: 'b4d.lbG', text: '阅卷老师', at: [160, 330], rot: -4, t0: LBG, t1: GAP + 0.6, target: { char: 'grader', part: 'headTop', dx: -10, dy: 6 }, bend: 0.2, gap: 14 },
+      ...TK.map((tt, i) => ({ type: 'b4_mark', id: 'b4d.tk' + i, text: '✓', x: MARGIN_X, y: LINES[i].y - 32, size: 46, t0: tt, t1: C_END, speed: 2800, anchor: 'middle', w: 5.5, sfx: 'b4_tick' })),
       { type: 'b4_caret', id: 'b4d.caret', at: [600, GAP_Y + 8], t0: CARET, t1: C_END },
-      { type: 'write', id: 'b4d.q', text: '?', x: (SLOT[0] + SLOT[2]) / 2, y: GAP_Y - 32, size: 62, anchor: 'middle', t0: QM, t1: C_END, speed: 2600, color: 'red', w: 6, z: Z.annot, sfx: 'pen' },
-      { type: 'write', id: 'b4d.minus', text: '-', x: (SCORE[0] + SCORE[2]) / 2, y: (SCORE[1] + SCORE[3]) / 2 - 56, size: 92, t0: MINUS, t1: C_END, speed: 1400, color: 'red', anchor: 'middle', w: 9, z: Z.annot, sfx: 'pen' },
-      { type: 'label', id: 'b4d.lbM', text: '扣分', at: [1210, 330], rot: 4, t0: LBM, t1: C_END, target: [SCORE[2] + 4, (SCORE[1] + SCORE[3]) / 2], bend: 0.15, gap: 12, size: 48 },
+      { type: 'b4_mark', id: 'b4d.q', text: '?', x: (SLOT[0] + SLOT[2]) / 2, y: GAP_Y - 32, size: 62, anchor: 'middle', t0: QM, t1: C_END, speed: 2600, w: 6 },
+      { type: 'b4_mark', id: 'b4d.minus', text: '-', x: (SCORE[0] + SCORE[2]) / 2, y: (SCORE[1] + SCORE[3]) / 2 - 56, size: 92, t0: MINUS, t1: C_END, speed: 1400, anchor: 'middle', w: 9 },
+      { type: 'label', id: 'b4d.lbM', text: '扣分', at: [1210, 370], rot: 4, t0: LBM, t1: C_END - 0.15, target: [SCORE[2] + 4, (SCORE[1] + SCORE[3]) / 2], bend: 0.15, gap: 12, size: 48 },
       { type: 'b4_pen', id: 'b4d.pen', t1: C_END },
     ],
     sfx: [[G_IN, 'pop'], [GAP + 0.1, 'boop']],

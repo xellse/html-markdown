@@ -3,19 +3,20 @@
 //   澳大利亚奥数委员会的历史记录："We had heard a lot about young Terry but until this year we were not sure how good he really was."
 //   第 27 届 IMO 在波兰华沙（1986 年 7 月）。陶哲轩 2004 年回忆："possibly the first extended social experience I had away
 //   from my parents, and the first time I can really remember playing a tourist."；委员会记录："Terry fitted in well, socially, with the team"。
-// 演绎（画面上的比方，不是真实事件）：比身高、踮脚、拍拍头、老师脑袋里的“厉害表”、华沙街头拍照。名单上不写名次（没有记录）。
-// 开头接第 5 场的结尾（停靠的印章、红字“再考一次！”、小陶已经走出画面右边）；本集第一次在中央盖“10 岁”印章，再停靠。
+// 演绎（画面上的比方，不是真实事件）：比身高、踮脚、老师脑袋里的“厉害表”、和队友击掌、华沙街头拍照。名单上不写名次（没有记录）。
+// 开头接第 5 场的结尾（红字“再考一次！”，小陶已经走出画面右边，那时还没有印章）；本集第一次在中央盖“10 岁”印章，再停靠。
 (() => {
-  const FL = 780, OFF = [-700, FL], HIDE = [-900, FL];
+  const FL = 780, OFF = [-700, FL];
   const TX = 330, TXE = 820;                                   // Terry's spot on the plain stage / in Warsaw
 
   /* ---------------- times (scene clock) ---------------- */
   const AMO_T = 1.9, A_OUT = 5.15;                             // the olympiad's name; 1986 + the name clear for the stamp
   const STAMP = 5.2, JUMP = 5.62, DOCK = 7.25, CARD = 7.35, CHECK = 8.3, RING6 = 9.95;
-  const LINE = 10.6, UPLOOK = 11.3, LB10 = 12.45, LOOKDOWN = 13.7, LB16 = 14.9, TIP = 15.9, REACH = 16.45, DROP = 17.35;
+  const LINE = 10.6, UPLOOK = 11.3, LB10 = 12.45, LOOKDOWN = 13.7, LB16 = 14.9, TIP = 15.75, REACH = 16.3, DROP = 17.15;
+  const FADE = 17.95, OUT0 = 18.3, OUT_DT = 0.09;               // labels fade out; then the five big kids pop off, one by one
   const LEAD = 18.9, CLOUD = 21.0, SEE = 22.0, SCRATCH = 23.6, GAUGE = 24.5;
   const MAP = 27.3, TAKEOFF = 28.25, LAND = 30.4;
-  const ST = 31.95, STOP = ST + 1.4, JOKE = 33.7, PAT0 = 34.2, PAT1 = 35.5, LOOK = 36.8, SPIN = 39.3;
+  const ST = 31.95, STOP = ST + 1.4, JOKE = 33.7, HI_UP = 34.45, HI_T = 34.6, HI_DOWN = 35.15, LAUGH1 = 36.2, LOOK = 36.8, SPIN = 39.3;
   const RAISE = 41.5, CLICK = 42.1, LOWER = 43.1;
   const DUR = 44.5;
 
@@ -26,10 +27,9 @@
   });
   SFX.define('t4_plane', (tone, noise) => { noise('bandpass', 700, 1.2, 0.5, 0.06, 1500); tone('sawtooth', 110, 150, 0.45, 0.025); });
   SFX.define('t4_squeak', tone => { tone('triangle', 500, 1150, 0.22, 0.12, [24, 40]); });
-  SFX.define('t4_pat', tone => { tone('sine', 330, 200, 0.06, 0.18); });
+  SFX.define('t4_clap', (tone, noise) => { noise('bandpass', 1900, 0.9, 0.07, 0.38); noise('highpass', 4200, 0.7, 0.03, 0.12); });
 
   /* ---------------- cast: the five teammates (shared E4.mate1–5), two team leaders (local: they only appear here) ---------------- */
-  const bagged = d => ({ ...d, bag: true, bagFloor: HIDE });  // the backpacks only show up in Warsaw (bag track)
   Object.assign(HAIR, {
     // team leader 1: a flat crew cut
     t4_crew() {
@@ -47,27 +47,19 @@
     },
   });
   const CAST4 = {
-    terry: bagged(E4.terry),
-    m4: bagged(E4.mate4),                                      // the team's one 大姐姐 (ponytail)
-    m2: bagged(E4.mate2),
-    m1: bagged(E4.mate1),
-    m3: bagged(E4.mate3),
-    m5: bagged(E4.mate5),
+    terry: E4.terry,
+    m4: E4.mate4,                                              // the team's one 大姐姐 (ponytail)
+    m2: E4.mate2,
+    m1: E4.mate1,
+    m3: E4.mate3,
+    m5: E4.mate5,
+    // stand-ins for the pop-off at the end of the line-up (not in `order`: drawn, shrinking, by COMP.t4_popOut)
+    x_m2: E4.mate2, x_m1: E4.mate1, x_m4: E4.mate4, x_m3: E4.mate3, x_m5: E4.mate5,
     ld1: { H: 430, head: 0.35, torso: 0.25, leg: 0.32, arm: 0.36, hair: 't4_crew', glasses: true, blink: [4.4, 1.3] },
     ld2: { H: 425, head: 0.35, torso: 0.25, leg: 0.32, arm: 0.36, hair: 't4_wave', blink: [3.8, 2.9] },
   };
 
   /* ---------------- 0 · the end of the recap, leaving ---------------- */
-  /** the docked 10-year stamp from the recap; pops off just before the new stamp comes down in the middle */
-  COMP.t4_stamp0 = {
-    draw(fx, t, F) {
-      if (t >= fx.t1) return;
-      const s = 1 - EASE.in(clamp((t - fx.t1 + 0.14) / 0.14));
-      DL.save(); DL.about(fx.dock[0], fx.dock[1], () => DL.scale(Math.max(0.01, s)));
-      COMP.ageStamp.draw(fx, t, F);
-      DL.restore();
-    },
-  };
   /** the recap's red “再考一次！” (same place and size), whisked away */
   COMP.t4_again = {
     draw(fx, t) {
@@ -323,8 +315,9 @@
           stroke(k + '.w' + r + j, [[wx - 18, wy], [wx + 18, wy, 1], [wx + 18, wy + 50, 1], [wx - 18, wy + 50, 1], [wx - 18, wy, 1]], { z, w: 2.5, color: C.pencil, draw: q, boil: 0.5 });
         });
       }
-      // an arched door
-      stroke(k + '.d', [[xm - 26, FL], [xm - 26, FL - 72, 1], [xm - 16, FL - 90], [xm, FL - 96], [xm + 16, FL - 90], [xm + 26, FL - 72], [xm + 26, FL, 1]], { z, w: 3.5, draw: q });
+      // an arched door (pencil), left out where someone stands in front of it
+      if ([SX.m4, SX.m2, TXE, SX.m1].every(x => Math.abs(x - xm) > 60))
+        stroke(k + '.d', [[xm - 26, FL], [xm - 26, FL - 72, 1], [xm - 16, FL - 90], [xm, FL - 96], [xm + 16, FL - 90], [xm + 26, FL - 72], [xm + 26, FL, 1]], { z, w: 2.5, color: C.pencil, draw: q, boil: 0.5 });
     });
     // the clock tower
     const q = clamp(p * 1.6), { x0, x1, top, tip, clock } = TOWER, xm = (x0 + x1) / 2;
@@ -335,7 +328,7 @@
       stroke('t4st.hh', [clock, [clock[0], clock[1] - 20]], { z, w: 4, draw: q });
       stroke('t4st.hm', [clock, [clock[0] + 22, clock[1] + 6]], { z, w: 3, draw: q });
       [470, 580].forEach((wy, i) => stroke('t4st.tw' + i, [[xm - 12, wy + 40], [xm - 12, wy + 6], [xm, wy - 6], [xm + 12, wy + 6], [xm + 12, wy + 40, 1], [xm - 12, wy + 40, 1]], { z, w: 2.5, color: C.pencil, draw: q, boil: 0.5 }));
-      stroke('t4st.td', [[xm - 28, FL], [xm - 28, FL - 76, 1], [xm, FL - 100], [xm + 28, FL - 76], [xm + 28, FL, 1]], { z, w: 3.5, draw: q });
+      stroke('t4st.td', [[xm - 28, FL], [xm - 28, FL - 76, 1], [xm, FL - 100], [xm + 28, FL - 76], [xm + 28, FL, 1]], { z, w: 2.5, color: C.pencil, draw: q, boil: 0.5 });
     }
   };
 
@@ -365,9 +358,11 @@
         const ang = (150 + i * 12) * RAD, r0 = 16 + 40 * v, L = 34 * Math.sin(Math.PI * Math.min(1, v * 1.4)), o = [c[0] - 40, c[1] - 6];
         stroke(k + '.ray' + i, [[o[0] + Math.cos(ang) * r0, o[1] + Math.sin(ang) * r0], [o[0] + Math.cos(ang) * (r0 + L), o[1] + Math.sin(ang) * (r0 + L)]], { z: Z.fx, w: 4 });
       }
+      const kq = clamp((t - fx.click) / 0.18);
+      if (kq > 0 && t < fx.down + 0.3) text(k + '.ka', '咔嚓！', fx.ka[0], fx.ka[1], { size: 58, rot: -8, z: Z.annot, halo: 10, scale: lerp(0.5, 1, EASE.back(kq)), opacity: clamp(kq * 3) });
       F.targets[k] = c;
     },
-    cues: fx => [[fx.up, 'boop']],
+    cues: fx => [[fx.up, 'boop'], [fx.click, 't4_click']],
   };
   /** the tourist map in m2's hands: held upside down at first (the 华沙 on it is upside down), turned the right way up at `spin` */
   const TMAP = [600, 604];
@@ -388,14 +383,54 @@
     },
     cues: fx => [[fx.t0, 'paper'], [fx.spin, 'swish']],
   };
-  /** pat-pat: three little ink ticks over Terry's head each time m1's hand lands */
-  COMP.t4_patTicks = {
+  /** the high-five: a little ink burst where the two hands meet. {at, t0} */
+  COMP.t4_hi5 = {
+    draw(fx, t) {
+      const v = (t - fx.t0) / 0.35; if (v < 0 || v >= 1) return;
+      const [x, y] = fx.at;
+      for (let i = 0; i < 7; i++) {
+        const a = (-180 + i * 30) * RAD, r0 = 20 + 26 * v, L = 22 * Math.sin(Math.PI * Math.min(1, v * 1.3));
+        stroke('t4.h5.' + i, [[x + Math.cos(a) * r0, y + Math.sin(a) * r0], [x + Math.cos(a) * (r0 + L), y + Math.sin(a) * (r0 + L)]], { z: Z.fx, w: 4 });
+      }
+    },
+    cues: fx => [[fx.t0, 't4_clap']],
+  };
+  /** the line-up breaks up: each big kid pops off (their pop-in, reversed). The real teen leaves the stage at t;
+   *  the stand-in 'x_<id>' (same look, same pose) is drawn shrinking about its feet for 0.24 s. {outs: [[id, t]]} */
+  COMP.t4_popOut = {
     draw(fx, t, F) {
-      if (t < fx.t0 + 0.3 || t >= fx.t1) return;
-      const ph = ((t - fx.t0) * PAT_HZ) % 1; if (ph > 0.3) return;
-      const a = F.anchors.terry; if (!a) return;
-      const o = 1 - ph / 0.3, c = [a.headTop[0] + 6, a.headTop[1] - 34];
-      [-50, -90, -130].forEach((d, i) => { const r = d * RAD; stroke('t4.pt' + i, [[c[0] + Math.cos(r) * 30, c[1] + Math.sin(r) * 30], [c[0] + Math.cos(r) * 50, c[1] + Math.sin(r) * 50]], { z: Z.fx, w: 3.5, opacity: o }); });
+      fx.outs.forEach(([id, t0]) => {
+        const u = (t - t0) / 0.24; if (u < 0 || u >= 1) return;
+        const sc = u < 0.3 ? 1 + 0.1 * EASE.out(u / 0.3) : 1.1 * (1 - EASE.in((u - 0.3) / 0.7));
+        const L = layoutChar('x_' + id, t, F); if (!L) return;
+        DL.save(); DL.about(LX[id], FL, () => DL.scale(Math.max(0.01, sc)));
+        drawChar(L, F);
+        DL.restore();
+      });
+    },
+    cues: fx => fx.outs.map(([, t0]) => [t0, 'plip']),
+  };
+  /** fades whatever `inner` (another fx) draws, to nothing over [f0, f0 + fd] */
+  COMP.t4_fade = {
+    draw(fx, t, F) {
+      const k = 1 - clamp((t - fx.f0) / fx.fd); if (k <= 0) return;
+      const n0 = DL.items.length;
+      COMP[fx.inner.type].draw(fx.inner, t, F);
+      if (k < 1) for (let i = n0; i < DL.items.length; i++) { const a = DL.items[i].attrs; a.opacity = +((a.opacity ?? 1) * k).toFixed(3); }
+    },
+    cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
+  };
+  /** small backpacks for Warsaw (the engine's bag is too big for this shot): a pack peeking out behind, one strap. on: [[id, w, h, strap]] */
+  COMP.t4_packs = {
+    draw(fx, t, F) {
+      if (t < fx.t0) return;
+      fx.on.forEach(([id, w, h, strap]) => {
+        const a = F.anchors[id]; if (!a) return;
+        const neckY = a.head[1] + a.r * 0.95, c = [a.hip[0] + w * 0.42, (neckY + a.hip[1]) / 2 + 2], k = 't4.pk.' + id;
+        stroke(k, superPts(c[0], c[1], w, h, 18, 4.2), { z: Z.back, w: 3.8, closed: true, fill: C.paper });
+        stroke(k + '.fl', [[c[0] - w / 2 + 4, c[1] - h * 0.2], [c[0], c[1] - h * 0.08], [c[0] + w / 2 - 4, c[1] - h * 0.2]], { z: Z.back + 0.1, w: 3 });
+        if (strap) stroke(k + '.st', [[a.head[0] + 10, neckY + 6], [a.hip[0] - 4, a.hip[1] - 14]], { z: Z.body + 0.1, w: 3.2 });
+      });
     },
   };
   /** little laugh lines bobbing beside a few heads. on: [[id, t0, t1]] */
@@ -414,6 +449,7 @@
   };
 
   /* ---------------- poses ---------------- */
+  const HI5 = [TXE + 72, 500];                                 // where Terry's and m1's hands meet
   const ldHold = { w: 1, to: 'abs', dx: CLIP[0] - 40, dy: CLIP[1] + 14, bend: 'down' };
   const camHands = { ikL: { w: 1, to: 'abs', dx: CAM_UP[0] - 14, dy: CAM_UP[1] + 18, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: CAM_UP[0] + 20, dy: CAM_UP[1] + 18, bend: 'out' } };
   const mapHands = { ikL: { w: 1, to: 'abs', dx: TMAP[0] - 56, dy: TMAP[1] + 18, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: TMAP[0] + 56, dy: TMAP[1] + 18, bend: 'down' } };
@@ -429,27 +465,28 @@
     t4_ld2Peek: { lean: -7, tilt: -12, armScale: 1.1, ikR: { w: 1, to: 'chin', dx: 0.28, dy: 0.05, bend: 'down' }, ikL: { w: 1, to: 'hip', dx: -24, dy: -4, bend: 'out' } },
     t4_ld2Scratch: { tilt: -9, armScale: 1.15, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' }, ikL: { w: 1, to: 'hip', dx: -24, dy: -4, bend: 'out' } },
     t4_lookDown: { tilt: -8, lean: -2 },
-    t4_m1pat: { lean: -3, tilt: 6, armR: [16, 10] },
-    t4_point: { lean: -3, armL: [86, 4], armR: [16, 10] },
+    t4_hi5: { lean: -2, tilt: -8, armScale: 1.9, armL: [16, 10], ikR: { w: 1, to: 'abs', dx: HI5[0] - 4, dy: HI5[1] + 6, bend: 'out' } },
+    t4_m1hi5: { lean: -4, tilt: 4, armR: [16, 10], ikL: { w: 1, to: 'abs', dx: HI5[0] + 8, dy: HI5[1] - 4, bend: 'down' } },
+    t4_m1up: { armScale: 1.4, armR: [140, 20], armL: [14, 10] },          // cheers on his own side, clear of Terry
     t4_mapHold: { tilt: 8, lean: 1, ...mapHands },
     t4_mapHuh: { tilt: 28, lean: 3, ...mapHands },
     t4_camUp: { tilt: -4, armScale: 1.6, ...camHands },
   });
-  const PAT_HZ = 2.4;                                          // pats per second; the hand lands at PAT0 + n / PAT_HZ
-  const pat = t => ({ ...POSE.t4_m1pat, armScale: 1.1, ikL: { w: 1, to: 'abs', dx: TXE + 8, dy: 528 - 26 * Math.abs(Math.sin((t - PAT0) * Math.PI * PAT_HZ)), bend: 'out' } });
   const tremble = base => t => ({ ...POSE[base], tilt: POSE[base].tilt + 3 * Math.sin(t * 47) });
   const walkE = makeWalk(ST, STOP, 5.2, { lean: -4 });
+  const laughBob = t0 => t => 1 + 0.03 * Math.sin((t - t0) * 22);
 
   /* ---------------- tracks ---------------- */
   // line-up order (left → right after Terry) and Warsaw spots
   const LX = { m2: 520, m1: 700, m4: 880, m3: 1060, m5: 1240 };
   const SX = { m4: 400, m2: 600, m1: 960 };
-  const teenPos = id => [[0, [LX[id], FL]], [LEAD, OFF, 0], ...(SX[id] ? [[ST, [SX[id] + 260, FL], 0], [ST, [SX[id], FL], STOP - ST, 'lin']] : [])];
+  const OUTS = [['m5', 0], ['m3', 1], ['m4', 2], ['m1', 3], ['m2', 4]].map(([id, i]) => [id, OUT0 + i * OUT_DT]);
+  const OUT_T = Object.fromEntries(OUTS);
+  const teenPos = id => [[0, [LX[id], FL]], [OUT_T[id], OFF, 0], ...(SX[id] ? [[ST, [SX[id] + 260, FL], 0], [ST, [SX[id], FL], STOP - ST, 'lin']] : [])];
   const ENTER = { m2: 0, m1: 0.12, m4: 0.24, m3: 0.36, m5: 0.48 };
   const teen = (id, o) => ({
     enter: LINE + ENTER[id],
     pos: teenPos(id),
-    bag: [[0, 0], [ST, 1, 0]],
     pose: [[0, 'stand'], [LOOKDOWN, 't4_lookDown', 0.15], [DROP + 0.2, 'stand', 0.2], [ST, walkE, 0], ...(o.pose || [])],
     face: [[0, 'neutral'], [LINE + 0.6, 'smile', 0.1], [LOOKDOWN, 'neutral', 0.08], [TIP + 0.3, 'surprised', 0.06], [DROP + 0.15, 'smile', 0.08], [ST, 'smile', 0], ...(o.face || [])],
     turn: [[0, 0], [LOOKDOWN, -0.3, 0.12], [ST, -0.5, 0], ...(o.turn || [])],
@@ -459,23 +496,24 @@
   const TRACKS_ = {
     terry: {
       pos: [[0, [-160, FL]], [0.3, [TX, FL], 1.2, 'lin'], [MAP, OFF, 0], [ST, [TXE + 260, FL], 0], [ST, [TXE, FL], STOP - ST, 'lin']],
-      bag: [[0, 0], [ST, 1, 0]],
       pose: [[0, makeWalk(0.3, 1.5, 5.2)], [1.5, 'stand', 0.12], [JUMP, 't4_jump', 0.1, 'back'], [JUMP + 0.3, 'kidCheer', 0.14], [DOCK, 'stand', 0.15],
         [CARD + 0.3, 'kidPoint', 0.12, 'back'], [LINE, 'stand', 0], [UPLOOK, 'lookUp', 0.15],
         [TIP, tremble('t4_tiptoe'), 0.12, 'back'], [REACH, tremble('t4_reach'), 0.1, 'back'], [DROP, 'stand', 0.07],
         [SEE + 0.1, 't4_kWave', 0.12, 'back'], [SEE + 1.4, 'stand', 0.15],
-        [ST, walkE, 0], [STOP, 'stand', 0.12], [LOOK, 'lookUp', 0.15], [RAISE, 't4_camUp', 0.18, 'back'], [LOWER, 'kidCheer', 0.15, 'back']],
+        [ST, walkE, 0], [STOP, 'stand', 0.12], [HI_UP, 't4_hi5', 0.12, 'back'], [HI_DOWN, 'stand', 0.2],
+        [LOOK, 'lookUp', 0.15], [RAISE, 't4_camUp', 0.18, 'back'], [LOWER, 'kidCheer', 0.15, 'back']],
       face: [[0, 'neutral'], [1.5, 'focus', 0.06], [AMO_T, 'neutral', 0.06], [JUMP, 'joy', 0.05], [DOCK, 'grin', 0.06], [LINE, 'neutral', 0], [UPLOOK, 'surprised', 0.05],
-        [LB10, 'neutral', 0.08], [TIP, 'effort', 0.06], [DROP + 0.12, 'sheepish', 0.06], [LEAD, 'neutral', 0], [SEE, 'smile', 0.08],
-        [ST, 'smile', 0], [JOKE, 'grin', 0.05], [PAT0, 'joy', 0.05], [PAT1 + 0.2, 'grin', 0.06], [LOOK, 'idea', 0.06], [RAISE, 'focus', 0.05], [LOWER, 'joy', 0.05]],
+        [LB10, 'neutral', 0.08], [TIP, 'effort', 0.06], [DROP + 0.12, 'sheepish', 0.06], [OUT0 + 0.2, 'neutral', 0.08], [LEAD, 'neutral', 0], [SEE, 'smile', 0.08],
+        [ST, 'smile', 0], [JOKE, 'grin', 0.05], [HI_T, 'joy', 0.05], [HI_T + 0.45, 'laugh', 0.05], [LAUGH1, 'smile', 0.08], [LOOK, 'idea', 0.06], [RAISE, 'focus', 0.05], [LOWER, 'joy', 0.05]],
       turn: [[0, 0.45], [1.5, 0.3, 0.12], [JUMP, 0, 0.1], [CARD + 0.3, 0.35, 0.1], [LINE, 0.1, 0], [UPLOOK, 0.35, 0.1], [DROP + 0.12, 0.15, 0.1],
         [LEAD, 0.35, 0], [ST, -0.5, 0], [JOKE, 0.5, 0.1], [LOOK, -0.45, 0.12], [RAISE, -0.6, 0.1], [LOWER, 0, 0.12]],
       gaze: [[0, [880, 240]], [AMO_T, [880, 440]], [JUMP, 'viewer'], [CARD + 0.2, 'card'], [LINE, 'viewer'], [UPLOOK, 'm2'], [LB10 + 0.3, 'viewer'],
-        [TIP, [520, 380]], [DROP + 0.12, 'viewer'], [LEAD, 'ld1'], [SEE + 1.5, 'viewer'], [ST, [-200, 500]], [JOKE, 'm1'], [PAT0, 'viewer'],
+        [TIP, [520, 380]], [DROP + 0.12, 'viewer'], [OUT0, [1050, 560]], [LEAD, 'ld1'], [SEE + 1.5, 'viewer'], [ST, [-200, 500]], [JOKE, 'm1'], [HI_UP, 'hi5'],
+        [HI_T + 0.4, 'm1'], [LAUGH1, 'viewer'],
         [LOOK, 'tower'], [RAISE, 'm2'], [LOWER, 'viewer']],
       squash: [[0, 1], [JUMP + 0.25, 0.86, 0.05], [JUMP + 0.3, 1, 0.22, 'back'], [UPLOOK, 1.06, 0.05], [UPLOOK + 0.06, 1, 0.2, 'back'],
         [TIP, 1.05, 0.12], [DROP, 0.86, 0.05], [DROP + 0.06, 1, 0.22, 'back'],
-        [PAT0, t => 1 - 0.06 * (1 - Math.abs(Math.sin((t - PAT0) * Math.PI * PAT_HZ))), 0.05], [PAT1, 1, 0.12], [LOWER, 1.08, 0.05], [LOWER + 0.06, 1, 0.22, 'back']],
+        [HI_T, 1.07, 0.04], [HI_T + 0.04, 1, 0.22, 'back'], [HI_T + 0.45, laughBob(HI_T), 0.05], [LAUGH1, 1, 0.1], [LOWER, 1.08, 0.05], [LOWER + 0.06, 1, 0.22, 'back']],
     },
     m2: teen('m2', {
       pose: [[STOP, 'stand', 0.12], [LOOK + 0.2, 't4_mapHold', 0.15], [LOOK + 1.3, 't4_mapHuh', 0.15, 'back'], [SPIN, 't4_mapHold', 0.15, 'back'], [RAISE, 't4_cheer', 0.15, 'back'], [LOWER + 0.1, 'stand', 0.2]],
@@ -484,20 +522,23 @@
       gaze: [[STOP, 'terry'], [LOOK + 0.2, 'tmap'], [RAISE, 'camT']],
     }),
     m1: teen('m1', {
-      pose: [[STOP, 'stand', 0.12], [PAT0 - 0.15, pat, 0.15], [PAT1, 'stand', 0.2], [RAISE + 0.2, 't4_point', 0.12, 'back'], [LOWER + 0.1, 'stand', 0.2]],
-      face: [[JOKE + 0.2, 'laugh', 0.05], [PAT1 + 0.2, 'smile', 0.08], [LOOK + 0.6, 'surprised', 0.05], [LOOK + 1.6, 'smile', 0.08], [LOWER, 'laugh', 0.05]],
-      turn: [[STOP, -0.45, 0.12], [LOOK + 0.6, -0.5, 0.1], [RAISE + 0.2, -0.55, 0.1]],
-      gaze: [[STOP, 'terry'], [LOOK + 0.6, 'tower'], [RAISE + 0.2, 'm2'], [LOWER, 'terry']],
-      squash: [[JOKE + 0.2, t => 1 + 0.03 * Math.sin((t - JOKE) * 22), 0.05], [PAT1, 1, 0.1]],
+      pose: [[STOP, 'stand', 0.12], [HI_UP, 't4_m1hi5', 0.12, 'back'], [HI_DOWN, 'stand', 0.2], [RAISE + 0.2, 't4_m1up', 0.12, 'back'], [LOWER + 0.1, 'stand', 0.2]],
+      face: [[JOKE + 0.2, 'laugh', 0.05], [HI_UP, 'grin', 0.05], [HI_T + 0.35, 'laugh', 0.05], [LAUGH1, 'smile', 0.08], [LOOK + 0.6, 'surprised', 0.05], [LOOK + 1.6, 'smile', 0.08],
+        [RAISE + 0.2, 'grin', 0.05], [LOWER, 'laugh', 0.05]],
+      turn: [[STOP, -0.45, 0.12], [LOOK + 0.6, -0.5, 0.1], [RAISE + 0.2, -0.3, 0.1]],
+      gaze: [[STOP, 'terry'], [HI_UP, 'hi5'], [HI_T + 0.4, 'terry'], [LOOK + 0.6, 'tower'], [RAISE + 0.2, 'm2'], [LOWER, 'terry']],
+      squash: [[JOKE + 0.2, laughBob(JOKE), 0.05], [HI_UP, 1, 0.08], [HI_T + 0.35, laughBob(HI_T), 0.05], [LAUGH1, 1, 0.1]],
     }),
     m4: teen('m4', {
       pose: [[STOP, 'stand', 0.12], [RAISE, 't4_cheer', 0.15, 'back'], [LOWER + 0.1, 'stand', 0.2]],
-      face: [[JOKE + 0.3, 'laugh', 0.05], [PAT1, 'smile', 0.08], [LOOK, 'surprised', 0.05], [LOOK + 1.2, 'smile', 0.08], [RAISE, 'joy', 0.05], [LOWER + 0.1, 'laugh', 0.06]],
+      face: [[JOKE + 0.3, 'laugh', 0.05], [LAUGH1, 'smile', 0.08], [LOOK, 'surprised', 0.05], [LOOK + 1.2, 'smile', 0.08], [RAISE, 'joy', 0.05], [LOWER + 0.1, 'laugh', 0.06]],
       turn: [[STOP, 0.4, 0.12], [LOOK, -0.6, 0.1], [LOOK + 1.8, 0.55, 0.1], [LOOK + 3.3, -0.4, 0.1], [RAISE, 0.45, 0.1]],
       gaze: [[STOP, 'terry'], [LOOK, [-100, 300]], [LOOK + 1.8, [1300, 260]], [LOOK + 3.3, 'tower'], [RAISE, 'camT']],
     }),
     m3: teen('m3', {}),   // m3 and m5 stay home in the Warsaw shot (fewer people, clearer picture)
     m5: teen('m5', {}),
+    // stand-ins for the pop-off: frozen in the pose the real ones have at that moment
+    ...Object.fromEntries(Object.keys(LX).map(id => ['x_' + id, { pos: [[0, [LX[id], FL]]], pose: [[0, 'stand']], face: [[0, 'smile']], turn: [[0, -0.3]], gaze: [[0, 'terry']] }])),
     ld1: {
       enter: LEAD + 0.05,
       pos: [[0, [LD1X, FL]], [MAP, OFF, 0]],
@@ -524,7 +565,7 @@
     cast: CAST4,
     order: ['ld1', 'ld2', 'm4', 'm2', 'terry', 'm1', 'm3', 'm5'],
     tracks: TRACKS_,
-    targets: () => ({ card: [880, 440], tower: [TOWER.clock[0], TOWER.clock[1] - 20], tmap: TMAP, clip: CLIP, camT: [CAM_UP[0] - 30, CAM_UP[1]] }),
+    targets: () => ({ card: [880, 440], tower: [TOWER.clock[0], TOWER.clock[1] - 20], tmap: TMAP, clip: CLIP, camT: [CAM_UP[0] - 30, CAM_UP[1]], hi5: HI5 }),
     set: [
       { type: 'floor', t0: 0.3, t1: MAP },
       { type: 't4_street', t0: ST },
@@ -540,29 +581,29 @@
       { type: 'ageStamp', age: 10, place: '进国家队', t0: STAMP, ...E4.STAMP, dockT: DOCK, pulse: [] },
       { type: 't4_roster', id: 't4.roster', at: [880, 440], t0: CARD, t1: LINE, me: 3, check: CHECK, ring: RING6 },
       // six in a row
-      { type: 'label', id: 't4.lb10', text: '10 岁', at: [236, 318], rot: -5, size: 54, t0: LB10, t1: LEAD, target: { char: 'terry', part: 'headTop', dy: -40 }, bend: 0.25, gap: 8 },
-      { type: 't4_brace', id: 't4.br16', text: '16、17 岁', x0: 440, x1: 1320, y: 352, t0: LB16, t1: LEAD },
-      { type: 't4_hline', id: 't4.hl', x0: 262, x1: 600, y: 401, t0: TIP, t1: LEAD },
+      { type: 't4_fade', f0: FADE, fd: 0.2, inner: { type: 'label', id: 't4.lb10', text: '10 岁', at: [236, 318], rot: -5, size: 54, t0: LB10, t1: LEAD, target: { char: 'terry', part: 'headTop', dy: -75 }, bend: 0.25, gap: 8 } },
+      { type: 't4_fade', f0: FADE, fd: 0.2, inner: { type: 't4_brace', id: 't4.br16', text: '16、17 岁', x0: 440, x1: 1320, y: 352, t0: LB16, t1: LEAD } },
+      { type: 't4_fade', f0: FADE, fd: 0.2, inner: { type: 't4_hline', id: 't4.hl', x0: 262, x1: 600, y: 401, t0: TIP, t1: LEAD } },
+      { type: 't4_popOut', id: 't4.out', outs: OUTS },
       // the team leaders
       { type: 't4_clip', id: 't4.clip', char: 'ld1', t0: LEAD + 0.36, t1: MAP },
-      { type: 'title', id: 't4.src', text: '（澳大利亚奥数委员会的记录）', x: 470, y: 300, size: 40, color: 'red', rot: -2, t0: LEAD + 0.5, t1: MAP },
+      { type: 'title', id: 't4.src', text: '（澳大利亚奥数委员会的记录里写着）', x: 440, y: 330, size: 38, color: 'red', rot: -2, t0: LEAD + 0.5, t1: MAP },
       { type: 'thought', id: 't4.cloud', at: CLOUD_AT, rx: 228, ry: 116, t0: CLOUD, t1: MAP, from: { char: 'ld1', part: 'headTop', dx: 10, dy: -6 } },
       { type: 't4_mind', id: 't4.mind', at: CLOUD_AT, t0: CLOUD + 0.15, t1: MAP, tg: GAUGE },
-      { type: 'mark', id: 't4.qq', char: '?', on: ['ld2'], t0: SCRATCH + 0.3, t1: MAP, size: 76, dx: 30 },
       // the flight
       { type: 't4_map', id: 't4.map', t0: MAP, t1: ST },
       { type: 'title', id: 't4.jul', text: '7 月', x: 790, y: 640, size: 58, color: 'red', rot: -4, t0: MAP + 0.25, t1: ST },
       { type: 'label', id: 't4.lbWaw', text: '华沙', at: [404, 154], rot: -4, size: 56, t0: LAND + 0.1, t1: ST, target: WAW, bend: -0.25, gap: 16 },
       // Warsaw
       { type: 'title', id: 't4.said', text: '（他后来自己说的）', x: 800, y: 124, size: 42, color: 'red', rot: -2, t0: 36.6, t1: DUR },
-      { type: 't4_laugh', id: 't4.laugh', on: [['m1', JOKE + 0.2, PAT1 + 0.1], ['m4', JOKE + 0.3, PAT1], ['m2', LOWER + 0.15, DUR], ['m1', LOWER + 0.05, DUR]] },
-      { type: 't4_patTicks', id: 't4.pt', t0: PAT0, t1: PAT1 },
+      { type: 't4_packs', id: 't4.packs', t0: ST, on: [['m4', 64, 86, true], ['m2', 64, 86, true], ['m1', 64, 86, true], ['terry', 48, 64, false]] },
+      { type: 't4_laugh', id: 't4.laugh', on: [['m1', JOKE + 0.2, HI_UP], ['m4', JOKE + 0.3, LAUGH1], ['m1', HI_T + 0.35, LAUGH1], ['terry', HI_T + 0.45, LAUGH1], ['m2', LOWER + 0.15, DUR], ['m1', LOWER + 0.05, DUR]] },
+      { type: 't4_hi5', id: 't4.hi5', at: HI5, t0: HI_T },
       { type: 't4_tmap', id: 't4.tmap', t0: LOOK + 0.25, t1: RAISE, spin: SPIN },
-      { type: 't4_cam', id: 't4.cam', t0: ST, up: RAISE, down: LOWER, click: CLICK },
-      { type: 'title', id: 't4.ka', text: '咔嚓！', x: 764, y: 356, size: 58, rot: -8, t0: CLICK, t1: LOWER + 0.3, sfx: 't4_click' },
+      { type: 't4_cam', id: 't4.cam', t0: ST, up: RAISE, down: LOWER, click: CLICK, ka: [820, 300] },
     ],
     sfx: [[JUMP, 'hop'], [JUMP + 0.27, 'thud'], [UPLOOK, 'boop'], [TIP, 't4_squeak'], [DROP, 'thud'], [LEAD + 0.05, 'pop'], [LEAD + 0.18, 'pop'],
-      [SEE, 'boop'], [SEE + 0.12, 'plip'], [MAP, 'whoosh'], [ST, 'whoosh'], ...[1, 2, 3].map(n => [PAT0 + n / PAT_HZ, 't4_pat']),
+      [SEE, 'boop'], [SEE + 0.12, 'plip'], [MAP, 'whoosh'], [ST, 'whoosh'],
       [LINE, 'whoosh'], ...Object.values(ENTER).map(d => [LINE + d, 'pop']), [LOWER, 'hop']],
     steps: [{ t0: 0.3, t1: 1.5, hz: 5.2 }, { t0: ST, t1: STOP, hz: 5.2 }],
     subs: [

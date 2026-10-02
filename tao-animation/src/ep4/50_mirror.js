@@ -1,7 +1,7 @@
 // 第 50 场 · 一面镜子：成绩单变成一面手镜，照出强（7、7）和弱（1、0、1）。
 // 学校的数学课对他太简单（陶哲轩 2019 年回忆，AMS《Living Proof》）；世界赛场上，不足变成了一个个分数。
 // 那天他心里怎么想，没有记录（日记本空白页 + 红问号；不演小陶的心情）。
-// 面对这样的成绩单，谁都可以选：转过头去找借口——这是一个普通小人（没有那撮头发，“我们”），不是小陶；
+// 面对这样的成绩单，谁都可以选：转过头去找借口——这是一个普通小人（戴帽子、没有那撮头发、比小陶高，标“我们（任何人）”），不是小陶；
 // 或者直直地看着它问：错在哪一题？卡在哪一步？为什么？只有第二种能让人进步。
 // 开场接第 40 场：成绩单在 E4.SHEET，写着 7、7、3、1、0、1 和“= 19”；“= 19”在成绩单滑下去变成镜子时淡出（镜框里放不下它）。
 (() => {
@@ -11,7 +11,7 @@
   const T = {
     glide: 0.4, totOff: 0.4, frame: 1.5, glint: 2.75, strong: 4.15, weak: 5.35, glint2: 6.8, labOff: 8.45, aside: 8.6,
     panel: 9.15, kid: 9.35, board: 9.6, yawn: 11.25, chin: 12.95, note: 13.45, panelOff: 16.9,
-    fly: 17.45, lab: 18.15, box: 19.15, flyOff: 21.75,
+    fly: 17.45, lab: 18.3, box: 19.35, flyOff: 21.75,
     diary: 22.3, open: 23.0, q: 23.55, noRec: 24.65, diaryOff: 26.85,
     center: 26.9, floor: 27.0, we: 27.35, weLab: 27.7, weLabOff: 30.45,
     away: 32.0, ex1: 34.45, hdr1: 35.0, ex2: 36.15, back: 39.45, glass: 39.6, hdr2: 40.15,
@@ -47,15 +47,19 @@
     const hy = cy + ry + band, hp2 = stag(p, 2, 3);
     stroke(k + '.collar', [[-36, hy - 8], [36, hy - 8, 1], [28, hy + 22, 1], [-28, hy + 22, 1], [-36, hy - 8, 1]], { z, w: 5, fill: C.paper, draw: hp2 });
     stroke(k + '.handle', superPts(0, hy + 22 + MG.hLen / 2, MG.hW, MG.hLen, 20, 4), { z, w: 5, closed: true, fill: C.paper, draw: hp2 });
-    stroke(k + '.hh', [[-9, hy + 52], [-9, hy + MG.hLen - 6]], { z: z + 0.1, w: 2.4, color: C.pencil, opacity: hp2, boil: 0.4 });
+    stroke(k + '.hh', [[-9, hy + 52], [-9, hy + MG.hLen - 6]], { z: z + 0.1, w: 2.4, color: C.pencil, draw: hp2, boil: 0.4 });
     // glass sheen (pencil) and a glint now and then
     const sp = clamp((lt - 0.6) / 0.3);
-    [[[-404, 40], [-352, -12]], [[-396, 92], [-360, 56]], [[330, 150], [382, 98]]].forEach((s, i) => stroke(k + '.sh' + i, s, { z: z + 0.1, w: 4, color: C.pencil, draw: sp }));
+    // glass sheen: two pairs of long diagonal streaks (behind the sheet, so they show in the glass around it)
+    [[[-418, 70], [-318, -84]], [[-398, 130], [-304, -6]], [[300, 214], [410, 52]], [[340, 226], [424, 108]]]
+      .forEach((s, i) => stroke(k + '.sh' + i, s, { z: z + 0.1, w: i % 2 ? 3 : 5, color: C.pencil, opacity: 0.85, draw: sp, bow: 0.2 }));
     sparkle(k + '.gl0', [-372, -22], (t - T.glint) / 0.5);
     sparkle(k + '.gl1', [356, 112], (t - T.glint2) / 0.5, 22);
   }
-  /** the red 强 / 弱 braces under the two halves (inside the glass) */
+  /** the red 强 / 弱 braces under the two halves (inside the glass), and later the ring round the 0 */
   function m4Labels(k, sh, t) {
+    const rp = EASE.out(clamp((t - T.ring) / 0.3));
+    if (rp > 0) stroke(k + '.ring0', ringPts(k + '.ring0', sh._bx(4) + CELL / 2, 0, CELL * 0.6, CELL * 0.57, { n: 11, a0: -100, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: rp });
     const fade = 1 - clamp((t - T.labOff) / 0.25); if (fade <= 0) return;
     const y0 = 126;
     [[0, 1, '强', T.strong], [3, 5, '弱', T.weak]].forEach(([a, b, s, t0], j) => {
@@ -80,7 +84,7 @@
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); m4Labels(k, fx.sheet, t); DL.restore();
     },
     cues: fx => [[T.glide, 'whoosh'], [T.frame, 'pen'], [T.frame + 0.35, 'pen'], [T.glint, 'plip'], [T.strong, 'pen'], [T.weak, 'pen'],
-      [T.glint2, 'plip'], [T.aside, 'whoosh'], [T.center, 'whoosh'], ...COMP.e4_scores.cues(fx.sheet)],
+      [T.glint2, 'plip'], [T.aside, 'whoosh'], [T.center, 'whoosh'], [T.ring, 'pen'], ...COMP.e4_scores.cues(fx.sheet)],
   };
 
   /* ---------------- L3–L4: a memory panel — the school maths class, far too easy ---------------- */
@@ -256,10 +260,23 @@
     cues: fx => [[fx.t0, 'pen'], [fx.t0 + 0.2, 'pen']],
   };
 
+  /** fades out (over FADE s, ending at t1) every item already drawn this frame whose key starts with one of `keys` */
+  const FADE = 0.25;
+  COMP.m4_fadeOut = {
+    draw(fx, t) {
+      const f = 1 - clamp((t - (fx.t1 - FADE)) / FADE); if (f >= 1) return;
+      DL.items.forEach(it => { if (fx.keys.some(kk => it.key.startsWith(kk))) it.attrs.opacity = +((it.attrs.opacity ?? 1) * f).toFixed(3); });
+    },
+  };
+  /** a plain cap (instead of Terry's tuft) for the ordinary kid: a small crown, a band and a bill. Head units, y up = negative. */
+  HAIR.m4_cap = () => {
+    const crown = []; for (let i = 0; i <= 10; i++) { const a = (-142 + i * 10.4) * RAD; crown.push([Math.cos(a) * 1.1, Math.sin(a) * 1.1]); }
+    return [crown, [[-0.86, -0.69], [0.86, -0.69]], [[0.84, -0.69], [1.56, -0.6], [1.52, -0.5], [0.8, -0.56]], [[0, -1.1], [0, -1.22]]];
+  };
   Object.assign(POSE, {
     m4_yawn: { ...POSE.sitBase, tilt: -6, lean: -3, armScale: 1.75, armL: [128, 30], armR: [128, 30] },
     m4_cross: { tilt: -9, lean: -2, armScale: 1.4, ikL: { w: 1, to: 'hip', dx: 24, dy: -36, bend: 'down' }, ikR: { w: 1, to: 'hip', dx: -24, dy: -32, bend: 'down' } },
-    m4_look: { lean: 2, tilt: -6, armScale: 1.08, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: 606, dy: 647, bend: 'down' } },
+    m4_look: { lean: 2, tilt: -6, armScale: 1.08, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: 608, dy: 636, bend: 'down' } },
   });
   Object.assign(FACE, {
     m4_yawn: { lidL: 0.88, lidR: 0.88, brow: 'arc', browY: 0.1, mouth: 'jaw', mo: 0.32 },
@@ -274,7 +291,7 @@
     cast: {
       terry: { ...E4.terry, desk: [DK.x, DK.top - 3], noShadow: true },
       // NOT 小陶: a plain stick kid with no tuft ("we" — anyone)
-      we: { H: 280, head: 0.42, torso: 0.22, leg: 0.3, arm: 0.34, kid: true, blink: [3.7, 0.2] },
+      we: { H: 300, head: 0.4, torso: 0.22, leg: 0.3, arm: 0.34, kid: true, hair: 'm4_cap', blink: [3.7, 0.2] },
     },
     order: ['terry', 'we'],
     tracks: {
@@ -302,10 +319,10 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       // L1–L2: the score sheet (as scene 40 left it) becomes a hand mirror: strong half / weak half
-      { type: 'm4_mirror', id: 'm4m', sheet: { type: 'e4_scores', id: 'm4s', at: SH.at, cell: CELL, t0: -1, scores: SC.map(v => [v, -1]), total: [19, -1], ringT: [[4, T.ring]] } },
+      { type: 'm4_mirror', id: 'm4m', sheet: { type: 'e4_scores', id: 'm4s', at: SH.at, cell: CELL, t0: -1, scores: SC.map(v => [v, -1]), total: [19, -1] } },
       // L3–L4: the memory panel
       { type: 'm4_panel', id: 'm4p', t0: T.panel, t1: T.panelOff },
-      { type: 'write', id: 'm4p.q', text: '2+3=?', x: (BD.x0 + BD.x1) / 2, y: 278, size: 110, anchor: 'middle', t0: T.board, t1: T.panelOff, speed: 2400, w: 6, sfx: 'chalk' },
+      { type: 'write', id: 'm4p.q', text: '3x+2=11', x: (BD.x0 + BD.x1) / 2, y: 290, size: 84, anchor: 'middle', t0: T.board, t1: T.panelOff, speed: 2400, w: 6, sfx: 'chalk' },
       { type: 'm4_stretch', id: 'm4p.st', char: 'terry', t0: T.yawn + 0.15, t1: T.chin },
       { type: 'title', id: 'm4p.src', text: '（陶哲轩 2019 年的回忆）', x: (PN.x0 + PN.x1) / 2, y: 742, size: 38, color: 'red', rot: -1, t0: T.note, t1: T.panelOff },
       // L5: the weak scores float out and become a row of scores
@@ -316,7 +333,7 @@
       { type: 'write', id: 'm4d.q', text: '?', x: DY.at[0] + DY.pw / 2, y: DY.at[1] - 104, size: 210, anchor: 'middle', t0: T.q, t1: T.diaryOff, speed: 2600, w: 9, color: 'red', sfx: 'pen' },
       { type: 'title', id: 'm4d.no', text: '没有记录', x: DY.at[0], y: 712, size: 48, color: 'red', rot: -3, t0: T.noRec, t1: T.diaryOff },
       // L7–L9: anyone may turn away and make excuses (a plain stick figure, not 小陶)
-      { type: 'label', id: 'm4w.lb', text: '我们', size: 46, at: [330, 470], rot: -3, t0: T.weLab, t1: T.weLabOff, target: { char: 'we', part: 'head', dx: -40, dy: -30 }, bend: 0.2, gap: 14 },
+      { type: 'label', id: 'm4w.lb', text: ['我们', '（任何人）'], size: 46, at: [684, 652], rot: 3, t0: T.weLab, t1: T.back, target: { char: 'we', part: 'head', dx: 40, dy: 20 }, bend: 0.25, gap: 14 },
       { type: 'm4_turn', id: 'm4w.turn', char: 'we', t0: T.away, t1: T.ex1 },
       { type: 'm4_say', id: 'm4w.e1', text: '题目太偏了。', at: [285, 448], tail: [92, 34], speaker: 'we', t0: T.ex1, t1: DUR, size: 56, rot: -3, dimT: T.back, dimTo: 0.35 },
       { type: 'm4_say', id: 'm4w.e2', text: '我还小。', at: [262, 560], tail: [118, 8], speaker: 'we', t0: T.ex2, t1: DUR, size: 56, rot: 2, dimT: T.back, dimTo: 0.35 },
@@ -329,6 +346,9 @@
       { type: 'write', id: 'm4w.ck', text: '✓', x: RX + 196, y: 418, size: 80, t0: T.check, speed: 2600, w: 8, color: 'red', sfx: 'pen', z: Z.annot },
       { type: 'm4_x', id: 'm4w.x', rect: [100, 318, 420, 600], t0: T.cross },
       { type: 'band', id: 'm4w.hi', rect: [RX + 64, 425, 116, 62], t0: T.hi, dur: 0.4 },
+      // eased exits (must stay last: they fade what was drawn before them)
+      { type: 'm4_fadeOut', id: 'm4fo.p', t1: T.panelOff, keys: ['m4p', 'terry.'] },
+      { type: 'm4_fadeOut', id: 'm4fo.d', t1: T.diaryOff, keys: ['m4d'] },
     ],
     sfx: [[T.kid, 'pop'], [T.yawn, 'boop'], [T.we, 'pop'], [T.back, 'whip']],
     subs: [

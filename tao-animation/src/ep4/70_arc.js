@@ -1,6 +1,6 @@
 // 第 70 场 · 他后来怎么说：只陈述记录和他自己说过的话（每一条都用红笔小字标出处）。
 // ① Clements (1984) 记录他 8 岁时：做完题，不爱检查。② 长大以后（博客上写给学生的职业建议）：《Be sceptical of your own work》；
-// ③《Use the wastebasket》：犯过的错要记下来，以后避开（本子里的两条是本集的例子，不是他的真实记录，所以标“比如”）；
+// ③《Use the wastebasket》：犯过的错要记下来，以后避开（本子里的两条是本集的例子，写给观众的，所以标“比如，你可以记”）；
 // ④ 2006 年采访：小时候有点倔，没弄懂的地方不全部想通就不罢休；⑤ 他 15 岁写的书里，练习就是 1986 年 IMO 第 5 题——
 // 是不是因为那次 0 分，没有人知道（轻松：小问号耸耸肩）；⑥ 1987 年：7 7 7 7 7 5，只丢了 2 分（只做预告）。
 (() => {
@@ -9,12 +9,12 @@
   const T = {
     src1: 1.25, open1: 2.7, w1: 4.5, w2: 5.3, ul: 6.5, shrink: 8.0,
     screen: 8.35, tao: 8.55, quote1: 12.45, quote2: 13.3, src2: 14.0, screenOff: 16.15,
-    log: 16.3, src3: 16.9, ex: 17.3, e1: 17.55, e2: 18.75, arrow: 20.05, logOff: 22.85,
-    kid: 23.0, page: 23.05, src4: 23.35, stub: 25.0, ringQ: 26.6, walk0: 27.9, walk1: 28.7, walk2: 28.85, walk3: 29.65,
-    scratch: 29.7, bulb: 30.35, fix: 30.5, kidOff: 31.65,
-    s86: 31.95, ring0: 33.3, book: 35.7, arr4: 35.95, src5: 36.2, open2: 36.9, fly: 37.9, land: 38.7,
-    qm: 40.35, coin: 40.6, shrug: 42.5, nobody: 42.6, clear: 44.75,
-    s87: 45.25, y87: 46.5, sc87: 47.3, ring5: 49.5, lost: 49.6,
+    log: 16.15, src3: 16.9, ex: 17.3, e1: 17.55, e2: 18.75, arrow: 20.05, logOff: 22.85,
+    kid: 22.85, page: 22.85, src4: 23.35, stub: 25.0, ringQ: 26.6, walk0: 27.8, walk1: 28.45, walk2: 28.55, walk3: 29.2,
+    scratch: 29.25, bulb: 29.9, fix: 30.05, kidOff: 31.9,
+    s86: 31.9, ring0: 33.3, small: 35.55, book: 36.0, arr4: 36.25, src5: 36.45, open2: 37.0, fly: 37.9, land: 38.7,
+    qm: 40.35, coin: 40.6, shrug: 42.5, nobody: 42.6, clear: 45.0,
+    s87: 45.0, y87: 46.2, sc87: 46.9, ring5: 49.5, lost: 49.6,
   };
 
   /* ---------------- little drawing helpers ---------------- */
@@ -131,7 +131,7 @@
       rules(k + '.rl', x0 + 26, x1 - 26, 360, 4, 90, z + 0.1);
       text(k + '.ti', '错误记录', cx, 290, { size: 64, z: z + 0.2 });
       stroke(k + '.tu', [[cx - 150, 336], [cx + 150, 333]], { z: z + 0.2, w: 4 });
-      if (t >= T.ex) text(k + '.eg', '比如：', x0 + 40, 372, { size: 34, color: C.red, anchor: 'start', z: Z.annot, opacity: clamp((t - T.ex) / 0.15) });
+      if (t >= T.ex) text(k + '.eg', '比如，你可以记：', x0 + 40, 372, { size: 34, color: C.red, anchor: 'start', z: Z.annot, opacity: clamp((t - T.ex) / 0.15) });
       ENTRIES.forEach(([s, t0, y], i) => {
         const xa = clamp((t - t0) / 0.15), xb = clamp((t - t0 - 0.15) / 0.15), mx = x0 + 70, my = y + 2;
         if (xa > 0) stroke(k + '.xa' + i, [[mx - 16, my - 16], [mx + 16, my + 16]], { z: Z.annot, w: 5, color: C.red, draw: xa });
@@ -177,7 +177,33 @@
   };
 
   /* ---------------- L9–L11: the book he wrote at 15; the 0 flies over to exercise "1986 IMO problem 5" ---------------- */
-  const S86 = { at: [470, 214], cell: 96, scale: 0.62 };
+  const S86 = { at: [470, 214], cell: 96, scale: 0.62 }, X87 = 880, Y86 = 236, Y87 = 476;
+  const S86POS = [[0, [800, 400]], [T.small, S86.at, 0.45, 'io'], [T.clear, [X87, Y86], 0.5, 'io']];
+  const S86SC = [[0, 1.2], [T.small, S86.scale, 0.45, 'io'], [T.clear, 1, 0.5, 'io']];
+  /** a red ring round one cell (a little smaller than the shared one, so it clears the problem number above) */
+  const cellRing = (k, x, y, sc, p) => stroke(k, ringPts(k, x, y, 96 * 0.6 * sc, 96 * 0.57 * sc, { n: 11, a0: -100, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: p });
+  /** the 1986 sheet (shared e4_scores) moved by tracks, with its year written to its left and the ring round the 0 */
+  COMP.m4_aS86 = {
+    init(fx) {
+      COMP.e4_scores.init(fx.sheet);
+      fx.yr = COMP.write.init({ id: fx.id + '.yr', text: '1986', x: -411, y: -32, size: 64, t0: T.s86 + 0.3, speed: 2400, w: 6, anchor: 'middle' });
+      return fx;
+    },
+    draw(fx, t, F) {
+      if (t < fx.sheet.t0) return;
+      const pos = evalTrack(S86POS, t), sc = evalTrack(S86SC, t);
+      fx.sheet.at = pos; fx.sheet.scale = sc;
+      COMP.e4_scores.draw(fx.sheet, t, F);
+      DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); COMP.write.draw(fx.yr, t, F); DL.restore();
+      if (t < T.clear) cellRing(fx.id + '.r0', pos[0] + sc * (fx.sheet._bx(4) + 48), pos[1], sc, EASE.out(clamp((t - T.ring0) / 0.3)));
+    },
+    cues: fx => [...COMP.e4_scores.cues(fx.sheet), ...COMP.write.cues(fx.yr), [T.ring0, 'pen'], [T.small, 'whoosh'], [T.clear, 'whoosh']],
+  };
+  /** a red ring round cell i of a sheet (via its published centre). {of, i, scale, t0} */
+  COMP.m4_aRing = {
+    draw(fx, t, F) { const c = F.targets[fx.of + '.s' + fx.i]; if (!c || t < fx.t0) return; cellRing(fx.id, c[0], c[1], fx.scale, EASE.out(clamp((t - fx.t0) / 0.3))); },
+    cues: fx => [[fx.t0, 'pen']],
+  };
   const BK = { at: [1130, 470], pw: 320, ph: 400 };
   const LAND = [BK.at[0] + 262, BK.at[1] + 2], LANDS = 64;          // beside "第 5 题" on the right-hand page (world)
   COMP.m4_aBook = {
@@ -266,7 +292,7 @@
     m4_aStubborn: { lean: -3, tilt: -9, ikL: { w: 1, to: 'hip', dx: -30, dy: -6, bend: 'out' }, ikR: { w: 1, to: 'hip', dx: 30, dy: -6, bend: 'out' } },
     m4_aPointL: { lean: -2, tilt: -4, armScale: 1.5, armL: [80, 8], armR: [16, 10] },
   });
-  const TAOX = 330, KX = 1000, KX2 = 1250;
+  const TAOX = 330, KX = 1000, KX2 = 1200;
   const walkPose = t => (t < T.walk1 ? makeWalk(T.walk0, T.walk1, 5.2)(t) : makeWalk(T.walk2, T.walk3, 5.2)(t));
 
   defineScene({
@@ -279,7 +305,7 @@
         pos: [[0, [TAOX, FL]], [T.logOff, [-900, FL], 0]],
         pose: [[0, 'stand'], [T.tao + 0.5, 'm4_aPresent', 0.15, 'back'], [11.2, 'stand', 0.2], [T.quote1, 'm4_aPresent', 0.15, 'back'],
           [15.6, 'stand', 0.2], [T.e1, 'm4_aPresent', 0.15, 'back'], [T.arrow + 1.0, 'stand', 0.2]],
-        face: [[0, 'smile'], [T.quote1, { ...FACE.smile, brow: 'arc', browY: 0.04 }, 0.08], [15.6, 'smile', 0.1], [T.arrow, 'proud', 0.08]],
+        face: [[0, 'smile'], [T.quote1, { ...FACE.smile, brow: 'arc', browY: 0.04 }, 0.08], [15.6, 'smile', 0.1], [T.arrow, { ...FACE.smile, brow: 'arc', browY: 0.04 }, 0.08]],
         turn: [[0, 0.4]],
         gaze: [[0, 'viewer'], [T.tao + 0.5, 'screen'], [11.2, 'viewer'], [T.quote1, 'screen'], [15.6, 'viewer'], [T.log + 0.3, 'log'], [T.arrow + 0.2, 'viewer']],
       },
@@ -304,7 +330,7 @@
       // L1–L2: Clements' notebook
       { type: 'm4_aNote83', id: 'm4a.nb', t0: -0.1, t1: T.logOff },          // already on the page at the cut
       { type: 'title', id: 'm4a.src1', text: '（研究者 Clements 的记录，他 8 岁时）', x: 800, y: 692, size: 38, color: 'red', rot: -1, t0: T.src1, t1: T.shrink },
-      { type: 'title', id: 'm4a.age8', text: '8 岁', x: 235, y: 340, size: 40, color: 'red', rot: -3, t0: T.shrink + 0.45, t1: T.logOff },
+      { type: 'title', id: 'm4a.age8', text: '8 岁', x: 415, y: 236, size: 40, color: 'red', rot: -3, t0: T.shrink + 0.45, t1: T.logOff },
       // L3–L4: grown up, at his blog
       { type: 'm4_aScreen', id: 'm4a.scr', t0: T.screen, t1: T.screenOff },
       { type: 'scribe', id: 'm4a.q1', text: '“要怀疑你', x: 660, y: 330, size: 86, t0: T.quote1, t1: T.screenOff, cps: 6, z: Z.set + 3 },
@@ -322,22 +348,23 @@
       { type: 'label', id: 'm4a.stub', text: '有点倔', size: 46, at: [1330, 330], rot: 4, t0: T.stub, t1: T.ringQ + 0.6, target: { char: 'terry', part: 'headTop', dx: 30, dy: 10 }, bend: -0.25, gap: 12 },
       { type: 'e4_bulb', id: 'm4a.bulb', char: 'terry', t0: T.bulb, t1: T.kidOff, state: [[T.bulb, 'on']], size: 84 },
       // L9–L11: the 0 and the book
-      { type: 'e4_scores', id: 'm4a.s86', at: S86.at, cell: S86.cell, scale: S86.scale, t0: T.s86, t1: T.clear, scores: E4.SCORES.map(v => [v, -1]), ringT: [[4, T.ring0]] },
-      { type: 'write', id: 'm4a.y86', text: '1986', x: 190, y: 190, size: 50, anchor: 'middle', t0: T.s86 + 0.3, t1: T.clear, speed: 2400, w: 6 },
+      { type: 'm4_aS86', id: 'm4a.s86w', sheet: { type: 'e4_scores', id: 'm4a.s86', at: [800, 400], cell: S86.cell, t0: T.s86, scores: E4.SCORES.map(v => [v, -1]) } },
       { type: 'm4_aBook', id: 'm4a.bk', t0: T.book, t1: T.clear },
-      { type: 'm4_aArrow', id: 'm4a.yrs', from: [672, 226], to: [962, 330], bend: -0.22, w: 4.5, head: 18, t0: T.arr4, t1: T.clear },
-      { type: 'title', id: 'm4a.4y', text: '4 年后', x: 836, y: 214, size: 44, color: 'red', rot: 3, t0: T.arr4 + 0.25, t1: T.clear },
+      { type: 'm4_aArrow', id: 'm4a.yrs', from: [672, 226], to: [1000, 262], bend: -0.22, w: 4.5, head: 18, t0: T.arr4, t1: T.clear },
+      { type: 'title', id: 'm4a.4y', text: '4 年后', x: 836, y: 166, size: 44, color: 'red', rot: 3, t0: T.arr4 + 0.25, t1: T.clear },
       { type: 'title', id: 'm4a.src5', text: '（他 15 岁写的书）', x: BK.at[0], y: 712, size: 38, color: 'red', rot: -1, t0: T.src5, t1: T.clear },
       { type: 'm4_aFly0', id: 'm4a.f0', t1: T.clear },
       { type: 'm4_aShrug', id: 'm4a.qm', at: [340, 770], size: 210, t0: T.qm, t1: T.clear, shrug: T.shrug },
       { type: 'title', id: 'm4a.coin', text: '巧合？', x: 600, y: 470, size: 66, color: 'red', rot: -4, t0: T.coin, t1: T.clear },
       { type: 'title', id: 'm4a.nobody', text: '没人知道。', x: 620, y: 566, size: 54, color: 'red', rot: -2, t0: T.nobody, t1: T.clear },
       // L12–L13: next year (a teaser only)
-      { type: 'write', id: 'm4a.y87', text: '1987', x: 800, y: 186, size: 110, anchor: 'middle', t0: T.y87, speed: 2600, w: 7, sfx: 'pen' },
-      { type: 'e4_scores', id: 'm4a.s87', at: [800, 450], cell: 96, scale: 1.15, t0: T.s87, scores: [7, 7, 7, 7, 7, 5].map((v, i) => [v, T.sc87 + i * 0.18]), ringT: [[5, T.ring5]] },
-      { type: 'label', id: 'm4a.lost', text: '只丢了 2 分', size: 54, at: [1270, 668], rot: -3, t0: T.lost, t1: DUR, target: [1094, 524], bend: -0.2, gap: 10 },
+      // under the 1986 row (which glides up here), the 1987 row: same columns, so the jump is visible at a glance
+      { type: 'write', id: 'm4a.y87', text: '1987', x: X87 - 411, y: Y87 - 32, size: 64, anchor: 'middle', t0: T.y87, speed: 2400, w: 6, sfx: 'pen' },
+      { type: 'e4_scores', id: 'm4a.s87', at: [X87, Y87], cell: 96, t0: T.s87, scores: [7, 7, 7, 7, 7, 5].map((v, i) => [v, T.sc87 + i * 0.18]) },
+      { type: 'm4_aRing', id: 'm4a.r5', of: 'm4a.s87', i: 5, scale: 1, t0: T.ring5 },
+      { type: 'label', id: 'm4a.lost', text: '只丢了 2 分', size: 54, at: [1320, 676], rot: -3, t0: T.lost, t1: DUR, target: [X87 + 253, Y87 + 62], bend: -0.2, gap: 10 },
     ],
-    sfx: [[T.tao, 'pop'], [T.kid, 'pop'], [T.s86, 'paper']],
+    sfx: [[T.tao, 'pop'], [T.kid, 'pop']],
     subs: [
       { t0: 0.3, t1: 4.3, text: '8岁时，一位研究他的老师写道：', say: '八岁时，一位研究他的老师写道：' },
       { t0: 4.4, t1: 7.6, text: '小陶做完题，不爱检查。' },
