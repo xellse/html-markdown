@@ -8,7 +8,7 @@ const E4 = {
   mate2: { H: 410, head: 0.35, torso: 0.25, leg: 0.34, arm: 0.36, hair: 'part', glasses: true, blink: [4.3, 1.1] },
   mate3: { H: 395, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'curly', blink: [3.6, 2.0] },
   mate4: { H: 398, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'ponytail', blink: [4.0, 2.6] },   // 队里唯一的大姐姐
-  mate5: { H: 405, head: 0.355, torso: 0.25, leg: 0.335, arm: 0.36, hair: 'curly', glasses: true, blink: [3.7, 0.7] },
+  mate5: { H: 405, head: 0.355, torso: 0.25, leg: 0.335, arm: 0.36, hair: 'bob', blink: [3.7, 0.7] },   // 齐耳的“锅盖头”
   // 阅卷老师（IMO 的“协调员”）：戴眼镜、打领带
   grader: { H: 420, head: 0.36, torso: 0.25, leg: 0.32, arm: 0.36, hair: 'sides', glasses: true, tie: true, blink: [4.1, 1.7] },
   // 长大以后的陶哲轩（和第 3 集一致）

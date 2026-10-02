@@ -3,13 +3,13 @@
 // 那天他心里怎么想，没有记录（日记本空白页 + 红问号；不演小陶的心情）。
 // 面对这样的成绩单，谁都可以选：转过头去找借口——这是一个普通小人（没有那撮头发，“我们”），不是小陶；
 // 或者直直地看着它问：错在哪一题？卡在哪一步？为什么？只有第二种能让人进步。
-// 开场接第 40 场：成绩单在 E4.SHEET，写着 7、7、3、1、0、1。
+// 开场接第 40 场：成绩单在 E4.SHEET，写着 7、7、3、1、0、1 和“= 19”；“= 19”在成绩单滑下去变成镜子时淡出（镜框里放不下它）。
 (() => {
   const FL = 780, DUR = 51.0, SH = E4.SHEET, CELL = SH.cell, SC = E4.SCORES;
 
   /* ---------------- timing (scene time) ---------------- */
   const T = {
-    glide: 0.4, frame: 1.5, glint: 2.75, strong: 4.15, weak: 5.35, glint2: 6.8, labOff: 8.45, aside: 8.6,
+    glide: 0.4, totOff: 0.4, frame: 1.5, glint: 2.75, strong: 4.15, weak: 5.35, glint2: 6.8, labOff: 8.45, aside: 8.6,
     panel: 9.15, kid: 9.35, board: 9.6, yawn: 11.25, chin: 12.95, note: 13.45, panelOff: 16.9,
     fly: 17.45, lab: 18.15, box: 19.15, flyOff: 21.75,
     diary: 22.3, open: 23.0, q: 23.55, noRec: 24.65, diaryOff: 26.85,
@@ -67,12 +67,16 @@
     });
   }
   COMP.m4_mirror = {
-    init(fx) { COMP.e4_scores.init(fx.sheet); return fx; },
+    init(fx) { COMP.e4_scores.init(fx.sheet); if (fx.sheet._tw) fx.sheet._tw.t1 = T.totOff + 0.3; return fx; },
     draw(fx, t, F) {
       const pos = evalTrack(MPOS, t), sc = evalTrack(MSC, t), k = fx.id;
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); m4Frame(k, t); DL.restore();
       fx.sheet.at = pos; fx.sheet.scale = sc;           // the sheet itself is the shared e4_scores, moved with the mirror
+      const n0 = DL.items.length;
       COMP.e4_scores.draw(fx.sheet, t, F);
+      // "= 19" (as scene 40 left it) fades out while the sheet glides down into the mirror
+      const f = 1 - clamp((t - T.totOff) / 0.3);
+      if (f < 1) for (let i = n0; i < DL.items.length; i++) { const it = DL.items[i]; if (it.key.startsWith('m4s.wt')) it.attrs.opacity = +((it.attrs.opacity ?? 1) * f).toFixed(3); }
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); m4Labels(k, fx.sheet, t); DL.restore();
     },
     cues: fx => [[T.glide, 'whoosh'], [T.frame, 'pen'], [T.frame + 0.35, 'pen'], [T.glint, 'plip'], [T.strong, 'pen'], [T.weak, 'pen'],
@@ -298,7 +302,7 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       // L1–L2: the score sheet (as scene 40 left it) becomes a hand mirror: strong half / weak half
-      { type: 'm4_mirror', id: 'm4m', sheet: { type: 'e4_scores', id: 'm4s', at: SH.at, cell: CELL, t0: -1, scores: SC.map(v => [v, -1]), ringT: [[4, T.ring]] } },
+      { type: 'm4_mirror', id: 'm4m', sheet: { type: 'e4_scores', id: 'm4s', at: SH.at, cell: CELL, t0: -1, scores: SC.map(v => [v, -1]), total: [19, -1], ringT: [[4, T.ring]] } },
       // L3–L4: the memory panel
       { type: 'm4_panel', id: 'm4p', t0: T.panel, t1: T.panelOff },
       { type: 'write', id: 'm4p.q', text: '2+3=?', x: (BD.x0 + BD.x1) / 2, y: 278, size: 110, anchor: 'middle', t0: T.board, t1: T.panelOff, speed: 2400, w: 6, sfx: 'chalk' },

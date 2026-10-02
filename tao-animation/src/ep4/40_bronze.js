@@ -2,12 +2,9 @@
 // 事实（ep4-script.md）：六题 7、7、3、1、0、1，共 19 分（第一天 17，第二天 2）；那年奖牌线：金 34、银 26、铜 17；
 //   满分 42（6 题 × 7 分）；澳大利亚队五人获铜牌；他至今仍是 IMO 历史上最年轻的奖牌得主。
 // 演绎：“领奖”只画成挂上奖牌、队员们一起欢呼；他当时怎么想没有记录，这里只演开心，不演别的心事。
-// 开场 = 第 30 场结尾（成绩单 7、7、3、1、0、1，位置 E4.SHEET）。
+// 开场 = 第 30 场结尾（成绩单 7、7、3、1、0、1，位置 E4.SHEET）。领奖的另外四位队员用共享的 E4.mate1–4（五块铜牌 = 小陶 + 四位）。
 (() => {
   const FL = 780, SH = E4.SHEET, C0 = SH.cell, SC = 'b4b.sc';
-  // e4_scores centres the whole row, "= 19" included: shift it right by half the total's width so the six boxes stay
-  // exactly where scene 30 left them (E4.SHEET)
-  const TOT_W = C0 * 1.5 + 40, AT = [SH.at[0] + TOT_W / 2, SH.at[1]];
   if (7 + 7 + 3 + 1 + 0 + 1 !== 19 || 7 + 7 + 3 !== 17 || 1 + 0 + 1 !== 2 || 6 * 7 !== 42) console.error('b4b: score maths');
   if (E4.SCORES.join() !== '7,7,3,1,0,1') console.error('b4b: E4.SCORES changed');
   /* ---------------- times (scene clock) ---------------- */
@@ -219,8 +216,6 @@
   };
 
   /* ---------------- cast & poses ---------------- */
-  // the fourth teammate: a big sister with a ponytail (same build as E4.mate1–3)
-  const MATE4 = { H: 398, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'ponytail', blink: [4.0, 0.5] };
   const MATES = [['mate1', 300], ['mate2', 545], ['mate3', 1055], ['mate4', 1300]];
   const TX = 800;
   POSE.b4_cheer = { armScale: 1.2, armL: [100, 62], armR: [100, 62] };   // a "yay!" with elbows out: hands beside the head, below the bunting
@@ -239,7 +234,7 @@
 
   defineScene({
     id: 'bronze', chapter: '铜牌', dur: DUR, floor: FL,
-    cast: { terry: { ...E4.terry, floor: STAGE }, mate1: { ...E4.mate1, floor: STAGE }, mate2: { ...E4.mate2, floor: STAGE }, mate3: { ...E4.mate3, floor: STAGE }, mate4: { ...MATE4, floor: STAGE } },
+    cast: { terry: { ...E4.terry, floor: STAGE }, mate1: { ...E4.mate1, floor: STAGE }, mate2: { ...E4.mate2, floor: STAGE }, mate3: { ...E4.mate3, floor: STAGE }, mate4: { ...E4.mate4, floor: STAGE } },
     order: ['mate1', 'mate2', 'mate3', 'mate4', 'terry'],
     tracks: {
       terry: {
@@ -258,7 +253,7 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2, pulse: [PULSE] },
       // 7 + 7 + 3 + 1 + 0 + 1 = 19
-      { type: 'e4_scores', id: SC, at: AT, cell: C0, t0: -1, scores: E4.SCORES.map(v => [v, -5]), total: [19, TOTAL],
+      { type: 'e4_scores', id: SC, at: SH.at, cell: C0, t0: -1, scores: E4.SCORES.map(v => [v, -5]), total: [19, TOTAL],
         braces: [{ from: 0, to: 2, label: '17', t0: BR17 }, { from: 3, to: 5, label: '2', t0: BR2 }] },
       { type: 'b4_sweep', id: 'b4b.sweep', t0: SWEEP, t1: RULER - 0.1 },
       // the medal lines

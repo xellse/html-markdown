@@ -28,8 +28,7 @@
   SFX.define('t4_squeak', tone => { tone('triangle', 500, 1150, 0.22, 0.12, [24, 40]); });
   SFX.define('t4_pat', tone => { tone('sine', 330, 200, 0.06, 0.18); });
 
-  /* ---------------- cast: the five teammates, two team leaders ---------------- */
-  const TEEN = { head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36 };
+  /* ---------------- cast: the five teammates (shared E4.mate1–5), two team leaders (local: they only appear here) ---------------- */
   const bagged = d => ({ ...d, bag: true, bagFloor: HIDE });  // the backpacks only show up in Warsaw (bag track)
   Object.assign(HAIR, {
     // team leader 1: a flat crew cut
@@ -49,11 +48,11 @@
   });
   const CAST4 = {
     terry: bagged(E4.terry),
-    m4: bagged({ H: 400, ...TEEN, hair: 'ponytail', blink: [4.0, 2.6] }),   // 大姐姐 (ponytail)
+    m4: bagged(E4.mate4),                                      // the team's one 大姐姐 (ponytail)
     m2: bagged(E4.mate2),
     m1: bagged(E4.mate1),
     m3: bagged(E4.mate3),
-    m5: bagged({ H: 390, ...TEEN, hair: 'bob', blink: [3.7, 0.5] }),        // 大姐姐 (bob)
+    m5: bagged(E4.mate5),
     ld1: { H: 430, head: 0.35, torso: 0.25, leg: 0.32, arm: 0.36, hair: 't4_crew', glasses: true, blink: [4.4, 1.3] },
     ld2: { H: 425, head: 0.35, torso: 0.25, leg: 0.32, arm: 0.36, hair: 't4_wave', blink: [3.8, 2.9] },
   };
@@ -533,7 +532,6 @@
     ],
     fx: [
       // the hand-over from the recap
-      { type: 't4_stamp0', age: 10, t0: -3, ...E4.STAMP, dockT: -2, t1: STAMP },
       { type: 't4_again', id: 't4.again', out: 0.12 },
       // 1986 · 澳大利亚数学奥林匹克
       { type: 'write', id: 't4.y86', text: '1986', x: 880, y: 130, size: 190, anchor: 'middle', t0: 0.5, t1: A_OUT, speed: 2600, gap: 0.03, glyphGap: 0.06, w: 9, sfx: 'pen', z: Z.annot },

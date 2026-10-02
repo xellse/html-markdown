@@ -90,7 +90,7 @@
     targets: () => ({ thing: [560, 420] }),
     fx: [
       { type: 'title', id: 'stampR', text: '上集回顾', x: 150, y: 110, size: 44, t0: -0.1, t1: 13.0, color: 'red', rot: -6 },
-      { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
+      // no age stamp here: the setback recapped above was before ten (probably age 9); the 10岁 stamp comes in scene 10
       { type: 'h4_curve', id: 'cv', at: [260, 430], t0: 0.3, t1: 4.2 },
       { type: 'h4_rank', id: 'rank', at: [480, 450], t0: 4.25, t1: 8.7, slide: 5.6 },
       { type: 'h4_plant', id: 'pl', at: [560, 560], t0: 8.75, t1: 13.0, h: [[0, 0], [8.8, 0], [9.3, 330, 0.7, 'out']], root: [[0, 0], [9.3, 22, 0.5]] },

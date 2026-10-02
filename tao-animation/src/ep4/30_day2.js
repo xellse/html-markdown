@@ -81,16 +81,6 @@
     cues: () => CLK_J.map(([tj]) => [tj, 'b4_whirr']),
   };
   SFX.define('b4_whirr', tone => { tone('triangle', 420, 1300, 0.22, 0.06, [28, 90]); });
-  /** red ring around one box of the sheet (like the sheet's own ringT, but it can go away again) */
-  COMP.b4_ring = {
-    draw(fx, t, F) {
-      if (t < fx.t0 || t >= fx.t1) return;
-      const c = F.targets[SC + '.s' + fx.i]; if (!c) return;
-      const R = SH.cell * 0.62;
-      stroke('b4d.ring', ringPts('b4d.ring', c[0], c[1], R, R, { n: 11, a0: -100, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.3)) });
-    },
-    cues: fx => [[fx.t0, 'pen']],
-  };
 
   /* ---------------- 课桌上的三张题纸 + 小陶手里的铅笔 ---------------- */
   COMP.b4_desk = {
@@ -260,8 +250,8 @@
       // the score sheet: 7, 7, 3 from yesterday; today 1, 0, 1
       // the shared braces: scene 25's "17" is already there (fades out with the exam room), the "2" comes on "两分"
       { type: 'e4_scores', id: SC, at: SH.at, cell: SH.cell, t0: -1, scores: [[7, -5], [7, -5], [3, -5], [1, W4], [0, W5], [1, W6]],
-        braces: [{ from: 0, to: 2, label: '17', t0: -1, t1: BR_OUT }, { from: 3, to: 5, label: '2', t0: BR0, t1: BR_OUT }] },
-      { type: 'b4_ring', id: 'b4d.ring', i: 4, t0: RING5, t1: B_END },
+        braces: [{ from: 0, to: 2, label: '17', t0: -1, t1: BR_OUT }, { from: 3, to: 5, label: '2', t0: BR0, t1: BR_OUT }],
+        ringT: [[4, RING5, B_END]] },   // the ring on the 0 goes away before the grader: his own paper isn't shown
       { type: 'b4_ul', id: 'b4d.ul', t0: UL0, t1: UL1 },
       // exam room, day two
       { type: 'b4_cal', id: 'b4d.cal', t1: A_END },
