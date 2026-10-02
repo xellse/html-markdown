@@ -7,6 +7,8 @@ const E4 = {
   mate1: { H: 400, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'messy', blink: [3.9, 0.3] },
   mate2: { H: 410, head: 0.35, torso: 0.25, leg: 0.34, arm: 0.36, hair: 'part', glasses: true, blink: [4.3, 1.1] },
   mate3: { H: 395, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'curly', blink: [3.6, 2.0] },
+  mate4: { H: 398, head: 0.36, torso: 0.25, leg: 0.33, arm: 0.36, hair: 'ponytail', blink: [4.0, 2.6] },   // 队里唯一的大姐姐
+  mate5: { H: 405, head: 0.355, torso: 0.25, leg: 0.335, arm: 0.36, hair: 'curly', glasses: true, blink: [3.7, 0.7] },
   // 阅卷老师（IMO 的“协调员”）：戴眼镜、打领带
   grader: { H: 420, head: 0.36, torso: 0.25, leg: 0.32, arm: 0.36, hair: 'sides', glasses: true, tie: true, blink: [4.1, 1.7] },
   // 长大以后的陶哲轩（和第 3 集一致）
@@ -77,14 +79,14 @@ PROPS.e4_page = (fx, t, lt, p) => {
 /* ---------------- 成绩单：六道题的得分 ----------------
  * { type: 'e4_scores', id, at: [cx, cy], scale: 1, t0, t1, cell: 118,
  *   scores: [[分, 写出时间], …6 个]（写出时间为负 = 一开始就写好；null = 还没写）,
- *   total: [总分, 写出时间]（可选）, ringT: [[题号 0-5, t], …]（红圈圈出某一格，可选）,
+ *   total: [总分, 写出时间]（可选）, ringT: [[题号 0-5, t, t1?], …]（红圈圈出某一格，t1 时消失；可选）,
  *   braces: [{ from: 0, to: 2, label: '17', t0, t1 }]（格子下面的红色大括号 + 红色手写数字；t0 为负 = 一开始就在，t1 时 0.25 秒淡出）}
  * 一道题满分 7 分。分数用手写字形一笔笔写进格子；第 3、4 题之间的粗线分开“第一天 / 第二天”。
  * 发布命名点：'<id>.s<i>'（第 i 格中心，i 从 0 起）、'<id>.total'、'<id>.top'。 */
 COMP.e4_scores = {
   init(fx) {
     const c = fx.cell || 118, n = 6, gap = 26;
-    fx._W = n * c + gap + (fx.total ? c * 1.5 + 40 : 0);
+    fx._W = n * c + gap;   // the six boxes stay centred on `at`; a total is drawn to their right
     fx._x0 = -fx._W / 2;
     fx._bx = i => fx._x0 + i * c + (i >= 3 ? gap : 0);
     fx._writes = (fx.scores || []).map((e, i) => !e || e[0] === null ? null : COMP.write.init({ id: fx.id + '.w' + i, text: String(e[0]), x: 0, y: 0, size: c * 0.62, t0: e[1], speed: 1500, w: 6.5, anchor: 'middle' }));
@@ -115,8 +117,8 @@ COMP.e4_scores = {
       stroke(k + '.br' + j, [[xa, y - 14], [xa + 10, y], [mid - 12, y], [mid, y + 16], [mid + 12, y], [xb - 10, y], [xb, y - 14]], { z: Z.annot, w: 5, color: C.red, opacity: op, draw: b.t0 < 0 ? 1 : EASE.out(clamp((t - b.t0) / 0.35)) });
       if (op > 0.02) { DL.save(); DL.translate(mid, y + 22); if (op < 1) DL.scale(1); COMP.write.draw(b.w, t, F); DL.restore(); }
     });
-    (fx.ringT || []).forEach(([i, rt], j) => {
-      if (t < rt) return;
+    (fx.ringT || []).forEach(([i, rt, rt1], j) => {
+      if (t < rt || (rt1 !== undefined && t >= rt1)) return;
       const x = fx._bx(i) + c / 2;
       stroke(k + '.r' + j, ringPts(k + '.r' + j, x, 0, c * 0.62, c * 0.62, { n: 11, a0: -100, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: EASE.out(clamp((t - rt) / 0.3)) });
     });
@@ -141,9 +143,9 @@ COMP.e4_scores = {
 COMP.e4_medal = {
   draw(fx, t, F) {
     if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
-    const lt = t - fx.t0, r = fx.r || 54, k = fx.id;
+    const kid = fx.char && CAST[fx.char] && CAST[fx.char].kid, lt = t - fx.t0, r = fx.r || (kid ? 30 : 54), k = fx.id;   // a child's medal is smaller
     let c, neck = null;
-    if (fx.char) { const a = F.anchors[fx.char]; if (!a) return; neck = [a.head[0], a.head[1] + a.r * 1.05]; c = [neck[0] + (fx.dx || 0), neck[1] + (fx.drop || r * 1.7)]; }
+    if (fx.char) { const a = F.anchors[fx.char]; if (!a) return; neck = [a.head[0], a.head[1] + a.r * 1.05]; c = [neck[0] + (fx.dx || 0), neck[1] + (fx.drop || (kid ? 44 : r * 1.7))]; }
     else c = fx.pos ? evalTrack(fx.pos, t) : fx.at;
     const pop = fx.t0 < 0 ? 1 : EASE.back(clamp(lt / 0.3)), z = fx.z ?? Z.front + 2;
     DL.save(); DL.about(c[0], c[1], () => DL.scale(pop));

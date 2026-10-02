@@ -254,8 +254,8 @@
 
   Object.assign(POSE, {
     m4_yawn: { ...POSE.sitBase, tilt: -6, lean: -3, armScale: 1.75, armL: [128, 30], armR: [128, 30] },
-    m4_cross: { tilt: -9, lean: -2, armScale: 1.25, ikL: { w: 1, to: 'hip', dx: 24, dy: -36, bend: 'down' }, ikR: { w: 1, to: 'hip', dx: -24, dy: -32, bend: 'down' } },
-    m4_look: { lean: 2, tilt: -6, armScale: 1.08, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: 600, dy: 664, bend: 'down' } },
+    m4_cross: { tilt: -9, lean: -2, armScale: 1.4, ikL: { w: 1, to: 'hip', dx: 24, dy: -36, bend: 'down' }, ikR: { w: 1, to: 'hip', dx: -24, dy: -32, bend: 'down' } },
+    m4_look: { lean: 2, tilt: -6, armScale: 1.08, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: 606, dy: 647, bend: 'down' } },
   });
   Object.assign(FACE, {
     m4_yawn: { lidL: 0.88, lidR: 0.88, brow: 'arc', browY: 0.1, mouth: 'jaw', mo: 0.32 },
@@ -263,14 +263,14 @@
   });
   const WX = 520;                                     // where the plain little stick figure stands
   const RX = 1060;                                    // left edge of the right-hand column (② 直视 + the three questions)
-  const QS = [['错在哪一题？', T.q1, 535], ['卡在哪一步？', T.q2, 615], ['为什么？', T.q3, 695]];
+  const QS = [['错在哪一题？', T.q1, 538], ['卡在哪一步？', T.q2, 620], ['为什么？', T.q3, 702]];
 
   defineScene({
     id: 'mirror', chapter: '一面镜子', dur: DUR, floor: FL,
     cast: {
       terry: { ...E4.terry, desk: [DK.x, DK.top - 3], noShadow: true },
       // NOT 小陶: a plain stick kid with no tuft ("we" — anyone)
-      we: { H: 250, head: 0.42, torso: 0.22, leg: 0.3, arm: 0.34, kid: true, blink: [3.7, 0.2] },
+      we: { H: 280, head: 0.42, torso: 0.22, leg: 0.3, arm: 0.34, kid: true, blink: [3.7, 0.2] },
     },
     order: ['terry', 'we'],
     tracks: {
@@ -320,7 +320,7 @@
       // L10–L11: or look straight at it, with a magnifying glass, and ask three questions
       { type: 'm4_glass', id: 'm4w.gl', char: 'we', t0: T.glass, look: 'weak' },
       { type: 'm4_hdr', id: 'm4w.h2', n: '2', text: '直视', x: RX, y: 455, t0: T.hdr2, size: 54 },
-      ...QS.map(([s, t0, y], i) => ({ type: 'scribe', id: 'm4w.q' + i, text: s, x: RX + 8, y, size: 50, t0, cps: 8, color: 'red', halo: 8 })),
+      ...QS.map(([s, t0, y], i) => ({ type: 'scribe', id: 'm4w.q' + i, text: s, x: RX + 8, y, size: 56, t0, cps: 8, color: 'red', halo: 8 })),
       // L12: only the second way works
       { type: 'write', id: 'm4w.ck', text: '✓', x: RX + 196, y: 418, size: 80, t0: T.check, speed: 2600, w: 8, color: 'red', sfx: 'pen', z: Z.annot },
       { type: 'm4_x', id: 'm4w.x', rect: [100, 318, 420, 600], t0: T.cross },

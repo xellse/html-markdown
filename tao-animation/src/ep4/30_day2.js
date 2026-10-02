@@ -3,7 +3,7 @@
 // 演绎：考场画面（墙上的日历翻过一页）；阅卷老师看的是一份“缺了一步”的示意证明——讲 IMO 只认完整证明的规矩，
 //   不是他的卷子。他当时的感受没有记录：小陶只用 focus / effort 的表情埋头做题，不演难过。
 //   墙上的钟从 9 点走到 1 点半只是示意“一天四个半小时”（开考时间没有记录）。
-// 开场 = 第 25 场结尾（成绩单 7、7、3，位置 E4.SHEET，第 1–3 格下的红括号“17”原样接过来，考场画面结束时收掉）；
+// 开场 = 第 25 场结尾（成绩单 7、7、3，位置 E4.SHEET，第 1–3 格下的红括号“17”用 e4_scores 的 braces 接过来，考场画面结束前淡出）；
 // 结尾只剩成绩单 7、7、3、1、0、1，第 40 场接着演。
 (() => {
   const FL = 780, SH = E4.SHEET, SC = 'b4d.sc';
@@ -11,7 +11,7 @@
   /* ---------------- times (scene clock) ---------------- */
   const FLIP = 0.55, UL0 = 1.95, UL1 = 12.55;                   // calendar 9 → 10; red underline under the sheet's "第二天"
   const W4 = 4.6, W5 = 7.5, W6 = 10.4;                          // the three scores, on "1分" / "0分" / "1分"
-  const BR0 = 12.85, BR_N = 14.4, A_END = 16.45;                // brace + "2"; the exam room goes away
+  const BR0 = 14.0, BR_OUT = 16.2, A_END = 16.45;              // "2" brace (its number is written 0.3 s later, on "两分"); both braces fade; the exam room goes away
   const GRID0 = 16.5, FILL0 = 17.85, FILL_DT = 0.025, LB57 = 19.3, RING5 = 21.65, B_END = 24.6;
   const G_IN = 24.65, LBG = 24.95, TK = [25.95, 26.65], GAP = 27.3, CARET = 28.5, QM = 28.85, MINUS = 29.85, LBM = 30.05;
   const C_END = 31.45, DUR = 31.9;
@@ -114,29 +114,6 @@
     },
   };
 
-  /* ---------------- 红色大括号：第 1–3 格下的 “17”（接第 25 场），第 4–6 格下的 “2” ---------------- */
-  // same brace shape, size and number size as scene 25's "17" (y 262, depth 34, digits 96 high), so the two read as a pair
-  const BRC = { y: 262, d: 34, size: 96 };
-  function b4dBrace(k, x0, x1, draw) {
-    const { y, d } = BRC, m = (x0 + x1) / 2, h = d / 2;
-    const pts = [[x0, y], [x0 + 10, y + h * 0.9], [x0 + 26, y + h, 1], [m - 24, y + h, 1], [m - 8, y + h * 1.15], [m, y + d, 1], [m + 8, y + h * 1.15], [m + 24, y + h, 1], [x1 - 26, y + h, 1], [x1 - 10, y + h * 0.9], [x1, y]];
-    stroke(k, pts, { z: Z.annot, w: 5, color: C.red, draw, boil: 0.6 });
-  }
-  const NUM = (txt, t0) => layoutWriting({ text: txt, x: 0, y: 0, size: BRC.size, t0, speed: 2600, gap: 0.03, glyphGap: 0.03, anchor: 'middle' });
-  const BR_17 = NUM('17', -9), BR_2 = NUM('2', BR_N);
-  /** {from, to: box indices, num: layout, t0 (negative = already there), keys: [brace key, number key prefix]} */
-  COMP.b4_brace = {
-    draw(fx, t, F) {
-      if (t < fx.t0 || t >= fx.t1) return;
-      const a = F.targets[SC + '.s' + fx.from], b = F.targets[SC + '.s' + fx.to]; if (!a || !b) return;
-      const x0 = a[0] - SH.cell / 2 + 6, x1 = b[0] + SH.cell / 2 - 6;
-      b4dBrace(fx.keys[0], x0, x1, fx.t0 < 0 ? undefined : EASE.out(clamp((t - fx.t0) / 0.45)));
-      DL.save(); DL.translate((x0 + x1) / 2, BRC.y + BRC.d + 16);
-      fx.num.strokes.forEach((s, i) => { const q = clamp((t - s.t0) / s.dur); if (q > 0) stroke(fx.keys[1] + i, s.pts, { z: Z.annot, w: 7, color: C.red, draw: q < 1 ? q : undefined, boil: 0.55 }); });
-      DL.restore();
-    },
-    cues: fx => (fx.t0 >= 0 ? [[fx.t0, 'pen']] : []).concat(fx.num.strokes.length && fx.num.strokes[0].t0 >= 0 ? [[fx.num.strokes[0].t0, 'pen']] : []),
-  };
   /** a red underline under the sheet's own "第二天" label (centre of boxes 4–6, 90 below the boxes' centre line) */
   COMP.b4_ul = {
     draw(fx, t, F) {
@@ -281,16 +258,15 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       // the score sheet: 7, 7, 3 from yesterday; today 1, 0, 1
-      { type: 'e4_scores', id: SC, at: SH.at, cell: SH.cell, t0: -1, scores: [[7, -5], [7, -5], [3, -5], [1, W4], [0, W5], [1, W6]] },
+      // the shared braces: scene 25's "17" is already there (fades out with the exam room), the "2" comes on "两分"
+      { type: 'e4_scores', id: SC, at: SH.at, cell: SH.cell, t0: -1, scores: [[7, -5], [7, -5], [3, -5], [1, W4], [0, W5], [1, W6]],
+        braces: [{ from: 0, to: 2, label: '17', t0: -1, t1: BR_OUT }, { from: 3, to: 5, label: '2', t0: BR0, t1: BR_OUT }] },
       { type: 'b4_ring', id: 'b4d.ring', i: 4, t0: RING5, t1: B_END },
-      // scene 25's "17" brace, carried over with its own draw keys so the cut is seamless
-      { type: 'b4_brace', id: 'b4d.brace17', from: 0, to: 2, num: BR_17, t0: -1, t1: A_END, keys: ['d4p5.brace', 'd4p5.17.s'] },
       { type: 'b4_ul', id: 'b4d.ul', t0: UL0, t1: UL1 },
       // exam room, day two
       { type: 'b4_cal', id: 'b4d.cal', t1: A_END },
       { type: 'b4_clock', id: 'b4d.clock', t1: A_END },
       { type: 'b4_desk', id: 'b4d.desk', t1: A_END },
-      { type: 'b4_brace', id: 'b4d.brace2', from: 3, to: 5, num: BR_2, t0: BR0, t1: A_END, keys: ['b4d.br2', 'b4d.br2n.s'] },
       // problem 5: 57 of the 210 got full marks
       { type: 'title', id: 'b4d.all', text: '全场 210 人', x: GR.cx, y: 300, size: 40, t0: GRID0 + 0.1, t1: B_END, dur: 0.2, sfx: 'b4_none' },
       { type: 'b4_grid', id: 'b4d.grid' },

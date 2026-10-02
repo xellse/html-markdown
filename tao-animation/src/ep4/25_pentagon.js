@@ -197,7 +197,7 @@
     cues: () => [...Array(GRW).keys()].map(r => [GRID_T + r * 0.055, 'tap']).filter((_, r) => r % 2 === 0).concat(FULL.map((_, j) => [FILL_T + j * 0.09, 'plip'])),
   };
 
-  /* ---------------- after the grid: a little pentagon under box 3, then the “17” brace ---------------- */
+  /* ---------------- after the grid: a little pentagon under box 3 ---------------- */
   COMP.d4_p5icon = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
@@ -208,17 +208,7 @@
     },
     cues: fx => [[fx.t0, 'pen']],
   };
-  const BR = { x0: CELL_L(0) + 6, x1: CELL_R(2) - 6, y: 262, d: 34, t0: 39.0 };
-  COMP.d4_p5brace = {
-    draw(fx, t) {
-      if (t < BR.t0) return;
-      const { x0, x1, y, d } = BR, m = (x0 + x1) / 2, h = d / 2, p = EASE.out(clamp((t - BR.t0) / 0.45));
-      const pts = [[x0, y], [x0 + 10, y + h * 0.9], [x0 + 26, y + h, 1], [m - 24, y + h, 1], [m - 8, y + h * 1.15], [m, y + d, 1], [m + 8, y + h * 1.15], [m + 24, y + h, 1], [x1 - 26, y + h, 1], [x1 - 10, y + h * 0.9], [x1, y]];
-      stroke('d4p5.brace', pts, { z: Z.annot, w: 5, color: C.red, draw: p, boil: 0.6 });
-    },
-    cues: () => [[BR.t0, 'pen']],
-  };
-  const SEV_X = (BR.x0 + BR.x1) / 2;
+  const BRACE_T = 39.0;                         // day one: the shared red brace under boxes 1–3, “17”
 
   /* ---------------- scene 20's end frame: problem 2's triangle and its label, cleared away first ---------------- */
   const GEO = { c: [1090, 520] }, GT = [[-40, -150], [-200, 100], [120, 90]], GARC = { r: 112, a0: -94, a1: 26 };
@@ -295,7 +285,8 @@
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       { type: 'd4_p5desk', id: 'd4p5.desk', t1: CUT },
       // the score sheet carries on from scene 20 (7, 7, empty); box 3 gets its 3
-      { type: 'e4_scores', id: 'd4p5.sheet', at: SH.at, cell: CELL, t0: -1, scores: [[7, -1], [7, -1], [3, 32.15], [null, 0], [null, 0], [null, 0]] },
+      { type: 'e4_scores', id: 'd4p5.sheet', at: SH.at, cell: CELL, t0: -1, scores: [[7, -1], [7, -1], [3, 32.15], null, null, null],
+        braces: [{ from: 0, to: 2, label: '17', t0: BRACE_T }] },
       // scene 20's last picture leaves
       { type: 'd4_p5geo', id: 'd4p5.geo' },
       { type: 'label', id: 'd4p5.lbGeo', text: '几何', at: GEO_LB_AT, rot: -4, size: 50, t0: -1, t1: GEO_OUT + 0.12, target: GEO_LB_TG, bend: -0.25, gap: 12 },
@@ -314,9 +305,6 @@
       // 3 points: all of Australia's points on this problem
       { type: 'd4_p5icon', id: 'd4p5.icon', at: [cellX(2) + 4, 372], r: 72, t0: 31.05, t1: 38.75 },
       { type: 'label', id: 'd4p5.lbAus', text: ['澳大利亚队', '这题的全部分数'], at: [1090, 470], rot: -3, size: 62, t0: 33.95, t1: 38.75, target: [CELL_R(2) + 8, CELL_BOT - 4], bend: 0.18, gap: 12 },
-      // day one: 17
-      { type: 'd4_p5brace', id: 'd4p5.brace' },
-      { type: 'write', id: 'd4p5.17', text: '17', x: SEV_X, y: BR.y + BR.d + 16, size: 96, t0: 39.75, speed: 2600, gap: 0.03, glyphGap: 0.03, w: 7, color: 'red', anchor: 'middle', sfx: 'pen', z: Z.annot },
     ],
     subs: [
       { t0: 1.1, t1: 5.1, text: '第三题，是五边形上的数字游戏：' },

@@ -292,7 +292,7 @@
       { type: 'd4_d1pencil', id: 'd4d1.pencil' },
       { type: 'swingMarks', id: 'd4d1.swing', char: 'terry', t0: 0.6, t1: 3.6 },
       // the score sheet: six empty boxes, top of the frame (E4.SHEET); problem 1 and 2 get their 7s
-      { type: 'e4_scores', id: 'd4d1.sheet', at: SH.at, cell: CELL, t0: 1.7, scores: [[7, S1_T], [7, S2_T], [null, 0], [null, 0], [null, 0], [null, 0]] },
+      { type: 'e4_scores', id: 'd4d1.sheet', at: SH.at, cell: CELL, t0: 1.7, scores: [[7, S1_T], [7, S2_T], null, null, null, null] },
       // 第 1 题
       { type: 'label', id: 'd4d1.lbP1', text: '第 1 题', at: [470, 318], rot: -3, t0: 7.4, t1: 10.95, target: [cellX(0) - 8, CELL_BOT + 6], bend: -0.2, gap: 10 },
       { type: 'd4_d1set', id: 'd4d1.set', t1: 10.95 },
