@@ -300,7 +300,7 @@
     set: [{ type: 'floor', t0: T.screen, t1: T.kidOff }],
     steps: [{ t0: T.walk0, t1: T.walk1, hz: 5.2 }, { t0: T.walk2, t1: T.walk3, hz: 5.2 }],
     fx: [
-      { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
+      // no 10岁 stamp here: this scene spans age 8 to adulthood
       // L1–L2: Clements' notebook
       { type: 'm4_aNote83', id: 'm4a.nb', t0: -0.1, t1: T.logOff },          // already on the page at the cut
       { type: 'title', id: 'm4a.src1', text: '（研究者 Clements 的记录，他 8 岁时）', x: 800, y: 692, size: 38, color: 'red', rot: -1, t0: T.src1, t1: T.shrink },
@@ -350,7 +350,7 @@
       { t0: 31.9, t1: 35.5, text: '巧的是：那道0分的第五题，', say: '巧的是：那道零分的第五题，' },
       { t0: 35.6, t1: 39.8, text: '四年后，被他收进了自己写的书里。' },
       { t0: 40.2, t1: 44.4, text: '是不是因为那次0分？没有人知道。', say: '是不是因为那次零分？没有人知道。' },
-      { t0: 45.1, t1: 49.1, text: '我们只知道：第二年的IMO，', say: '我们只知道：第二年的国际奥数，' },
+      { t0: 45.1, t1: 49.1, text: '我们只知道：第二年的国际奥数，' },
       { t0: 49.2, t1: 51.6, text: '他只丢了2分。', say: '他只丢了两分。' },
     ],
   });

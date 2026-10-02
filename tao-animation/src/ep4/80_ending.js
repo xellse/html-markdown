@@ -9,7 +9,7 @@
       if (t < fx.t0 || t >= fx.t1) return;
       const goIn = EASE.out(clamp((t - fx.t0) / 0.6)), shake = t > fx.stop && t < fx.stop + 0.5 ? Math.sin((t - fx.stop) * 50) * 6 : 0;
       const out = EASE.in(clamp((t - fx.back) / 0.5));
-      const x = lerp(1120, 900, goIn) + shake + out * 320, y = 420, k = fx.id;
+      const x = lerp(1180, 1010, goIn) + shake + out * 320, y = 400, k = fx.id;   // halts just right of the ringed answer
       DL.save(); DL.translate(x, y); DL.rotate(-18);
       stroke(k + '.b', superPts(0, 0, 150, 70, 18, 8), { z: Z.fx, w: 5, closed: true, fill: C.paper });
       stroke(k + '.s', [[-20, -35], [-20, 35]], { z: Z.fx + 0.1, w: 4 });
@@ -42,10 +42,12 @@
     draw(fx, t, F) {
       if (t < fx.t0) return;
       const tg = F.targets.bug, a = F.anchors.terry; if (!tg || !a) return;
-      const u = EASE.io(clamp((t - fx.t0) / (fx.caught - fx.t0))), p = lerp2(a.handR, tg, u), k = fx.id, z = Z.fx + 2;
+      const u = EASE.io(clamp((t - fx.t0) / (fx.caught - fx.t0))), p = lerp2(a.handR, tg, u), k = fx.id, z = Z.fx + 2, sc = EASE.back(clamp((t - fx.t0) / 0.25));
+      DL.save(); DL.about(p[0], p[1], () => DL.scale(sc));
       stroke(k + '.ring', ringPts(k, p[0], p[1], 52, 52, { n: 14, closed: true }), { z, w: 6, closed: true });
       stroke(k + '.h', [[p[0] + 37, p[1] + 37], [p[0] + 90, p[1] + 90]], { z, w: 9 });
       stroke(k + '.sh', ringPts(k + 's', p[0], p[1], 36, 36, { n: 8, a0: 200, sweep: 60 }), { z, w: 3, color: C.pencil });
+      DL.restore();
     },
   };
   defineScene({
@@ -54,9 +56,9 @@
     tracks: {
       terry: {
         pos: [[0, [TX, FL]], [CLEAR, [1100, FL], 0.6, 'io']],
-        pose: [[0, 'stand'], [8.7, 'akimbo', 0.15, 'back'], [CLEAR, 'stand', 0.2], [13.6, { ...POSE.stand, armScale: 1.5, armL: [95, 10] }, 0.1, 'back'],
-          [16.5, { ...POSE.stand, armScale: 1.5, armL: [85, 8] }, 0.15], [20.3, { ...POSE.stand, armScale: 1.5, armL: [95, 10] }, 0.12], [21.0, 'kidCheer', 0.12, 'back']],
-        face: [[0, 'smile'], [8.7, 'proud', 0.05], [CLEAR, 'focus', 0.05], [13.6, 'surprised', 0.05], [16.5, 'focus', 0.06], [20.3, 'idea', 0.05], [21.0, 'joy', 0.05]],
+        pose: [[0, 'stand'], [8.7, 'akimbo', 0.15, 'back'], [CLEAR, 'stand', 0.2], [15.0, { ...POSE.stand, lean: -4, armScale: 1.7, ikL: { w: 1, to: [1060, 452], bend: 'down' } }, 0.1, 'back'],
+          [16.5, { ...POSE.stand, armScale: 1.5, armL: [85, 8] }, 0.15], [19.1, { ...POSE.stand, armScale: 1.5, armR: [70, 40] }, 0.2], [21.0, 'kidCheer', 0.12, 'back']],
+        face: [[0, 'smile'], [8.7, 'proud', 0.05], [CLEAR, 'focus', 0.05], [15.0, 'surprised', 0.05], [16.5, 'focus', 0.06], [20.3, 'idea', 0.05], [21.0, 'joy', 0.05]],
         turn: [[0, -0.3], [CLEAR, -0.45, 0.1], [21.0, 0, 0.1]],
         gaze: [[0, 'gold'], [CLEAR, 'page'], [20.3, 'bug'], [21.0, 'viewer']],
         squash: [[0, 1], [21.0, 1.1, 0.06], [21.06, 1, 0.25, 'back']],
@@ -66,13 +68,13 @@
     fx: [
       { type: 'ageStamp', age: 10, t0: -3, ...E4.STAMP, dockT: -2 },
       ...GOLD.map(([s, t0], i) => ({ type: 'title', id: 'g' + i, text: s, x: 560, y: 190 + i * 110, size: 66, t0, t1: CLEAR })),
-      { type: 'band', id: 'hiG', rect: [560 - 11 * 66 / 2 + 4 * 66 + 22, 190 + 330 - 40, 6 * 66, 80], t0: 10.2, t1: CLEAR, dur: 0.45 },   // over 直视自己的错
+      { type: 'band', id: 'hiG', rect: [560 - 11 * 66 / 2 + 4 * 66 + 22, 190 + 330 - 40, 6 * 66 - 34, 80], t0: 10.2, t1: CLEAR, dur: 0.45 },   // over 直视自己的错
       // a page with a wrong answer, ringed in red
       { type: 'prop', kind: 'e4_page', id: 'pg', at: PG, rot: -2, t0: CLEAR, w: 640, h: 380, lines: 4 },
-      { type: 'write', id: 'wr', text: '20 × 21 = 420', x: PG[0] - 220, y: PG[1] - 110, size: 72, t0: CLEAR + 0.2, speed: 3200, w: 6, sfx: 'pen' },
-      { type: 'ringRect', id: 'rg', rect: { write: 'wr', from: 10, to: 13 }, t0: CLEAR + 0.9, pad: 10 },
-      { type: 'h4_eraser', id: 'er', t0: 12.9, stop: 13.6, back: 14.4, t1: 15.0 },
-      { type: 'title', id: 'stop', text: '先别擦！', x: 960, y: 260, size: 70, t0: 13.6, t1: 16.5, color: 'red', rot: 6, sfx: 'stamp' },
+      { type: 'write', id: 'wr', text: '1+2+…+20 = 420', x: PG[0] - 262, y: PG[1] - 110, size: 62, t0: CLEAR, speed: 6000, gap: 0.02, glyphGap: 0.02, w: 6, sfx: 'pen' },   // the false sum from the detective scene
+      { type: 'ringRect', id: 'rg', rect: { write: 'wr', from: 11, to: 14 }, t0: 14.45, pad: 10 },
+      { type: 'h4_eraser', id: 'er', t0: 14.6, stop: 15.1, back: 15.8, t1: 16.4 },
+      { type: 'title', id: 'stop', text: '先别擦！', x: 990, y: 200, size: 70, t0: 15.1, t1: 16.6, color: 'red', rot: 6, sfx: 'stamp' },
       { type: 'scribe', id: 'q', text: '你错在哪一步？', x: PG[0] - 200, y: PG[1] + 0, size: 52, t0: 16.7, cps: 10, color: 'red' },
       { type: 'h4_bug', id: 'bug', t0: 17.6, caught: 20.4 },
       { type: 'h4_glass', id: 'gl', t0: 19.6, caught: 20.4 },
