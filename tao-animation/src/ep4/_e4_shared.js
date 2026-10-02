@@ -77,7 +77,8 @@ PROPS.e4_page = (fx, t, lt, p) => {
 /* ---------------- 成绩单：六道题的得分 ----------------
  * { type: 'e4_scores', id, at: [cx, cy], scale: 1, t0, t1, cell: 118,
  *   scores: [[分, 写出时间], …6 个]（写出时间为负 = 一开始就写好；null = 还没写）,
- *   total: [总分, 写出时间]（可选）, ringT: [[题号 0-5, t], …]（红圈圈出某一格，可选）}
+ *   total: [总分, 写出时间]（可选）, ringT: [[题号 0-5, t], …]（红圈圈出某一格，可选）,
+ *   braces: [{ from: 0, to: 2, label: '17', t0, t1 }]（格子下面的红色大括号 + 红色手写数字；t0 为负 = 一开始就在，t1 时 0.25 秒淡出）}
  * 一道题满分 7 分。分数用手写字形一笔笔写进格子；第 3、4 题之间的粗线分开“第一天 / 第二天”。
  * 发布命名点：'<id>.s<i>'（第 i 格中心，i 从 0 起）、'<id>.total'、'<id>.top'。 */
 COMP.e4_scores = {
@@ -86,7 +87,8 @@ COMP.e4_scores = {
     fx._W = n * c + gap + (fx.total ? c * 1.5 + 40 : 0);
     fx._x0 = -fx._W / 2;
     fx._bx = i => fx._x0 + i * c + (i >= 3 ? gap : 0);
-    fx._writes = (fx.scores || []).map(([v, t], i) => v === null ? null : COMP.write.init({ id: fx.id + '.w' + i, text: String(v), x: 0, y: 0, size: c * 0.62, t0: t, speed: 1500, w: 6.5, anchor: 'middle' }));
+    fx._writes = (fx.scores || []).map((e, i) => !e || e[0] === null ? null : COMP.write.init({ id: fx.id + '.w' + i, text: String(e[0]), x: 0, y: 0, size: c * 0.62, t0: e[1], speed: 1500, w: 6.5, anchor: 'middle' }));
+    fx._br = (fx.braces || []).map((b, j) => ({ ...b, w: COMP.write.init({ id: fx.id + '.bw' + j, text: b.label, x: 0, y: 0, size: c * 0.6, t0: b.t0 < 0 ? -9 : b.t0 + 0.3, t1: b.t1, speed: 1500, w: 6, color: 'red', anchor: 'middle', z: Z.annot }) }));
     if (fx.total) fx._tw = COMP.write.init({ id: fx.id + '.wt', text: '= ' + fx.total[0], x: 0, y: 0, size: c * 0.62, t0: fx.total[1], speed: 1500, w: 6.5 });
     return fx;
   },
@@ -107,6 +109,12 @@ COMP.e4_scores = {
       DL.save(); DL.translate(fx._bx(i) + c / 2, -c * 0.31); COMP.write.draw(w, t, F); DL.restore();
     });
     if (fx._tw) { DL.save(); DL.translate(fx._bx(5) + c + 34, -c * 0.31); COMP.write.draw(fx._tw, t, F); DL.restore(); }
+    (fx._br || []).forEach((b, j) => {
+      if (t < b.t0 || (b.t1 !== undefined && t >= b.t1 + 0.25)) return;
+      const op = b.t1 !== undefined ? 1 - clamp((t - b.t1) / 0.25) : 1, xa = fx._bx(b.from) + 8, xb = fx._bx(b.to) + c - 8, y = c / 2 + 74, mid = (xa + xb) / 2;
+      stroke(k + '.br' + j, [[xa, y - 14], [xa + 10, y], [mid - 12, y], [mid, y + 16], [mid + 12, y], [xb - 10, y], [xb, y - 14]], { z: Z.annot, w: 5, color: C.red, opacity: op, draw: b.t0 < 0 ? 1 : EASE.out(clamp((t - b.t0) / 0.35)) });
+      if (op > 0.02) { DL.save(); DL.translate(mid, y + 22); if (op < 1) DL.scale(1); COMP.write.draw(b.w, t, F); DL.restore(); }
+    });
     (fx.ringT || []).forEach(([i, rt], j) => {
       if (t < rt) return;
       const x = fx._bx(i) + c / 2;
@@ -122,6 +130,7 @@ COMP.e4_scores = {
     (fx._writes || []).forEach(w => { if (w && w.t0 >= 0) c.push([w.t0, 'pen']); });
     if (fx._tw && fx._tw.t0 >= 0) c.push([fx._tw.t0, 'pen']);
     (fx.ringT || []).forEach(([, rt]) => { if (rt >= 0) c.push([rt, 'pen']); });
+    (fx.braces || []).forEach(b => { if (b.t0 >= 0) c.push([b.t0, 'pen']); });
     return c;
   },
 };

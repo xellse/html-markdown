@@ -30,7 +30,7 @@ def main():
     ep = sys.argv[1] if len(sys.argv) > 1 else 'ep1'
     meta = json.load(open(os.path.join(ROOT, 'src', ep, 'meta.json'), encoding='utf-8'))
     voices = meta.get('audio', {}).get('voices', {})
-    page = os.path.join(ROOT, f'.{ep}-lines.html')
+    page = os.path.join(ROOT, f'.{ep}-lines-{os.getpid()}.html')
     build.build(ep, out=page, audio=False)
     scenes = dump_lines(page)
     os.remove(page)

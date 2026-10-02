@@ -19,5 +19,5 @@ build/
 .env.*.local
 
 # episode build scratch
-tao-animation/.*-lines.html
+tao-animation/.*-lines*.html
 __pycache__/

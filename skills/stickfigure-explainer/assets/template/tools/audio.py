@@ -89,7 +89,7 @@ def main():
     a = ap.parse_args()
     meta = json.load(open(os.path.join(ROOT, 'src', a.ep, 'meta.json'), encoding='utf-8'))
     cfg = meta['audio']
-    tmp_page = os.path.join(ROOT, f'.{a.ep}-lines.html')
+    tmp_page = os.path.join(ROOT, f'.{a.ep}-lines-{os.getpid()}.html')
     build.build(a.ep, out=tmp_page, audio=False)
     scenes = dump_lines(tmp_page)
     os.remove(tmp_page)
