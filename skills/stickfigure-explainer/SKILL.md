@@ -28,14 +28,14 @@ description: 用 Ben Orlin（《欢乐数学》《疯狂微积分》《数学游
 4. **10 秒风格样片** ✋：直接改演示或写一个短场景，发布给用户确认线条、颜色含义和主角造型。**要快**，不要为此开多方案评审。
 5. **系列大纲** ✋：写 `script-outline.md`，内容包括主题、内外两条阶梯、观众画像、每集的事实、演绎和学习目标、出处。
 6. **逐集制作** ✋：
-   1. 先写逐句旁白，定时间；
-   2. 再写场景，多的时候分给 3 个代理并行，用前缀隔离；
-   3. 截图检查，至少改 2–3 轮；
+   1. 先写逐句旁白，定时间，**开工前做剧本核对**：对照事实清单、上一集结尾和屏幕上的每个算式；
+   2. 再写场景，多的时候分给 3–5 个代理并行，用前缀隔离；
+   3. 自动检查 `tools/lint_frames.cjs` 加缩略图，最多 2 轮；全集复审只做一轮（2 个审片人，只报必改和应改），返工后重跑 lint，不再开复核；
    4. `tools/check_timing.py` 检查字幕时长，再用 `tools/audio.py` 生成配音和配乐包（它会自动重新构建页面）；
    5. `playtest.cjs` 测试播放器；
    6. 发布，写说明。
 
-   细节见 `references/pipeline.md`。
+   细节见 `references/pipeline.md`，审片预算见第 9 节。
 
 ## 不能丢的原则（以及原因）
 - **颜色即意义**：黑色是故事，红色是旁白、批注和小问号，黄色是关键知识。孩子靠颜色读画面，挪用一次，颜色就失去意义。
@@ -84,5 +84,6 @@ python3 tools/check_timing.py ep1                     # 生成配音前，先检
 python3 tools/audio.py ep1                            # 配音 + 配乐 → episode-1.audio.js，列出超时句子，并自动重新构建页面
 NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280
 python3 <skill>/scripts/sheet.py frames sheet.png 4 480        # 用 Read 看这张图
+NODE_PATH=$(npm root -g) node tools/lint_frames.cjs episode-1.html > lint.md    # 自动查脸上压线、线穿字、一帧消失、切场漏画面、空舞台、小字
 NODE_PATH=$(npm root -g) node <skill>/scripts/playtest.cjs episode-1.html out
 ```

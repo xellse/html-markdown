@@ -45,7 +45,8 @@ project/
 - 舞台坐标 1600 × 900，原点在左上角，y 向下。
 - **`write` 的 y 是字的顶端**：字高等于 size，数字写在 y 到 y + size 之间。**`text`、`scribe`、`title`、`speech`、`label` 的 y 是文字的垂直中心**。
 - 组件里的 `t0`、`t1` 和轨道时间都是**场景内时间**，`targets(F)` 里的 `F.t` 也一样；`F.T` 是整集时间。**meta.json 的 `poster` 是整集时间**。
-- 字体常量：`CFG.FONT_ZH`（站酷快乐体，中文默认）、`CFG.FONT_MIX`（Patrick Hand 优先，适合英文和数字标签）、`CFG.FONT_MONO`（VT323，代码和屏幕）。
+- 字体常量：`CFG.FONT_ZH`（站酷快乐体，中文默认）、`CFG.FONT_MIX`（Patrick Hand 优先，适合英文和数字标签）、`CFG.FONT_MONO`（VT323，代码和屏幕）。含英文字母的文字用默认字体时，`text()` 会自动换成 `FONT_MIX`，因为站酷把 O 画成方块。
+- `render(t)` 之后，`EP.lastF` 是这一帧的 F（锚点、目标点），`tools/lint_frames.cjs` 靠它找角色的脸。
 - 等宽代码字体每个字符宽 `CFG.MONO_ADV × size`（0.4）。`textWidth(str, size, CFG.FONT_MONO)` 会按这个值估算。
 
 ## 2. 场景（defineScene）

@@ -164,7 +164,9 @@ function text(key, str, x, y, o = {}) {
   let tf = `matrix(${m.map(v => +v.toFixed(4)).join(' ')}) translate(${f1(x)} ${f1(y)})`;
   if (o.rot) tf += ` rotate(${o.rot})`;
   if (o.scale !== undefined && o.scale !== 1) tf += ` scale(${+o.scale.toFixed(4)})`;
-  const a = { transform: tf, x: 0, y: 0, 'font-size': o.size || 40, 'font-family': o.font || CFG.FONT_ZH,
+  // Latin letters always in Patrick Hand: ZCOOL draws O as a square, so "IMO" would read "IM口"
+  const font = o.font || CFG.FONT_ZH;
+  const a = { transform: tf, x: 0, y: 0, 'font-size': o.size || 40, 'font-family': font === CFG.FONT_ZH && /[A-Za-z]/.test(str) ? CFG.FONT_MIX : font,
     fill: o.color || C.ink, 'text-anchor': o.anchor || 'middle', 'dominant-baseline': 'central', style: 'white-space:pre' };
   if (o.opacity !== undefined && o.opacity < 1) a.opacity = +o.opacity.toFixed(3);
   if (o.halo) { a.stroke = C.paper; a['stroke-width'] = o.halo; a['stroke-linejoin'] = 'round'; a['paint-order'] = 'stroke'; }
@@ -578,10 +580,12 @@ function drawFace(L, F, key) {
     const k = key('eye' + i);
     if (blinking) {
       stroke(k, [hl(cx - rx * 0.85, cy + 0.04), hl(cx, cy + ry * 0.2), hl(cx + rx * 0.85, cy + 0.04)], { z: Z.front, w: 4.5 });
+      eyesW.push({ cx, cy, rx, ry });   // glasses stay on while blinking
       return;
     }
     if (face.eyes === 'happy') {
       stroke(k, [hl(cx - rx * 0.82, cy + ry * 0.18), hl(cx, cy - ry * 0.42), hl(cx + rx * 0.82, cy + ry * 0.18)], { z: Z.front, w: 5 });
+      eyesW.push({ cx, cy, rx, ry });
       return;
     }
     const ring = ringPts(k, cx, cy, rx, ry, { n: 11, a0: -100, sweep: 360, rv: 0.04, closed: true }).map(p => hl(p[0], p[1]));
@@ -623,7 +627,7 @@ function drawFace(L, F, key) {
     });
   }
   // glasses
-  if (def.glasses && !blinking) {
+  if (def.glasses) {
     eyesW.forEach((e, i) => stroke(key('gl' + i), superPts(e.cx, e.cy, e.rx * 2 + 0.16, e.ry * 1.75, 16, 4).map(p => hl(p[0], p[1])), { z: Z.front, w: 4, closed: true }));
     if (eyesW.length === 2) stroke(key('glb'), [hl(fu - 0.06, ey - 0.12), hl(fu + 0.06, ey - 0.12)], { z: Z.front, w: 4 });
   }
@@ -1402,6 +1406,7 @@ function render(tIn) {
   if (!sc.noSeries) COMP.seriesMark.draw({ text: EP.series, x: 40, y: 44 });
   COMP.subtitles.draw({ lines: sc.subs, y: 850 }, lt);
   commit();
+  EP.lastF = F;   // read by tools/lint_frames.cjs
   return t;
 }
 

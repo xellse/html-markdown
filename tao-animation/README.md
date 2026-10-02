@@ -25,6 +25,12 @@ python3 tools/audio.py ep1   # 台词或配乐改了才需要运行
 python3 build.py ep1         # 生成 episode-1.html
 ```
 
+画面自动检查（约 1.5 分钟，结果按场景列出时间段）：
+
+```bash
+NODE_PATH=$(npm root -g) node tools/lint_frames.cjs episode-4.html > lint.md
+```
+
 `tools/audio.py` 做三件事：
 - 用微软 Edge 神经网络语音为每句字幕生成配音，存到 `audio/voice/`。已经生成过的台词不会重复生成。
 - 截取、压缩配乐，存到 `audio/music/`。
