@@ -22,9 +22,9 @@
     tracks: {
       terry: {
         pos: [[0, [TX, FL]], [C2, [1120, FL], 0.5, 'io'], [25.7, [1800, FL], 0.6, 'in']],
-        pose: [[0, 'stand'], [0.4, 'kidCheer', 0.12, 'back'], [3.6, 'stand', 0.2], [4.2, 'akimbo', 0.15, 'back'], [A, 'stand', 0.2], [12.8, 'thinkStand', 0.2], [B, 'stand', 0.2],
+        pose: [[0, 'stand'], [0.4, 'kidCheer', 0.12, 'back'], [3.6, 'stand', 0.2], [4.2, 'stand', 0.15], [A, 'stand', 0.2], [12.8, 'thinkStand', 0.2], [B, 'stand', 0.2],
           [C2 + 0.5, { ...POSE.stand, lean: -6, armScale: 1.7, ikL: { w: 1, to: [PG[0] + 40, PG[1] - 20], bend: 'down' } }, 0.2], [25.0, 'kidCheer', 0.12, 'back']],
-        face: [[0, 'joy'], [4.2, 'proud', 0.05], [A, 'neutral', 0.06], [12.8, 'focus', 0.06], [B, 'smile', 0.06], [C2, 'puzzled', 0.06], [23.4, 'idea', 0.05], [25.0, 'joy', 0.05]],
+        face: [[0, 'joy'], [4.2, 'smile', 0.05], [A, 'neutral', 0.06], [12.8, 'focus', 0.06], [B, 'smile', 0.06], [C2, 'puzzled', 0.06], [23.4, 'idea', 0.05], [25.0, 'joy', 0.05]],
         turn: [[0, -0.3], [C2, -0.5, 0.15], [25.0, -0.1, 0.1]],
         gaze: [[0, 'viewer'], [0.6, 'w1'], [4.4, 'w2'], [A, 'card'], [B, 'viewer'], [C2, 'page'], [25.0, 'viewer']],
       },
@@ -38,7 +38,7 @@
       { type: 'title', id: 'w2', text: '认真', x: 420, y: 440, size: 130, t0: 4.3, t1: A, underline: true },
       { type: 'title', id: 'w2s', text: '证明写到让人忘不了', x: 700, y: 452, size: 44, t0: 5.4, t1: A, color: 'red', anchor: 'start', rot: -2 },
       { type: 'e5_medal', id: 'au', char: 'terry', r: 38, drop: 52, label: '金', t0: 0.4, t1: A, shine: [1.0] },
-      { type: 'h5_book', id: 'bk', at: [TX + 150, FL - 190], title: '解题', t0: 4.4, t1: A },
+      { type: 'h5_book', id: 'bk', at: [TX + 150, FL - 190], title: '证明', t0: 4.4, t1: A },
       // ② 那门没及格的课
       { type: 'e5_course', id: 'co', at: [760, 440], title: '无聊的课', t0: 8.8, stampT: 10.0, t1: B, rot: -4 },
       { type: 'title', id: 'also', text: '也要认真做', x: 1020, y: 300, size: 64, t0: 13.0, t1: B, color: 'red', rot: 4, sfx: 'pen' },
@@ -48,7 +48,7 @@
       // ④ 回去，再试一次
       { type: 'prop', id: 'pg', kind: 'e5_page', at: PG, w: 380, h: 300, lines: 0, t0: C2, t1: 26.0, drawDur: 0.4 },
       { type: 'title', id: 'q', text: '?', x: PG[0], y: PG[1] - 40, size: 110, t0: C2 + 0.2, t1: 24.2, color: 'red' },
-      { type: 'write', id: 'ok', text: '✓', x: PG[0] - 30, y: PG[1] - 90, size: 110, t0: 24.3, t1: 26.0, color: 'red', sfx: 'ding' },
+      { type: 'write', id: 'ok', text: '✓', x: PG[0] - 30, y: PG[1] - 90, size: 110, t0: 24.3, t1: 26.0, color: 'red', speed: 2600, sfx: 'ding' },
       { type: 'speech', id: 'again', text: ['卡住了？', '回去，再试一次！'], at: [1200, 230], tail: [20, 110], size: 64, speaker: 'terry', t0: 22.1, t1: 26.0, rot: 4 },
     ],
     subs: [
