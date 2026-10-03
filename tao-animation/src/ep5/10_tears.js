@@ -288,6 +288,7 @@
       const kick = Math.sin(lt * 2 * Math.PI * 1.9);
       [[1, 'L'], [-1, 'R']].forEach(([sg, n]) => { const a = (62 + 44 * sg * kick) * RAD, kn = [K[0] - 6 * (1 - sg) / 2, K[1]]; stroke(k + '.leg' + n, [P, kn, [kn[0] + Math.cos(a) * 44, kn[1] - Math.sin(a) * 44]], { z, w: bw }); });
       stroke(k + '.torso', [N, P], { z, w: bw });
+      [0, 1].forEach(j => { const rr = 56 + j * 13; stroke(k + '.km' + j, [0, 1, 2, 3].map(i => { const an = (24 + i * 24) * RAD; return [K[0] + Math.cos(an) * rr, K[1] - Math.sin(an) * rr]; }), { z: Z.fx, w: 2.4, opacity: 0.8 - j * 0.25, boil: 0.8 }); });   // kick marks
       stroke(k + '.armA', [S, [S[0] - 20, S[1] + 16], [S[0] - 58, S[1] + 14]], { z, w: bw });   // hugging the pillow, under his head
       stroke(k + '.armB', [S, [S[0] + 20, S[1] + 12], [S[0] + 46, S[1] + 12]], { z, w: bw });
       const fill = ringPts(k + '.h', H[0], H[1], r, r, { n: 12, a0: -120, sweep: 360, rv: 0.035, closed: true });
