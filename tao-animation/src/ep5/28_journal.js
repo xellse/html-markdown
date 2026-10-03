@@ -250,7 +250,7 @@
     draw(fx, t) {
       if (t < CARD || t >= DUR) return;
       const fo = fadeEnd(t); if (fo <= 0) return;
-      const k = 'c5jCard', z = Z.set + 2, [x, y] = [640, 252], W = 335, H = 52, s = EASE.back(clamp((t - CARD) / 0.25));
+      const k = 'c5jCard', z = Z.set + 2, [x, y] = [620, 234], W = 335, H = 52, s = EASE.back(clamp((t - CARD) / 0.25));
       const n0 = DL.items.length;
       DL.save(); DL.about(x, y, () => DL.scale(Math.max(0.01, s)));
       stroke(k + '.c', box(x - W, y - H, x + W, y + H), { z, w: 4.5, fill: C.paper });
@@ -328,7 +328,7 @@
         squash: [[0, 1], [WALK1, 0.94, 0.05], [WALK1 + 0.05, 1, 0.2, 'back'], [NOD + 0.1, 1.05, 0.05], [NOD + 0.16, 1, 0.2, 'back']],
       },
     },
-    targets: F => ({ book: BK.c, page: [PG.c[0] - 200, PG.c[1] - 60], cal: [CAL.x, CAL.y + 140], pages: B45C, byline: F.targets.byline || [965, 352], icons: [645, 250], card: [640, 252], cupT: CUP_H }),
+    targets: F => ({ book: BK.c, page: [PG.c[0] - 200, PG.c[1] - 60], cal: [CAL.x, CAL.y + 140], pages: B45C, byline: F.targets.byline || [965, 352], icons: [645, 250], card: [620, 234], cupT: CUP_H }),
     set: [{ type: 'floor', t0: SET_IN, t1: END + 0.45 }],
     fx: [
       { type: 'ageStamp', age: 12, place: '1987 年 10 月', t0: -0.1, ...E5.STAMP, dockT: DOCK, pulse: [] },
