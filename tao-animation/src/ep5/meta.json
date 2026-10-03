@@ -1,0 +1,79 @@
+{
+  "series": "数学少年陶哲轩",
+  "title": "数学少年陶哲轩 第5集",
+  "desc": "第5集《好玩，也要认真》：1987 年哈瓦那银牌（40 分，只差 2 分）、1988 年堪培拉金牌（34 分）；九岁时的眼泪和蹦床、老教授的周末下午茶、十二岁写的两页证明、一门没及格的课。",
+  "h1": "第5集 · 好玩，也要认真",
+  "kicker": "数学少年陶哲轩 · 11–15 岁",
+  "aria": "动画第5集：陶哲轩九岁时写下自己做不出题时会哭、会生闷气，但更多时候会回去再试一次；他每年都重新考进国家队，1987 年在哈瓦那以 40 分（满分 42）拿到银牌，丢分的第六题和“质数机器”k×k+k+41 有关；十二岁时给老教授刊物上的难题写了两页证明；1988 年在堪培拉拿到金牌，第四题的解答让阅卷老师记了三十年，超级难题第六题只拿 1 分（魔法分数和梯子，中间有一处“轮到你了”）；一门觉得无聊的大学课没及格；奥数像短跑，研究像马拉松；十五岁写了一本解题书。",
+  "poster_label": "播放 · 第5集（约 9 分钟）",
+  "poster": 0.0,
+  "out": "episode-5.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      },
+      "think": {
+        "file": "Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "secs": 45
+      }
+    },
+    "music": {
+      "title": "main",
+      "recap": "main",
+      "tears": "calm",
+      "between": "chip",
+      "havana": "main",
+      "primes": "sneaky",
+      "journal": "calm",
+      "canberra": "main",
+      "six": "sneaky",
+      "gold": "turn",
+      "boring": "calm",
+      "marathon": "calm",
+      "ending": "main",
+      "end": "main"
+    },
+    "think": "think"
+  }
+}
