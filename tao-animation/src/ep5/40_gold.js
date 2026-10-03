@@ -12,7 +12,7 @@
   const WR = [0.35, 0.6, 0.85, -5, 1.1, -5], TOTAL = 2.0;
   const RULER = 4.0, GLINE = 4.55, BAND = 5.2, MARK0 = 5.55, CLIMB = 5.65, CLIMB_D = 0.9, LAND = 6.6;
   const T_IN = 7.3, LB_GOLD = 7.6, A_OUT = 9.85;
-  const SWAP = 10.5, CAF = 10.6, ENT0 = 11.0, ENT1 = 12.2, LOOP0 = 12.3, PERIOD = 5.8, LOOP1 = LOOP0 + PERIOD, HB = 15.0, C_OUT = 18.85;
+  const SWAP = 10.5, CAF = 10.6, ENT0 = 10.9, ENT1 = 12.2, LOOP0 = 12.4, LOOP1 = LOOP0 + 2700 / 520, HB = 15.0, C_OUT = 18.85;
   const STAGE_IN = 19.3, HOP_ST = 19.45, PM_IN = 19.65, PM_ARR = 20.5, LB_CER = 20.0, LB_PM = 20.7, APPROACH = 21.55, REACH = 22.2, MEDAL_ON = 22.85, BACKOFF = 23.15, CLAP = 23.55, S_OUT = 24.5;
   const STEPS_IN = 24.7, RUN0 = 24.95, RUN1 = 25.25, HOPS = [25.25, 25.7, 26.15], HOP_D = 0.3, CHEER2 = 26.9;
   const ZJ = 29.35, YOUNG = 30.3, CAP2 = 31.3, END = 33.9, DUR = 34.5;
@@ -117,6 +117,7 @@
         for (let i = 0; i < 34; i++) {
           const d = rnd(h, bi * 100 + i, 1) * 0.25 + 0.25, u = (t - b - d) / 2.1; if (u <= 0 || u >= 1) continue;
           const x = 200 + (rnd(h, bi * 100 + i, 2) * 0.5 + 0.5) * 1200 + Math.sin(u * 7 + i) * 22, y = 300 + u * 460 + Math.sin(u * 3 + i) * 10;
+          if (fx.avoid && x > fx.avoid[0] && x < fx.avoid[1] && y < fx.avoid[2]) continue;   // keep the big red word clear
           const rot = (rnd(h, bi * 100 + i, 3) * 2) * 400 * u, op = 1 - clamp((u - 0.75) / 0.25), kk = k + '.' + bi + '.' + i;
           DL.save(); DL.translate(x, y); DL.rotate(rot);
           if (i % 3 === 0) stroke(kk, [[-8, -3], [-2, 3], [4, -3], [10, 3]], { z: Z.shadow + 1, w: 2.6, opacity: op, boil: 0.5 });
@@ -144,7 +145,7 @@
         stroke(k + '.cu' + i, box(x + 18, top - 30, x + 32, top - 10), { z: z + 0.2, w: 2.6, fill: C.paper, draw: q });
       });
       // a little hanging sign
-      const sx = 250, sy = 232, sq = clamp((t - CAF - 0.2) / 0.3);
+      const sx = 230, sy = 176, sq = clamp((t - CAF - 0.2) / 0.3);
       stroke(k + '.sgS', [[sx - 50, sy - 34], [sx, sy - 80, 1], [sx + 50, sy - 34]], { z: Z.set, w: 2.4, color: C.pencil, draw: sq });
       stroke(k + '.sg', box(sx - 80, sy - 36, sx + 80, sy + 36), { z: Z.set, w: 4.5, fill: C.paper, draw: sq });
       if (sq > 0.5) text(k + '.sgT', '食堂', sx, sy + 2, { size: 50, z: Z.set + 0.2, opacity: clamp((sq - 0.5) * 3) });
@@ -222,16 +223,18 @@
     cues: () => [[ZJ, 'pop'], [YOUNG, 'whoosh'], [YOUNG + 0.15, 'stamp'], [CAP2, 'pop']],
   };
 
-  /* ---------------- 绕桌子一圈：一条椭圆路线，前半圈在桌子前面，后半圈在桌子后面（被桌子挡住） ---------------- */
-  const RXL = 430, PCX = 800;
-  const thetaT = t => Math.PI / 2 + 2 * Math.PI * clamp((t - LOOP0) / PERIOD);
-  const pathAt = th => [PCX - RXL * Math.cos(th), 740 + 40 * Math.sin(th)];
+  /* ---------------- 转一大圈：从桌子前面往右走出画面，在画面外转身，再从桌子后面往左走回来（桌子挡住下半身） ---------------- */
+  // a procession with a fixed 165 px spacing (s = distance walked along the route; each teammate is d ahead of / behind Terry)
+  const V = 520, PA = 1000, PT = 600, BACK_Y = 690, PCX = 800;   // the long off-stage turn: the leaders reappear just after the last ones have left
+  const sAt = t => V * clamp(t - LOOP0, 0, LOOP1 - LOOP0);
+  const procAt = s => (s <= PA ? [PCX + s, FL] : s < PA + PT ? [PCX + PA + 40, lerp(FL, BACK_Y, (s - PA) / PT)] : [PCX + PA - (s - PA - PT), BACK_Y]);
+  const isBack = s => s >= PA + PT / 2;
   const inLoop = t => t >= LOOP0 && t < LOOP1;
   const MATE = {
-    mate1: { off: 0.42, from: 1760 }, mate2: { off: 0.84, from: 1900 },
-    mate3: { off: -0.42, from: -200 }, mate4: { off: -0.84, from: -350 }, mate5: { off: -1.26, from: -500 },
+    mate1: { d: 165, from: 1760 }, mate2: { d: 330, from: 1900 },
+    mate3: { d: -165, from: -200 }, mate4: { d: -330, from: -350 }, mate5: { d: -495, from: -500 },
   };
-  const homeOf = id => pathAt(Math.PI / 2 + MATE[id].off);
+  const homeOf = id => procAt(MATE[id].d);
   const ARMS = {
     mate1: t => ({ armScale: 1.2, armR: [132 + 14 * Math.sin(t * 9), 30], armL: [16, 10] }),
     mate2: () => ({ armScale: 1.4, armL: [140, 20], armR: [140, 20] }),
@@ -240,40 +243,40 @@
     mate5: t => ({ armScale: 1.2, armL: [132 + 14 * Math.sin(t * 9 + 1), 30], armR: [16, 10] }),
   };
   const zipPose = s => ({ lean: s * 14, tilt: s * 6, armL: [40, 30], armR: [40, 30], ikL: { w: 0 }, ikR: { w: 0 } });
-  const loopTurn = th => 0.45 * clamp(Math.sin(th) * 4, -1, 1);
+  const routeTurn = (t, d) => (inLoop(t) ? (isBack(sAt(t) + d) ? -0.45 : 0.45) : 0);
   const mateTracks = id => {
-    const m = MATE[id], home = homeOf(id), right = m.from > 800, walkE = makeWalk(ENT0, ENT1, 5.2, { lean: -3 }), walkL = makeWalk(LOOP0, LOOP1, 4.6, { lean: -2, bounce: 0.8 });
-    const cOut = C_OUT + (right ? 0 : 0.06) + Math.abs(m.off) * 0.04;
+    const m = MATE[id], home = homeOf(id), fromRight = m.from > 800, out = m.d < 0 ? 1 : -1;   // leave on the side away from where they came in
+    const walkE = makeWalk(ENT0, ENT1, 5.2, { lean: -3 }), walkL = makeWalk(LOOP0, LOOP1, 5.2, { lean: -3, bounce: 0.8 });
+    const cOut = C_OUT + (out < 0 ? (330 - m.d) : (m.d + 495)) / 165 * 0.06;   // whoever is nearest the edge goes first
     return {
       pos: [[0, t => {
-        if (t < ENT0) return [m.from, home[1]];
-        if (t < ENT1) return [lerp(m.from, home[0], (t - ENT0) / (ENT1 - ENT0)), home[1]];
-        if (inLoop(t)) return pathAt(thetaT(t) + m.off);
-        return home;
-      }], [cOut, [right ? 2000 : -400, home[1]], 0.35, 'in']],
+        if (t < ENT0) return [m.from, FL];
+        if (t < ENT1) return [lerp(m.from, home[0], (t - ENT0) / (ENT1 - ENT0)), FL];
+        return procAt(sAt(t) + m.d);
+      }], [cOut, [out > 0 ? 2000 : -400, BACK_Y], 0.35, 'in']],
       pose: [[0, t => {
         if (t < ENT1) return walkE(t);
         const arms = ARMS[id](t);
         return inLoop(t) ? { ...walkL(t), ...arms } : { ...POSE.stand, ...arms };
-      }], [cOut, zipPose(right ? 1 : -1), 0.08]],
+      }], [cOut, zipPose(out), 0.08]],
       face: [[0, 'smile'], [ENT1, 'joy', 0.05], [HB, 'laugh', 0.05], [LOOP1, 'joy', 0.05]],
-      turn: [[0, t => (t < ENT1 ? (right ? -0.45 : 0.45) : inLoop(t) ? loopTurn(thetaT(t) + m.off) : (right ? -0.3 : 0.3))], [cOut, right ? 0.45 : -0.45, 0.08]],
+      turn: [[0, t => (t < ENT1 ? (fromRight ? -0.45 : 0.45) : inLoop(t) ? routeTurn(t, m.d) : (m.d > 0 ? 0.3 : -0.3))], [cOut, out * 0.45, 0.08]],
       gaze: [[0, 'terry']],
     };
   };
   const zOff = (id, t) => {
-    if (t < CAF - 0.1 || t >= C_OUT + 0.6) return 0;
-    const th = id === 'terry' ? thetaT(t) : thetaT(t) + MATE[id].off;
-    return inLoop(t) && Math.sin(th) < 0 ? -22 : 12;
+    if (t < CAF - 0.1 || t >= C_OUT + 0.4) return 0;
+    return t >= LOOP0 && isBack(sAt(t) + (id === 'terry' ? 0 : MATE[id].d)) ? -22 : 12;
   };
+  const floorOfCrowd = (id, t) => (zOff(id, t) < 0 ? BACK_Y : FL);
 
-  /* ---------------- 小陶的路线：站着 → 绕桌子 → 跳上舞台 → 跑出去 → 跑回来一级一级跳上台阶 ---------------- */
+  /* ---------------- 小陶的路线：站着 → 转一大圈（停在桌子后面）→ 跳上舞台 → 跑出去 → 跑回来一级一级跳上台阶 ---------------- */
   const SP = [[330, FL], [620, 690], [850, 600], [1080, 510]];   // floor start + the three steps (where he stands)
   const hopArc = (a, b, u, h) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u) - h * 4 * u * (1 - u)];
+  const T_BACK = procAt(V * (LOOP1 - LOOP0));                     // where the round ends: behind the table
   const posT = t => {
-    if (inLoop(t)) return pathAt(thetaT(t));
-    if (t < HOP_ST) return [PCX, FL];
-    if (t < HOP_ST + HOP_D) return hopArc([PCX, FL], [740, STAGE], (t - HOP_ST) / HOP_D, 60);
+    if (t < HOP_ST) return procAt(sAt(t));
+    if (t < HOP_ST + HOP_D) return hopArc(T_BACK, [740, STAGE], (t - HOP_ST) / HOP_D, 60);
     if (t < S_OUT) return [740, STAGE];
     if (t < RUN0) return [lerp(740, -300, EASE.in(clamp((t - S_OUT) / 0.3))), STAGE];
     if (t < RUN1) return [lerp(-100, SP[0][0], (t - RUN0) / (RUN1 - RUN0)), FL];
@@ -285,7 +288,8 @@
     return SP[0];
   };
   const floorT = t => {
-    if (t >= HOP_ST + HOP_D * 0.5 && t < S_OUT) return STAGE;
+    if (t < HOP_ST + HOP_D * 0.5) return t >= LOOP0 && isBack(sAt(t)) ? BACK_Y : FL;
+    if (t < S_OUT) return STAGE;
     for (let i = 2; i >= 0; i--) if (t >= HOPS[i] + HOP_D * 0.5) return SP[i + 1][1];
     return FL;
   };
@@ -295,7 +299,7 @@
     c5_gHang: { lean: -8, tilt: -6, armScale: 1.2, ikL: { w: 1, to: 'abs', dx: 752, dy: 606, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: 778, dy: 606, bend: 'down' } },
     c5_gClap: { armScale: 1.1, ikL: { w: 1, to: 'chin', dx: -0.15, dy: 0.9, bend: 'down' }, ikR: { w: 1, to: 'chin', dx: 0.15, dy: 0.9, bend: 'down' } },
   });
-  const walkLoopT = makeWalk(LOOP0, LOOP1, 4.6, { lean: -2, bounce: 0.8 });
+  const walkLoopT = makeWalk(LOOP0, LOOP1, 5.2, { lean: -3, bounce: 0.8 });
   const runT = makeWalk(RUN0, RUN1, 6, { lean: -6 });
   const pmWalk = (t0, t1) => makeWalk(t0, t1, 5.2, { lean: -3 });
   const pmHoldWalk = (t0, t1) => { const w = pmWalk(t0, t1); return t => ({ ...w(t), ...POSE.c5_gHold }); };
@@ -309,7 +313,7 @@
       const Ls = CROWD.map(id => [id, layoutChar(id, t, F)]).filter(([, L]) => L);
       Ls.forEach(([id]) => { F.targets[id] = F.anchors[id].head; });
       Ls.sort((a, b) => zOff(a[0], t) - zOff(b[0], t));
-      Ls.forEach(([id, L]) => { L.def = { ...L.def, z: zOff(id, t), floor: id === 'terry' ? floorT(t) : FL }; drawChar(L, F); });
+      Ls.forEach(([id, L]) => { L.def = { ...L.def, z: zOff(id, t), floor: id === 'terry' ? floorT(t) : floorOfCrowd(id, t) }; drawChar(L, F); });
     },
   };
 
@@ -332,7 +336,7 @@
           [END + 0.05, zipPose(1), 0.08]],
         face: [[0, 'smile'], [T_IN, 'joy', 0.05], [9.6, 'grin', 0.08], [ENT1, 'joy', 0.05], [C_OUT, 'grin', 0.08], [REACH, 'smile', 0.06], [MEDAL_ON, 'joy', 0.05],
           [S_OUT, 'grin', 0.06], [CHEER2, 'joy', 0.05], [28.6, 'proud', 0.08], [YOUNG, 'proudGrin', 0.06]],
-        turn: [[0, 0], [LOOP0, t => (inLoop(t) ? loopTurn(thetaT(t)) : 0), 0], [LOOP1, 0, 0.12], [PM_IN, 0.35, 0.12], [S_OUT, -0.45, 0.08], [RUN0, 0.45, 0], [CHEER2, 0, 0.12], [ZJ, -0.3, 0.12]],
+        turn: [[0, 0], [LOOP0, t => routeTurn(t, 0), 0], [LOOP1, 0, 0.12], [PM_IN, 0.35, 0.12], [S_OUT, -0.45, 0.08], [RUN0, 0.45, 0], [CHEER2, 0, 0.12], [ZJ, -0.3, 0.12]],
         gaze: [[0, 'viewer'], [ENT0 + 0.3, 'mate1'], [LOOP0, 'viewer'], [PM_ARR, 'pmT'], [MEDAL_ON, 'medal'], [MEDAL_ON + 0.6, 'viewer'], [RUN0, [1700, 400]], [CHEER2, 'viewer'], [ZJ, 'young'], [YOUNG + 1.0, 'viewer']],
         squash: [[0, 1], [T_IN + 0.05, 0.9, 0.05], [T_IN + 0.11, 1.06, 0.08], [T_IN + 0.19, 1, 0.2, 'back'], [HOP_ST + HOP_D, 0.88, 0.05], [HOP_ST + HOP_D + 0.05, 1, 0.2, 'back'],
           [MEDAL_ON + 0.3, 0.92, 0.05], [MEDAL_ON + 0.36, 1, 0.2, 'back'], ...terrySq],
@@ -360,7 +364,7 @@
       { type: 'c5_gRuler', id: 'c5gR' },
       { type: 'c5_gFade', f0: A_OUT - 0.3, fd: 0.3, inner: { type: 'band', id: 'c5gHi', rect: [RX + 46, Yv(32) - 34, 130, 68], t0: BAND, dur: 0.35 } },
       // L3：金牌！
-      { type: 'c5_gConfetti', id: 'c5gConf', bursts: [T_IN + 0.1, MEDAL_ON + 0.15] },
+      { type: 'c5_gConfetti', id: 'c5gConf', bursts: [T_IN + 0.1, MEDAL_ON + 0.15], avoid: [600, 1000, 450] },
       { type: 'c5_gFade', f0: A_OUT, fd: 0.3, inner: { type: 'title', id: 'c5gWin', text: '金牌！', x: 800, y: 392, size: 84, color: 'red', rot: -4, t0: LB_GOLD, sfx: 'tada' } },
       // L4–L5：食堂，绕桌子一圈（7 月 17 日，身上还没有奖牌）
       { type: 'c5_gCafe', id: 'c5gCafe' },
@@ -375,13 +379,13 @@
       { type: 'c5_gFade', f0: C_OUT - 0.2, fd: 0.3, inner: { type: 'speech', id: 'c5gHB', text: '生日快乐！', at: [800, 226], size: 76, t0: HB, t1: DUR, rot: -3 } },
       { type: 'label', id: 'c5gLbPm', text: '总理', at: [1260, 300], rot: 4, size: 50, t0: LB_PM, t1: APPROACH, target: { char: 'pm', part: 'headTop', dx: 34, dy: 16 }, bend: -0.2, gap: 12 },
       { type: 'c5_gHeld', id: 'c5gHeld' },
-      { type: 'e5_medal', id: 'c5gMedal', char: 'terry', label: '金', t0: MEDAL_ON, t1: S_OUT + 0.35, shine: [MEDAL_ON + 0.4] },
+      { type: 'e5_medal', id: 'c5gMedal', char: 'terry', r: 38, label: '金', t0: MEDAL_ON, t1: S_OUT + 0.35, shine: [MEDAL_ON + 0.4] },
       ...STEP.map((s, i) => ({ type: 'c5_gFade', f0: END, fd: 0.45, inner: { type: 'e5_medal', id: 'c5gM' + i, at: [s.x0 + 54, s.top - 58], r: 38, label: ['铜', '银', '金'][i], t0: HOPS[i] + HOP_D, shine: [HOPS[i] + HOP_D + 0.1] } })),
       // L8：至今最年轻的金牌得主
       { type: 'c5_gYoung', id: 'c5gYg', at: [300, 400] },
     ],
     sfx: [[T_IN, 'pop'], [HOP_ST + HOP_D, 'thud'], ...HOPS.map(h => [h, 'hop']), [C_OUT, 'whoosh'], [S_OUT, 'whoosh'], [CLAP, 'boop'], [END + 0.05, 'whoosh']],
-    steps: [{ t0: ENT0, t1: ENT1, hz: 5.2 }, { t0: LOOP0, t1: LOOP1, hz: 4.6 }, { t0: PM_IN, t1: PM_ARR, hz: 5.2 }, { t0: RUN0, t1: RUN1, hz: 6 }],
+    steps: [{ t0: ENT0, t1: ENT1, hz: 5.2 }, { t0: LOOP0, t1: LOOP1, hz: 5.2 }, { t0: PM_IN, t1: PM_ARR, hz: 5.2 }, { t0: RUN0, t1: RUN1, hz: 6 }],
     subs: [
       { t0: 0.3, t1: 3.5, text: '两天加起来：34分。', say: '两天加起来：三十四分。' },
       { t0: 4.0, t1: 7.0, text: '金牌线是32分——', say: '金牌线是三十二分——' },

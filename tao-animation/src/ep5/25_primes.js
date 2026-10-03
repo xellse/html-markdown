@@ -377,7 +377,7 @@
     },
     targets: () => ({ cell6: [BACK[0] + BACK_S * (cellX(5) - SH.at[0]), BACK[1]] }),
     fx: [
-      { type: 'ageStamp', age: 11, t0: -3, ...E5.STAMP, dockT: -2 },
+      { type: 'ageStamp', age: 11, t0: -3, ...E5.STAMP, dockT: -2, t1: P.DUR - 0.35 },   // shrinks away before the next scene stamps 12
       // the hand-over from havana: the sheet (same id), "第六题"; then it shrinks away
       { type: 'b5_pSheet', id: 'b5p.sheetGo', inner: { type: 'e5_scores', id: SID, at: SH.at, cell: CELL, t0: -1,
         scores: E5.S87.map(v => [v, -5]), total: [40, -5], ringT: [[5, -1, 52.0], [5, P.RING5]] } },

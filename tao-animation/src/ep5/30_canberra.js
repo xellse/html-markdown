@@ -9,9 +9,9 @@
   const FL = 780, SH = E5.SHEET;
   /* ---------------- times (scene clock) ---------------- */
   const Y88 = 0.4, MAP_IN = 1.6, LB_OCE = 3.2, SHRINK = 5.2, AUS = 5.45, ARR = 7.4, PIN = 7.15, MAP_OUT = 8.95;
-  const CAL_IN = 9.1, FLIP = 11.15, CAKE = 12.2, N13 = 12.5, JOY = 12.6, ZIP = 14.3, CAL_OUT = 14.5;
-  const SHEET = 15.2, W4 = 15.8, MK_IN = 16.4, NOD1 = 17.9, NOD2 = 18.25, RING4 = 18.6, ANS_OUT = 19.9, APART = 20.05;
-  const Y30 = 20.3, CARD = 20.9, WORDS = [24.5, 25.25, 26.0], BAND = 26.55, FORGET = 27.5, SRC = 28.7, D_OUT = 30.75;
+  const CAL_IN = 9.1, FLIP = 11.15, CAKE = 12.2, N13 = 12.5, JOY = 12.6, ZIP = 14.3, CAL_OUT = 14.75;
+  const SHEET = 15.0, W4 = 15.8, MK_IN = 16.4, NOD1 = 17.9, NOD2 = 18.25, RING4 = 18.6, ANS_OUT = 19.9, APART = 20.05;
+  const Y30 = 20.3, CARD = 22.3, WORDS = [24.5, 25.25, 26.0], BAND = 26.55, FORGET = 27.5, SRC = 28.7, D_OUT = 30.75;
   const MEM = 31.5, KID = 31.75, PAPER = 32.15, PROOF = 36.0, ARROW = 36.15, LINES0 = 36.3, LB30 = 38.4;
   const END = 39.7, DUR = 40.3;
   const fadeEnd = t => 1 - clamp((t - END) / 0.45);
@@ -50,7 +50,7 @@
     [135.4, -15.0], [137.5, -16.3], [139.4, -17.4], [140.8, -17.5], [141.6, -15.0], [141.6, -12.6]].map(([a, b]) => proj(a, b));
   const TAS = [[144.6, -40.7], [146.5, -41.1], [148.3, -40.9], [148.0, -42.9], [146.9, -43.6], [145.2, -42.2]].map(([a, b]) => proj(a, b));
   const CBR = proj(149.13, -35.28);
-  const WAVES = [[-330, -70], [-345, 110], [-250, 250], [320, -150], [345, 60], [250, 255], [-60, 275]];
+  const WAVES = [[-330, -70], [-345, 110], [-250, 250], [310, -170], [375, 160], [250, 262], [-60, 275]];
   const mapPose = t => {   // centre + scale of the map
     const u = EASE.io(clamp((t - SHRINK) / 0.45));
     return { c: lerp2([800, 470], [800, 215], u), s: lerp(1, 0.52, u) };
@@ -93,7 +93,7 @@
   const D15 = layoutWriting({ text: '15', x: 0, y: 0, size: 78, t0: -9, speed: 1, anchor: 'middle' });
   const D16 = layoutWriting({ text: '16', x: 0, y: 0, size: 78, t0: -9, speed: 1, anchor: 'middle' });
   const D17 = layoutWriting({ text: '17', x: 0, y: 0, size: 100, t0: -9, speed: 1, anchor: 'middle' });
-  const N13L = layoutWriting({ text: '13', x: 0, y: 0, size: 46, t0: N13, speed: 1500, anchor: 'middle' });
+  const N13L = layoutWriting({ text: '13', x: 0, y: 0, size: 40, t0: N13, speed: 1500, anchor: 'middle' });
   const drawL = (k, L, x, y, z, o = {}) => { DL.save(); DL.translate(x, y); L.strokes.forEach((s, j) => { const q = o.t === undefined ? 1 : clamp((o.t - s.t0) / s.dur); if (q > 0) stroke(k + j, s.pts, { z, w: o.w || 7, boil: 0.5, opacity: o.op, draw: q < 1 ? q : undefined, color: o.color }); }); DL.restore(); };
   const page1 = (k, z, op) => {
     const top = CAL.y + CAL.band + 18;
@@ -121,12 +121,12 @@
           stroke(k + '.ck1', box(cx - 46, cb - 44, cx + 46, cb), { z: z + 0.2, w: 4.5, fill: C.paper, draw: cp });
           stroke(k + '.ck2', box(cx - 32, cb - 78, cx + 32, cb - 44), { z: z + 0.25, w: 4.5, fill: C.paper, draw: cp });
           stroke(k + '.icing', [[cx - 46, cb - 30], [cx - 32, cb - 22], [cx - 16, cb - 31], [cx, cb - 22], [cx + 16, cb - 31], [cx + 32, cb - 22], [cx + 46, cb - 30]], { z: z + 0.3, w: 3, draw: cp });
-          [-12, 12].forEach((dx, i) => {
-            stroke(k + '.cd' + i, [[cx + dx, cb - 78], [cx + dx, cb - 100]], { z: z + 0.3, w: 4, draw: cp });
-            const fl = cp >= 1 ? Math.sin(t * 13 + i * 2) * 1.5 : 0;
-            if (cp >= 1) stroke(k + '.fl' + i, [[cx + dx, cb - 103], [cx + dx - 5 + fl, cb - 112], [cx + dx, cb - 124], [cx + dx + 5 + fl, cb - 112], [cx + dx, cb - 103]], { z: z + 0.3, w: 2.6, closed: true, fill: C.paper });
+          // number candles "13" on top, each with a little flame
+          drawL(k + '.n13', N13L, cx, cb - 78 - 40, z + 0.4, { t, w: 5 });
+          if (t >= N13 + 0.35) N13L.boxes.forEach((b, i) => {
+            const fx0 = cx + b.x + b.w * (i ? 0.35 : 0.3), fl = Math.sin(t * 13 + i * 2) * 1.5, fy = cb - 122;
+            stroke(k + '.fl' + i, [[fx0, fy], [fx0 - 5 + fl, fy - 9], [fx0, fy - 21], [fx0 + 5 + fl, fy - 9], [fx0, fy]], { z: z + 0.3, w: 2.6, closed: true, fill: C.paper });
           });
-          drawL(k + '.n13', N13L, cx, cb - 41 - 2, z + 0.4, { t, w: 4.5 });
         }
       }
       // the 15–16 page tears off at its top-left corner, swings, drops and fades
@@ -185,7 +185,7 @@
   };
 
   /* ---------------- 回忆框：7 岁的小陶，纸上只有“答案：…” ---------------- */
-  const MEMF = { x0: 150, y0: 300, x1: 635, y1: 720 }, KIDB = [298, 704], KIDS = 0.8;
+  const MEMF = { x0: 150, y0: 300, x1: 635, y1: 720 }, KIDB = [292, 704], KIDS = 0.95;
   COMP.c5_cMem = {
     draw(fx, t, F) {
       if (t < MEM || t >= DUR) return;
@@ -272,7 +272,7 @@
     const s = startOf(x), kid = id === 'terry';
     return {
       pos: [[0, [-120, FL]], [s, [x, FL], ARR - s, 'lin'], [ZIPT[id], [x + 1500, FL], 0.35, 'in']],
-      pose: [[0, makeWalk(s, ARR, 5.2, { lean: -4 })], [ARR, 'stand', 0.12], ...(kid ? [[JOY, 'kidCheer', 0.1, 'back'], [JOY + 1.1, 'stand', 0.15]] : [[JOY + 0.1, 'c5_cClap', 0.1, 'back']]), [ZIPT[id], zipPose, 0.08]],
+      pose: [[0, makeWalk(s, ARR, 5.2, { lean: -4 })], [ARR, 'stand', 0.12], ...(kid ? [[JOY, 'kidCheer', 0.1, 'back'], [JOY + 1.1, 'stand', 0.15]] : [[JOY + 0.1, 'c5_cYay', 0.1, 'back']]), [ZIPT[id], zipPose, 0.08]],
       face: [[0, 'smile'], [JOY, kid ? 'joy' : 'grin', 0.05], [JOY + 1.2, 'smile', 0.1]],
       turn: [[0, 0.45], [ARR, 0, 0.12], ...(kid ? [] : [[JOY, x < 645 ? 0.35 : -0.35, 0.1]]), [ZIPT[id], 0.45, 0.08]],
       gaze: [[0, [1700, 420]], [ARR, 'viewer'], [PIN + 0.2, 'cbr'], [CAL_IN + 0.3, 'cal'], ...(kid ? [[JOY + 0.9, 'viewer']] : [[JOY, 'terry']]), [ZIPT[id] - 0.1, [1700, 420]]],
@@ -281,7 +281,7 @@
   };
   const AX = 590, BX = 1010, AX2 = 380, BX2 = 1220;
   Object.assign(POSE, {
-    c5_cClap: { armScale: 1.1, ikL: { w: 1, to: 'chin', dx: -0.15, dy: 0.9, bend: 'down' }, ikR: { w: 1, to: 'chin', dx: 0.15, dy: 0.9, bend: 'down' } },
+    c5_cYay: { armScale: 1.2, armL: [100, 62], armR: [100, 62] },   // a yay with elbows out (like ep4's medal cheer)
     c5_cAnsA: { tilt: 4, lean: 2, armL: [14, 10], ikR: { w: 1, to: 'abs', dx: ANS.c[0] - ANS.w / 2 + 4, dy: ANS.c[1] + 10, bend: 'down' } },
     c5_cAnsB: { tilt: -4, lean: -2, armR: [14, 10], ikL: { w: 1, to: 'abs', dx: ANS.c[0] + ANS.w / 2 - 4, dy: ANS.c[1] + 10, bend: 'down' } },
     c5_cCardA: { armL: [14, 10], ikR: { w: 1, to: 'abs', dx: CRD.x0 + 4, dy: 520, bend: 'down' } },
@@ -330,7 +330,7 @@
       // L1：1988，大洋洲
       { type: 'c5_cFade', f0: SHRINK - 0.1, fd: 0.3, inner: { type: 'write', id: 'c5cY88', text: '1988', x: 800, y: 64, size: 160, anchor: 'middle', t0: Y88, speed: 2600, gap: 0.03, glyphGap: 0.06, w: 9, sfx: 'pen', z: Z.annot } },
       { type: 'c5_cMap', id: 'c5cMap' },
-      { type: 'c5_cFade', f0: SHRINK - 0.15, fd: 0.25, inner: { type: 'label', id: 'c5cLbOce', text: '第一次来到大洋洲', at: [1268, 330], rot: -4, size: 48, t0: LB_OCE, t1: DUR, target: [1046, 452], bend: -0.2, gap: 14 } },
+      { type: 'c5_cFade', f0: SHRINK - 0.15, fd: 0.25, inner: { type: 'label', id: 'c5cLbOce', text: '第一次来到大洋洲', at: [1300, 466], rot: -4, size: 48, t0: LB_OCE, t1: DUR, target: [1048, 500], bend: -0.2, gap: 14 } },
       // L3：7 月 15、16 日考试；17 日，13 岁生日
       { type: 'c5_cCal', id: 'c5cCal' },
       // L4：成绩单（只有第 4 格写 7），两位阅卷老师

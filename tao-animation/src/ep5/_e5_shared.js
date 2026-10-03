@@ -171,9 +171,9 @@ COMP.e5_scores = {
 COMP.e5_medal = {
   draw(fx, t, F) {
     if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
-    const kid = fx.char && CAST[fx.char] && CAST[fx.char].kid, lt = t - fx.t0, r = fx.r || (kid ? 30 : 54), k = fx.id;   // a child's medal is smaller
+    const kid = fx.char && CAST[fx.char] && CAST[fx.char].kid, lt = t - fx.t0, r = fx.r || (kid ? 38 : 54), k = fx.id;   // a child's medal is smaller (r 38 keeps its label readable on a phone)
     let c, neck = null;
-    if (fx.char) { const a = F.anchors[fx.char]; if (!a) return; neck = [a.head[0], a.head[1] + a.r * 1.05]; c = [neck[0] + (fx.dx || 0), neck[1] + (fx.drop || (kid ? 44 : r * 1.7))]; }
+    if (fx.char) { const a = F.anchors[fx.char]; if (!a) return; neck = [a.head[0], a.head[1] + a.r * 1.05]; c = [neck[0] + (fx.dx || 0), neck[1] + (fx.drop || (kid ? 52 : r * 1.7))]; }
     else c = fx.pos ? evalTrack(fx.pos, t) : fx.at;
     const pop = fx.t0 < 0 ? 1 : EASE.back(clamp(lt / 0.3)), z = fx.z ?? Z.front + 2;
     DL.save(); DL.about(c[0], c[1], () => DL.scale(pop));

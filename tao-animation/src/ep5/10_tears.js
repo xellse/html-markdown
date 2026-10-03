@@ -13,11 +13,11 @@
   /* ---------------- layout ---------------- */
   const DX = 250, DTOP = 616, DW = 300, SEAT = 624;            // desk + stool on the left
   const Q = [300, 330];                                         // the big red "?" over the desk
-  const MT = 652, PRONE_HEAD = [548, 600];                      // mattress top; his head on the pillow when he sulks face down
-  const KB = [610, MT], MB = [850, MT], DADX = 1230;             // kid and mom sitting on the bed; dad standing by it
+  const MT = 652, PRONE_HEAD = [592, 602];                      // mattress top; his head on the pillow when he sulks face down
+  const KB = [610, MT], MB = [872, MT], DADX = 1230;             // kid and mom sitting on the bed; dad standing by it
   const TX = 800, TM = 690;                                     // trampoline centre and mat height
   const PG_BIG = [800, 380], PG_SMALL = [1210, 232], PG_W = 480, PG_H = 500;
-  const POOF_C = [TX + 20, 391];                                // where the sulk cloud is when it pops
+  const POOF_C = [TX - 4, 389], PUH = [TX + 118, 350];          // where the sulk cloud is when it pops; the “噗！” beside it
 
   /* ---------------- times (scene clock) ---------------- */
   const KID_IN = 0.15, STUCK = 1.4, QT = 2.2;                                     // L1 0.3–3.5
@@ -118,12 +118,18 @@
     stroke(k + '.pl', ringPts(k + '.pl', 556, MT - 12, 52, 15, { n: 12, closed: true }), { z: z + 0.2, w: 4, closed: true, fill: C.paper, draw: stag(p, 3, 4) });
     if (p > 0.8) shadow(k + '.sh', 741, FL + 4, 580, 1);
   };
+  const matY = t => TM + 4 + 18 * sag(t);   // the mat's centre dips when he lands
   const trampPaint = (t, F, lt) => {
-    const p = EASE.out(clamp(lt / 0.4)), k = 'a5t.tr', z = Z.back, sg = sag(t);
-    stroke(k + '.mat', [[-124, 0], [-60, 10 + 22 * sg, 1], [60, 10 + 22 * sg, 1], [124, 0]].map(([x, y, c]) => [TX + x, TM + y, c]), { z: z + 0.2, w: 5, draw: stag(p, 0, 3) });
-    stroke(k + '.rim', ringPts(k + '.rim', TX, TM, 128, 18, { n: 14, a0: 180, sweep: 180 }), { z, w: 4.5, draw: stag(p, 1, 3) });
-    [-108, -44, 44, 108].forEach((x, i) => stroke(k + '.leg' + i, [[TX + x, TM + 8], [TX + x * 1.08, FL]], { z: z - 0.1, w: 4.5, draw: stag(p, 2, 3) }));
-    if (p > 0.8) shadow(k + '.sh', TX, FL + 4, 290, 1);
+    const p = EASE.out(clamp(lt / 0.4)), k = 'a5t.tr', z = Z.back, my = matY(t), mry = 12 + 4 * sag(t);
+    stroke(k + '.rim', ringPts(k + '.rim', TX, TM, 132, 20, { n: 16, closed: true }), { z, w: 4.5, closed: true, draw: stag(p, 0, 4) });
+    stroke(k + '.mat', ringPts(k + '.mat', TX, my, 96, mry, { n: 14, closed: true }), { z: z + 0.2, w: 4, closed: true, draw: stag(p, 1, 4) });
+    for (let i = 0; i < 12; i++) {   // little springs between frame and mat
+      const a = (i + 0.5) / 12 * Math.PI * 2, o = [TX + Math.cos(a) * 130, TM + Math.sin(a) * 19], n = [TX + Math.cos(a) * 99, my + Math.sin(a) * mry], pts = [];
+      for (let j = 0; j <= 4; j++) { const q = lerp2(o, n, j / 4), w = j % 4 === 0 ? 0 : (j % 2 ? 4 : -4); pts.push([q[0] - Math.sin(a) * w, q[1] + Math.cos(a) * w * 0.4]); }
+      stroke(k + '.sp' + i, pts, { z: z + 0.1, w: 2.4, draw: stag(p, 2, 4), boil: 0.6 });
+    }
+    [-116, -44, 44, 116].forEach((x, i) => stroke(k + '.leg' + i, [[TX + x, TM + 14], [TX + x * 1.06, FL - 6], [TX + x * 1.06 + (x < 0 ? -12 : 12), FL]], { z: z - 0.1, w: 4.5, draw: stag(p, 3, 4) }));
+    if (p > 0.8) shadow(k + '.sh', TX, FL + 4, 300, 1);
   };
 
   /* ---------------- the big red "?" over the desk → shrinks while he works → a red ✓ ---------------- */
@@ -201,7 +207,7 @@
       const r = a.r, s_ = (a.headTop[0] - a.head[0]) / r, c_ = -(a.headTop[1] - a.head[1]) / r;   // head tilt
       const hl = (u, v) => [a.head[0] + u * r * c_ - v * r * s_, a.head[1] + u * r * s_ + v * r * c_];
       [-1, 1].forEach(s => {
-        const P0 = hl(s * 0.8, 0), P1 = [P0[0] + s * 110, P0[1] - 70], P2 = [P0[0] + s * 190, FL - 12], k = 'a5t.tear' + (s < 0 ? 'L' : 'R');
+        const P0 = hl(s * 0.9, 0.04), P1 = [P0[0] + s * 110, P0[1] - 70], P2 = [P0[0] + s * 190, FL - 12], k = 'a5t.tear' + (s < 0 ? 'L' : 'R');
         const B = u => bez(P0, P1, P2, u), n = 12;
         [-3.5, 3.5].forEach((o, j) => {
           const pts = [];
@@ -232,8 +238,8 @@
       if (a && (t < THROW || (t >= TAKE && t < HOPOFF))) { const h = a.handR; stroke('a5t.pen', [[h[0] - 5, h[1] + 8], [h[0] + 13, h[1] - 24]], { z: Z.front + 1, w: 4.5 }); }
       const u = (t - THROW) / PEN_FLY;
       if (u >= 0 && u < 1) {
-        const p = penFly(F, t), ang = (-60 + 900 * u) * RAD, dx = Math.cos(ang) * 17, dy = Math.sin(ang) * 17;
-        stroke('a5t.fly', [[p[0] - dx, p[1] - dy], [p[0] + dx, p[1] + dy]], { z: Z.fx, w: 4.5 });
+        const p = penFly(F, t), ang = (-60 + 900 * u) * RAD, dx = Math.cos(ang) * 22, dy = Math.sin(ang) * 22;
+        stroke('a5t.fly', [[p[0] - dx, p[1] - dy], [p[0] + dx, p[1] + dy]], { z: Z.fx, w: 5.5 });
         [0.06, 0.12].forEach((d, j) => { if (u > d + 0.05) stroke('a5t.fsp' + j, [penFly(F, t - (d + 0.06) * PEN_FLY), penFly(F, t - d * PEN_FLY)], { z: Z.fx - 0.1, w: 2.5, color: C.pencil }); });
       }
     },
@@ -241,13 +247,13 @@
   };
 
   /* ---------------- the problem sheet: picked up, torn in two, carried to the bed, dropped ---------------- */
-  const HW = 56, HH = 80;
-  const ZIG = [[0, -40], [-5, -28], [4, -16], [-4, -4], [5, 8], [-4, 20], [4, 32], [0, 40]];   // the torn edge, top → bottom
+  const HW = 64, HH = 90;
+  const ZIG = [[0, -45], [-5, -32], [5, -18], [-4, -5], [5, 9], [-4, 22], [5, 35], [0, 45]];   // the torn edge, top → bottom
   const drawHalf = (k, s, c, rot, op, z) => {   // s = -1 left half, +1 right half; the torn edge faces the other half
     DL.save(); DL.translate(c[0], c[1]); DL.rotate(rot);
     const ox = s * HW / 2, ix = -s * HW / 2, edge = ZIG.map(([x, y]) => [ix + x, y]);
     stroke(k, [[ox, -HH / 2], [ox, HH / 2, 1], [edge[7][0], HH / 2, 1], ...edge.slice(0, 7).reverse().map(p => [p[0], p[1], 1]), [ox, -HH / 2, 1]], { z, w: 3.8, fill: C.paper, opacity: op });
-    [-14, 8].forEach((y, i) => wig(k + '.w' + i, s < 0 ? ox + 8 : ix + 10, s < 0 ? ix - 10 : ox - 8, y, 4, { z: z + 0.1, w: 2.2, color: C.pencil, boil: 0.6, opacity: op }));
+    [-18, 4, 24].forEach((y, i) => wig(k + '.w' + i, s < 0 ? ox + 8 : ix + 10, s < 0 ? ix - 10 : ox - 8, y, 4, { z: z + 0.1, w: 2.2, color: C.pencil, boil: 0.6, opacity: op }));
     DL.restore();
   };
   COMP.a5_tHalves = {
@@ -261,7 +267,7 @@
         const c = [(L[0] + R[0]) / 2, (L[1] + R[1]) / 2 - (HH / 2 - 12)];
         DL.save(); DL.translate(c[0], c[1]);
         stroke(k + '.whole', [[-HW, -HH / 2], [HW, -HH / 2, 1], [HW, HH / 2, 1], [-HW, HH / 2, 1], [-HW, -HH / 2, 1]], { z, w: 3.8, fill: C.paper });
-        [-14, 8].forEach((y, i) => wig(k + '.ww' + i, -HW + 12, HW - 30 + i * 10, y, 8, { z: z + 0.1, w: 2.2, color: C.pencil, boil: 0.6 }));
+        [-18, 4, 24].forEach((y, i) => wig(k + '.ww' + i, -HW + 12, HW - 30 + i * 10, y, 8, { z: z + 0.1, w: 2.2, color: C.pencil, boil: 0.6 }));
         DL.restore();
         return;
       }
@@ -278,9 +284,9 @@
       if (t < FLOP || t >= SITUP) return;
       const lt = t - FLOP, drop = -30 * (1 - EASE.out(clamp(lt / 0.16))), k = 'a5t.pr', r = 53.75, bw = 5.5;
       const H = [PRONE_HEAD[0], PRONE_HEAD[1] + drop], z = Z.body + 1, zh = Z.front;
-      const N = [H[0] + r * 0.92, H[1] + r * 0.6 - drop * 0.1], P = [N[0] + 56, N[1] + 6], K = [P[0] + 37, P[1] + 2], S = lerp2(N, P, 0.18);
+      const N = [H[0] + r * 0.9, H[1] + r * 0.6 - drop * 0.1], P = [N[0] + 64, N[1] + 5], K = [P[0] + 44, P[1] + 2], S = lerp2(N, P, 0.18);
       const kick = Math.sin(lt * 2 * Math.PI * 1.9);
-      [[1, 'L'], [-1, 'R']].forEach(([sg, n]) => { const a = (52 + 34 * sg * kick) * RAD; stroke(k + '.leg' + n, [P, K, [K[0] + Math.cos(a) * 37, K[1] - Math.sin(a) * 37]], { z, w: bw }); });
+      [[1, 'L'], [-1, 'R']].forEach(([sg, n]) => { const a = (62 + 44 * sg * kick) * RAD, kn = [K[0] - 6 * (1 - sg) / 2, K[1]]; stroke(k + '.leg' + n, [P, kn, [kn[0] + Math.cos(a) * 44, kn[1] - Math.sin(a) * 44]], { z, w: bw }); });
       stroke(k + '.torso', [N, P], { z, w: bw });
       stroke(k + '.armA', [S, [S[0] - 20, S[1] + 16], [S[0] - 58, S[1] + 14]], { z, w: bw });   // hugging the pillow, under his head
       stroke(k + '.armB', [S, [S[0] + 20, S[1] + 12], [S[0] + 46, S[1] + 12]], { z, w: bw });
@@ -288,7 +294,7 @@
       stroke(k + '.hf', fill, { z: zh, closed: true, fill: C.paper, noStroke: true, w: 1 });
       stroke(k + '.hl', ringPts(k + '.h', H[0], H[1], r, r, { n: 12, a0: -120, sweep: 372, rv: 0.035 }), { z: zh, w: bw });
       HAIR.tuft(0, 0).forEach((pts, i) => stroke(k + '.hair' + i, pts.map(([u, v]) => [H[0] + v * r, H[1] - u * r]), { z: zh, w: 5 }));   // crown toward the headboard
-      stroke(k + '.ear', ringPts(k + '.ear', H[0] + r * 0.16, H[1] + r * 0.05, r * 0.15, r * 0.21, { n: 8, a0: -80, sweep: 250 }), { z: zh + 0.1, w: 3.5 });
+      stroke(k + '.ear', ringPts(k + '.ear', H[0] + r * 0.3, H[1] + r * 0.12, r * 0.17, r * 0.24, { n: 8, a0: -100, sweep: 220 }), { z: zh + 0.1, w: 4 });
     },
   };
 
@@ -301,7 +307,7 @@
       if (t < POOF) {
         let c;
         if (t < SITUP) c = [PRONE_HEAD[0] + 40, PRONE_HEAD[1] - 118];
-        else { const a = F.anchors.kid; if (!a) return; c = [a.head[0] + 20, a.head[1] - 128]; }
+        else { const a = F.anchors.kid; if (!a) return; c = [a.head[0] - 4, a.head[1] - 128]; }
         const sc = evalTrack(FUME_SZ, t), rx = 92 * sc, ry = 54 * sc;
         [0, 1].forEach(j => {
           const pts = [], n = 64;
@@ -316,7 +322,7 @@
         stroke(k + '.b' + i, [[c[0] + Math.cos(a) * r0, c[1] + Math.sin(a) * r0 * 0.7], [c[0] + Math.cos(a) * r1, c[1] + Math.sin(a) * r1 * 0.7]], { z: Z.fx, w: 4, opacity: 1 - u });
       }
       const tq = clamp((t - POOF) / 0.15), to = 1 - clamp((t - POOF - 1.0) / 0.25);
-      if (to > 0) text(k + '.puh', '噗！', c[0], c[1], { size: 64, z: Z.annot, scale: lerp(0.5, 1, EASE.back(tq)), opacity: clamp(tq * 3) * to, rot: -6, halo: 8 });
+      if (to > 0) text(k + '.puh', '噗！', PUH[0], PUH[1], { size: 64, z: Z.annot, scale: lerp(0.5, 1, EASE.back(tq)), opacity: clamp(tq * 3) * to, rot: -6, halo: 8 });
     },
     cues: () => [[FUME, 'a5_tGrr'], [POOF, 'a5_tPoof']],
   };
@@ -341,16 +347,16 @@
     a5_tGlare: { ...SIT, lean: 4, tilt: 9, ikL: desk(-46), ikR: desk(30) },
     a5_tWind: { ...SIT, lean: -4, tilt: -6, armScale: 1.75, armR: [140, 30], ikL: desk(-44) },
     a5_tThrow: { ...SIT, lean: 5, tilt: 3, armScale: 1.6, armR: [95, -15], ikL: desk(-44) },
-    a5_tGrab: { ...SIT, lean: 3, tilt: 5, armScale: 1.25, ikL: abs(DX - 56, 630), ikR: abs(DX + 56, 630) },
-    a5_tRip: { ...SIT, lean: -2, tilt: -5, armScale: 1.4, ikL: abs(DX - 96, 606, 'out'), ikR: abs(DX + 96, 606, 'out') },
+    a5_tGrab: { ...SIT, lean: 3, tilt: 5, armScale: 1.25, ikL: abs(DX - 60, 640), ikR: abs(DX + 60, 640) },
+    a5_tRip: { ...SIT, lean: -2, tilt: -5, armScale: 1.5, ikL: abs(DX - 118, 588, 'out'), ikR: abs(DX + 118, 588, 'out') },
     a5_tHold: { armScale: 1.3, armL: [40, -8], armR: [40, -8] },
-    a5_tBedHold: { ...SIT, armScale: 1.3, ikL: abs(KB[0] - 62, KB[1] - 4), ikR: abs(KB[0] + 62, KB[1] - 4) },
+    a5_tBedHold: { ...SIT, armScale: 1.3, ikL: abs(KB[0] - 78, KB[1] + 10), ikR: abs(KB[0] + 78, KB[1] + 10) },
     a5_tJump: { legL: [6, 22], legR: [6, 22], armScale: 1.75, armL: [140, 18], armR: [140, 18] },
     a5_tReach: { ...SIT, armScale: 1.55, ikL: desk(-112, -6), ikR: desk(118, -30) },
     a5_tSitCheer: { ...SIT, armScale: 1.75, armL: [140, 18], armR: [140, 18] },
     a5_tDadJoke: { lean: -3, tilt: -7, armL: [72, 34], armR: [18, 10] },
     a5_tMomSit: { ...SIT, lean: -3, armL: [22, 16], armR: [22, 16] },
-    a5_tMomPoint: { ...SIT, lean: -7, tilt: -6, armScale: 1.05, ikL: abs(KB[0] + 90, KB[1] - 48, 'out'), armR: [22, 16] },
+    a5_tMomPoint: { ...SIT, lean: -7, tilt: -6, armScale: 1.12, ikL: abs(KB[0] + 96, KB[1] - 54, 'out'), armR: [22, 16] },
   });
   Object.assign(FACE, {
     a5_tSad: { lidL: 0.28, lidR: 0.28, brow: 'line', browL: -20, browR: -20, mouth: 'frown', mw: 0.28 },
@@ -376,9 +382,9 @@
     tracks: {
       kid: {
         enter: KID_IN,
-        pos: [[0, [DX, SEAT]], [UP, [430, FL], 0.16, 'out'], [WALK0, [600, FL], FLOP - WALK0, 'lin'], [FLOP, OFF, 0], [SITUP, KB, 0], [LEAVE, [600, FL], 0.16, 'out'],
-          [JUMP_ON, jumpArc(JUMP_ON, 0.35, [600, FL], [TX, TM + 8], 110), 0], [JUMP_ON + 0.35, t => [TX, TM + 8 + 22 * sag(t) + hopY(t)], 0],
-          [OFF_T, jumpArc(OFF_T, 0.28, [TX, TM + 8], [700, FL]), 0], [WALK2, [300, FL], SIT2 - 0.05 - WALK2, 'lin'], [SIT2, [DX, SEAT], 0],
+        pos: [[0, [DX, SEAT]], [UP, [430, FL], 0.12], [WALK0, [600, FL], FLOP - WALK0, 'lin'], [FLOP, OFF, 0], [SITUP, KB, 0], [LEAVE, [600, FL], 0.12],
+          [JUMP_ON, jumpArc(JUMP_ON, 0.35, [600, FL], [TX, TM + 6], 110), 0], [JUMP_ON + 0.35, t => [TX, matY(t) + 2 + hopY(t)], 0],
+          [OFF_T, jumpArc(OFF_T, 0.28, [TX, TM + 6], [700, FL]), 0], [WALK2, [300, FL], SIT2 - 0.05 - WALK2, 'lin'], [SIT2, [DX, SEAT], 0],
           [HOPOFF, jumpArc(HOPOFF, 0.25, [DX, SEAT], [440, FL]), 0], [RUN0, [1830, FL], RUN1 - RUN0, 'lin']],
         pose: [[0, writing(3, 12)], [STUCK, 'sitScratch', 0.14, 'back'], [STAMP - 0.25, 'a5_tSit', 0.15], [SAD, 'a5_tSlump', 0.15], [TAP_ON - 0.05, 'a5_tWail', 0.1, 'back'],
           [TAP_OFF + 0.1, 'a5_tSlump', 0.15], [MAD, 'a5_tGlare', 0.12, 'back'], [WIND, 'a5_tWind', 0.14, 'back'], [THROW, 'a5_tThrow', 0.07],
@@ -410,7 +416,7 @@
       },
       mom: {
         enter: MOM_IN,
-        pos: [[0, MB], [LEAVE + 0.05, [MB[0], FL], 0.14, 'out'], [LEAVE + 0.3, [1820, FL], 1.15, 'lin']],
+        pos: [[0, MB], [LEAVE + 0.05, [MB[0], FL], 0.12], [LEAVE + 0.3, [1820, FL], 1.15, 'lin']],
         pose: [[0, 'a5_tMomSit'], [POINT, 'a5_tMomPoint', 0.14, 'back'], [LEAVE + 0.05, 'stand', 0.12], [LEAVE + 0.3, makeWalk(LEAVE + 0.3, LEAVE + 1.45, 5.6, { lean: 5 }), 0]],
         face: [[0, 'smile'], [THINK, 'focus', 0.08], [LEAVE, 'smile', 0.08]],
         turn: [[0, -0.35], [LEAVE + 0.2, 0.5, 0.1]],
