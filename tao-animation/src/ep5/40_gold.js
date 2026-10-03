@@ -335,7 +335,7 @@
           [S_OUT, zipPose(-1), 0.08], [RUN0, runT, 0], ...terryHops, [CHEER2, 'kidCheer', 0.1, 'back'], [28.6, 'stand', 0.15],
           [END + 0.05, zipPose(1), 0.08]],
         face: [[0, 'smile'], [T_IN, 'joy', 0.05], [9.6, 'grin', 0.08], [ENT1, 'joy', 0.05], [C_OUT, 'grin', 0.08], [REACH, 'smile', 0.06], [MEDAL_ON, 'joy', 0.05],
-          [S_OUT, 'grin', 0.06], [CHEER2, 'joy', 0.05], [28.6, 'proud', 0.08], [YOUNG, 'proudGrin', 0.06]],
+          [S_OUT, 'grin', 0.06], [CHEER2, 'joy', 0.05], [28.6, 'joy', 0.08], [YOUNG, 'grin', 0.06]],
         turn: [[0, 0], [LOOP0, t => routeTurn(t, 0), 0], [LOOP1, 0, 0.12], [PM_IN, 0.35, 0.12], [S_OUT, -0.45, 0.08], [RUN0, 0.45, 0], [CHEER2, 0, 0.12], [ZJ, -0.3, 0.12]],
         gaze: [[0, 'viewer'], [ENT0 + 0.3, 'mate1'], [LOOP0, 'viewer'], [PM_ARR, 'pmT'], [MEDAL_ON, 'medal'], [MEDAL_ON + 0.6, 'viewer'], [RUN0, [1700, 400]], [CHEER2, 'viewer'], [ZJ, 'young'], [YOUNG + 1.0, 'viewer']],
         squash: [[0, 1], [T_IN + 0.05, 0.9, 0.05], [T_IN + 0.11, 1.06, 0.08], [T_IN + 0.19, 1, 0.2, 'back'], [HOP_ST + HOP_D, 0.88, 0.05], [HOP_ST + HOP_D + 0.05, 1, 0.2, 'back'],

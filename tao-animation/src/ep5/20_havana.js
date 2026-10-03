@@ -3,7 +3,7 @@
 //   六题得分 7、7、7、7、7、5，共 40 分，银牌；满分 42（6 题 × 7 分）；那年 22 人满分，金牌线就是 42。
 // 演绎：海边、棕榈树、太阳只是“哈瓦那”的简笔画；22 个举着“42”的小人代表 22 位满分选手（不指名）。
 //   他拿银牌时怎么想没有记录：这里只演开心（smile → grin → joy），不演失落。
-// 开头：第 15 场停靠着的“12 岁”先缩走，“11 岁 · 哈瓦那”在中央盖下再停靠。
+// 开头：第 15 场停靠着的“11 岁”先缩走，“11 岁 · 哈瓦那”在中央盖下再停靠。
 // 结尾：只留下成绩单（E5.SHEET，7、7、7、7、7、5，“= 40”，第 6 格红圈）和印章，第 25 场第一帧一模一样（同一个 id 'b5.sheet'）。
 (() => {
   const FL = 780, SH = E5.SHEET, CELL = SH.cell, SID = 'b5.sheet', TX = 420, MX = 800;
@@ -36,7 +36,7 @@
     },
     cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
   };
-  /** the previous scene's docked stamp (12 岁): stays, then shrinks away into its corner */
+  /** the previous scene's docked stamp (11 岁): stays, then shrinks away into its corner */
   COMP.b5_hOldStamp = {
     draw(fx, t, F) {
       const u = clamp((t - fx.out) / 0.22); if (u >= 1) return;
@@ -232,7 +232,7 @@
     }),
     fx: [
       // the stamp: the old 12 leaves, 11 · 哈瓦那 comes down in the middle and docks
-      { type: 'b5_hOldStamp', id: 'b5h.old', out: T.OLD_OUT, inner: { age: 12, t0: -3, ...E5.STAMP, dockT: -2 } },
+      { type: 'b5_hOldStamp', id: 'b5h.old', out: T.OLD_OUT, inner: { age: 11, t0: -3, ...E5.STAMP, dockT: -2 } },
       { type: 'ageStamp', age: 11, place: '哈瓦那', t0: T.STAMP, ...E5.STAMP, dockT: T.DOCK },
       { type: 'b5_hFloor', id: 'b5h.floor', t0: 0.15, out: T.END },
       // 1987 年 7 月 · 古巴 · 哈瓦那

@@ -257,7 +257,7 @@
     draw(fx, t) {
       if (t < LAND(0) || t >= P.CNT_OUT + 0.25) return;
       const n0 = DL.items.length, n = countAt(t); if (!n) return;
-      const xa = SX(0) - 15, xb = SX(n - 1) + 15, mid = (xa + xb) / 2, y = 684, k = 'b5p.cnt';
+      const xa = SX(0) - MINI.w / 2 + 2, xb = SX(n - 1) + MINI.w / 2 - 2, mid = (xa + xb) / 2, y = 684, k = 'b5p.cnt';
       stroke(k + '.br', [[xa, y + 8], [xa + 8, y - 2], [mid - 10, y - 2], [mid, y - 14], [mid + 10, y - 2], [xb - 8, y - 2], [xb, y + 8]], { z: Z.set + 6, w: 3.5 });
       const str = n + ' 个', size = 48, tw = textWidth(str, size), all = tw + 10 + 0.8 * 40, x0 = mid - all / 2;
       const pulse = 1 + 0.25 * Math.max(0, Math.sin(Math.PI * clamp((t - LAND(39)) / 0.35)));
@@ -274,9 +274,27 @@
     draw(fx, t) {
       if (t < P.BREAK || t >= P.M5_OUT + 0.35) return;
       const x = (SX(39) + SX(40)) / 2, op = 1 - clamp((t - P.M5_OUT) / 0.35);
-      stroke('b5p.brk', [[x - 6, 686], [x + 6, 700], [x - 6, 714], [x + 6, 728], [x - 6, 742], [x + 4, 754]], { z: Z.annot, w: 4.5, color: C.red, draw: EASE.out(clamp((t - P.BREAK) / 0.25)), opacity: op });
+      stroke('b5p.brk', [[x - 6, 686], [x + 6, 698], [x - 6, 710], [x + 6, 722], [x - 6, 734], [x + 4, 744]], { z: Z.annot, w: 4.5, color: C.red, draw: EASE.out(clamp((t - P.BREAK) / 0.25)), opacity: op });
     },
     cues: () => [[P.BREAK, 'pen']],
+  };
+
+  /** which number went in: pencil-grey inputs under the four big cards (0 1 2 3), and 0 · 39 · 40 under the strip */
+  const IN_Y = ROW_Y + BIG.h / 2 + 30, STRIP_IN_Y = 770;
+  COMP.b5_pInputs = {
+    draw(fx, t) {
+      if (t >= P.M5_OUT + 0.35) return;
+      const n0 = DL.items.length, o = { size: 34, font: CFG.FONT_MIX, color: C.pencil, z: Z.annot };
+      P.OUT.forEach((tt, i) => {   // under the row: until the cards fly into the strip
+        const u = clamp((t - tt - 0.3) / 0.15) * (1 - clamp((t - P.SHRINK) / 0.2));
+        if (u > 0.01) text('b5p.in' + i, String(i), ROW[i], IN_Y, { ...o, opacity: u });
+      });
+      [[0, '0', 'middle', 0], [39, '39', 'end', 8], [40, '40', 'start', -8]].forEach(([i, s, anchor, dx]) => {
+        const u = clamp((t - LAND(i)) / 0.2);
+        if (u > 0.01) text('b5p.sin' + i, s, SX(i) + dx, STRIP_IN_Y, { ...o, anchor, opacity: u });
+      });
+      fadeFrom(n0, 1 - clamp((t - P.M5_OUT) / 0.35));
+    },
   };
 
   /* ---------------- “前 4 个 ✓ ⇒ 前 40 个 ✓” and the ring + arrow on the strip ---------------- */
@@ -390,6 +408,7 @@
       // 41, 43, 47, 53 … then the strip
       { type: 'b5_pCards', id: 'b5p.cards' },
       { type: 'b5_pDiffs', id: 'b5p.diffs' },
+      { type: 'b5_pInputs', id: 'b5p.inputs' },
       { type: 'b5_pCount', id: 'b5p.count' },
       { type: 'b5_pFade', f0: P.LB40_OUT, fd: 0.25, inner: { type: 'title', id: 'b5p.lb40', text: '连着 40 个质数！', x: 1130, y: 430, size: 60, color: 'red', rot: -3, t0: P.LB40 } },
       // 40 → 1681 = 41 × 41

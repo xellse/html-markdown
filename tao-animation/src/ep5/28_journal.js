@@ -54,7 +54,7 @@
   /* ---------------- 第 44 期：薄薄的小刊物，翻开放大 ---------------- */
   const BK = { c: [682, 612], w: 150, h: 190 };                 // the booklet in the professor's hand
   const PG = { c: [1157.5, 475], w: 725, h: 450 };               // the opened page (x 795–1520, y 250–700)
-  const FORMULA = 'xπ + y·arctan½ + z·arctan¼ = 0';
+  const FORMULA = 'xπ + y·arctan(1/2) + z·arctan(1/4) = 0';
   function booklet(k, cx, cy, w, h, issue, z, op = 1) {
     stroke(k + '.cv', box(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2), { z, w: 4.5, fill: C.paper, opacity: op });
     stroke(k + '.sh', [[cx - w / 2 + 10, cy + h / 2 + 7], [cx + w / 2 + 6, cy + h / 2 + 6, 1], [cx + w / 2 + 6, cy - h / 2 + 10]], { z: z - 0.1, w: 2.4, color: C.pencil, opacity: 0.7 * op, boil: 0.5 });
@@ -83,7 +83,7 @@
       if (op > 0) {
         text(k + '.hd', 'JCMN 第 44 期', 0, -177, { size: 44, z: zp + 0.2, opacity: op });
         stroke(k + '.hr', [[-W + 30, -142], [W - 30, -145]], { z: zp + 0.1, w: 3, opacity: op });
-        typed(k + '.f', FORMULA, 0, -62, FORM, t, { size: 46, cps: 24, opacity: op });
+        typed(k + '.f', FORMULA, 0, -62, FORM, t, { size: 40, cps: 26, opacity: op });
         if (t >= NOTE) text(k + '.note', '（一道很难的题，不用看懂）', 0, 4, { size: 38, color: C.red, z: Z.annot, opacity: op * clamp((t - NOTE) / 0.15), scale: lerp(0.7, 1, EASE.back(clamp((t - NOTE) / 0.2))), halo: 8 });
         typed(k + '.q', 'Can this be proved?', 0, 100, Q_EN, t, { size: 54, cps: 17, opacity: op });
         typed(k + '.zh', '这个，能证明吗？', 0, 172, Q_ZH, t, { size: 46, cps: 9, color: 'red', z: Z.annot, opacity: op });
@@ -99,7 +99,7 @@
     },
     cues: () => {
       const c = [[BOOK_IN, 'pop'], [OPEN, 'whoosh'], [OPEN + 0.3, 'paper'], [NOTE, 'pop'], [CLOSE, 'whoosh']];
-      for (let i = 0; i < [...FORMULA].length; i += 4) c.push([FORM + i / 24, 'pen']);
+      for (let i = 0; i < [...FORMULA].length; i += 4) c.push([FORM + i / 26, 'pen']);
       for (let i = 0; i < 19; i += 4) c.push([Q_EN + i / 17, 'pen']);
       for (let i = 0; i < 8; i += 3) c.push([Q_ZH + i / 9, 'pen']);
       return c;
@@ -250,12 +250,12 @@
     draw(fx, t) {
       if (t < CARD || t >= DUR) return;
       const fo = fadeEnd(t); if (fo <= 0) return;
-      const k = 'c5jCard', z = Z.set + 2, [x, y] = [640, 252], W = 295, H = 52, s = EASE.back(clamp((t - CARD) / 0.25));
+      const k = 'c5jCard', z = Z.set + 2, [x, y] = [640, 252], W = 335, H = 52, s = EASE.back(clamp((t - CARD) / 0.25));
       const n0 = DL.items.length;
       DL.save(); DL.about(x, y, () => DL.scale(Math.max(0.01, s)));
       stroke(k + '.c', box(x - W, y - H, x + W, y + H), { z, w: 4.5, fill: C.paper });
       stroke(k + '.sh', [[x - W + 10, y + H + 7], [x + W + 7, y + H + 6, 1], [x + W + 7, y - H + 10]], { z: z - 0.1, w: 2.2, color: C.pencil, opacity: 0.7, boil: 0.5 });
-      text(k + '.f', FORMULA, x, y + 1, { size: 38, z: z + 0.2 });
+      text(k + '.f', FORMULA, x, y + 1, { size: 36, z: z + 0.2 });
       DL.restore();
       fadeFrom(n0, fo);
     },

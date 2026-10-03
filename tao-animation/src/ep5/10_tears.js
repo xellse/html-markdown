@@ -394,7 +394,7 @@
           [SIT2, 'a5_tSit', 0], [REACH, 'a5_tReach', 0.14], [WRITE2, writing(3, 12), 0.14], [CHECK, 'a5_tSitCheer', 0.12, 'back'],
           [HOPOFF, 'a5_tJump', 0.08], [RUN0, makeWalk(RUN0, RUN1, 8, { lean: 9, bounce: 1.4 }), 0]],
         face: [[0, 'focus'], [STUCK, 'puzzled', 0.06], [PAGE + 0.2, 'neutral', 0.08], [SAD, 'a5_tSad', 0.08], [TAP_ON - 0.05, 'a5_tWail', 0.05], [TAP_OFF + 0.1, 'a5_tSad', 0.08],
-          [MAD, 'a5_tMad', 0.06], [SITUP, 'a5_tPeek', 0.06], [THINK, 'focus', 0.08], [LEAVE, 'a5_tPout', 0.06],
+          [MAD, 'a5_tMad', 0.06], [SITUP, 'smile', 0.06], [THINK, 'focus', 0.08], [LEAVE, 'a5_tPout', 0.06],
           [HOPS[0] + 0.5, 'neutral', 0.06], [HOPS[1] + 0.5, 'smile', 0.06], [HOPS[2] + 0.5, 'grin', 0.06], [POOF, 'joy', 0.05], [OFF_T, 'smile', 0.08],
           [WRITE2, 'focus', 0.08], [IDEA, 'idea', 0.05], [SMILE, 'smile', 0.08], [CHECK, 'grin', 0.05], [CHECK + 0.6, 'joy', 0.05]],
         turn: [[0, 0.12], [STAMP, 0.25, 0.1], [PAGE + 0.2, 0.35, 0.1], [SHRINK, 0, 0.1], [MAD, 0.1, 0.1], [UP, 0.4, 0.08], [SITUP, 0.15, 0], [MOM_IN, 0.3, 0.1],
@@ -410,7 +410,7 @@
       dad: {
         pos: [[0, [1780, FL]], [DAD0, [DADX, FL], DAD1 - DAD0, 'lin'], [DAD_OUT, [1800, FL], 0.95, 'lin']],
         pose: [[0, makeWalk(DAD0, DAD1, 4.8, { lean: -4 })], [DAD1, 'a5_tDadJoke', 0.14, 'back'], [DAD_OUT, makeWalk(DAD_OUT, DAD_OUT + 0.95, 5, { lean: 4 }), 0]],
-        face: [[0, 'smile'], [HAHA - 0.05, 'laugh', 0.05], [DAD_OUT - 0.1, 'smile', 0.08]],
+        face: [[0, 'smile'], [HAHA - 0.05, 'grin', 0.05], [DAD_OUT - 0.1, 'smile', 0.08]],
         turn: [[0, -0.45], [DAD_OUT - 0.05, 0.5, 0.1]],
         gaze: [[0, 'kidAt'], [DAD_OUT, [1700, 450]]],
         squash: [[0, 1], [HAHA, laughBob(HAHA), 0.05], [DAD_OUT - 0.1, 1, 0.1]],
