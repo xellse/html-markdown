@@ -8,6 +8,7 @@
 | `episode-2.html` | 第 2 集《看出来 ≠ 证出来》，配 `episode-2.audio.js` |
 | `episode-3.html` | 第 3 集《卡住，然后想通》，配 `episode-3.audio.js`；分镜与逐句旁白见 `ep3-script.md` |
 | `episode-4.html` | 第 4 集《第一次站上世界赛场》，配 `episode-4.audio.js`；分镜与逐句旁白见 `ep4-script.md` |
+| `episode-5.html` | 第 5 集《好玩，也要认真》，配 `episode-5.audio.js`；分镜与逐句旁白见 `ep5-script.md` |
 | `style-sample.html` | 最初确认风格用的 10 秒样片 |
 | `script-outline.md` | 6 集剧本大纲 |
 

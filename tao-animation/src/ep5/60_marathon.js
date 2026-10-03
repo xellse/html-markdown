@@ -184,7 +184,8 @@
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const lt = t - fx.t0, pos = evalTrack(fx.pos, t), sc = (fx.sc ? evalTrack(fx.sc, t) : 1) * Math.max(0.01, EASE.back(clamp(lt / 0.3))), st = stepTrack(fx.state, t) || 'run';
-      const k = fx.id, z = fx.z ?? Z.front, zf = fx.z ?? Z.fx, w = 4.5;   // fx.z: further down the road, behind the jogger
+      const scB = fx.sc ? evalTrack(fx.sc, t) : 1, kw = 1 / Math.max(0.5, scB);   // keep the pen width the same at any size
+      const k = fx.id, z = fx.z ?? Z.front, zf = fx.z ?? Z.fx, w = 4.8 * kw;   // fx.z: further down the road, behind the jogger
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc);
       const ph = t * 15, s = Math.sin(ph);
       const limb = (key, a, b, c) => stroke(k + key, [a, b, c], { z, w });
@@ -196,7 +197,7 @@
         limb('.aL', [-20, -46], [-32, -26], [-36, -4]); limb('.aR', [-20, -46], [-8, -26], [-12, -4]);
         for (let i = 0; i < 3; i++) {   // sweat drops flying off
           const u = ((t - fx.flop) * 1.6 + i / 3) % 1, a = (-150 + i * 50) * RAD, r = 22 + 26 * u, c = [head[0] + Math.cos(a) * r, head[1] + Math.sin(a) * r - 6 * u];
-          stroke(k + '.sw' + i, [[c[0], c[1] - 6, 1], [c[0] + 4, c[1] + 1], [c[0], c[1] + 5], [c[0] - 4, c[1] + 1], [c[0], c[1] - 6, 1]], { z, w: 2.4, fill: C.paper, opacity: 1 - u });
+          stroke(k + '.sw' + i, [[c[0], c[1] - 6, 1], [c[0] + 4, c[1] + 1], [c[0], c[1] + 5], [c[0] - 4, c[1] + 1], [c[0], c[1] - 6, 1]], { z, w: 2.4 * kw, fill: C.paper, opacity: 1 - u });
         }
       } else if (st === 'ready') {
         hip = [-6, -40]; neck = [18, -74]; head = [30, -92];
@@ -215,17 +216,17 @@
         const A1 = arm(s), A2 = arm(-s);
         limb('.aL', sh, A1[0], A1[1]); limb('.aR', sh, A2[0], A2[1]);
         // speed lines trailing behind
-        [-70, -46, -22].forEach((y, i) => stroke(k + '.spd' + i, [[-40 - i * 6, y], [-92 - i * 10, y + 2]], { z: zf, w: 3, boil: 0.8 }));
+        [-70, -46, -22].forEach((y, i) => stroke(k + '.spd' + i, [[-40 - i * 6, y], [-92 - i * 10, y + 2]], { z: zf, w: 3 * kw, boil: 0.8 }));
       }
       stroke(k + '.body', [hip, neck], { z, w });
       stroke(k + '.hf', ringPts(k + '.h', head[0], head[1], 15, 15, { n: 10, closed: true }), { z: z + 0.1, closed: true, fill: C.paper, w });
       if (st === 'flop') {
-        stroke(k + '.e0', [[head[0] - 9, head[1] - 6], [head[0] - 4, head[1] - 3], [head[0] - 9, head[1]]], { z: z + 0.2, w: 2.4 });
-        stroke(k + '.e1', [[head[0] + 9, head[1] - 6], [head[0] + 4, head[1] - 3], [head[0] + 9, head[1]]], { z: z + 0.2, w: 2.4 });
-        stroke(k + '.m', ringPts(k + '.m', head[0], head[1] + 7, 3.5, 4, { n: 7, closed: true }), { z: z + 0.2, w: 2.2, closed: true });
+        stroke(k + '.e0', [[head[0] - 9, head[1] - 6], [head[0] - 4, head[1] - 3], [head[0] - 9, head[1]]], { z: z + 0.2, w: 2.4 * kw });
+        stroke(k + '.e1', [[head[0] + 9, head[1] - 6], [head[0] + 4, head[1] - 3], [head[0] + 9, head[1]]], { z: z + 0.2, w: 2.4 * kw });
+        stroke(k + '.m', ringPts(k + '.m', head[0], head[1] + 7, 3.5, 4, { n: 7, closed: true }), { z: z + 0.2, w: 2.2 * kw, closed: true });
       } else {
         dot(k + '.e0', [head[0] - 4, head[1] - 2], 2.4, C.ink, z + 0.2); dot(k + '.e1', [head[0] + 6, head[1] - 2], 2.4, C.ink, z + 0.2);
-        stroke(k + '.m', st === 'cheer' ? [[head[0] - 5, head[1] + 6], [head[0] + 1, head[1] + 9], [head[0] + 7, head[1] + 6]] : [[head[0] - 3, head[1] + 7], [head[0] + 6, head[1] + 7]], { z: z + 0.2, w: 2.2 });
+        stroke(k + '.m', st === 'cheer' ? [[head[0] - 5, head[1] + 6], [head[0] + 1, head[1] + 9], [head[0] + 7, head[1] + 6]] : [[head[0] - 3, head[1] + 7], [head[0] + 6, head[1] + 7]], { z: z + 0.2, w: 2.2 * kw });
       }
       DL.restore();
     },
@@ -246,7 +247,7 @@
         box(`${k}.ch${i}${j}`, xx, y0, xx + 14, y0 + 20, { z, w: 2, fill: (i + j) % 2 ? C.ink : C.paper });
       }
       // two posts and the tape (it snaps when the runner gets there)
-      const P1 = [fin + 34, far - 80], P2 = [fin + 18, near - 80];
+      const P1 = [fin + 34, far - 165], P2 = [fin + 18, near - 165];
       stroke(k + '.po1', [[P1[0], far + 4], P1], { z: z + 0.2, w: 4.5 });
       stroke(k + '.po2', [[P2[0], near - 2], P2], { z: Z.front + 2, w: 4.5 });
       const br = clamp((t - T.dash1 + 0.08) / 0.3);
@@ -262,6 +263,9 @@
   /* the road: a centre line from (600, 786) winding up to the horizon (1280, 240); u = 0 near … 1 far */
   const RP = u => [600 + 680 * Math.pow(u, 1.8) + 420 * Math.sin(u * 2.6 * Math.PI) * u * (1 - u), 786 - 546 * (1 - Math.pow(1 - u, 1.7))];
   const RW = u => 270 * Math.pow(1 - u, 1.4) + 8;
+  // the sprinter on the road keeps to the right-hand lane (clear of the jogger), dashes up it, flops; as Tao runs on, it drifts back toward us
+  const LANE = u => { const c = RP(u); return [c[0] + RW(u) * 0.22, c[1]]; }, JOGX = 520;
+  const SPR_POS = [[0, LANE(0.03)], [T.spr0, LANE(0.24), T.flop - T.spr0, 'out'], [T.flop + 0.1, LANE(0.2), 1.0, 'io']];
   const SIGNS = [{ u: 0.2, size: 64, bw: 96, post: 140 }, { u: 0.46, size: 50, bw: 78, post: 104 }, { u: 0.7, size: 40, bw: 64, post: 78 }];
   COMP.x5_mRoad = {
     draw(fx, t, F) {
@@ -342,7 +346,7 @@
         enter: T.teen,
         pos: [[0, [STOOL.x, STOOL.seat - 4]], [T.homeOff + 0.32, [-900, STOOL.seat - 4], 0]],
         pose: [[0, typing]],
-        face: [[0, 'focus'], [T.open, 'smile', 0.1], [T.bookOff, 'focus', 0.1], [T.sheep, 'sheepish', 0.06]],
+        face: [[0, { ...FACE.focus, brow: 'arc', browY: 0.02 }], [T.open, 'smile', 0.1], [T.bookOff, { ...FACE.focus, brow: 'arc', browY: 0.02 }, 0.1], [T.sheep, 'sheepish', 0.06]],
         turn: [[0, 0.5]],
         gaze: [[0, 'screen'], [T.open, 'book'], [T.bookOff, 'screen'], [T.arms, 'jars'], [T.drip + 0.8, 'screen'], [T.ask + 0.1, 'dad'], [T.fast, 'screen']],
         squash: [[0, 1], [T.ask + 0.1, 0.94, 0.05], [T.ask + 0.15, 1, 0.22, 'back']],
@@ -365,15 +369,15 @@
       },
       tao: {
         enter: T.tao,
-        pos: [[0, [222, FL]], [T.jog0, [600, FL], T.jogAt - T.jog0, 'lin'], [T.end + 0.32, [-900, FL], 0]],
+        pos: [[0, [222, FL]], [T.jog0, [JOGX, FL], T.jogAt - T.jog0, 'lin'], [T.end + 0.32, [-900, FL], 0]],
         pose: [[0, 'stand'], [T.point, 'present', 0.15, 'back'], [T.dash1 + 0.4, 'stand', 0.2], [T.jog0, jogPose(T.jog0), 0.12]],
         face: [[0, 'smile'], [T.flop, { ...FACE.smile, brow: 'arc', browY: 0.04 }, 0.08], [T.full, 'joy', 0.08]],
         turn: [[0, 0.4], [T.jog0, 0.3, 0.12]],
         gaze: [[0, 'viewer'], [T.point, 'runner'], [T.dash1 + 0.5, 'viewer'], [T.jog0, [1300, 300]], [T.spr0, 'sprinter'], [T.sprOff, [1300, 300]], [T.gauge + 0.1, 'viewer']],
       },
     },
-    targets: F => ({ screen: [MAC[0], MAC[1] - 150], book: [BK.at[0] + 140, 420], jars: [1115, 560], runner: [lerp(TRK.start, TRK.fin + 40, clamp((F.t - T.dash0) / (T.dash1 - T.dash0))), 700],
-      sprinter: RP(lerp(0.12, 0.38, clamp((F.t - T.spr0) / (T.flop - T.spr0)))) }),
+    targets: F => ({ screen: [MAC[0], MAC[1] - 150], book: [BK.at[0] + 140, 420], jars: [1115, 560], runner: [lerp(TRK.start, TRK.fin + 60, clamp((F.t - T.dash0) / (T.dash1 - T.dash0))), 600],
+      sprinter: (p => [p[0], p[1] - 90])(evalTrack(SPR_POS, F.t)) }),
     set: [
       { type: 'floor', t0: T.desk, t1: T.trackOff + 0.32 },
       { type: 'stool', x: STOOL.x, seat: STOOL.seat, t0: T.desk, t1: T.homeOff + 0.32 },
@@ -398,13 +402,13 @@
       { type: 'x5_mFast', id: 'x5mFast', char: 'teen', t0: T.fast, t1: T.homeOff + 0.32 },
       // L7: the short track
       { type: 'x5_mTrack', id: 'x5mTrk', t0: T.track, t1: T.trackOff + 0.32 },
-      { type: 'x5_mRunner', id: 'x5mRun', t0: T.track + 0.2, t1: T.trackOff + 0.32, pos: [[0, [TRK.start + 14, 742]], [T.dash0, [TRK.fin + 46, 742], T.dash1 - T.dash0, 'lin']],
+      { type: 'x5_mRunner', id: 'x5mRun', t0: T.track + 0.2, t1: T.trackOff + 0.32, pos: [[0, [TRK.start + 30, 742]], [T.dash0, [TRK.fin + 70, 742], T.dash1 - T.dash0, 'lin']], sc: [[0, 1.9]],
         state: [[0, 'ready'], [T.dash0, 'run'], [T.dash1 + 0.05, 'cheer']], sfxAt: [[T.dash0, 'whip']] },
-      { type: 'title', id: 'x5mSprL', text: '短跑 = 奥数比赛', x: 960, y: 480, size: 50, color: 'red', rot: -3, t0: T.sprintLab, t1: T.trackOff + 0.32 },
+      { type: 'title', id: 'x5mSprL', text: '短跑 = 奥数比赛', x: 960, y: 330, size: 50, color: 'red', rot: -3, t0: T.sprintLab, t1: T.trackOff + 0.32 },
       // L8–L10: the long road
       { type: 'x5_mRoad', id: 'x5mRd', t0: T.road, t1: T.end + 0.32 },
       { type: 'title', id: 'x5mMar', text: '马拉松 = 做研究', x: 720, y: 196, size: 50, color: 'red', rot: -2, t0: T.maraLab, t1: T.end + 0.32 },
-      { type: 'x5_mRunner', id: 'x5mSpr2', z: Z.body - 2, t0: T.spr0, t1: T.sprOff + 0.32, pos: [[0, RP(0.12)], [T.spr0, RP(0.38), T.flop - T.spr0, 'out']], sc: [[0, 0.84], [T.spr0, 0.6, T.flop - T.spr0, 'out']],
+      { type: 'x5_mRunner', id: 'x5mSpr2', z: Z.body - 2, t0: T.spr0, t1: T.sprOff + 0.32, pos: SPR_POS, sc: [[0, 1.7], [T.spr0, 1.45, T.flop - T.spr0, 'out'], [T.flop + 0.1, 1.5, 1.0, 'io']],
         state: [[0, 'run'], [T.flop, 'flop']], flop: T.flop, sfxAt: [[T.spr0, 'whip'], [T.flop, 'thud']] },
       { type: 'x5_mGauge', id: 'x5mG', char: 'tao', t0: T.gauge, t1: T.end + 0.32 },
       { type: 'title', id: 'x5mSrc', text: '（2009 年采访）', x: 1270, y: 700, size: 38, color: 'red', rot: -2, t0: T.src, t1: T.end + 0.32 },

@@ -822,15 +822,18 @@ const COMP = {
     },
   },
   /** Recurring stamp: draws on big in the red pen, then docks to a corner and stays.
-   *  {age + suffix('岁') | label('唐朝'), place (ribbon), center, R, dockT, dock, dockScale, pulse} */
+   *  {age + suffix('岁') | label('唐朝'), place (ribbon), center, R, dockT, dock, dockScale, pulse,
+   *   t1 (shrinks away into its spot over 0.25 s — e.g. before the next age is stamped), key ('stamp'; give two
+   *   stamps that are on screen at the same moment different keys)} */
   ageStamp: {
     draw(fx, t) {
       const lt = t - fx.t0; if (lt < 0) return;
+      const out = fx.t1 !== undefined ? clamp((t - fx.t1) / 0.25) : 0; if (out >= 1) return;
       const du = EASE.io(clamp((t - fx.dockT) / 0.4));
       const pos = lerp2(fx.center, fx.dock, du);
-      let sc = lerp(1, fx.dockScale, du);
+      let sc = lerp(1, fx.dockScale, du) * (1 - EASE.in(out));
       (fx.pulse || []).forEach(pt => { const v = (t - pt) / 0.45; if (v > 0 && v < 1) sc *= 1 + 0.22 * Math.sin(Math.PI * v); });
-      const R = fx.R, k = 'stamp';
+      const R = fx.R, k = fx.key || 'stamp';
       DL.save(); DL.translate(pos[0], pos[1]); DL.scale(sc); DL.rotate(-6 * (1 - du) - 4);
       stroke(k + '.o', ringPts(k + '.o', 0, 0, R, R, { n: 14, a0: -110, sweep: 374, rv: 0.025 }), { z: Z.stamp, w: 7, color: C.red, draw: EASE.out(clamp(lt / 0.42)) });
       stroke(k + '.i', ringPts(k + '.i', 0, 0, R - 18, R - 18, { n: 14, a0: 70, sweep: 368, rv: 0.02 }), { z: Z.stamp, w: 3.2, color: C.red, draw: EASE.out(clamp((lt - 0.12) / 0.4)) });

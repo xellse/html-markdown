@@ -58,6 +58,18 @@
     DL.restore();
   }
 
+  /** yellow highlighter drawn ABOVE a speech line (multiply blend), so the speech's paper halo cannot hide it. {rect, t0, t1, dur, pad} */
+  COMP.x5_bHiTop = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      const [x, y, w, h] = fx.rect, pad = fx.pad ?? 8, p = EASE.out(clamp((t - fx.t0) / (fx.dur || 0.35)));
+      const x0 = x - pad, xe = lerp(x0, x + w + pad, p), y0 = y + h * 0.08, y1 = y + h * 0.96, top = [], bot = [];
+      for (let i = 0; i <= 8; i++) { const xx = lerp(x0, xe, i / 8); top.push([xx, y0 + Math.sin(i * 1.7) * 3]); bot.unshift([xx, y1 + Math.sin(i * 2.3) * 4]); }
+      stroke(fx.id, top.concat(bot), { z: Z.annot + 0.5, closed: true, fill: C.hi, noStroke: true, opacity: 0.85, blend: true, boil: 0.4, w: 1 });
+    },
+    cues: fx => [[fx.t0, 'swish']],
+  };
+
   /* ---------------- L1: the university ---------------- */
   const BX = 700;   // centre of the building (its door)
   PROPS.x5_bUni = (fx, t, lt, p) => {
@@ -256,12 +268,13 @@
 
   /* ---------------- poses, faces ---------------- */
   Object.assign(POSE, {
-    x5_bYawn: { tilt: -3, armScale: 1.75, armL: [132, 26], armR: [132, 26] },
+    // a one-arm stretch (the other arm hangs): not the two-arm cheer
+    x5_bYawn: { tilt: 6, lean: 2, armScale: 1.75, armL: [128, 32], armR: [16, 12] },
     // down on one knee: the near leg's foot planted (thigh level, shin straight down), the far knee on the floor
     x5_bKneel: { legL: [85, -85], legR: [15, 75], lean: -6, tilt: -6, armL: [62, 44], armR: [22, -14] },
   });
   Object.assign(FACE, {
-    x5_bYawn: { lidL: 0.88, lidR: 0.88, brow: 'arc', browY: 0.1, mouth: 'jaw', mo: 0.32 },
+    x5_bYawn: { eyes: 'happy', eyeSY: 0.28, brow: 'arc', browY: 0.12, mouth: 'jaw', mo: 0.58, headSY: 1.05 },   // eyes squeezed shut, mouth wide open
     x5_bSad: { lidL: 0.36, lidR: 0.36, brow: 'line', browL: -20, browR: -20, browY: 0.02, mouth: 'frown', mw: 0.26 },
   });
   const doodlePose = t => ({ ...POSE.sitBase, tilt: 7, lean: 4, ikL: { w: 1, to: 'desk', dx: -42, dy: -2, bend: 'down' },
@@ -369,6 +382,7 @@
       { type: 'prop', id: 'x5bUni', kind: 'x5_bUni', at: [BX, FL], t0: T.bld, t1: T.bldOff + 0.32, drawDur: 0.6, sfxAt: [[T.bld, 'pen']] },
       // L2–L5, L11
       { type: 'x5_bCards', id: 'x5bCd' },
+      { type: 'title', id: 'x5bYawn', text: '哈～', x: 322, y: 506, size: 46, rot: -6, t0: T.yawn + 0.12, t1: T.yawnEnd },
       // L6–L8
       { type: 'scribe', id: 'x5bBd.l0', text: LINES[0][0], x: LX, y: LINES[0][2], size: 56, t0: LINES[0][1], t1: T.roomOff + 0.32, cps: CPS, z: Z.board, sfx: 'chalk' },
       { type: 'scribe', id: 'x5bBd.l1', text: LINES[1][0], x: LX, y: LINES[1][2], size: 56, t0: LINES[1][1], t1: T.roomOff + 0.32, cps: CPS, z: Z.board, sfx: 'chalk' },
@@ -385,7 +399,7 @@
       { type: 'label', id: 'x5bSelf', text: '小时候的自己', size: 44, at: [300, 380], rot: -4, t0: T.self, t1: T.selfOff, target: { char: 'kid', part: 'headTop', dx: -10, dy: -8 }, bend: 0.25, gap: 12 },
       { type: 'title', id: 'x5bSrc', text: '（2021 年采访）', x: 1260, y: 700, size: 38, color: 'red', rot: -2, t0: T.src, t1: DUR },
       { type: 'speech', id: 'x5bSay1', text: '认真的学习习惯', at: [900, 300], tail: [0, 42], speaker: 'tao', t0: T.say1, t1: DUR, size: 60, rot: -2 },
-      { type: 'band', id: 'x5bHi', rect: [700, 272, 120, 58], t0: T.hi1, t1: DUR, dur: 0.4, pad: 8 },
+      { type: 'x5_bHiTop', id: 'x5bHi', rect: [692, 278, 122, 58], t0: T.hi1, t1: DUR, dur: 0.4, pad: 8 },
       { type: 'speech', id: 'x5bSay2', text: '不感兴趣的课，也用心听', at: [1236, 420], tail: [-250, 32], speaker: 'tao', t0: T.say2, t1: DUR, size: 52, rot: 2 },
       // eased exits (must stay last: they fade what was drawn before them)
       { type: 'x5_bFade', t0: T.inFade, d: 0.3, keys: ['terry.'] },
