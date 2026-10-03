@@ -159,7 +159,7 @@ project/
 
 | type | 主要参数 | 用途 |
 |---|---|---|
-| `ageStamp` | `age`（+`suffix`，默认'岁'）或 `label`（'唐朝'、'第1步'）、`place`（飘带文字）、`center`、`R: 150`、`dockT`、`dock: [1486, 108]`、`dockScale: 0.46`、`pulse: [t…]` | 红色印章，先盖在中央，再停靠到角落 |
+| `ageStamp` | `age`（+`suffix`，默认'岁'）或 `label`（'唐朝'、'第1步'）、`place`（飘带文字）、`center`、`R: 150`、`dockT`、`dock: [1486, 108]`、`dockScale: 0.46`、`pulse: [t…]`、`t1`（0.25 秒缩小消失，换年龄前用）、`key`（两个印章同时在画面上时用不同的 key） | 红色印章，先盖在中央，再停靠到角落 |
 | `write` | `text`、`x`、`y`（字顶）、`size`、`speed`（单位/秒）、`gap`、`glyphGap`、`track`、`color: 'red'`、`w`、`z`、`sfx`、`endSfx`、`silent` | 手写数学，只支持 GLYPH 里的字符 |
 | `highlight` | `of`（某个 write 的 id）、`t0`、`dur` | 黄色荧光笔划过整行 |
 | `ring` | `of`、`glyph`（字符序号，空格也算） | 红笔圈出一个字符 |

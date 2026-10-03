@@ -31,6 +31,7 @@
     },
     targets: () => ({ w1: [420, 250], w2: [420, 440], card: [760, 440], page: PG }),
     fx: [
+      { type: 'ageStamp', label: '长大后', t0: -3, ...E5.STAMP, dockT: -2, t1: 0.6 },   // carried over from the marathon scene, then retired
       // ① 好玩 / 认真
       { type: 'title', id: 'w1', text: '好玩', x: 420, y: 250, size: 130, t0: 0.4, t1: A },
       { type: 'title', id: 'w1s', text: '一次次回到题目前', x: 700, y: 262, size: 44, t0: 1.6, t1: A, color: 'red', anchor: 'start', rot: -2 },
