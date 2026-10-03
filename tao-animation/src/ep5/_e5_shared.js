@@ -79,13 +79,35 @@ PROPS.e5_tea = (fx, t, lt, p) => {
   }
 };
 
+/** 一张课程卡（第 5、80 场）：横线 + 标题，上面斜盖一个红色“不及格”章；卡片只露出一半（从下面探出来）。{at, t0, t1, title, peek} */
+COMP.e5_course = {
+  draw(fx, t) {
+    if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
+    const lt = t - fx.t0, p = EASE.back(clamp(lt / 0.4)), k = fx.id, z = Z.set + 2, [cx, cy] = fx.at;
+    const op = fx.t1 !== undefined ? 1 - clamp((t - fx.t1 + 0.3) / 0.3) : 1;
+    DL.save(); DL.translate(cx, cy + (1 - p) * 120); DL.rotate(fx.rot || 4);
+    stroke(k + '.card', superPts(0, 0, 230, 290, 24, 10), { z, w: 5, closed: true, fill: C.paper, opacity: op });
+    text(k + '.t', fx.title || '一门课', 0, -96, { size: 40, z: z + 0.1, opacity: op });
+    for (let i = 0; i < 3; i++) stroke(k + '.l' + i, [[-80, -30 + i * 44], [80, -28 + i * 44]], { z: z + 0.1, w: 3, color: C.pencil, opacity: 0.7 * op, boil: 0.5 });
+    if (t >= fx.stampT) {
+      const s = EASE.back(clamp((t - fx.stampT) / 0.25));
+      DL.save(); DL.translate(0, 40); DL.rotate(-14); DL.scale(lerp(1.6, 1, s));
+      stroke(k + '.st', superPts(0, 0, 200, 76, 20, 8), { z: z + 0.3, w: 5, closed: true, color: C.red, opacity: op });
+      text(k + '.stt', '不及格', 0, 2, { size: 50, color: C.red, z: z + 0.4, opacity: op });
+      DL.restore();
+    }
+    DL.restore();
+  },
+  cues: fx => [[fx.t0, 'paper'], [fx.stampT, 'stamp']],
+};
+
 /* ---------------- 成绩单：六道题的得分 ----------------
  * { type: 'e5_scores', id, at: [cx, cy], scale: 1, t0, t1, cell: 118,
  *   scores: [[分, 写出时间], …6 个]（写出时间为负 = 一开始就写好；null = 还没写）,
  *   total: [总分, 写出时间]（可选）, ringT: [[题号 0-5, t, t1?], …]（红圈圈出某一格，t1 时消失；可选）,
  *   braces: [{ from: 0, to: 2, label: '17', t0, t1 }]（格子下面的红色大括号 + 红色手写数字；t0 为负 = 一开始就在，t1 时 0.25 秒淡出）}
  * 一道题满分 7 分。分数用手写字形一笔笔写进格子；第 3、4 题之间的粗线分开“第一天 / 第二天”。
- * 发布命名点：'<id>.s<i>'（第 i 格中心，i 从 0 起）、'<id>.total'、'<id>.top'。 */
+ * 有 t1 时，最后 0.3 秒淡出。发布命名点：'<id>.s<i>'（第 i 格中心，i 从 0 起）、'<id>.total'、'<id>.top'。 */
 COMP.e5_scores = {
   init(fx) {
     const c = fx.cell || 118, n = 6, gap = 26;
@@ -100,7 +122,7 @@ COMP.e5_scores = {
   draw(fx, t, F) {
     if (t < fx.t0 || (fx.t1 !== undefined && t >= fx.t1)) return;
     const c = fx.cell || 118, k = fx.id, lt = t - fx.t0, p = fx.t0 < 0 ? 1 : EASE.out(clamp(lt / 0.45));
-    const sc = fx.scale || 1, [cx, cy] = fx.at, z = fx.z ?? Z.set + 2;
+    const sc = fx.scale || 1, [cx, cy] = fx.at, z = fx.z ?? Z.set + 2, n0 = DL.items.length;
     DL.save(); DL.translate(cx, cy); if (sc !== 1) DL.scale(sc);
     for (let i = 0; i < 6; i++) {
       const x = fx._bx(i);
@@ -126,6 +148,9 @@ COMP.e5_scores = {
       stroke(k + '.r' + j, ringPts(k + '.r' + j, x, 0, c * 0.62, c * 0.62, { n: 11, a0: -100, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: EASE.out(clamp((t - rt) / 0.3)) });
     });
     DL.restore();
+    // with a t1, the sheet fades out over its last 0.3 s instead of vanishing in one frame
+    const fo = fx.t1 !== undefined ? 1 - clamp((t - fx.t1 + 0.3) / 0.3) : 1;
+    if (fo < 1) for (let i = n0; i < DL.items.length; i++) { const at = DL.items[i].attrs; at.opacity = +((at.opacity ?? 1) * fo).toFixed(3); }
     for (let i = 0; i < 6; i++) F.targets[`${k}.s${i}`] = [cx + sc * (fx._bx(i) + c / 2), cy];
     F.targets[k + '.total'] = [cx + sc * (fx._bx(5) + c + 34 + c * 0.7), cy];
     F.targets[k + '.top'] = [cx, cy - sc * (c / 2 + 34)];

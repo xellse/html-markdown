@@ -15,9 +15,13 @@ defineScene({
   fx: [
     { type: 'title', id: 'nx', text: '下一集 · 最后一集', x: 620, y: 200, size: 72, t0: 0, color: 'red', rot: -3 },
     { type: 'title', id: 'a', text: '聪明，不够用了', x: 640, y: 380, size: 96, t0: 3.3 },
-    { type: 'mark', id: 'mk', char: '?', on: ['terry'], t0: 5.0, t1: 7.3 },
+    { type: 'mark', id: 'mk', char: '?', on: ['terry'], dx: 90, t0: 5.0, t1: 7.3 },
     { type: 'qm', id: 'qm', pos: [[0, [200, 700]]], size: 200, t0: 5.4, act: [[0, 'hop'], [7.6, 'wave']], mood: [[0, 'happy']] },
-    { type: 'speech', id: 'bye', text: '下集见！', at: [1460, 330], tail: [-40, 40], speaker: 'terry', t0: 7.9, t1: 10.7, rot: 5 },
+    { type: 'speech', id: 'bye', text: '下集见！', at: [1150, 230], tail: [80, 60], speaker: 'terry', t0: 7.9, t1: 10.7, rot: 5 },
   ],
-  subs: [],   // filled from the script below
+  subs: [
+    { t0: 0.3, t1: 3.5, text: '下一集，也是最后一集：' },
+    { t0: 3.6, t1: 7.6, text: '长大的小陶，发现聪明不够用了。' },
+    { t0: 8.0, t1: 10.2, text: '我们下集见！' },
+  ],
 });
