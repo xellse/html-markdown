@@ -99,7 +99,7 @@
   };
 
   /* ---------------- 两张小卡片：转述导师的话（不是对白气泡） ---------------- */
-  const CARDS = [{ s: '表现：让人失望', y: 300 }, { s: '基础：要打扎实', y: 395 }];
+  const CARDS = [{ s: '表现：让人失望', y: 290 }, { s: '基础：要打扎实', y: 383 }];
   COMP.b6_sCards = {
     draw(fx, t) {
       CARDS.forEach((c, i) => {
@@ -192,7 +192,7 @@
     b6_sSit: { ...SITL, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' } },
     b6_sDown: { ...SITL, tilt: 11, lean: 4, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: -6, dy: -2, bend: 'down' } },
     b6_sSad: { ...SITL, tilt: 16, lean: 6, ikL: hipT(-28, 18), ikR: hipT(28, 18) },
-    b6_sFist: { ...SITL, tilt: -2, ikL: hipT(-30, 16), armR: [44, 116], ikR: { w: 0 } },
+    b6_sFist: { ...SITL, tilt: -2, armScale: 1.15, ikL: hipT(-30, 16), armR: [78, 100], ikR: { w: 0 } },
     b6_sProf: { ...SITL, legScale: 1.05, ikL: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' }, ikR: hipT(30, 16) },
     b6_sHop: { legL: [22, -46], legR: [10, -30], armL: [64, 24], armR: [64, 24], lean: 3 },
     b6_sTeeter: t => ({ lean: -5, tilt: -6, armScale: 1.1, armL: [100 + 45 * Math.sin(t * 15), 25], armR: [100 + 45 * Math.sin(t * 15 + Math.PI), 25] }),

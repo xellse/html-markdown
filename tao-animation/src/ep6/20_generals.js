@@ -26,7 +26,7 @@
   const SPIN1 = [5.7, 7.5], ARC1 = 8.1;
   // B. 黑板（L3–L4）
   const BOARD0 = 8.3, CPS = 10;
-  const WL = [{ s: 'T(b) 定理', y: 372, t0: 9.55 }, { s: 'Tb, T*b', y: 418, t0: 10.35 }, { s: '|Tf| < C|f|', y: 464, t0: 11.15 }], WS = 38;
+  const WL = [{ s: 'T(b) 定理', y: 392, t0: 9.55 }, { s: 'Tb, T*b', y: 438, t0: 10.35 }, { s: '|Tf| < C|f|', y: 484, t0: 11.15 }], WS = 38;
   const RING0 = 12.1, PREP1 = 13.45;
   const PT0 = 13.7, Q0 = 13.95, STOP = 14.3, LEAK0 = 16.2, L4_OUT = 17.7;
   // C. 只记得个大概（L5–L7）
@@ -139,7 +139,7 @@
     b6_gHold: t => { const h = handOnStack(t); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
     b6_gHoldB: () => { const h = handOnBasic(); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
     b6_gTap: t => ({ ...POSE.b6_gSit, legR: [66, -60 + 16 * Math.max(0, Math.sin(t * 11))] }),
-    b6_gWrite: t => { const p = nibAt(t); return { lean: 2, tilt: -3, armScale: 1.9, ikL: hipT(-24, -6), ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
+    b6_gWrite: t => { const p = nibAt(t); return { lean: 3, tilt: -3, armScale: 1.65, armL: [6, 0], ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
   });
   POSE.b6_gScratch = t => ({ ...POSE.b6_gHold(t), tilt: 9, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' } });
   Object.assign(FACE, {
@@ -443,7 +443,7 @@
           [4.75, makeWalk(4.75, 5.35, 5.6), 0], [5.38, 'b6_gSit', 0.15],
           [8.33, 'stand', 0.12], [8.5, makeWalk(8.5, 9.4, 5.6), 0], [9.38, 'b6_gWrite', 0.12],
           [12.5, 'b6_gPresent', 0.14, 'back'], [STOP, 'b6_gStuck', 0.1],
-          [18.4, 'scratchStand', 0.14, 'back'], [21.85, 'stand', 0.15], [SHRUG, 'b6_gShrug', 0.14, 'back'],
+          [18.4, 'thinkStand', 0.14, 'back'], [21.85, 'stand', 0.15], [SHRUG, 'b6_gShrug', 0.14, 'back'],
           [LEAP - 0.15, 'crouch', 0.1], [LEAP, 'jumpUp', 0.08], [LAND, 'stand', 0.12],
           ...HOPS.flatMap(h => [[h - 0.12, 'crouch', 0.08], [h, 'b6_gHop', 0.08], [h + 0.4, 'stand', 0.1]]),
           [OFF - 0.12, 'crouch', 0.08], [OFF, 'b6_gHop', 0.08], [OFF + 0.45, 'stand', 0.1],
@@ -510,8 +510,8 @@
       { type: 'b6_gTxt', id: 'b6g.2h', text: '2 小时', x: 790, y: 112, size: 44, t0: 6.2, t1: ARC1 },
       // A small corner he prepared … and the big empty board around it
       { type: 'b6_gChalk', id: 'b6g.chalkfx' },
-      { type: 'b6_gFade', id: 'b6g.ringF', out: PREP1 - 0.3, of: { type: 'ringRect', id: 'b6g.ring', rect: [BX - 12, 346, 220, 146], t0: RING0, t1: PREP1, pad: 14 } },
-      { type: 'b6_gFade', id: 'b6g.prepF', out: PREP1 - 0.3, of: { type: 'label', id: 'b6g.prep', text: '准备好的一小块', at: [330, 270], rot: -3, t0: RING0 + 0.2, t1: PREP1, target: [540, 330], bend: 0.2, gap: 10 } },
+      { type: 'b6_gFade', id: 'b6g.ringF', out: PREP1 - 0.3, of: { type: 'ringRect', id: 'b6g.ring', rect: [BX - 12, 362, 220, 150], t0: RING0, t1: PREP1, pad: 14 } },
+      { type: 'b6_gFade', id: 'b6g.prepF', out: PREP1 - 0.3, of: { type: 'label', id: 'b6g.prep', text: '准备好的一小块', at: [330, 270], rot: -3, t0: RING0 + 0.2, t1: PREP1, target: [536, 346], bend: 0.2, gap: 10 } },
       { type: 'b6_gPointer', id: 'b6g.ptrfx', t0: PT0 + 0.15, t1: L4_OUT, to: [336, 300] },
       { type: 'b6_gFade', id: 'b6g.qF', out: L4_OUT - 0.3, of: { type: 'write', id: 'b6g.q', text: '?', x: 236, y: 170, size: 150, t0: Q0, t1: L4_OUT, speed: 2200, w: 9, z: Z.board, sfx: 'chalk' } },
       { type: 'b6_gTxt', id: 'b6g.leak', text: '露馅了', x: 250, y: 470, size: 46, rot: -4, t0: LEAK0, t1: L4_OUT },

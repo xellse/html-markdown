@@ -25,8 +25,8 @@
     tracks: {
       terry: {
         enter: 9.3,
-        pos: [[0, [700, FL]], [9.6, [700, FL]], [12.4, [960, FL], 2.8, 'lin']],
-        pose: [[0, makeWalk(9.6, 12.4, 4.6)], [12.5, { ...POSE.stand, armScale: 1.6, ikL: { w: 1, to: [1300, 420], bend: 'out' } }, 0.2, 'back']],
+        pos: [[0, [700, FL]], [9.6, [960, FL], 2.8, 'lin'], [13.3, [1760, FL], 0.9, 'in']],   // walks off along the road before the cut
+        pose: [[0, makeWalk(9.6, 12.4, 4.6)], [12.5, { ...POSE.stand, armScale: 1.6, ikL: { w: 1, to: [1300, 420], bend: 'out' } }, 0.2, 'back'], [13.3, makeWalk(13.3, 14.3, 4.6)]],
         face: [[0, 'smile'], [12.5, 'joy', 0.05]],
         turn: [[0, 0.4]],
         gaze: [[0, 'far']],
