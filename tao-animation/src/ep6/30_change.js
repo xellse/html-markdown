@@ -280,11 +280,11 @@
   };
 
   /* ---------------- ⑥ 文件柜：最上面的抽屉被拉开，里面是一沓沓文件 ---------------- */
-  const CAB = { x0: 1300, x1: 1460, y0: 470, dh: 103 };
+  const CAB = { x0: 1315, x1: 1475, y0: 470, dh: 103 };
   const drawerU = t => EASE.out(clamp((t - T.drawer) / 0.22));
-  const drawerOff = t => { const u = drawerU(t); return [-40 * u, 18 * u]; };
+  const drawerOff = t => { const u = drawerU(t); return [-18 * u, 22 * u]; };
   const HANDLE = t => { const [ox, oy] = drawerOff(t); return [(CAB.x0 + CAB.x1) / 2 + ox, CAB.y0 + 8 + CAB.dh / 2 - 4 + oy]; };
-  const INSIDE = [1338, 488];
+  const INSIDE = [1352, 490];
   COMP.c6_cab = {
     draw(fx, t) {
       if (t < T.meet || t >= T.p6 + 0.3) return;
@@ -313,7 +313,7 @@
   };
 
   /* ---------------- ⑥ 那篇论文：从抽屉里抽出来，递过去，他翻开就读 ---------------- */
-  const HAND = [702, 628], PC6 = [645, 640];
+  const HAND = [728, 626], PC6 = [645, 640];
   function paperCenter(t, F) {
     if (t < T.pick) return null;
     const s = F.anchors.stein, b = F.anchors.tMeet;
@@ -513,10 +513,10 @@
     c6_pcRest: { ...SITB, ikL: { w: 1, to: 'desk', dx: 10, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'desk', dx: 70, dy: -2, bend: 'down' } },
     c6_books: { tilt: 10, lean: 1, ikL: { w: 1, to: 'abs', dx: STK.x - 80, dy: 655, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: STK.x + 80, dy: 655, bend: 'out' } },
     c6_sPonder: { tilt: -7, armL: [14, 8], ikR: { w: 1, to: 'chin', dx: 0.32, dy: 0.06, bend: 'down' } },
-    c6_sIn: { lean: 7, tilt: 4, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: INSIDE[0], dy: INSIDE[1], bend: 'down' } },
-    c6_sLift: { lean: 2, tilt: 2, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: 1312, dy: 604, bend: 'down' } },
-    c6_sGive: { lean: -4, tilt: -3, armR: [14, 8], ikL: { w: 1, to: 'abs', dx: HAND[0], dy: HAND[1], bend: 'down' }, ikR: { w: 0 } },
-    c6_mReach: { lean: 3, armL: [16, 10], ikR: { w: 1, to: 'abs', dx: HAND[0], dy: HAND[1], bend: 'down' } },
+    c6_sIn: { lean: 7, tilt: 4, armScale: 1.12, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: INSIDE[0], dy: INSIDE[1], bend: 'down' } },
+    c6_sLift: { lean: 2, tilt: 2, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: 1318, dy: 604, bend: 'down' } },
+    c6_sGive: { lean: -4, tilt: -3, armScale: 1.1, armR: [14, 8], ikL: { w: 1, to: 'abs', dx: HAND[0], dy: HAND[1], bend: 'down' }, ikR: { w: 0 } },
+    c6_mReach: { lean: 3, armScale: 1.15, armL: [16, 10], ikR: { w: 1, to: 'abs', dx: HAND[0], dy: HAND[1], bend: 'down' } },
     c6_mHold: { tilt: 6, armScale: 1.2, ikL: { w: 1, to: 'abs', dx: PC6[0] - 45, dy: PC6[1] + 5, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: PC6[0] + 45, dy: PC6[1] + 5, bend: 'down' } },
     c6_mRead: { tilt: 10, armScale: 1.2, ikL: { w: 1, to: 'abs', dx: PC6[0] - 88, dy: PC6[1] + 8, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: PC6[0] + 88, dy: PC6[1] + 8, bend: 'down' } },
     c6_taoHold: { armR: [14, 8], ikL: { w: 1, to: 'abs', dx: 1150, dy: 668, bend: 'down' } },
@@ -530,11 +530,11 @@
   const m3Talk = t => ({ tilt: -2 * Math.sin(t * 6), armR: [16, 10], armL: [62 + 18 * Math.sin(t * 5.4 + 1), 48 + 24 * Math.sin(t * 6.6)] });
   const listen = list => t => ({ tilt: nodTilt(t, list, 9) });
   // the advisor walks to the cabinet and back (his position also places the paper he carries)
-  const SPOS = [[0, [1010, FL]], [T.walk0, [1205, FL], T.walk1 - T.walk0, 'lin'], [T.back0, [800, FL], T.back1 - T.back0, 'lin'], [T.c6 + OUT, OFF, 0]];
+  const SPOS = [[0, [1010, FL]], [T.walk0, [1205, FL], T.walk1 - T.walk0, 'lin'], [T.back0, [860, FL], T.back1 - T.back0, 'lin'], [T.c6 + OUT, OFF, 0]];
   const sX = t => evalTrack(SPOS, t)[0];
   const sListen = t => ({ tilt: -2 + nodTilt(t, T.nodS, 8), armL: [14, 8], armR: [14, 8] });
   const sWalk = t => ({ ...makeWalk(T.walk0, T.walk1, 5.2)(t), ikR: { w: 0, to: 'abs', dx: HANDLE(T.walk1 + 0.3)[0], dy: HANDLE(T.walk1 + 0.3)[1], bend: 'down' } });
-  const sReach = t => { const h = HANDLE(t); return { lean: 6, tilt: 3, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'down' } }; };
+  const sReach = t => { const h = HANDLE(t); return { lean: 7, tilt: 3, armScale: 1.12, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'down' } }; };
   const sCarry = t => ({ ...makeWalk(T.back0, T.back1, 5.2)(t), ikL: { w: 1, to: 'abs', dx: sX(t) - 32, dy: 640, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: sX(t) - 32, dy: 640, bend: 'down' } });
   const gradHold = t => {
     const u = (t - T.hop) / 0.42, h = u > 0 && u < 1 ? -42 * Math.sin(Math.PI * u) : 0, tuck = u > 0 && u < 1 ? Math.sin(Math.PI * u) : 0;
@@ -672,7 +672,7 @@
     },
     targets: F => ({
       board: [470, 300], note: [1110, 585], book: [STK.x, 592], screen: [1060, 445], btn: BTN, sheet: DK.sheet,
-      cab: [1340, 520], paperT: paperCenter(F.t, F) || HAND, card: [CD.x, CD.y], tip: [tipX(F.t), AR.y], door: [DOOR.x, 430], essay: [1146, 640],
+      cab: [1360, 520], paperT: paperCenter(F.t, F) || HAND, card: [CD.x, CD.y], tip: [tipX(F.t), AR.y], door: [DOOR.x, 430], essay: [1146, 640],
     }),
     set: [
       { type: 'floor', t0: 0.3, t1: T.end + 0.32 },

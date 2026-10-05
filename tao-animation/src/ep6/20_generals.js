@@ -17,7 +17,7 @@
   const PX = { exam3: 1095, stein: 1275, exam2: 1455 }, PHIP = 650;
   const CHAIR = { x: 880, seat: 655 }, BENCH = { x: 420, seat: 655 };
   const DOOR = { x0: 950, x1: 1580, top: 300 };
-  const TX = 500, BX = 545;                                    // Terry at the board; left edge of his notes
+  const TX = 430, BX = 520;                                    // Terry at the board; left edge of his notes
 
   /* ---------------- 时间（场景内） ---------------- */
   // A. 考场（L1–L2）
@@ -26,7 +26,7 @@
   const SPIN1 = [5.7, 7.5], ARC1 = 8.1;
   // B. 黑板（L3–L4）
   const BOARD0 = 8.3, CPS = 10;
-  const WL = [{ s: 'T(b) 定理', y: 410, t0: 9.55 }, { s: 'Tb, T*b', y: 458, t0: 10.35 }, { s: '|Tf| < C|f|', y: 506, t0: 11.15 }];
+  const WL = [{ s: 'T(b) 定理', y: 372, t0: 9.55 }, { s: 'Tb, T*b', y: 418, t0: 10.35 }, { s: '|Tf| < C|f|', y: 464, t0: 11.15 }], WS = 38;
   const RING0 = 12.1, PREP1 = 13.45;
   const PT0 = 13.7, Q0 = 13.95, STOP = 14.3, LEAK0 = 16.2, L4_OUT = 17.7;
   // C. 只记得个大概（L5–L7）
@@ -94,7 +94,7 @@
   const nibAt = t => {
     let L = WL[0]; for (const l of WL) if (t >= l.t0 - 0.12) L = l;
     const u = clamp((t - L.t0) * CPS / [...L.s].length);
-    return [BX + textWidth(L.s, 40) * u, L.y + 10 + 3 * Math.sin(t * 31)];
+    return [BX + textWidth(L.s, WS) * u, L.y + 10 + 3 * Math.sin(t * 31)];
   };
 
   /* ---------------- 楼梯：四张题卡，一级比一级小、比一级简单（比喻，不是真题） ---------------- */
@@ -112,12 +112,12 @@
   const STAND = [[300, 420], [540, 505], [735, 590], [880, 675]];             // where Terry stands on each step
 
   /* ---------------- 记错科目的那叠题卡，和“基础题” ---------------- */
-  const HOLD = [870, 365], DESKSPOT = [1012, 566];
+  const HOLD = [850, 400], DESKSPOT = [1000, 574], KA = 0.35;
   const stackAt = t => {                                                       // {c:[x,y], k:scale, rot}
-    if (t < ASIDE) { const u = EASE.out(clamp((t - STACK0) / 0.3)); return { c: lerp2(DESKSPOT, HOLD, u), k: lerp(0.45, 1, u), rot: lerp(-4, 2, u) }; }
-    const u = EASE.io(clamp((t - ASIDE) / 0.45)); return { c: lerp2(HOLD, DESKSPOT, u), k: lerp(1, 0.45, u), rot: lerp(2, -4, u) };
+    if (t < ASIDE) { const u = EASE.out(clamp((t - STACK0) / 0.3)); return { c: lerp2(DESKSPOT, HOLD, u), k: lerp(KA, 1, u), rot: lerp(-4, 2, u) }; }
+    const u = EASE.io(clamp((t - ASIDE) / 0.45)); return { c: lerp2(HOLD, DESKSPOT, u), k: lerp(1, KA, u), rot: lerp(2, -4, u) };
   };
-  const SW = 220, SH = 116, BW = 170, BH = 84, HOLD2 = [880, 380];
+  const SW = 220, SH = 116, BW = 170, BH = 84, HOLD2 = [860, 405];
   const handOnStack = t => { const s = stackAt(t); return [s.c[0] + (SW / 2 - 12) * s.k, s.c[1] + 16 * s.k]; };
   const handOnBasic = () => [HOLD2[0] + BW / 2 - 12, HOLD2[1] + 14];
 
@@ -136,10 +136,10 @@
   Object.assign(POSE, {
     b6_gPoint: { ...POSE.b6_gProf, lean: -4, armScale: 1.1, armL: [118, 12], ikL: { w: 0 } },
     b6_gBeckon: t => ({ ...POSE.b6_gProf, lean: -5, armScale: 1.1, armL: [62, 64 + 34 * Math.max(0, Math.sin(t * 7))], ikL: { w: 0 } }),
-    b6_gHold: t => { const h = handOnStack(t); return { ...POSE.b6_gProf, lean: -7, armScale: 1.45, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'down' } }; },
-    b6_gHoldB: () => { const h = handOnBasic(); return { ...POSE.b6_gProf, lean: -7, armScale: 1.45, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'down' } }; },
+    b6_gHold: t => { const h = handOnStack(t); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
+    b6_gHoldB: () => { const h = handOnBasic(); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
     b6_gTap: t => ({ ...POSE.b6_gSit, legR: [66, -60 + 16 * Math.max(0, Math.sin(t * 11))] }),
-    b6_gWrite: t => { const p = nibAt(t); return { lean: 2, tilt: 3, armScale: 1.6, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
+    b6_gWrite: t => { const p = nibAt(t); return { lean: 2, tilt: -3, armScale: 1.9, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
   });
   POSE.b6_gScratch = t => ({ ...POSE.b6_gHold(t), tilt: 9, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' } });
   Object.assign(FACE, {
@@ -225,7 +225,7 @@
         WL.forEach((L, i) => {
           if (t < L.t0) return;
           const n = Math.min([...L.s].length, Math.floor((t - L.t0) * CPS) + 1);
-          text(k + '.wl' + i, [...L.s].slice(0, n).join(''), BX, L.y, { size: 40, anchor: 'start', z: Z.board });
+          text(k + '.wl' + i, [...L.s].slice(0, n).join(''), BX, L.y, { size: WS, anchor: 'start', z: Z.board });
         });
       });
       // corridor bench
@@ -378,7 +378,8 @@
         DL.save(); DL.translate(s.c[0], s.c[1]); DL.scale(s.k); DL.rotate(s.rot);
         [2, 1].forEach(j => stroke(k + '.b' + j, box(-SW / 2 + 7 * j, -SH / 2 - 7 * j, SW / 2 + 7 * j, SH / 2 - 7 * j), { z: z - 0.1 * j, w: 3.5, fill: C.paper }));
         stroke(k, box(-SW / 2, -SH / 2, SW / 2, SH / 2), { z, w: 4.5, fill: C.paper });
-        text(k + '.t', '另一个科目', 0, -SH / 2 + 30, { size: 36, z: z + 0.1 });
+        const tq = clamp((s.k - 0.75) / 0.2);                                   // the header goes as the stack shrinks onto the table
+        if (tq > 0) text(k + '.t', '另一个科目', 0, -SH / 2 + 30, { size: 36, z: z + 0.1, opacity: tq });
         [8, 30].forEach((yy, j) => { const pts = []; for (let i = 0; i <= 10; i++) pts.push([-SW / 2 + 26 + i * 16.8, yy + (i % 2 ? -4 : 3)]); stroke(k + '.l' + j, pts, { z: z + 0.1, w: 2.6, boil: 0.6 }); });
         DL.restore();
       });
@@ -406,7 +407,7 @@
         const m = a.mouth, u = dp / 1.1;
         [0, 1, 2].forEach(i => {
           const v = clamp(u * 1.25 - i * 0.12); if (v <= 0 || v >= 1) return;
-          const x = m[0] + 30 + 70 * v, y = m[1] - 18 + i * 18 - 10 * v;
+          const x = m[0] + a.r * 1.0 + 70 * v, y = m[1] - 18 + i * 18 - 10 * v;
           stroke('b6g.pf' + i, [[x, y], [x + 18, y - 6], [x + 36, y + 2]], { z: Z.fx, w: 3, color: C.pencil, opacity: 1 - v, boil: 0.8 });
         });
       }
@@ -432,15 +433,15 @@
       terry: {
         pos: [[0, [-130, FL]], [0.35, [600, FL], 1.6, 'lin'],
           [4.75, [880, FL], 0.6, 'lin'], [5.4, [CHAIR.x, CHAIR.seat], 0.18],
-          [8.35, [CHAIR.x, FL], 0.15], [8.55, [TX, FL], 0.8, 'lin'],
+          [8.35, [CHAIR.x, FL], 0.15], [8.5, [TX, FL], 0.9, 'lin'],
           [LEAP, hop(LEAP, 0.5, [TX, FL], STAND[0], 150), 0],
           ...HOPS.map((h, i) => [h, hop(h, 0.4, STAND[i], STAND[i + 1], 60), 0]),
-          [OFF, hop(OFF, 0.45, STAND[3], [700, FL], 70), 0],
+          [OFF, hop(OFF, 0.45, STAND[3], [640, FL], 70), 0],
           [WALK4[0], [BENCH.x, FL], WALK4[1] - WALK4[0], 'lin'], [SIT2, [BENCH.x, BENCH.seat], 0.18],
           [UP2, [BENCH.x, FL], 0.18], [WALK5[0], [-160, FL], WALK5[1] - WALK5[0], 'lin']],
         pose: [[0, makeWalk(0.35, 1.95, 5.2)],
           [4.75, makeWalk(4.75, 5.35, 5.6), 0], [5.38, 'b6_gSit', 0.15],
-          [8.33, 'stand', 0.12], [8.55, makeWalk(8.55, 9.35, 5.6), 0], [9.4, 'b6_gWrite', 0.15],
+          [8.33, 'stand', 0.12], [8.5, makeWalk(8.5, 9.4, 5.6), 0], [9.42, 'b6_gWrite', 0.15],
           [12.5, 'b6_gPresent', 0.14, 'back'], [STOP, 'b6_gStuck', 0.1],
           [18.4, 'scratchStand', 0.14, 'back'], [21.85, 'stand', 0.15], [SHRUG, 'b6_gShrug', 0.14, 'back'],
           [LEAP - 0.15, 'crouch', 0.1], [LEAP, 'jumpUp', 0.08], [LAND, 'stand', 0.12],
@@ -455,7 +456,7 @@
           [EX_PUZ, 'surprised', 0.08], [MIS0 + 0.6, 'smile', 0.1], [TICKS[0] - 0.2, 'grin', 0.08], [48.7, 'neutral', 0.1],
           [TAP[0], 'sheepish', 0.1], [OPEN[0] + 0.2, 'surprised', 0.06], [NOD + 0.5, 'b6_gRelief', 0.1],
           [WIPE + 0.3, 'b6_gPhew', 0.1], [PUFF + 1.0, 'b6_gRelief', 0.12]],
-        turn: [[0, 0.5], [2.0, 0.3, 0.15], [8.55, -0.5, 0.12], [9.35, 0.35, 0.15],
+        turn: [[0, 0.5], [2.0, 0.3, 0.15], [8.5, -0.5, 0.12], [9.4, 0.35, 0.15],
           [LEAP - 0.2, -0.3, 0.12], [LAND, 0.35, 0.15],
           [OFF - 0.15, -0.3, 0.12], [OFF + 0.5, 0.35, 0.15],
           [WALK4[0], -0.5, 0.12], [WALK4[1], 0.35, 0.15], [WIPE, 0.15, 0.2], [WALK5[0], -0.6, 0.12]],
@@ -509,11 +510,11 @@
       { type: 'b6_gTxt', id: 'b6g.2h', text: '2 小时', x: 790, y: 112, size: 44, t0: 6.2, t1: ARC1 },
       // A small corner he prepared … and the big empty board around it
       { type: 'b6_gChalk', id: 'b6g.chalkfx' },
-      { type: 'b6_gFade', id: 'b6g.ringF', out: PREP1 - 0.3, of: { type: 'ringRect', id: 'b6g.ring', rect: [BX - 12, 384, 236, 146], t0: RING0, t1: PREP1, pad: 16 } },
-      { type: 'b6_gFade', id: 'b6g.prepF', out: PREP1 - 0.3, of: { type: 'label', id: 'b6g.prep', text: '准备好的一小块', at: [380, 300], rot: -3, t0: RING0 + 0.2, t1: PREP1, target: [BX + 6, 372], bend: 0.2, gap: 10 } },
+      { type: 'b6_gFade', id: 'b6g.ringF', out: PREP1 - 0.3, of: { type: 'ringRect', id: 'b6g.ring', rect: [BX - 12, 346, 220, 146], t0: RING0, t1: PREP1, pad: 14 } },
+      { type: 'b6_gFade', id: 'b6g.prepF', out: PREP1 - 0.3, of: { type: 'label', id: 'b6g.prep', text: '准备好的一小块', at: [330, 270], rot: -3, t0: RING0 + 0.2, t1: PREP1, target: [540, 330], bend: 0.2, gap: 10 } },
       { type: 'b6_gPointer', id: 'b6g.ptrfx', t0: PT0 + 0.15, t1: L4_OUT, to: [336, 300] },
       { type: 'b6_gFade', id: 'b6g.qF', out: L4_OUT - 0.3, of: { type: 'write', id: 'b6g.q', text: '?', x: 236, y: 170, size: 150, t0: Q0, t1: L4_OUT, speed: 2200, w: 9, z: Z.board, sfx: 'chalk' } },
-      { type: 'b6_gTxt', id: 'b6g.leak', text: '露馅了', x: 345, y: 480, size: 46, rot: -4, t0: LEAK0, t1: L4_OUT },
+      { type: 'b6_gTxt', id: 'b6g.leak', text: '露馅了', x: 250, y: 470, size: 46, rot: -4, t0: LEAK0, t1: L4_OUT },
       // only half remembered
       { type: 'b6_gFade', id: 'b6g.cloudF', out: C_OUT - 0.3, of: { type: 'thought', id: 'b6g.cloud', at: [320, 240], rx: 240, ry: 100, t0: CLOUD0, t1: C_OUT, from: { char: 'terry', part: 'headTop', dx: 0, dy: -6 } } },
       { type: 'b6_gFuzzy', id: 'b6g.fuzzy', t0: CLOUD0 + 0.3, t1: C_OUT },
@@ -523,14 +524,14 @@
       // luck: the examiner prepared for another subject
       { type: 'b6_gLuck', id: 'b6g.lk' },
       { type: 'b6_gStack', id: 'b6g.stack' },
-      { type: 'b6_gFade', id: 'b6g.misF', out: 44.55, of: { type: 'label', id: 'b6g.mis', text: '记错了科目', at: [560, 296], rot: -3, t0: MIS0, t1: 44.85, target: [HOLD[0] - SW / 2, HOLD[1] - 20], bend: -0.15, gap: 12 } },
-      ...TICKS.map((tt, i) => ({ type: 'b6_gFade', id: 'b6g.tkF' + i, out: E_OUT - 0.3, of: { type: 'write', id: 'b6g.tk' + i, text: '✓', x: 556 + i * 76, y: i === 1 ? 300 : 318, size: 52, t0: tt, t1: E_OUT, speed: 2800, color: 'red', w: 6.5, z: Z.annot, sfx: 'plip' } })),
+      { type: 'b6_gFade', id: 'b6g.misF', out: 44.55, of: { type: 'label', id: 'b6g.mis', text: '记错了科目', at: [520, 300], rot: -3, t0: MIS0, t1: 44.85, target: [HOLD[0] - SW / 2, HOLD[1] - 20], bend: -0.15, gap: 12 } },
+      ...TICKS.map((tt, i) => ({ type: 'b6_gFade', id: 'b6g.tkF' + i, out: E_OUT - 0.3, of: { type: 'write', id: 'b6g.tk' + i, text: '✓', x: 560 + i * 76, y: i === 1 ? 298 : 318, size: 52, t0: tt, t1: E_OUT, speed: 2800, color: 'red', w: 6.5, z: Z.annot, sfx: 'plip' } })),
       // barely passed
       { type: 'b6_gTxt', id: 'b6g.pass', text: '勉强通过', x: 1265, y: 236, size: 62, t0: PASS0, t1: 59.6, ul: true, sfx: 'stamp' },
       { type: 'b6_gTxt', id: 'b6g.said', text: '（他后来说）', x: 420, y: 296, size: 38, t0: SAID0, t1: NOTE1 },
       { type: 'b6_gPhew', id: 'b6g.phew' },
     ],
-    steps: [{ t0: 0.35, t1: 1.95, hz: 5.2 }, { t0: 4.75, t1: 5.35, hz: 5.6 }, { t0: 8.55, t1: 9.35, hz: 5.6 }, { t0: WALK4[0], t1: WALK4[1], hz: 5.6 }, { t0: WALK5[0], t1: WALK5[1], hz: 6 }],
+    steps: [{ t0: 0.35, t1: 1.95, hz: 5.2 }, { t0: 4.75, t1: 5.35, hz: 5.6 }, { t0: 8.5, t1: 9.4, hz: 5.6 }, { t0: WALK4[0], t1: WALK4[1], hz: 5.6 }, { t0: WALK5[0], t1: WALK5[1], hz: 6 }],
     sfx: [[P_IN.exam3, 'pop'], [P_IN.stein, 'pop'], [P_IN.exam2, 'pop'], [5.45, 'thud'], [STOP, 'boop'],
       [LEAP, 'hop'], [LAND, 'thud'], ...HOPS.map(h => [h, 'hop']), [OFF, 'hop'], [EX_SCR, 'boop'], [SIT2, 'thud'], ...tapCues, [WIPE, 'swish']],
     subs: [
