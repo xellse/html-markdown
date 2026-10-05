@@ -1,0 +1,76 @@
+{
+  "series": "数学少年陶哲轩",
+  "title": "数学少年陶哲轩 第6集",
+  "desc": "第6集《聪明不够用了》（最后一集）：17 岁去普林斯顿读博士，靠聪明、不准备，资格口试差点没通过；导师的一句“让人失望”成了转折点；后来和本·格林证明质数能排成任意长的等间隔队伍；那个爱问“为什么”的小问号，住进了他自己的脑子里。",
+  "h1": "第6集 · 聪明不够用了",
+  "kicker": "数学少年陶哲轩 · 17 岁到今天",
+  "aria": "动画第6集（最后一集）：陶哲轩17岁去普林斯顿读博士，研究生课没有作业和考试，只有一场让人害怕的资格口试；同学们准备了好几个月，他只准备了两个星期，还常打游戏到深夜；口试时教授的问题越问越简单，他勉强通过；导师斯坦温和地说他的表现让人失望，他后来写道这正是他需要听到的；从那以后他认真学习，导师给的第一道题他博士毕业五年后才解出；后来他和本·格林证明了质数里有任意长的等间隔队伍（中间有一处“轮到你了”：5、11、17、23、29 的下一个是什么）；2006年获菲尔兹奖；他写文章教大家问自己“笨问题”，小问号住进了他的脑子里，最后跳到一个新的孩子身边。",
+  "poster_label": "播放 · 第6集（约 8 分钟）",
+  "poster": 0.0,
+  "out": "episode-6.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      },
+      "think": {
+        "file": "Local Forecast - Elevator.mp3",
+        "title": "Local Forecast - Elevator",
+        "secs": 45
+      }
+    },
+    "music": {
+      "title": "main",
+      "recap": "main",
+      "princeton": "main",
+      "habits": "chip",
+      "generals": "sneaky",
+      "stein": "calm",
+      "change": "turn",
+      "primes": "sneaky",
+      "qm": "calm",
+      "ending": "main",
+      "end": "main"
+    },
+    "think": "think"
+  }
+}
