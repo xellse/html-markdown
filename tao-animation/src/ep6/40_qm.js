@@ -20,7 +20,7 @@
     // L4–L5: the exam day
     teen: 11.0, tag2: 11.05, puz: 12.0, scratch: 12.6, bq1: 15.0, bq2: 16.4, sheep2: 15.6, n2: 17.3, qaOut: 18.75, bOut: 19.0,
     // L6–L8: the first essay
-    desk: 19.0, tao: 19.15, p1: 19.45, t1a: 24.0, t1b: 25.9, body: 26.9, sitUp: 27.6, raise: 28.5, n3: 28.8, hi1: 29.3, cOut: 32.3,
+    desk: 19.0, tao: 19.15, p1: 19.45, t1a: 24.0, t1b: 25.9, body: 20.2, sitUp: 27.6, raise: 28.5, n3: 28.8, hi1: 29.3, cOut: 32.3,
     // L9–L10: the second essay, the too-easy tick, the magnifier
     deskOut: 32.35, stand: 32.5, p2: 32.7, t2: 33.1, prob: 34.4, puzzle: 35.6, squint: 37.9, mag: 37.95, n4: 38.6, dOut: 41.8,
     // L11: the question mark moves in
@@ -41,7 +41,7 @@
   function board(k, b, p, z) {
     box(k + '.o', b.x, b.y, b.x + b.w, b.y + b.h, { z, w: 6, fill: C.paper, draw: stag(p, 0, 3) });
     box(k + '.i', b.x + 14, b.y + 14, b.x + b.w - 14, b.y + b.h - 14, { z: z + 0.1, w: 3.2, draw: stag(p, 1, 3) });
-    stroke(k + '.tray', [[b.x + 30, b.y + b.h + 12], [b.x + b.w - 30, b.y + b.h + 12]], { z, w: 5, draw: stag(p, 2, 3) });
+    stroke(k + '.tray', [[b.x + 30, b.y + b.h + 12], [b.x + b.w * (b.tray ?? 1) - 30, b.y + b.h + 12]], { z, w: 5, draw: stag(p, 2, 3) });
   }
   /** fades out (over d s from t0) every item already drawn this frame whose key starts with one of `keys`: must stay at the end of fx */
   COMP.x6_fade = {
@@ -253,7 +253,7 @@
   };
 
   /* ---------------- L15–L17: the big board, the crowd, the twin primes ---------------- */
-  const GB = { x: 230, y: 90, w: 1120, h: 310 };
+  const GB = { x: 230, y: 70, w: 1120, h: 250, tray: 0.55 };   // short tray: the little "?" over Tao's head stays clear of it
   COMP.x6_board = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
@@ -283,12 +283,10 @@
     },
     cues: () => CROWD.filter((_, i) => i % 5 === 2).map(h => [h.t0, 'pop']),
   };
-  const PS = 66, PR1 = 135, PR2 = 262, QY = PR2 + PS - 120;   // pair rows (glyph tops); the big ? sits on row 2's baseline
+  const PS = 66, PR1 = 108, PR2 = 214, QS = 96, QY = PR2 + PS - QS;   // QS: the big ? stays below row 1 (row 1 ends at y 174, the ? starts at 184)   // pair rows (glyph tops); the big ? sits on row 2's baseline
 
   /* ---------------- poses, faces ---------------- */
   Object.assign(POSE, {
-    // seated, one hand up like asking in class (the other stays on the desk)
-    x6_sitRaise: { ...POSE.sitBase, lean: -6, tilt: -4, armScale: 1.95, armR: [138, 34], ikL: { w: 1, to: 'desk', dx: -40, dy: -2, bend: 'out' } },
     // pointing with the screen-left arm (he faces left, toward the maze)
     x6_pointL: { lean: -2, armScale: 1.2, armL: [84, 6], armR: [16, 10] },
     // holding the magnifier out to the tick on the paper
@@ -331,8 +329,8 @@
       },
       tao: {
         enter: T.tao,
-        pos: [[0, [TX, SITY]], [T.stand, [TX, FL], 0.25]],
-        pose: [[0, taoWrite], [T.sitUp, 'sitUp', 0.15], [T.raise, 'x6_sitRaise', 0.12, 'back'], [T.stand, 'stand', 0.25],
+        pos: [[0, [TX, SITY]], [T.raise, [TX, FL], 0.2]],   // L8: he stands up behind the desk to raise his hand, like asking in class
+        pose: [[0, taoWrite], [T.sitUp, 'sitUp', 0.15], [T.raise, 'raiseHand', 0.2, 'back'], [T.stand, 'stand', 0.25],
           [T.puzzle, 'scratchStand', 0.12, 'back'], [T.squint, 'x6_mag', 0.3, 'out'], [T.dOut, 'stand', 0.25],
           [T.point, 'x6_pointL', 0.15, 'back'], [T.path - 0.2, 'stand', 0.2], [T.dead, 'thinkStand', 0.15], [T.balls, 'stand', 0.15],
           [T.sheep, 'scratchStand', 0.12, 'back'], [T.laugh + 1.1, 'stand', 0.2], [T.look + 0.3, 'thinkStand', 0.15], [T.dots - 0.3, 'stand', 0.2]],
@@ -346,7 +344,7 @@
         gaze: [[0, 'paper'], [T.t2, 'paper'], [T.prob, 'prob'], [T.ck, 'ck'], [T.dOut, 'viewer'], [T.qe + 0.2, 'qmE'], [T.s1, 'viewer'],
           [T.maze, 'maze'], [T.path, 'tip'], [T.dead, 'maze'], [T.sheep, 'viewer'],
           [T.gb, 'viewer'], [T.ppl + 0.1, 'm3'], [T.ppl + 0.7, 'ben'], [T.crowd, 'viewer'], [T.look, 'pairs'], [T.bigQ, 'bigQ']],
-        squash: [[0, 1], [T.stand, 1.05, 0.06], [T.stand + 0.06, 1, 0.22, 'back'], [T.j1, 0.93, 0.06], [T.j1 + 0.06, 1, 0.25, 'back'],
+        squash: [[0, 1], [T.raise, 1.05, 0.06], [T.raise + 0.06, 1, 0.22, 'back'], [T.j1, 0.93, 0.06], [T.j1 + 0.06, 1, 0.25, 'back'],
           [T.s1, 1.06, 0.06], [T.s1 + 0.06, 1, 0.25, 'back']],
       },
       // L15: the people who work with him (classmates and the mathematician reused, a size smaller)
@@ -390,7 +388,7 @@
       { type: 'prop', id: 'x6p1', kind: 'e6_page', at: PAPER.at, w: PAPER.w, h: PAPER.h, lines: 0, t0: T.p1, t1: T.cOut + 0.32, drawDur: 0.5, sfxAt: [[T.p1, 'paper']] },
       { type: 'scribe', id: 'x6t1a', text: '问自己笨问题——', x: 310, y: 270, size: 66, cps: 5, t0: T.t1a, t1: T.cOut + 0.32, z: Z.set + 1 },
       { type: 'scribe', id: 'x6t1b', text: '然后回答它！', x: 310, y: 360, size: 66, cps: 5, t0: T.t1b, t1: T.cOut + 0.32, z: Z.set + 1 },
-      { type: 'x6_scrib', id: 'x6rl', color: 'pencil', z: Z.set + 1, t1: T.cOut + 0.32, lines: [[260, 455, 650, T.body], [260, 515, 600, T.body + 0.35], [260, 575, 420, T.body + 0.7]] },
+      { type: 'x6_scrib', id: 'x6rl', color: 'pencil', z: Z.set + 1, t1: T.cOut + 0.32, lines: [[260, 455, 650, T.body], [260, 515, 600, T.body + 0.8], [260, 575, 420, T.body + 1.6]] },
       { type: 'band', id: 'x6hi1', rect: [508, 237, 198, 66], t0: T.hi1, t1: T.cOut + 0.32, dur: 0.4 },
       { type: 'label', id: 'x6n3', text: '不要怕问‘笨’问题', size: 48, at: [1230, 205], rot: -2, t0: T.n3, t1: T.cOut + 0.32, target: { char: 'tao', part: 'handR', dy: -18 }, bend: -0.25, gap: 10 },
 
@@ -417,7 +415,7 @@
 
       // L15: many people around one big board
       { type: 'x6_board', id: 'x6gb', t0: T.gb, t1: DUR },
-      { type: 'x6_scrib', id: 'x6scr', sfx: 'chalk', t1: T.gOut + 0.32, lines: [[300, 150, 190, 0], [620, 136, 150, 1], [930, 158, 210, 2], [1160, 140, 140, 3], [380, 250, 230, 4], [760, 236, 170, 5], [1050, 258, 200, 6], [520, 332, 160, 7], [800, 336, 200, 8]].map(([x, y, w, i]) => [x, y, w, T.scr + i * 0.38]) },
+      { type: 'x6_scrib', id: 'x6scr', sfx: 'chalk', t1: T.gOut + 0.32, lines: [[300, 125, 190, 0], [620, 118, 150, 1], [930, 130, 210, 2], [1160, 120, 140, 3], [380, 198, 230, 4], [760, 188, 170, 5], [1050, 204, 200, 6], [520, 268, 160, 7], [820, 274, 200, 8]].map(([x, y, w, i]) => [x, y, w, T.scr + i * 0.38]) },
       { type: 'x6_crowd', id: 'x6crowd', t1: T.gOut + 0.32 },
 
       // L16–L17: the pairs of primes two apart … and nobody knows if they go on forever
@@ -426,9 +424,9 @@
       { type: 'write', id: 'x6pair2', text: '(11,13)', x: 926, y: PR1, size: PS, speed: 2300, t0: T.pairs[2] },
       { type: 'write', id: 'x6pair3', text: '(17,19)', x: 430, y: PR2, size: PS, speed: 2300, t0: T.pairs[3] },
       { type: 'write', id: 'x6pair4', text: '…', x: 722, y: PR2, size: PS, speed: 2300, t0: T.dots },
-      { type: 'write', id: 'x6bigq', text: '?', x: 800, y: QY, size: 120, speed: 2600, w: 9, color: 'red', t0: T.bigQ, sfx: 'pen' },
-      { type: 'label', id: 'x6n7', text: '最想得到的那道题', size: 50, at: [560, 470], rot: -2, t0: T.n7, t1: T.n7Out + 0.32, target: [560, PR2 + PS + 8], bend: 0.15, gap: 8 },
-      { type: 'label', id: 'x6n8', text: '还没人知道', size: 50, at: [905, 472], rot: -3, t0: T.n8, t1: DUR, target: [836, QY + 128], bend: -0.2, gap: 8 },
+      { type: 'write', id: 'x6bigq', text: '?', x: 800, y: QY, size: QS, speed: 2600, w: 9, color: 'red', t0: T.bigQ, sfx: 'pen' },
+      { type: 'label', id: 'x6n7', text: '最想得到的那道题', size: 50, at: [560, 402], rot: -2, t0: T.n7, t1: T.n7Out + 0.32, target: [560, PR2 + PS + 8], bend: 0.15, gap: 8 },
+      { type: 'label', id: 'x6n8', text: '还没人知道', size: 50, at: [905, 404], rot: -3, t0: T.n8, t1: DUR, target: [829, QY + QS + 8], bend: -0.2, gap: 8 },
 
       // eased exits (must stay last: they fade what was drawn before them)
       { type: 'x6_fade', t0: T.aOut, keys: ['kid.', 'x6qs.', 'x6h1', 'x6m1.', 'x6tag1'] },
@@ -442,7 +440,7 @@
       { type: 'x6_fade', t0: T.n7Out, keys: ['x6n7.'] },
       { type: 'x6_fade', t0: T.end, keys: ['tao.', 'x6gb.', 'x6pair', 'x6bigq.', 'x6n8.', 'x6huh.', 'floor'] },
     ],
-    sfx: [...hop, [T.kid, 'pop'], [T.kidSurp, 'boop'], [T.teen, 'pop'], [T.scratch, 'tap'], [T.tao, 'pop'], [T.raise, 'whip'], [T.stand, 'tap'],
+    sfx: [...hop, [T.kid, 'pop'], [T.kidSurp, 'boop'], [T.teen, 'pop'], [T.scratch, 'tap'], [T.tao, 'pop'], [T.raise, 'whip'],
       [T.prob, 'zip'], [T.puzzle, 'boop'], [T.squint, 'swish'], [T.j0, 'boing'], [T.j1, 'tap'], [T.s0 + 0.2, 'zip'], [T.s1, 'pop'],
       [T.point, 'swish'], [T.sheep, 'boop'], [T.ppl, 'pop'], [T.ppl + 0.5, 'pop'], [T.ppl + 1.0, 'pop'], [T.look, 'tap']],
     subs: [

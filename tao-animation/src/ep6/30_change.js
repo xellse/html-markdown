@@ -10,28 +10,31 @@
   const FL = 780, DUR = 52.2, OFF = [-900, FL], SEAT = 612;
 
   /* ---------------- times (scene clock) ---------------- */
+  // each cut: the people fade at cN (and leave the stage at cN + OUT), the props a moment later at pN;
+  // the next shot's props start drawing in under them, its people pop in only once the old ones are gone
+  const OUT = 0.24;
   const T = {
     s18: 0.15, s18out: 39.6, s20: 39.9, s20out: 51.6,
     // L1 从那以后
     w0: 0.3, w1: 1.5, hd: 0.45, nod: 1.85, c0: 3.2,
     // L2 ① 上课 ② 读书
-    cls: 3.3, chk: 4.0, c1: 4.75, lib: 4.85, flip: 5.75, c2: 6.45,
+    cls: 3.25, clsIn: 3.46, chk: 4.0, c1: 4.75, p1: 4.85, lib: 4.85, libIn: 5.0, flip: 5.75, c2: 6.45, p2: 6.5,
     // L3 ③ 同学
-    talk: 6.55, sp1: 6.8, sw: 8.3, sp3: 8.45, sp3e: 9.85, nods: [7.3, 7.8, 8.95, 9.45], c3: 10.0,
+    talk: 6.7, sp1: 6.85, sw: 8.3, sp3: 8.45, sp3e: 9.85, nods: [7.3, 7.8, 8.95, 9.45], c3: 10.0,
     // L4 ④ 电脑房
-    pc: 10.1, reach: 10.8, off: 11.05, lbPc: 11.45, c4: 12.95,
+    pc: 10.1, pcIn: 10.26, reach: 10.8, off: 11.05, lbPc: 11.45, c4: 12.95, p4: 13.05,
     // L5 导师给的题
-    desk: 13.25, lbProb: 13.6, c5: 17.4,
+    desk: 13.2, deskIn: 13.35, lbProb: 13.6, c5: 17.4, p5: 17.45,
     // L6–L8 每周见面
-    meet: 17.55, wk0: 17.6, wk1: 18.55, stIn: 17.75, flips: [18.3, 18.85, 19.4], ex0: 19.2, ex1: 22.5,
+    meet: 17.5, wk0: 17.6, wk1: 18.55, stIn: 17.75, flips: [18.3, 18.85, 19.4], ex0: 19.2, ex1: 22.5,
     nodS: [20.35, 21.65], think: 23.15, thinkEnd: 24.6, walk0: 24.75, walk1: 25.4, drawer: 25.45, pick: 25.95,
-    back0: 26.35, back1: 27.0, give: 27.05, take: 27.35, open: 27.8, c6: 29.25,
+    back0: 26.35, back1: 27.0, give: 27.05, take: 27.35, open: 27.8, c6: 29.25, p6: 29.3,
     // L9–L10 第一道题
-    card: 29.55, teen7: 29.65, scratch: 30.45, arr0: 32.95, arr1: 35.55, check: 35.8, lbYr: 36.0, c7: 37.5,
+    card: 29.4, teen7: 29.55, scratch: 30.45, arr0: 32.95, arr1: 35.55, check: 35.8, lbYr: 36.0, c7: 37.4, p7: 37.55,
     // L11 博士
-    grad: 37.75, hop: 38.7, c8: 43.05,
+    grad: 37.66, hop: 38.7, c8: 43.05,
     // L12–L13 回头看
-    door: 43.25, tao: 43.35, look: 43.8, pulse: 44.65, quote: 46.4, note: 46.75, hi: 49.4, end: 51.55,
+    door: 43.15, tao: 43.31, look: 43.8, pulse: 44.65, quote: 46.4, note: 46.75, hi: 49.4, end: 51.55,
   };
   const PAGES = [14.55, 14.9, 15.25, 15.6, 15.95, 16.3, 16.65, 17.0];
   const DOOD = [[19.45, '?', 690, 372], [20.05, 'x', 780, 318], [20.65, '→', 850, 380], [21.25, '=', 728, 300], [21.85, '…', 815, 336]];
@@ -70,7 +73,7 @@
   const BD = { x: 150, y: 160, w: 620, h: 280 }, CLS = { x: 1060, top: 600 };
   COMP.c6_cls = {
     draw(fx, t) {
-      if (t < T.cls || t >= T.c1 + 0.3) return;
+      if (t < T.cls || t >= T.p1 + 0.3) return;
       const k = 'c6cls', p = clamp((t - T.cls - 0.15) / 0.35);
       if (p > 0) {   // chalk notes (fragments only, no real maths)
         glyphs(k + '.g0', '( x + 1 )', 205, 202, 44, { z: Z.board, w: 4, draw: p });
@@ -112,7 +115,7 @@
   const STK = { x: 940, y: 690, books: [[150, 24, 0, -1], [134, 22, 7, 1.5], [156, 24, -5, -0.5], [138, 22, 3, 1]] };
   COMP.c6_lib = {
     draw(fx, t) {
-      if (t < T.lib || t >= T.c2 + 0.3) return;
+      if (t < T.lib || t >= T.p2 + 0.3) return;
       const k = 'c6lib', z = Z.set, p = EASE.out(clamp((t - T.lib) / 0.4));
       stroke(k + '.o', box(LIB.x0, LIB.y0, LIB.x1, FL), { z, w: 5, fill: C.paper, draw: p });
       LIB.rows.slice(0, 2).forEach((y, i) => stroke(k + '.sb' + i, [[LIB.x0, y], [LIB.x1, y + 1]], { z: z + 0.1, w: 5, draw: p }));
@@ -123,22 +126,22 @@
         stroke(k + '.bs' + j, [[b.x + 4, b.bot - b.h + 16], [b.x + b.w - 4, b.bot - b.h + 16]], { z: z + 0.3, w: 2.2, draw: d });
       });
       // the stack in his arms (pops in with him); the top book is open
-      const s = pop(t, T.lib + 0.05, 0.3), zs = Z.desk;
+      const s = pop(t, T.libIn, 0.3), zs = Z.desk, kS = 'c6libS';
       DL.save(); DL.about(STK.x, STK.y, () => DL.scale(s));
       let yb = STK.y;
       STK.books.forEach(([w, h, dx, r], j) => {
         DL.save(); DL.translate(STK.x + dx, yb - h / 2); DL.rotate(r);
-        stroke(k + '.sk' + j, box(-w / 2, -h / 2, w / 2, h / 2), { z: zs, w: 4, fill: C.paper });
-        stroke(k + '.sp' + j, [[-w / 2 + 9, h / 2 - 6], [w / 2 - 9, h / 2 - 6]], { z: zs + 0.1, w: 2, color: C.pencil });
+        stroke(kS + '.sk' + j, box(-w / 2, -h / 2, w / 2, h / 2), { z: zs, w: 4, fill: C.paper });
+        stroke(kS + '.sp' + j, [[-w / 2 + 9, h / 2 - 6], [w / 2 - 9, h / 2 - 6]], { z: zs + 0.1, w: 2, color: C.pencil });
         DL.restore();
         yb -= h;
       });
       const x = STK.x, y = yb;   // the open book
-      stroke(k + '.pL', [[x - 2, y + 2], [x - 74, y + 4, 1], [x - 72, y - 8], [x - 38, y - 15], [x - 2, y - 6, 1], [x - 2, y + 2, 1]], { z: zs + 0.2, w: 3.5, fill: C.paper });
-      stroke(k + '.pR', [[x + 2, y + 2], [x + 74, y + 4, 1], [x + 72, y - 8], [x + 38, y - 15], [x + 2, y - 6, 1], [x + 2, y + 2, 1]], { z: zs + 0.2, w: 3.5, fill: C.paper });
-      for (let i = 0; i < 2; i++) { scrib(k + '.tl' + i, x - 62, x - 14, y - 5 + i * 6, { z: zs + 0.3, w: 1.6, amp: 1 }); scrib(k + '.tr' + i, x + 14, x + 62, y - 5 + i * 6, { z: zs + 0.3, w: 1.6, amp: 1 }); }
+      stroke(kS + '.pL', [[x - 2, y + 2], [x - 74, y + 4, 1], [x - 72, y - 8], [x - 38, y - 15], [x - 2, y - 6, 1], [x - 2, y + 2, 1]], { z: zs + 0.2, w: 3.5, fill: C.paper });
+      stroke(kS + '.pR', [[x + 2, y + 2], [x + 74, y + 4, 1], [x + 72, y - 8], [x + 38, y - 15], [x + 2, y - 6, 1], [x + 2, y + 2, 1]], { z: zs + 0.2, w: 3.5, fill: C.paper });
+      for (let i = 0; i < 2; i++) { scrib(kS + '.tl' + i, x - 62, x - 14, y - 5 + i * 6, { z: zs + 0.3, w: 1.6, amp: 1 }); scrib(kS + '.tr' + i, x + 14, x + 62, y - 5 + i * 6, { z: zs + 0.3, w: 1.6, amp: 1 }); }
       const f = (t - T.flip) / 0.35;   // he turns a page
-      if (f > 0 && f < 1) { const a = Math.PI * EASE.io(f); stroke(k + '.flip', [[x, y - 6], [x + 36 * Math.cos(a), y - 20 - 18 * Math.sin(a)], [x + 72 * Math.cos(a), y - 8 - 34 * Math.sin(a)]], { z: zs + 0.4, w: 3 }); }
+      if (f > 0 && f < 1) { const a = Math.PI * EASE.io(f); stroke(kS + '.flip', [[x, y - 6], [x + 36 * Math.cos(a), y - 20 - 18 * Math.sin(a)], [x + 72 * Math.cos(a), y - 8 - 34 * Math.sin(a)]], { z: zs + 0.4, w: 3 }); }
       DL.restore();
     },
     cues: () => [[T.lib, 'pen'], [T.lib + 0.15, 'paper'], [T.flip, 'paper']],
@@ -185,7 +188,7 @@
   }
   COMP.c6_pc = {
     draw(fx, t) {
-      if (t < T.pc || t >= T.c4 + 0.3) return;
+      if (t < T.pc || t >= T.p4 + 0.3) return;
       const k = 'c6pc', z = Z.set + 1, p = EASE.out(clamp((t - T.pc) / 0.4));
       stroke(k + '.mon', box(MON.x0, MON.y0, MON.x1, MON.y1), { z, w: 5, fill: C.paper, draw: p });
       stroke(k + '.scr', box(SCR.x0, SCR.y0, SCR.x1, SCR.y1), { z: z + 0.1, w: 3.5, draw: p });
@@ -222,7 +225,7 @@
   const PJ = [[0, -2], [5, 1.5], [-3, -1], [6, 2], [-2, -1.5], [3, 1], [-5, -2], [2, 1.5]];
   COMP.c6_dk = {
     draw(fx, t) {
-      if (t < T.desk || t >= T.c5 + 0.3) return;
+      if (t < T.desk || t >= T.p5 + 0.3) return;
       const k = 'c6dk', z = Z.desk + 1, p = clamp((t - T.desk - 0.1) / 0.3);
       const [sx, sy] = DK.stack;   // the problems from his advisor: a neat stack
       stroke(k + '.st', box(sx - 58, sy - 28, sx + 58, sy), { z, w: 4, fill: C.paper, draw: p });
@@ -253,7 +256,7 @@
   const CAL = { x: 250, y: 175, w: 190, h: 210, band: 52 };
   COMP.c6_cal = {
     draw(fx, t) {
-      if (t < T.meet || t >= T.c6 + 0.3) return;
+      if (t < T.meet || t >= T.p6 + 0.3) return;
       const { x, y, w, h, band } = CAL, z = Z.set + 1, k = 'c6cal', p = EASE.out(clamp((t - T.meet) / 0.35));
       stroke(k + '.str', [[x - 52, y + 2], [x, y - 40, 1], [x + 52, y + 2]], { z, w: 2.4, color: C.pencil, draw: p });
       dot(k + '.nail', [x, y - 40], 4.5, C.ink, z);
@@ -261,14 +264,14 @@
       stroke(k + '.sh', [[x - w / 2 + 12, y + h + 8], [x + w / 2 + 8, y + h + 8, 1], [x + w / 2 + 8, y + 12]], { z: z - 0.1, w: 2.4, color: C.pencil, opacity: 0.7 * p, boil: 0.5 });
       stroke(k + '.band', [[x - w / 2, y + band], [x + w / 2, y + band + 1]], { z: z + 0.1, w: 4, draw: p });
       let i = 0; T.flips.forEach(f => { if (t >= f) i++; });
-      const cy = y + band + (h - band) / 2, q = clamp((t - T.meet - 0.2) / 0.2);
+      const cy = y + band + (h - band) / 2, lastF = i ? T.flips[i - 1] : -9, q = clamp((t - T.meet - 0.2) / 0.2) * clamp((t - lastF - 0.15) / 0.1);
       if (q > 0) text(k + '.wk', `第 ${i + 1} 周`, x, cy, { size: 50, z: z + 0.2, opacity: q });
       T.flips.forEach((f, j) => {   // the page just torn off swings down and fades
         const u = (t - f) / 0.5; if (u < 0 || u >= 1) return;
         const sw = EASE.out(clamp(u / 0.25)), fall = EASE.in(clamp((u - 0.1) / 0.9)), op = 1 - clamp((u - 0.55) / 0.4), z2 = z + 0.5;
         DL.save(); DL.translate(x - w / 2 + 30 * fall, y + band + 260 * fall); DL.rotate(16 * sw + 36 * fall); DL.translate(-(x - w / 2), -(y + band));
         stroke(k + '.old' + j, box(x - w / 2, y + band, x + w / 2, y + h), { z: z2, w: 5, fill: C.paper, opacity: op });
-        text(k + '.oldT' + j, `第 ${j + 1} 周`, x, cy, { size: 50, z: z2 + 0.1, opacity: op });
+        text(k + '.oldT' + j, `第 ${j + 1} 周`, x, cy, { size: 50, z: z2 + 0.1, opacity: 1 - clamp(u / 0.28) });
         DL.restore();
       });
       [-1, 1].forEach(s => stroke(k + '.rg' + s, ringPts(k + '.rg' + s, x + s * 52, y, 10, 15, { n: 8, a0: 100, sweep: 300 }), { z: z + 0.6, w: 4, draw: p }));
@@ -284,7 +287,7 @@
   const INSIDE = [1338, 488];
   COMP.c6_cab = {
     draw(fx, t) {
-      if (t < T.meet || t >= T.c6 + 0.3) return;
+      if (t < T.meet || t >= T.p6 + 0.3) return;
       const { x0, x1, y0, dh } = CAB, k = 'c6cab', z = Z.set + 1, p = EASE.out(clamp((t - T.meet - 0.1) / 0.4)), cx = (x0 + x1) / 2;
       stroke(k + '.body', box(x0, y0, x1, FL), { z, w: 5, fill: C.paper, draw: p });
       stroke(k + '.sh', [[x1 + 4, y0 + 12], [x1 + 8, FL - 2]], { z: z - 0.1, w: 2.4, color: C.pencil, opacity: 0.7 * p, boil: 0.5 });
@@ -374,7 +377,7 @@
   }
   COMP.c6_cd = {
     draw(fx, t) {
-      if (t < T.card || t >= T.c7 + 0.3) return;
+      if (t < T.card || t >= T.p7 + 0.3) return;
       const k = 'c6cd', z = Z.set + 2, { x, y, w, h } = CD, s = pop(t, T.card, 0.3);
       DL.save(); DL.about(x, y, () => DL.scale(s));
       stroke(k + '.c', box(x - w / 2, y - h / 2, x + w / 2, y + h / 2), { z, w: 5, fill: C.paper });
@@ -506,7 +509,7 @@
   const SITB = POSE.sitBase;
   Object.assign(POSE, {
     c6_fist: { tilt: -3, armR: [30, 118], armL: [16, 10] },
-    c6_pcReach: { ...SITB, lean: 10, tilt: 3, armScale: 1.4, ikL: { w: 1, to: 'desk', dx: 40, dy: -4, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: BTN[0] - 4, dy: BTN[1], bend: 'down' } },
+    c6_pcReach: { ...SITB, lean: 10, tilt: 3, armScale: 1.4, ikL: { w: 1, to: 'desk', dx: 40, dy: -4, bend: 'down' }, ikR: { w: 1, to: 'desk', dx: BTN[0] - 4 - 760, dy: BTN[1] - PCD.top, bend: 'down' } },
     c6_pcRest: { ...SITB, ikL: { w: 1, to: 'desk', dx: 10, dy: -2, bend: 'out' }, ikR: { w: 1, to: 'desk', dx: 70, dy: -2, bend: 'down' } },
     c6_books: { tilt: 10, lean: 1, ikL: { w: 1, to: 'abs', dx: STK.x - 80, dy: 655, bend: 'out' }, ikR: { w: 1, to: 'abs', dx: STK.x + 80, dy: 655, bend: 'out' } },
     c6_sPonder: { tilt: -7, armL: [14, 8], ikR: { w: 1, to: 'chin', dx: 0.32, dy: 0.06, bend: 'down' } },
@@ -527,10 +530,10 @@
   const m3Talk = t => ({ tilt: -2 * Math.sin(t * 6), armR: [16, 10], armL: [62 + 18 * Math.sin(t * 5.4 + 1), 48 + 24 * Math.sin(t * 6.6)] });
   const listen = list => t => ({ tilt: nodTilt(t, list, 9) });
   // the advisor walks to the cabinet and back (his position also places the paper he carries)
-  const SPOS = [[0, [1010, FL]], [T.walk0, [1205, FL], T.walk1 - T.walk0, 'lin'], [T.back0, [800, FL], T.back1 - T.back0, 'lin'], [T.c6 + 0.3, OFF, 0]];
+  const SPOS = [[0, [1010, FL]], [T.walk0, [1205, FL], T.walk1 - T.walk0, 'lin'], [T.back0, [800, FL], T.back1 - T.back0, 'lin'], [T.c6 + OUT, OFF, 0]];
   const sX = t => evalTrack(SPOS, t)[0];
   const sListen = t => ({ tilt: -2 + nodTilt(t, T.nodS, 8), armL: [14, 8], armR: [14, 8] });
-  const sWalk = makeWalk(T.walk0, T.walk1, 5.2);
+  const sWalk = t => ({ ...makeWalk(T.walk0, T.walk1, 5.2)(t), ikR: { w: 0, to: 'abs', dx: HANDLE(T.walk1 + 0.3)[0], dy: HANDLE(T.walk1 + 0.3)[1], bend: 'down' } });
   const sReach = t => { const h = HANDLE(t); return { lean: 6, tilt: 3, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'down' } }; };
   const sCarry = t => ({ ...makeWalk(T.back0, T.back1, 5.2)(t), ikL: { w: 1, to: 'abs', dx: sX(t) - 32, dy: 640, bend: 'down' }, ikR: { w: 1, to: 'abs', dx: sX(t) - 32, dy: 640, bend: 'down' } });
   const gradHold = t => {
@@ -557,7 +560,7 @@
     tracks: {
       terry: {
         enter: T.w0,
-        pos: [[0, [-110, FL]], [T.w0, [800, FL], T.w1 - T.w0, 'lin'], [T.c0 + 0.3, OFF, 0]],
+        pos: [[0, [-110, FL]], [T.w0, [800, FL], T.w1 - T.w0, 'lin'], [T.c0 + OUT, OFF, 0]],
         pose: [[0, makeWalk(T.w0, T.w1, 5.2)], [T.w1, 'stand', 0.12], [T.nod, t => ({ ...POSE.c6_fist, tilt: -3 + nodTilt(t, [T.nod + 0.12], 10) }), 0.12, 'back']],
         face: [[0, 'smile'], [T.nod - 0.1, 'focus', 0.08]],
         turn: [[0, 0.45], [T.w1, 0.05, 0.15]],
@@ -565,16 +568,16 @@
         squash: [[0, 1], [T.nod, 1.06, 0.05], [T.nod + 0.05, 1, 0.22, 'back']],
       },
       tCls: {
-        enter: T.cls + 0.05,
-        pos: [[0, [CLS.x, SEAT]], [T.c1 + 0.3, OFF, 0]],
+        enter: T.clsIn,
+        pos: [[0, [CLS.x, SEAT]], [T.c1 + OUT, OFF, 0]],
         pose: [[0, writing(40)]],
         face: [[0, 'focus']],
         turn: [[0, -0.4]],
         gaze: [[0, 'board'], [3.75, 'note'], [4.3, 'board']],
       },
       tLib: {
-        enter: T.lib + 0.05,
-        pos: [[0, [930, FL]], [T.c2 + 0.3, OFF, 0]],
+        enter: T.libIn,
+        pos: [[0, [930, FL]], [T.c2 + OUT, OFF, 0]],
         pose: [[0, 'c6_books']],
         face: [[0, 'focus'], [T.flip + 0.2, { ...FACE.focus, mouth: 'smile', mw: 0.24 }, 0.08]],
         turn: [[0, 0.1]],
@@ -582,7 +585,7 @@
       },
       mate1: {
         enter: T.talk,
-        pos: [[0, [470, FL]], [T.c3 + 0.3, OFF, 0]],
+        pos: [[0, [470, FL]], [T.c3 + OUT, OFF, 0]],
         pose: [[0, 'stand'], [T.sp1, m1Talk, 0.12], [T.sw, 'stand', 0.15]],
         face: [[0, 'smile'], [T.sp1, talkFace, 0.05], [T.sw, 'smile', 0.08]],
         turn: [[0, 0.35]],
@@ -590,7 +593,7 @@
       },
       tTalk: {
         enter: T.talk + 0.08,
-        pos: [[0, [800, FL]], [T.c3 + 0.3, OFF, 0]],
+        pos: [[0, [800, FL]], [T.c3 + OUT, OFF, 0]],
         pose: [[0, listen(T.nods)]],
         face: [[0, 'smile'], [T.sp1 + 0.2, 'focus', 0.08], [T.nods[0], 'smile', 0.08], [T.sw, 'focus', 0.08], [T.nods[2], 'smile', 0.08]],
         turn: [[0, -0.3], [T.sw, 0.3, 0.15]],
@@ -598,23 +601,23 @@
       },
       mate3: {
         enter: T.talk + 0.04,
-        pos: [[0, [1130, FL]], [T.c3 + 0.3, OFF, 0]],
+        pos: [[0, [1130, FL]], [T.c3 + OUT, OFF, 0]],
         pose: [[0, 'stand'], [T.sp3, m3Talk, 0.12], [T.sp3e, 'stand', 0.15]],
         face: [[0, 'smile'], [T.sp3, talkFace, 0.05], [T.sp3e, 'smile', 0.08]],
         turn: [[0, -0.35]],
         gaze: [[0, 'tTalk']],
       },
       tPc: {
-        enter: T.pc + 0.05,
-        pos: [[0, [760, SEAT]], [T.c4 + 0.3, OFF, 0]],
+        enter: T.pcIn,
+        pos: [[0, [760, SEAT]], [T.c4 + OUT, OFF, 0]],
         pose: [[0, typing], [T.reach, 'c6_pcReach', 0.15, 'back'], [T.off + 0.25, 'c6_pcRest', 0.2], [T.off + 0.75, t => ({ ...POSE.c6_pcRest, tilt: nodTilt(t, [T.off + 0.75], 8) }), 0.05]],
         face: [[0, 'grin'], [T.reach - 0.12, 'focus', 0.08], [T.off + 0.35, 'smile', 0.1]],
         turn: [[0, 0.4], [T.off + 0.4, 0.1, 0.15]],
         gaze: [[0, 'screen'], [T.reach - 0.12, 'btn'], [T.off + 0.4, 'viewer']],
       },
       tDesk: {
-        enter: T.desk + 0.1,
-        pos: [[0, [DK.x, SEAT]], [T.c5 + 0.3, OFF, 0]],
+        enter: T.deskIn,
+        pos: [[0, [DK.x, SEAT]], [T.c5 + OUT, OFF, 0]],
         pose: [[0, writing(22)]],
         face: [[0, 'focus']],
         turn: [[0, 0.1]],
@@ -632,7 +635,7 @@
       },
       tMeet: {
         enter: T.wk0,
-        pos: [[0, [-140, FL]], [T.wk0, [600, FL], T.wk1 - T.wk0, 'lin'], [T.c6 + 0.3, OFF, 0]],
+        pos: [[0, [-140, FL]], [T.wk0, [600, FL], T.wk1 - T.wk0, 'lin'], [T.c6 + OUT, OFF, 0]],
         pose: [[0, makeWalk(T.wk0, T.wk1, 5.2)], [T.wk1, 'stand', 0.12], [T.ex0, explain, 0.12], [T.ex1, { tilt: -3, armL: [16, 10], armR: [16, 10] }, 0.18],
           [T.give + 0.05, 'c6_mReach', 0.25], [T.take + 0.1, 'c6_mHold', 0.25], [T.open, 'c6_mRead', 0.2, 'back']],
         face: [[0, 'smile'], [T.ex0, explainFace, 0.05], [T.ex1, 'focus', 0.08], [T.take, 'surprised', 0.06], [T.take + 0.35, 'smile', 0.08], [T.open, 'focus', 0.08]],
@@ -642,7 +645,7 @@
       },
       tCard: {
         enter: T.teen7,
-        pos: [[0, [140, FL]], [T.c7 + 0.3, OFF, 0]],
+        pos: [[0, [140, FL]], [T.c7 + OUT, OFF, 0]],
         pose: [[0, 'stand'], [T.scratch, 'scratchStand', 0.12, 'back'], [T.arr0, 'stand', 0.2]],
         face: [[0, 'neutral'], [T.scratch, 'puzzled', 0.08], [T.arr0, 'focus', 0.1], [T.check, 'surprised', 0.06], [T.check + 0.5, 'smile', 0.1]],
         turn: [[0, 0.4]],
@@ -650,8 +653,8 @@
         squash: [[0, 1], [T.check, 1.06, 0.05], [T.check + 0.05, 1, 0.22, 'back']],
       },
       tGrad: {
-        enter: T.grad + 0.05,
-        pos: [[0, [800, FL]], [T.c8 + 0.3, OFF, 0]],
+        enter: T.grad,
+        pos: [[0, [800, FL]], [T.c8 + OUT, OFF, 0]],
         pose: [[0, gradHold]],
         face: [[0, 'smile'], [T.hop, 'joy', 0.06], [T.hop + 1.3, 'proudGrin', 0.1]],
         turn: [[0, 0]],
@@ -673,13 +676,13 @@
     }),
     set: [
       { type: 'floor', t0: 0.3, t1: T.end + 0.32 },
-      { type: 'board', ...BD, t0: T.cls, t1: T.c1 + 0.32 },
-      { type: 'stool', x: CLS.x, seat: SEAT + 6, t0: T.cls, t1: T.c1 + 0.32 },
-      { type: 'desk', x: CLS.x, top: CLS.top, w: 300, t0: T.cls, t1: T.c1 + 0.32 },
-      { type: 'stool', x: 760, seat: SEAT + 6, t0: T.pc, t1: T.c4 + 0.32 },
-      { type: 'desk', x: PCD.x, top: PCD.top, w: 560, t0: T.pc, t1: T.c4 + 0.32 },
-      { type: 'stool', x: DK.x, seat: SEAT + 6, t0: T.desk, t1: T.c5 + 0.32 },
-      { type: 'desk', x: DK.x, top: DK.top, w: 460, t0: T.desk, t1: T.c5 + 0.32 },
+      { type: 'board', ...BD, t0: T.cls, t1: T.p1 + 0.28 },
+      { type: 'stool', x: CLS.x, seat: SEAT + 6, t0: T.cls, t1: T.p1 + 0.28 },
+      { type: 'desk', x: CLS.x, top: CLS.top, w: 300, t0: T.cls, t1: T.p1 + 0.28 },
+      { type: 'stool', x: 760, seat: SEAT + 6, t0: T.pc, t1: T.p4 + 0.28 },
+      { type: 'desk', x: PCD.x, top: PCD.top, w: 560, t0: T.pc, t1: T.p4 + 0.28 },
+      { type: 'stool', x: DK.x, seat: SEAT + 6, t0: T.desk, t1: T.p5 + 0.28 },
+      { type: 'desk', x: DK.x, top: DK.top, w: 460, t0: T.desk, t1: T.p5 + 0.28 },
       { type: 'door', ...DOOR, t0: T.door, t1: T.end + 0.32 },
     ],
     fx: [
@@ -694,10 +697,10 @@
       { type: 'c6_spk', id: 'c6spk1', char: 'mate1', dir: 1, t0: T.sp1, t1: T.sw },
       { type: 'c6_spk', id: 'c6spk3', char: 'mate3', dir: -1, t0: T.sp3, t1: T.sp3e },
       { type: 'c6_pc', id: 'c6pc' },
-      { type: 'label', id: 'c6lbPc', text: '少打了', at: [990, 236], rot: -4, size: 52, t0: T.lbPc, t1: T.c4 + 0.3, target: [1050, 380], bend: -0.2, gap: 10 },
+      { type: 'label', id: 'c6lbPc', text: '少打了', at: [990, 236], rot: -4, size: 52, t0: T.lbPc, t1: T.p4 + 0.3, target: [1050, 380], bend: -0.2, gap: 10 },
       // L5
       { type: 'c6_dk', id: 'c6dk' },
-      { type: 'label', id: 'c6lbProb', text: '导师给的题', at: [470, 470], rot: -3, size: 46, t0: T.lbProb, t1: T.c5 + 0.3, target: [612, 566], bend: 0.2, gap: 10 },
+      { type: 'label', id: 'c6lbProb', text: '导师给的题', at: [470, 470], rot: -3, size: 46, t0: T.lbProb, t1: T.p5 + 0.3, target: [612, 566], bend: 0.2, gap: 10 },
       // L6–L8
       { type: 'c6_cal', id: 'c6cal' },
       { type: 'c6_cab', id: 'c6cab' },
@@ -706,7 +709,7 @@
       { type: 'c6_pp', id: 'c6pp' },
       // L9–L10
       { type: 'c6_cd', id: 'c6cd' },
-      { type: 'label', id: 'c6lbYr', text: '有的题，要很多年', at: [900, 655], rot: -2, size: 50, t0: T.lbYr, t1: T.c7 + 0.3 },
+      { type: 'label', id: 'c6lbYr', text: '有的题，要很多年', at: [900, 655], rot: -2, size: 50, t0: T.lbYr, t1: T.p7 + 0.3 },
       // L11
       { type: 'c6_gr', id: 'c6gr' },
       // L12–L13
@@ -716,14 +719,20 @@
       { type: 'title', id: 'c6note', text: '（他 2019 年写的）', x: 760, y: 440, size: 38, color: 'red', rot: -1, t0: T.note, t1: T.end + 0.3 },
       // eased exits (keep last: they fade what was drawn before them)
       { type: 'c6_fade', t0: T.c0, keys: ['terry.', 'c6Hd'] },
-      { type: 'c6_fade', t0: T.c1, keys: ['tCls.', 'board', 'desk' + CLS.x, 'stool' + CLS.x, 'c6cls'] },
-      { type: 'c6_fade', t0: T.c2, keys: ['tLib.', 'c6lib'] },
+      { type: 'c6_fade', t0: T.c1, keys: ['tCls.'] },
+      { type: 'c6_fade', t0: T.p1, keys: ['board', 'desk' + CLS.x, 'stool' + CLS.x, 'c6cls'] },
+      { type: 'c6_fade', t0: T.c2, keys: ['tLib.', 'c6libS'] },
+      { type: 'c6_fade', t0: T.p2, keys: ['c6lib.'] },
       { type: 'c6_fade', t0: T.c3, keys: ['mate1.', 'tTalk.', 'mate3.'] },
-      { type: 'c6_fade', t0: T.c4, keys: ['tPc.', 'desk' + PCD.x, 'stool760', 'c6pc', 'c6lbPc'] },
-      { type: 'c6_fade', t0: T.c5, keys: ['tDesk.', 'desk' + DK.x, 'stool' + DK.x, 'c6dk', 'c6lbProb'] },
+      { type: 'c6_fade', t0: T.c4, keys: ['tPc.'] },
+      { type: 'c6_fade', t0: T.p4, keys: ['desk' + PCD.x, 'stool760', 'c6pc', 'c6lbPc'] },
+      { type: 'c6_fade', t0: T.c5, keys: ['tDesk.'] },
+      { type: 'c6_fade', t0: T.p5, keys: ['desk' + DK.x, 'stool' + DK.x, 'c6dk', 'c6lbProb'] },
       { type: 'c6_fade', t0: T.thinkEnd - 0.2, d: 0.2, keys: ['c6th', 'c6dd.th'] },
-      { type: 'c6_fade', t0: T.c6, keys: ['tMeet.', 'stein.', 'c6cal', 'c6cab', 'c6pp'] },
-      { type: 'c6_fade', t0: T.c7, keys: ['tCard.', 'c6cd', 'c6lbYr'] },
+      { type: 'c6_fade', t0: T.c6, keys: ['tMeet.', 'stein.', 'c6pp'] },
+      { type: 'c6_fade', t0: T.p6, keys: ['c6cal', 'c6cab'] },
+      { type: 'c6_fade', t0: T.c7, keys: ['tCard.'] },
+      { type: 'c6_fade', t0: T.p7, keys: ['c6cd', 'c6lbYr'] },
       { type: 'c6_fade', t0: T.c8, keys: ['tGrad.', 'c6gr'] },
       { type: 'c6_fade', t0: T.end, d: 0.3, keys: ['tao.', 'door', 'c6dr', 'c6es', 'c6qt', 'c6note', 'floor'] },
     ],
