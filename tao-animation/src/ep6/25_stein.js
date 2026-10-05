@@ -202,7 +202,7 @@
     b6_sSit: { ...SITL, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' } },
     b6_sDown: { ...SITL, tilt: 11, lean: 4, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: -6, dy: -2, bend: 'down' } },
     b6_sSad: { ...SITL, tilt: 16, lean: 6, ikL: hipT(-28, 18), ikR: hipT(28, 18) },
-    b6_sFist: { ...SITL, tilt: -2, armScale: 1.15, ikL: hipT(-30, 16), armR: [45, 117], ikR: { w: 0 } },     // fist up in front of the chest, elbow down
+    b6_sFist: { ...SITL, tilt: -2, armScale: 1.3, ikL: hipT(-34, 40), armR: [65, 88], ikR: { w: 0 } },     // fist up in front of the chest, elbow down
     b6_sProf: { ...SITL, legScale: 1.05, ikL: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' }, ikR: hipT(30, 16) },
     b6_sHop: { legL: [22, -46], legR: [10, -30], armL: [64, 24], armR: [64, 24], lean: 3 },
     b6_sTeeter: t => ({ lean: -5, tilt: -6, armScale: 1.1, armL: [100 + 45 * Math.sin(t * 15), 25], armR: [100 + 45 * Math.sin(t * 15 + Math.PI), 25] }),
