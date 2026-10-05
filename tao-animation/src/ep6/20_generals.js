@@ -139,7 +139,7 @@
     b6_gHold: t => { const h = handOnStack(t); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
     b6_gHoldB: () => { const h = handOnBasic(); return { ...POSE.b6_gProf, lean: -4, armScale: 1.6, ikL: { w: 1, to: 'abs', dx: h[0], dy: h[1], bend: 'out' } }; },
     b6_gTap: t => ({ ...POSE.b6_gSit, legR: [66, -60 + 16 * Math.max(0, Math.sin(t * 11))] }),
-    b6_gWrite: t => { const p = nibAt(t); return { lean: 2, tilt: -3, armScale: 1.9, armL: [14, 8], ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
+    b6_gWrite: t => { const p = nibAt(t); return { lean: 2, tilt: -3, armScale: 1.9, ikL: hipT(-24, -6), ikR: { w: 1, to: 'abs', dx: p[0], dy: p[1], bend: 'down' } }; },
   });
   POSE.b6_gScratch = t => ({ ...POSE.b6_gHold(t), tilt: 9, ikR: { w: 1, to: 'head', dx: 0.95, dy: -0.85, bend: 'out' } });
   Object.assign(FACE, {
@@ -441,7 +441,7 @@
           [UP2, [BENCH.x, FL], 0.18], [WALK5[0], [-160, FL], WALK5[1] - WALK5[0], 'lin']],
         pose: [[0, makeWalk(0.35, 1.95, 5.2)],
           [4.75, makeWalk(4.75, 5.35, 5.6), 0], [5.38, 'b6_gSit', 0.15],
-          [8.33, 'stand', 0.12], [8.5, makeWalk(8.5, 9.4, 5.6), 0], [9.42, 'b6_gWrite', 0.15],
+          [8.33, 'stand', 0.12], [8.5, makeWalk(8.5, 9.4, 5.6), 0], [9.38, 'b6_gWrite', 0.12],
           [12.5, 'b6_gPresent', 0.14, 'back'], [STOP, 'b6_gStuck', 0.1],
           [18.4, 'scratchStand', 0.14, 'back'], [21.85, 'stand', 0.15], [SHRUG, 'b6_gShrug', 0.14, 'back'],
           [LEAP - 0.15, 'crouch', 0.1], [LEAP, 'jumpUp', 0.08], [LAND, 'stand', 0.12],

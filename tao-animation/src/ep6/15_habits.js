@@ -27,7 +27,7 @@
   /* ---------------- layout ---------------- */
   const TBL = { x: 650, w: 620, top: 600 }, SEAT = 645, M1 = 560, M2 = 800, M3 = [215, 262], M4 = [1085, 1040];   // study table
   const STACK = 420, BKC = [M4[1], 615], BKW = 80, BKH = 110;                                                      // the book stack, the open book
-  const SK = { x: 565, w: 560 }, E1 = 400, E3 = 565, E4 = 730, EXX = 1060;                                         // skit: committee table, three examiners, the examinee
+  const SK = { x: 565, w: 620 }, E1 = 385, E3 = 565, E4 = 745, EXX = 1060;                                         // skit: committee table, three examiners, the examinee
   const D1 = 560, D2 = 1020, DTOP = 370, DW = 210;                                                                 // the two class doors
   const CHX = 740, CSEAT = 655, KB = [862, 586], SCR = { x0: 895, y0: 395, x1: 1115, y1: 555 }, CLK = [1240, 252];   // computer room
   const XD = 420;                                                                                                  // the exam door
@@ -202,6 +202,21 @@
     },
   };
 
+  /** the play-acted examiners' huge slanted eyebrows (keys under each character, so they fade with him) */
+  COMP.a6_hBrows = {
+    draw(fx, t, F) {
+      if (t >= LAUGH) return;
+      [['mate1', FIERCE[0]], ['mate3', FIERCE[1]], ['mate4', FIERCE[2]]].forEach(([id, f]) => {
+        if (t < f) return;
+        const a = F.anchors[id]; if (!a) return;
+        const u = EASE.back(clamp((t - f) / 0.15)), up = [(a.headTop[0] - a.head[0]) / a.r, (a.headTop[1] - a.head[1]) / a.r], rt = [-up[1], up[0]];
+        const fu = (evalTrack(TRACKS[id].turn, t) ?? 0) * 0.28, P = (x, y) => [a.head[0] + (rt[0] * x - up[0] * y) * a.r, a.head[1] + (rt[1] * x - up[1] * y) * a.r];
+        [-1, 1].forEach((s, i) => stroke(`${id}.a6brow${i}`, [P(s * 0.12 + fu, -0.66), P(s * 0.6 + fu, lerp(-0.7, -0.98, u))], { z: Z.front + 0.5, w: 7.5 }));
+      });
+    },
+    cues: () => FIERCE.map(f => [f, 'whip']),
+  };
+
   /* ---------------- 3 · two doors: 不喜欢的课 / 喜欢的课 ---------------- */
   const doorAt = (k, x, sign, open, p, z) => {
     const x0 = x - DW / 2, x1 = x + DW / 2;
@@ -324,16 +339,16 @@
     a6_hAsk: { lean: 3, armScale: 1.15, ikR: abs(366, 466), armL: [16, 10] },
     a6_hHandUp: { ...SITP, armScale: 1.55, armR: [125, 30], ikL: abs(M1 - 40, 598) },
     a6_hHoldBook: { tilt: 4, armScale: 1.05, ikL: abs(BKC[0] - BKW + 8, BKC[1] + 22), ikR: abs(BKC[0] + BKW - 8, BKC[1] + 22) },
-    a6_hCross: { ...SITP, lean: -2, tilt: -3, ikL: { w: 1, to: 'hip', dx: 36, dy: -58, bend: 'down' }, ikR: { w: 1, to: 'hip', dx: -36, dy: -50, bend: 'down' } },
     a6_hLaughSit: { ...SITP, lean: -6, tilt: -8, armScale: 1.2, armL: [40, 70], armR: [40, 70] },
     a6_hShrug: { tilt: 8, armScale: 1.1, armL: [30, 80], armR: [30, 80] },
     a6_hFlat: { tilt: -2 },
   });
   Object.assign(FACE, {
-    a6_hFierce: { lidL: 0.22, lidR: 0.22, brow: 'line', browL: 44, browR: 44, browY: 0.14, mouth: 'frown', mw: 0.36 },
+    a6_hFierce: { lidL: 0.22, lidR: 0.22, mouth: 'frown', mw: 0.36 },   // the big eyebrows are drawn by a6_hBrows
     a6_hScared: { eyeSY: 1.16, pupil: 0.7, brow: 'line', browL: -20, browR: -20, browY: 0.08, mouth: 'wavy', mw: 0.36 },
     a6_hNope: { lidL: 0.32, lidR: 0.32, brow: 'line', browL: -6, browR: -6, mouth: 'frown', mw: 0.28 },
   });
+  const cross = x => ({ ...SITP, lean: -2, tilt: -3, ikL: abs(x + 36, SEAT - 58), ikR: abs(x - 36, SEAT - 50) });   // arms folded, the stern look
   const deskHands = (x, wr = 0) => t => ({ ...SITP, tilt: 6, ikL: abs(x - 46, 598), ikR: abs(x + 44 + (wr ? 6 * Math.sin(t * wr) : 0), 598 - (wr ? 3 * Math.abs(Math.sin(t * wr * 0.5)) : 0)) });
   const tremble = t => ({ legL: [5, 0], legR: [5, 0], armScale: 1.1, armL: [12, 36], armR: [12, 36], tilt: 5 * Math.sin(t * 40), lean: 2 * Math.sin(t * 33) });
   const typing = (fast) => t => { const f = fast ? 17 : 9, a = Math.max(0, Math.sin(t * f)), b = Math.max(0, Math.sin(t * f + 2.2)); return { ...SITP, lean: 8, tilt: 4, armScale: 1.45, ikL: abs(KB[0], KB[1] - 9 * a), ikR: abs(KB[0] + 58, KB[1] - 9 * b) }; };
@@ -352,7 +367,7 @@
         enter: M_IN[0],
         pos: [[0, [M1, SEAT]], [CUTA + 0.27, [E1, SEAT], 0], [CUTB + 0.27, OFF, 0]],
         pose: [[0, deskHands(M1, 9)], [GROUP, deskHands(M1), 0.15], [ANSWER, 'a6_hHandUp', 0.12, 'back'],
-          [CUTA + 0.27, deskHands(E1), 0], [FIERCE[0], 'a6_hCross', 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
+          [CUTA + 0.27, deskHands(E1), 0], [FIERCE[0], cross(E1), 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
         face: [[0, 'focus'], [GROUP, 'smile', 0.06], [MOCK + 0.15, 'effort', 0.05], [ANSWER, 'idea', 0.05], [ANSWER + 0.4, 'grin', 0.06],
           [CUTA + 0.27, 'neutral', 0], [FIERCE[0], 'a6_hFierce', 0.05], [LAUGH, 'laugh', 0.05]],
         turn: [[0, 0.2], [GROUP, -0.15, 0.1], [MOCK, -0.3, 0.1], [CUTA + 0.27, 0.25, 0]],
@@ -372,7 +387,7 @@
         enter: M_IN[2],
         pos: [[0, [M3[0], FL]], [GROUP, [M3[1], FL], 0.3, 'lin'], [CUTA + 0.27, [E3, SEAT], 0], [CUTB + 0.27, OFF, 0]],
         pose: [[0, 'thinkStand'], [GROUP, makeWalk(GROUP, GROUP + 0.3, 6), 0], [GROUP + 0.3, 'stand', 0.1], [MOCK, 'a6_hAsk', 0.12, 'back'],
-          [CUTA + 0.27, deskHands(E3), 0], [FIERCE[1], 'a6_hCross', 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
+          [CUTA + 0.27, deskHands(E3), 0], [FIERCE[1], cross(E3), 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
         face: [[0, 'focus'], [GROUP, 'smile', 0.06], [MOCK, 'proud', 0.06], [ANSWER + 0.4, 'smile', 0.06], [CUTA + 0.27, 'neutral', 0], [FIERCE[1], 'a6_hFierce', 0.05], [LAUGH, 'laugh', 0.05]],
         turn: [[0, 0.35], [CUTA + 0.27, 0, 0]],
         gaze: [[0, [STACK, 520]], [GROUP, 'mate1'], [CUTA + 0.27, 'viewer'], [SHAKE0, 'mate2'], [LAUGH, 'viewer']],
@@ -382,7 +397,7 @@
         enter: M_IN[3],
         pos: [[0, [M4[0], FL]], [GROUP, [M4[1], FL], 0.3, 'lin'], [CUTA + 0.27, [E4, SEAT], 0], [CUTB + 0.27, OFF, 0]],
         pose: [[0, 'stand'], [BOOK - 0.1, 'a6_hHoldBook', 0.12, 'back'], [BOOK_OUT, 'stand', 0.15], [GROUP, makeWalk(GROUP, GROUP + 0.3, 6), 0], [GROUP + 0.3, 'stand', 0.1],
-          [CUTA + 0.27, deskHands(E4), 0], [FIERCE[2], 'a6_hCross', 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
+          [CUTA + 0.27, deskHands(E4), 0], [FIERCE[2], cross(E4), 0.12], [LAUGH, 'a6_hLaughSit', 0.12, 'back']],
         face: [[0, 'smile'], [BOOK, 'focus', 0.06], [BOOK_OUT, 'smile', 0.06], [CUTA + 0.27, 'neutral', 0], [FIERCE[2], 'a6_hFierce', 0.05], [LAUGH, 'laugh', 0.05]],
         turn: [[0, -0.3], [CUTA + 0.27, -0.2, 0]],
         gaze: [[0, [1300, 330]], [BOOK, [BKC[0] - 20, BKC[1]]], [BOOK + 0.9, [BKC[0] + 30, BKC[1]]], [BOOK + 1.8, [BKC[0] - 20, BKC[1] + 20]], [GROUP, 'mate2'], [MOCK + 0.1, 'mate1'],
@@ -399,7 +414,7 @@
           [CUTC + 0.27, typing(false), 0], [GAME, typing(true), 0.1],
           [CUTD + 0.27, 'stand', 0], [W4a, makeWalk(W4a, W4b, 5.4, { bag: true }), 0], [W4b, 'stand', 0.1], [PAT, pat, 0.12, 'back'], [PAT1, 'stand', 0.15],
           [W5a, makeWalk(W5a, W5b, 5.4, { bag: true }), 0], [W5b, 'stand', 0.1]],
-        face: [[0, 'smile'], [SHRUG, 'grin', 0.06], [GOIN - 0.3, 'joy', 0.05], [COMEOUT, 'joy', 0], [SHAKE, 'a6_hNope', 0.06], [W3a, 'smile', 0.1],
+        face: [[0, 'smile'], [SHRUG, 'grin', 0.06], [GOIN - 0.3, 'joy', 0.05], [COMEOUT, 'joy', 0], [W2a + 0.3, 'smile', 0.08], [W2b, 'neutral', 0.08], [SHAKE, 'a6_hNope', 0.06], [W3a, 'smile', 0.1],
           [CUTC + 0.27, 'smile', 0], [GAME, 'grin', 0.06], [CUTD + 0.27, 'smile', 0], [PAT, 'smile', 0], [W5b, 'smile', 0]],
         turn: [[0, -0.45], [T_IN1, -0.15, 0.12], [W1a, -0.45, 0.08], [W1b, -0.3, 0.1], [W2a, -0.45, 0.08], [W2b, -0.4, 0.1],
           [SHAKE, t => -0.35 + 0.4 * Math.sin((t - SHAKE) * 15), 0.06], [SHAKE1, -0.45, 0.1],
@@ -424,8 +439,9 @@
       { type: 'a6_hQCard', id: 'a6hQCard' },
       { type: 'mark', id: 'a6hBang', char: '!', on: ['mate1'], dx: -34, t0: ANSWER + 0.05, t1: CUTA },
       // L4 · the skit
-      { type: 'a6_hLayer', id: 'a6hSkitL', t0: SKIT, fo: CUTB, paint: skitPaint, sfxAt: [[SKIT, 'paper'], ...FIERCE.map(f => [f, 'boop']), [PLACARD + 0.18, 'thud'], [LAUGH, 'tada']] },
+      { type: 'a6_hLayer', id: 'a6hSkitL', t0: SKIT, fo: CUTB, paint: skitPaint, sfxAt: [[SKIT, 'paper'], [PLACARD + 0.18, 'thud'], [LAUGH, 'tada']] },
       { type: 'a6_hShiver', id: 'a6hShiver' },
+      { type: 'a6_hBrows', id: 'a6hBrows' },
       { type: 'a6_hNote', id: 'a6hN4', text: '（小品，开玩笑的）', at: [760, 210], rot: -3, t0: NOTE4, t1: CUTB + 0.15 },
       // L5–L6 · his doors
       { type: 'a6_hLayer', id: 'a6hDoorsL', t0: DOORS, fo: CUTC, paint: doorsPaint, sfxAt: [[DOORS, 'paper'], [W1b - 0.05, 'swish'], [GOIN + 0.4, 'tap'], [COMEOUT - 0.08, 'swish'], [COMEOUT + 0.4, 'tap']] },

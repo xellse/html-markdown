@@ -355,7 +355,7 @@
           [CUT1 + 0.27, 'stand', 0], [SIGN0 - 0.2, signing, 0.15], [SIGN1 + 0.15, 'stand', 0.15],
           [CUT2 + 0.27, 'stand', 0], [PRESS_T - 0.22, 'a6_pTerryPress', 0.15, 'back'], [PRESS_T + 0.45, 'stand', 0.18], [PRESS_T + 0.6, 'kidCheer', 0.12, 'back'], [PRESS_T + 1.3, 'stand', 0.2],
           [T_W2, walkL, 0], [T_W3, 'stand', 0.1], [LOOKUP, 'lookUp', 0.15, 'back'], [SCARY, 'a6_pShrink', 0.12],
-          [CUT4, 'stand', 0.2], [ROW2 + 0.5, 'kidCheer', 0.12, 'back'], [ROW2 + 1.6, 'stand', 0.2],
+          [CUT4, 'stand', 0.2], [ROW2 + 0.5, 'kidCheer', 0.12, 'out'], [ROW2 + 1.6, 'stand', 0.2],
           [DROP + 0.1, 'lookUp', 0.12, 'back'], [THUMP + 0.05, 'a6_pFlinch', 0.08, 'back'], [THUMP + 0.9, 'lookUp', 0.25]],
         face: [[0, 'smile'], [WAVE0, 'grin', 0.06], [T_W0, 'smile', 0], [LOOK, 'idea', 0.05], [LOOK + 0.8, 'grin', 0.06], [DAD1, 'joy', 0.05], [GRAB + 0.6, 'grin', 0.06],
           [CUT1 + 0.27, 'smile', 0], [SIGN0 - 0.2, 'focus', 0.06], [SIGN1 + 0.15, 'grin', 0.06],
