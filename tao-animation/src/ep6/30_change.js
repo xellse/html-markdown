@@ -5,7 +5,7 @@
 // 演绎：四格快切里的教室、图书馆、同学、电脑房都只是示意；“第一道题”是哪道没有记录，卡片上只画一个“?”；
 //   时间箭头上的刻度只表示一年年过去（两格读博的年份、一顶博士帽 = 毕业、1–5 = 毕业后第几年）；
 //   “他变了”不演成一下子全改掉：他只是走上来，握拳点点头。
-// 开场：直接在角落盖 18 岁；说到“二十岁”换成 20 岁；结尾前 0.6 秒内全部清掉，印章也收掉。
+// 开场：直接在角落盖 18 岁；说到“二十岁”换成 20 岁；长大后的他出场前换成“长大后”；结尾前 0.6 秒内全部清掉，印章也收掉。
 (() => {
   const FL = 780, DUR = 52.2, OFF = [-900, FL], SEAT = 612;
 
@@ -14,7 +14,7 @@
   // the next shot's props start drawing in under them, its people pop in only once the old ones are gone
   const OUT = 0.24;
   const T = {
-    s18: 0.15, s18out: 39.6, s20: 39.9, s20out: 51.6,
+    s18: 0.15, s18out: 39.6, s20: 39.9, s20out: 43.05, sAd: 43.45, sAdOut: 51.6,
     // L1 从那以后
     w0: 0.3, w1: 1.5, hd: 0.45, nod: 1.85, c0: 3.2,
     // L2 ① 上课 ② 读书
@@ -689,6 +689,7 @@
       // the age stamp: 18 straight into the corner; 20 when he gets his PhD; gone before the cut
       { type: 'ageStamp', age: 18, t0: T.s18, ...E6.STAMP, center: E6.STAMP.dock, dockT: -99, t1: T.s18out, key: 'c6s18' },
       { type: 'ageStamp', age: 20, t0: T.s20, ...E6.STAMP, center: E6.STAMP.dock, dockT: -99, t1: T.s20out, key: 'c6s20' },
+      { type: 'ageStamp', label: '长大后', t0: T.sAd, ...E6.STAMP, center: E6.STAMP.dock, dockT: -99, t1: T.sAdOut, key: 'c6sAd' },   // the grown-up looking back (2019), not the 20-year-old
       // L1
       { type: 'title', id: 'c6Hd', text: '从那以后', x: 800, y: 250, size: 76, color: 'red', rot: -2, underline: true, t0: T.hd, t1: T.c0 + 0.3 },
       // L2–L4：四格快切

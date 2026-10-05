@@ -97,17 +97,19 @@
     return [BX + textWidth(L.s, WS) * u, L.y + 10 + 3 * Math.sin(t * 31)];
   };
 
-  /* ---------------- 楼梯：四张题卡，一级比一级小、比一级简单（比喻，不是真题） ---------------- */
+  /* ---------------- 楼梯：四张题卡，一级比一级小、比一级简单（比喻：卡上只有铅笔“题目线”，不写真题，免得孩子去算） ---------------- */
   const STEPS = [
-    { x0: 100, x1: 420, y: 420, f: '37×48+26=?', s: 40 },
-    { x0: 420, x1: 645, y: 505, f: '48×26=?', s: 38 },
-    { x0: 645, x1: 810, y: 590, f: '9+8=?', s: 36 },
-    { x0: 810, x1: 940, y: 675, f: '2>1?', s: 36 },
+    { x0: 100, x1: 420, y: 420, s: 40, n: 3, len: 1 },
+    { x0: 420, x1: 645, y: 505, s: 38, n: 2, len: 1 },
+    { x0: 645, x1: 810, y: 590, s: 36, n: 1, len: 1 },
+    { x0: 810, x1: 940, y: 675, s: 36, n: 1, len: 0.42 },
   ];
+  const NOTE_ST = 31.2;                                                        // red "越来越简单" on the big first step
+  const squig = (key, x0, x1, y) => { const pts = [], n = Math.max(2, Math.round((x1 - x0) / 9)); for (let i = 0; i <= n; i++) pts.push([lerp(x0, x1, i / n), y + (i % 2 ? -4.5 : 3.5) + rnd(hstr(key), i, 1) * 1.5]); return pts; };
   STEPS.forEach((st, i) => {
     st.card = [st.x0 + 10, st.y + 10, st.x1 - 10, st.y + 10 + st.s + 26];
-    st.w = layoutWriting({ text: st.f, x: (st.x0 + st.x1) / 2, y: st.y + 23, size: st.s, t0: CARD_W[i], speed: 3200, anchor: 'middle' });
-    if (st.w.width > st.card[2] - st.card[0] - 16) console.error('b6g: card ' + i + ' formula does not fit');
+    const [a, b, c, d] = st.card, x0 = a + 16;
+    st.lines = Array.from({ length: st.n }, (_, j) => ({ pts: squig('b6g.sq' + i + j, x0, x0 + (c - a - 32) * st.len, b + (d - b) * (j + 1) / (st.n + 1)), t0: CARD_W[i] + j * 0.28 }));
   });
   const STAND = [[300, 420], [540, 505], [735, 590], [880, 675]];             // where Terry stands on each step
 
@@ -295,20 +297,20 @@
     },
     cues: fx => [[fx.t0, 'swish']],
   };
-  /** the result he only half remembers: dashed, pieces missing, flickering */
-  const FUZ = layoutWriting({ text: '(x+1)(x-1)=x×x-1', x: 320, y: 200, size: 40, t0: 0, speed: 1, anchor: 'middle' });
-  const MISSING = new Set([2, 11, 15]);
+  /** the result he only half remembers: dashed, flickering squiggles with pieces missing (a pencil "?" in each gap) —
+   *  no real formula, so nobody reads it as school maths he forgot */
+  const FUZ = [[212, [[150, 235], [285, 372], [418, 492]]], [262, [[176, 268], [316, 412]]]]
+    .flatMap(([y, segs], r) => segs.map(([a, b], j) => squig('b6g.fz' + r + j, a, b, y)));
+  const FUZQ = [[260, 212], [395, 212], [292, 262], [446, 262]];
   COMP.b6_gFuzzy = {
     draw(fx, t) {
       if (t < fx.t0 || t >= fx.t1) return;
       const op = clamp((t - fx.t0) / 0.4) * outP(t, fx.t1);
-      FUZ.strokes.forEach((s, i) => {
-        if (MISSING.has(s.gi)) return;
-        const flick = 0.45 + 0.4 * (0.5 + 0.5 * Math.sin(t * 2.6 + s.gi * 1.9));
-        dashed('b6g.fz' + i, s.pts, 7, 7, t * 9 + s.gi * 3, { z: Z.fx + 0.5, w: 4, opacity: op * flick, boil: 1.6 });
+      FUZ.forEach((pts, i) => {
+        const flick = 0.45 + 0.4 * (0.5 + 0.5 * Math.sin(t * 2.6 + i * 1.9));
+        dashed('b6g.fz' + i, pts, 10, 8, t * 9 + i * 5, { z: Z.fx + 0.5, w: 4, opacity: op * flick, boil: 1.6 });
       });
-      // a pencil "?" where the missing pieces were
-      [...MISSING].forEach((gi, j) => { const b = FUZ.boxes[gi]; if (b) text('b6g.fzq' + j, '?', b.x + b.w / 2, b.y + b.h * 0.6, { size: 36, color: C.pencil, z: Z.fx + 0.5, opacity: op * 0.9, font: CFG.FONT_MIX }); });
+      FUZQ.forEach(([x, y], j) => text('b6g.fzq' + j, '?', x, y, { size: 36, color: C.pencil, z: Z.fx + 0.5, opacity: op * (0.6 + 0.3 * Math.sin(t * 3 + j)), font: CFG.FONT_MIX }));
     },
   };
   /** the three things he could not do, one card above each examiner; each gets a red ✗ */
@@ -346,11 +348,16 @@
           const cp = clamp((t - STAIR0 - 0.3 - i * 0.12) / 0.25); if (cp <= 0) return;
           const [a, b, c, d] = s.card;
           stroke(k + '.c' + i, box(a, b, c, d), { z: z + 0.2, w: 3.5, fill: C.paper, draw: cp });
-          s.w.strokes.forEach((g, j) => { const q = clamp((t - g.t0) / g.dur); if (q > 0) stroke(k + '.f' + i + '.' + j, g.pts, { z: z + 0.3, w: 4.5, draw: q < 1 ? q : undefined, boil: 0.5 }); });
+          s.lines.forEach((g, j) => { const q = clamp((t - g.t0) / 0.26); if (q > 0) stroke(k + '.f' + i + '.' + j, g.pts, { z: z + 0.3, w: 3.5, draw: q < 1 ? q : undefined, boil: 0.6 }); });
         });
+        if (t >= NOTE_ST) {
+          const lt = t - NOTE_ST;
+          text(k + '.note', '越来越简单', 262, 600, { size: 40, color: C.red, z: Z.annot, rot: 9, scale: lerp(0.5, 1, EASE.back(clamp(lt / 0.22))), opacity: clamp(lt / 0.08), halo: 8 });
+          arrow(k + '.noteA', [170, 662], [398, 722], { p: EASE.out(clamp((lt - 0.15) / 0.3)), bend: -0.08, color: C.red, w: 4, head: 18 });
+        }
       });
     },
-    cues: () => [[STAIR0, 'paper'], ...STEPS.map(s => [s.w.strokes[0].t0, 'chalk'])],
+    cues: () => [[STAIR0, 'paper'], ...STEPS.flatMap(s => s.lines.map(g => [g.t0, 'pen'])), [NOTE_ST, 'pop']],
   };
   /** red "运气！" with a few sparkle ticks */
   COMP.b6_gLuck = {

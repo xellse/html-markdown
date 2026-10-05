@@ -30,7 +30,7 @@
     // L15: many people
     gb: 61.7, ppl: 62.1, scr: 62.3, crowd: 63.5, gOut: 67.0,
     // L16–L17: twin primes
-    look: 67.6, pairs: [68.0, 68.7, 69.4, 70.2], n7: 70.6, dots: 74.1, bigQ: 74.9, n7Out: 75.5, n8: 75.95, end: 78.2,
+    look: 67.6, pairs: [68.0, 68.7, 69.4, 70.2], brace: 71.15, n7: 71.3, dots: 74.1, bigQ: 74.9, n7Out: 75.5, n8: 75.95, end: 78.2,
   };
   // the little red "?" that pops above his head now and then, once the question mark has moved in
   const HUH = [[46.3, 47.9], [54.9, 56.6], [65.0, 66.7], [75.4, DUR]];
@@ -283,6 +283,15 @@
     },
     cues: () => CROWD.filter((_, i) => i % 5 === 2).map(h => [h.t0, 'pop']),
   };
+  /** a red brace under the whole list of pairs (x 430–1150), point down in the middle: "this whole list is the problem" */
+  const BRACE = [[430, 284], [438, 294, 1], [782, 294], [790, 304, 1], [798, 294], [1142, 294], [1150, 284, 1]];
+  COMP.x6_brace = {
+    draw(fx, t) {
+      if (t < fx.t0 || t >= fx.t1) return;
+      stroke(fx.id, BRACE, { z: Z.annot - 1, w: 4.5, color: C.red, draw: EASE.out(clamp((t - fx.t0) / 0.35)) });
+    },
+    cues: fx => [[fx.t0, 'pen']],
+  };
   const PS = 66, PR1 = 108, PR2 = 214, QS = 96, QY = PR2 + PS - QS;   // QS: the big ? stays below row 1 (row 1 ends at y 174, the ? starts at 184)   // pair rows (glyph tops); the big ? sits on row 2's baseline
 
   /* ---------------- poses, faces ---------------- */
@@ -425,7 +434,8 @@
       { type: 'write', id: 'x6pair3', text: '(17,19)', x: 430, y: PR2, size: PS, speed: 2300, t0: T.pairs[3] },
       { type: 'write', id: 'x6pair4', text: '…', x: 722, y: PR2, size: PS, speed: 2300, t0: T.dots },
       { type: 'write', id: 'x6bigq', text: '?', x: 800, y: QY, size: QS, speed: 2600, w: 9, color: 'red', t0: T.bigQ, sfx: 'pen' },
-      { type: 'label', id: 'x6n7', text: '最想得到的那道题', size: 50, at: [560, 402], rot: -2, t0: T.n7, t1: T.n7Out + 0.32, target: [560, PR2 + PS + 8], bend: 0.15, gap: 8 },
+      { type: 'x6_brace', id: 'x6brace', t0: T.brace, t1: T.n7Out + 0.32 },
+      { type: 'label', id: 'x6n7', text: '最想得到的那道题', size: 50, at: [560, 402], rot: -2, t0: T.n7, t1: T.n7Out + 0.32, target: [790, 306], bend: 0.15, gap: 8 },
       { type: 'label', id: 'x6n8', text: '还没人知道', size: 50, at: [905, 404], rot: -3, t0: T.n8, t1: DUR, target: [829, QY + QS + 8], bend: -0.2, gap: 8 },
 
       // eased exits (must stay last: they fade what was drawn before them)
@@ -437,7 +447,7 @@
       { type: 'x6_fade', t0: T.metaOut, keys: ['x6meta'] },
       { type: 'x6_fade', t0: T.fOut, keys: ['x6mz.', 'x6n5.', 'x6n6.'] },
       { type: 'x6_fade', t0: T.gOut, keys: ['m1.', 'm2.', 'm3.', 'm4.', 'ben.', 'x6crowd.', 'x6scr.'] },
-      { type: 'x6_fade', t0: T.n7Out, keys: ['x6n7.'] },
+      { type: 'x6_fade', t0: T.n7Out, keys: ['x6n7.', 'x6brace'] },
       { type: 'x6_fade', t0: T.end, keys: ['tao.', 'x6gb.', 'x6pair', 'x6bigq.', 'x6n8.', 'x6huh.', 'floor'] },
     ],
     sfx: [...hop, [T.kid, 'pop'], [T.kidSurp, 'boop'], [T.teen, 'pop'], [T.scratch, 'tap'], [T.tao, 'pop'], [T.raise, 'whip'],

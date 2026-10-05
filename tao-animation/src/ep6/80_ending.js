@@ -32,21 +32,8 @@
     const a = xy(from), b = xy(to);
     return [lerp(a[0], b[0], EASE.io(u)), lerp(a[1], b[1], EASE.io(u)) - Math.sin(Math.PI * u) * 60];
   };
-  /** 一个孩子的书桌：桌子 + 一本摊开的本子，封面写 Jasper。{at, t0} */
-  COMP.h6_desk = {
-    draw(fx, t) {
-      if (t < fx.t0) return;
-      const p = EASE.out(clamp((t - fx.t0) / 0.5)), [x, y] = fx.at, k = fx.id, z = Z.desk;
-      stroke(k + '.top', [[x - 170, y], [x + 170, y]], { z, w: 6, draw: p });
-      stroke(k + '.l1', [[x - 150, y], [x - 150, FL]], { z, w: 5, draw: p });
-      stroke(k + '.l2', [[x + 150, y], [x + 150, FL]], { z, w: 5, draw: p });
-      stroke(k + '.bk', [[x - 120, y - 6], [x - 110, y - 46, 1], [x + 20, y - 40, 1], [x + 10, y - 2, 1]], { z: z + 0.2, w: 4, closed: true, fill: C.paper, draw: p });
-      if (p > 0.6) text(k + '.nm', 'Jasper', x - 50, y - 24, { size: 34, z: z + 0.3, rot: -4 });
-    },
-    cues: fx => [[fx.t0, 'paper']],
-  };
   defineScene({
-    id: 'ending', chapter: '尾声', dur: 45.1, floor: FL,
+    id: 'ending', chapter: '尾声', dur: 47.5, floor: FL,
     cast: { little: { ...E6.kid, hair: 'tuft', H: 230 }, tao: E6.taoAdult, kid: E6.kid },
     tracks: {
       little: {
@@ -59,10 +46,10 @@
       },
       tao: {
         enter: S1 - 0.1,
-        pos: [[0, [520, FL]]],
-        pose: [[0, 'stand'], [27.4, 'present', 0.2], [S2, 'stand', 0.2], [40.0, t => ({ ...POSE.wave, armScale: 1.6, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, armR: [118, 22 + 25 * Math.sin((t - 40) * 11)] }), 0.12]],
+        pos: [[0, [520, FL]], [46.1, [-220, FL], 1.3, 'in']],   // waves, then walks off: the stage is left to the new child
+        pose: [[0, 'stand'], [27.4, 'present', 0.2], [S2, 'stand', 0.2], [40.0, t => ({ ...POSE.wave, armScale: 1.6, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, armR: [118, 22 + 25 * Math.sin((t - 40) * 11)] }), 0.12], [46.0, makeWalk(46.0, 47.5, 4.6)]],
         face: [[0, 'smile'], [S2, 'joy', 0.06]],
-        turn: [[0, 0.3]],
+        turn: [[0, 0.3], [46.0, -0.6, 0.15]],
         gaze: [[0, 'viewer'], [S2 + 0.3, 'kid']],
       },
       kid: {
@@ -81,13 +68,13 @@
       { type: 'title', id: 'six', text: '六集，一级一级', x: 400, y: 200, size: 60, t0: 0.6, t1: S1, color: 'red', rot: -3 },
       // ② 给学得快的孩子们写的话：三件事
       { type: 'title', id: 'q1', text: '说不通？去弄清楚：', x: 1100, y: 240, size: 64, t0: 27.4, t1: S2 },
-      { type: 'title', id: 'a1', text: '① 自己推一推', x: 1000, y: 370, size: 56, t0: 32.3, t1: S2, color: 'red', anchor: 'start' },
-      { type: 'title', id: 'a2', text: '② 去查一查', x: 1000, y: 460, size: 56, t0: 33.6, t1: S2, color: 'red', anchor: 'start' },
-      { type: 'title', id: 'a3', text: '③ 问问别人', x: 1000, y: 550, size: 56, t0: 35.0, t1: S2, color: 'red', anchor: 'start' },
+      { type: 'title', id: 'a1', text: '① 自己推一推', x: 1000, y: 370, size: 56, t0: 32.3, t1: S2, anchor: 'start' },
+      { type: 'title', id: 'a2', text: '② 去查一查', x: 1000, y: 460, size: 56, t0: 33.6, t1: S2, anchor: 'start' },
+      { type: 'title', id: 'a3', text: '③ 问问别人', x: 1000, y: 550, size: 56, t0: 35.0, t1: S2, anchor: 'start' },
       { type: 'title', id: 'src', text: '（2004 年，写给学得快的孩子们）', x: 1100, y: 650, size: 36, t0: 24.0, t1: S2, color: 'red' },
       // ③ 小问号跳到新的孩子身边；陶哲轩头上还留着一个小小的“?”
-      { type: 'h6_desk', id: 'desk', at: [1220, 650], t0: S2 + 0.2 },
-      { type: 'qm', id: 'qm', pos: [[0, [600, 330]], [S2 + 0.4, [600, 330]], [39.6, [1010, 560], 1.6, 'io']], size: 150, t0: S2 + 0.1, act: [[0, 'hop'], [41.4, 'wave']], mood: [[0, 'happy']], sign: [[0, null], [42.5, '轮到你了！']], signSize: 56 },
+      { type: 'e6_desk', id: 'desk', at: [1220, 650], t0: S2 + 0.2 },
+      { type: 'qm', id: 'qm', pos: [[0, [600, 330]], [S2 + 0.4, [600, 330]], [39.6, [1010, 560], 1.6, 'io']], size: 150, t0: S2 + 0.1, act: [[0, 'hop'], [41.4, 'wave']], mood: [[0, 'happy']], sign: [[0, null], [42.5, '轮到你了！']], signSize: 70 },
       { type: 'mark', id: 'mk', char: '?', on: ['tao'], dx: 60, t0: 39.8 },
     ],
     subs: [

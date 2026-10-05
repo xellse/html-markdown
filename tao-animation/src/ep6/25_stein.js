@@ -17,7 +17,7 @@
   const SET0 = 0.3, T_IN = 0.55, S_WALK = [1.2, 2.9], S_SIT = 3.0, GENTLE = 4.6;
   const CARD = [7.7, 11.0], DOWN = 8.3, SAD = 11.5, CARD_OUT = 14.6;
   const CLOUD0 = 15.0, OWN0 = 15.6, X0 = 18.4, CLOUD1 = 19.8;
-  const A_WALK = [19.9, 21.0], WROTE0 = 22.8, LIFT = [23.0, 24.4], FIST = 28.7, NOTE1 = 32.0;
+  const A_WALK = [19.9, 21.0], WROTE0 = 21.0, LIFT = [23.0, 24.4], FIST = 28.7, NOTE1 = 32.0;
   const PAN0 = 32.35, PAN_D = 0.55, T_WALK = [32.95, 33.5];
   const HOPS = [33.75, 34.35, 34.95, 35.55], WORK0 = 36.7, EDGE = [36.75, 37.0], TEETER = [37.0, 37.7], BACK = 37.75, LB0 = 37.9, BAND0 = 38.4;
   const PAN1 = 40.55, PAN1_D = 0.5;
@@ -146,6 +146,16 @@
     },
   };
 
+  /** two little motion lines under the fist pump */
+  COMP.b6_sPump = {
+    draw(fx, t, F) {
+      const lt = t - FIST - 0.05; if (lt < 0 || lt > 0.95) return;
+      const a = F.anchors.terry; if (!a) return;
+      const h = a.handR, op = 1 - clamp((lt - 0.6) / 0.35), p = EASE.out(clamp(lt / 0.15));
+      [[-12, 0], [14, 6]].forEach(([dx, dy], i) => stroke('b6s.pump' + i, [[h[0] + dx, h[1] + 24 + dy], [h[0] + dx + 3, h[1] + 42 + dy], [h[0] + dx, h[1] + 58 + dy]], { z: Z.fx, w: 3, draw: p, opacity: op, boil: 0.6 }));
+    },
+  };
+
   /* ---------------- 楼梯：“聪明”的台阶到这里断了，上面一级是“用功”（比喻） ---------------- */
   const ST = [{ x0: 240, x1: 390, y: 700 }, { x0: 390, x1: 540, y: 630 }, { x0: 540, x1: 690, y: 560 }, { x0: 690, x1: 860, y: 490 }];
   const WORK = { x0: 1140, x1: 1400, y: 350 };
@@ -192,7 +202,7 @@
     b6_sSit: { ...SITL, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' } },
     b6_sDown: { ...SITL, tilt: 11, lean: 4, ikL: hipT(-30, 16), ikR: { w: 1, to: 'desk', dx: -6, dy: -2, bend: 'down' } },
     b6_sSad: { ...SITL, tilt: 16, lean: 6, ikL: hipT(-28, 18), ikR: hipT(28, 18) },
-    b6_sFist: { ...SITL, tilt: -2, armScale: 1.15, ikL: hipT(-30, 16), armR: [78, 100], ikR: { w: 0 } },
+    b6_sFist: { ...SITL, tilt: -2, armScale: 1.15, ikL: hipT(-30, 16), armR: [45, 117], ikR: { w: 0 } },     // fist up in front of the chest, elbow down
     b6_sProf: { ...SITL, legScale: 1.05, ikL: { w: 1, to: 'desk', dx: 0, dy: -2, bend: 'down' }, ikR: hipT(30, 16) },
     b6_sHop: { legL: [22, -46], legR: [10, -30], armL: [64, 24], armR: [64, 24], lean: 3 },
     b6_sTeeter: t => ({ lean: -5, tilt: -6, armScale: 1.1, armL: [100 + 45 * Math.sin(t * 15), 25], armR: [100 + 45 * Math.sin(t * 15 + Math.PI), 25] }),
@@ -204,6 +214,7 @@
   Object.assign(FACE, {
     b6_sSad: { lidL: 0.34, lidR: 0.34, brow: 'line', browL: -18, browR: -18, browY: 0.03, mouth: 'frown', mw: 0.22 },
     b6_sKind: { mouth: 'smile', mw: 0.24, lidL: 0.16, lidR: 0.16, brow: 'line', browL: -8, browR: -8 },
+    b6_sGo: { brow: 'line', browL: 14, browR: 14, mouth: 'smile', mw: 0.32 },                       // determined smile
   });
   const taoPos = [[0, [-150, FL]], [A_WALK[0], [TAO_X, FL], A_WALK[1] - A_WALK[0], 'lin'], [PAN0, [TAO_X - PANW, FL], PAN_D, 'io']];
   const taoRead = t => { const x = evalTrack(taoPos, t)[0]; return { ...makeWalk(A_WALK[0], A_WALK[1], 5.2)(t), armL: [14, 8], ikR: { w: 1, to: 'abs', dx: x + 105, dy: 595, bend: 'down' } }; };
@@ -231,7 +242,7 @@
           ...HOPS.flatMap(h => [[h - 0.1, 'crouch', 0.08], [h, 'b6_sHop', 0.08], [h + 0.35, 'stand', 0.1]]),
           [TEETER[0], 'b6_sTeeter', 0.1], [TEETER[1], 'stand', 0.15], [BACK + 0.3, 'lookUp', 0.2]],
         face: [[0, 'sheepish'], [GENTLE, 'neutral', 0.1], [DOWN, 'sheepish', 0.1], [SAD, 'b6_sSad', 0.3],
-          [23.6, 'neutral', 0.3], [24.6, 'focus', 0.15], [31.3, 'smile', 0.15],
+          [23.6, 'neutral', 0.3], [24.6, 'focus', 0.15], [FIST, 'b6_sGo', 0.1], [31.3, 'smile', 0.15],
           [T_WALK[0], 'smile', 0], [HOPS[0], 'proud', 0.1], [EDGE[1], 'surprised', 0.06], [BACK + 0.3, 'focus', 0.12]],
         turn: [[0, 0.35], [T_WALK[0] - 0.02, 0.35, 0]],
         gaze: [[0, 'stein'], [DOWN, 'desk'], [24.3, 'stein'], [T_WALK[0], 'viewer'], [HOPS[0], 'step'], [EDGE[0], 'gap'], [BACK + 0.2, 'work']],
@@ -261,7 +272,8 @@
       { type: 'b6_sExam', id: 'b6s.exam' },
       { type: 'b6_sTxt', id: 'b6s.own', text: '（他自己的看法）', x: 850, y: 215, size: 38, t0: OWN0, t1: CLOUD1 },
       { type: 'b6_sPaper', id: 'b6s.paper' },
-      { type: 'b6_sFade', id: 'b6s.wroteF', out: NOTE1 - 0.3, of: { type: 'label', id: 'b6s.wrote', text: '（他 2018 年写的）', at: [330, 330], size: 38, rot: -2, t0: WROTE0, t1: NOTE1, target: { char: 'taoA', part: 'handR', dx: 44, dy: -150 }, bend: 0.1, gap: 10 } },
+      { type: 'b6_sFade', id: 'b6s.wroteF', out: NOTE1 - 0.3, of: { type: 'label', id: 'b6s.wrote', text: ['长大后的他', '（2018 年写的）'], at: [360, 300], size: 44, rot: -2, t0: WROTE0, t1: NOTE1, target: { char: 'taoA', part: 'head', dx: 80, dy: -40 }, bend: 0.15, gap: 8 } },
+      { type: 'b6_sPump', id: 'b6s.pump' },
       { type: 'b6_sStairs', id: 'b6s.stairs' },
     ],
     steps: [{ t0: S_WALK[0], t1: S_WALK[1], hz: 5.0 }, { t0: A_WALK[0], t1: A_WALK[1], hz: 5.2 }, { t0: T_WALK[0], t1: T_WALK[1], hz: 5.6 }],

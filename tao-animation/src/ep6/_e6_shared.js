@@ -71,3 +71,16 @@ COMP.e6_medal = {
   cues: fx => [[fx.t0, 'ding'], ...(fx.shine || []).map(s => [s, 'plip'])],
 };
 
+/** 一个孩子的书桌：桌子 + 一本本子，封面写 Jasper（第 80、90 场共用）。{at, t0}（t0 为负 = 一开始就画好） */
+COMP.e6_desk = {
+  draw(fx, t) {
+    if (t < fx.t0) return;
+    const p = fx.t0 < 0 ? 1 : EASE.out(clamp((t - fx.t0) / 0.5)), [x, y] = fx.at, k = fx.id, z = Z.desk;
+    stroke(k + '.top', [[x - 170, y], [x + 170, y]], { z, w: 6, draw: p });
+    stroke(k + '.l1', [[x - 150, y], [x - 150, fx.floor ?? 780]], { z, w: 5, draw: p });
+    stroke(k + '.l2', [[x + 150, y], [x + 150, fx.floor ?? 780]], { z, w: 5, draw: p });
+    stroke(k + '.bk', [[x - 120, y - 6], [x - 110, y - 46, 1], [x + 20, y - 40, 1], [x + 10, y - 2, 1]], { z: z + 0.2, w: 4, closed: true, fill: C.paper, draw: p });
+    if (p > 0.6) text(k + '.nm', 'Jasper', x - 50, y - 24, { size: 34, z: z + 0.3, rot: -4 });
+  },
+  cues: fx => (fx.t0 >= 0 ? [[fx.t0, 'paper']] : []),
+};

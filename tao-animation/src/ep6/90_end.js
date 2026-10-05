@@ -11,20 +11,31 @@ COMP.h6_fade = {
   cues: fx => (COMP[fx.inner.type].cues ? COMP[fx.inner.type].cues(fx.inner) : []),
 };
 defineScene({
-  id: 'end', chapter: '最后一个问题', dur: 24.0, floor: 760,
-  cast: {},
-  tracks: {},
+  id: 'end', chapter: '最后一个问题', dur: 24.0, floor: 780,
+  // carried over from the ending: the new child at the desk, with the little question mark beside him
+  cast: { kid: E6.kid },
+  tracks: {
+    kid: {
+      pos: [[0, [1385, 780]]],
+      pose: [[0, 'kidCheer'], [0.7, 'stand', 0.2], [4.2, 'thinkStand', 0.2], [18.6, t => ({ ...POSE.wave, armScale: 1.6, ikL: { w: 1, to: 'hip', dx: -24, dy: -2, bend: 'out' }, armR: [118, 22 + 25 * Math.sin((t - 18.6) * 11)] }), 0.12]],
+      face: [[0, 'joy'], [0.7, 'smile', 0.06], [4.2, 'focus', 0.06], [12.4, 'idea', 0.05], [18.6, 'joy', 0.05]],
+      turn: [[0, -0.3]],
+      gaze: [[0, 'q'], [18.6, 'viewer']],
+    },
+  },
+  targets: () => ({ q: [640, 420] }),
   fx: [
     { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'q', text: '最后一个问题', x: 640, y: 150, size: 72, t0: 0.2, color: 'red', rot: -3 } },
     { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'write', id: 'w', text: '3 , 5 , 7', x: 470, y: 250, size: 120, t0: 3.9, speed: 2600 } },
     { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'p1', text: '+2', x: 548, y: 420, size: 52, t0: 5.4, color: 'red' } },
     { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'p2', text: '+2', x: 720, y: 420, size: 52, t0: 5.9, color: 'red' } },
-    { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'ok', text: '全是质数 ✓', x: 1100, y: 330, size: 56, t0: 6.6, color: 'red', rot: 3 } },
+    { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'ok', text: '全是质数 ✓', x: 1110, y: 300, size: 56, t0: 6.6, color: 'red', rot: 3 } },
     { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'qq', text: '还有别的一组吗？', x: 640, y: 540, size: 80, t0: 8.9, underline: true } },
-    { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'hint', text: '提示：每次加 2 的三个数里，总有 3 的倍数。', x: 640, y: 660, size: 46, t0: 12.3, color: 'red' } },
+    { type: 'h6_fade', f0: 18.0, fd: 0.45, inner: { type: 'title', id: 'hint', text: '提示：每次加 2 的三个数里，总有 3 的倍数。', x: 560, y: 660, size: 46, t0: 12.3, color: 'red' } },
     { type: 'title', id: 'fin', text: '全剧终 · 谢谢观看！', x: 800, y: 380, size: 110, t0: 18.5, sfx: 'stamp' },
     { type: 'title', id: 'ser', text: '《数学少年陶哲轩》', x: 800, y: 230, size: 64, t0: 18.9, color: 'red' },
-    { type: 'qm', id: 'qm', pos: [[0, [1360, 760]]], size: 150, t0: 19.4, act: [[0, 'hop'], [21.0, 'wave']], mood: [[0, 'happy']] },
+    { type: 'e6_desk', id: 'desk', at: [1220, 650], t0: -1 },
+    { type: 'qm', id: 'qm', pos: [[0, [1010, 560]], [0.9, [1275, 650], 0.8, 'io']], size: 150, t0: -1, act: [[0, 'hop'], [18.6, 'hop'], [20.4, 'wave']], mood: [[0, 'happy']], sign: [[-1, '轮到你了！'], [0.8, null]], signSize: 70, silent: true },
     // the answer, printed upside down in the corner like a puzzle book
     { type: 'title', id: 'ans', text: '答案：没有！3 的倍数里，只有 3 是质数。', x: 520, y: 770, size: 34, t0: 12.6, rot: 180, color: 'red' },
   ],
