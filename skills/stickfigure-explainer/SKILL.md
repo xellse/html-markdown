@@ -85,6 +85,6 @@ python3 tools/audio.py ep1                            # 配音 + 配乐 → epis
 NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280
 python3 <skill>/scripts/sheet.py frames sheet.png 4 480        # 用 Read 看这张图
 NODE_PATH=$(npm root -g) node tools/lint_frames.cjs episode-1.html > lint.md    # 自动查脸上压线、线穿字、一帧消失、切场漏画面、空舞台、小字
-NODE_PATH=$(npm root -g) node tools/export_video.cjs episode-1.html ep1-4k.mp4 --jobs 3   # 导出 4K MP4（逐帧渲染 + 离线混音）
+NODE_PATH=$(npm root -g) node tools/export_video.cjs episode-1.html ep1-4k.mp4 --jobs 3   # 导出 4K MP4（逐帧渲染 + 离线混音）——只在用户本地电脑上运行，不在云端做（见 pipeline.md 第 10 节）
 NODE_PATH=$(npm root -g) node <skill>/scripts/playtest.cjs episode-1.html out
 ```
