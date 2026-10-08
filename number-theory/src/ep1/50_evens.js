@@ -27,7 +27,7 @@
     // L12: the thick corner of 12
     thick: 48.1,
     // L13: 4 hops onto the sign, the sign tips onto Jasper's head
-    hop: 51.85, land: 52.35, back0: 52.5, back1: 53.05, laugh: 53.3,
+    hop: 51.75, land: 52.35, back0: 52.5, back1: 53.05, laugh: 53.3,
     // L14–L15
     off: 56.5, rub: 56.95, rubEnd: 58.5, fanli: 61.75, arrOut: 66.0,
     // L16–L18: the big sign in a video frame, knocked flat by a big field of dots
@@ -50,8 +50,8 @@
     return phi - Math.acos(SP / d) / RAD;    // ≈ 16°
   })();
   const rotAbout = th => [BASE[0] + SR * Math.sin(th * RAD), FL - SR * Math.cos(th * RAD)];
-  // the counter-examples: three dot squares, bottom rows on y = 250
-  const G = 52, ROW = 250, EQY = 280, EQS = 46;
+  // the counter-examples: three dot squares, bottom rows on y = 232
+  const G = 52, ROW = 232, EQY = 262, EQS = 46;
   const COL = { A: 400, B: 800, C: 1220 };
   const AX = COL.A - G / 2, AY = ROW - G;                       // 2×2: top-left dot
   const BX = COL.B - G, BY = ROW - 2 * G;                       // 3×3
@@ -60,10 +60,10 @@
   const LAND = [BASE[0] + SW / 2 - 16 - G - AX, (PLANT[1] - SH / 2) - G * 0.2 - 2 - G - AY];
   const offA = t => {
     if (t < T.hop || t >= T.back1) return [0, 0];
-    if (t < T.land) { const u = (t - T.hop) / (T.land - T.hop), e = EASE.io(u); return [LAND[0] * e, LAND[1] * e - 95 * Math.sin(Math.PI * u)]; }
+    if (t < T.land) { const u = (t - T.hop) / (T.land - T.hop), e = EASE.io(u); return [LAND[0] * e, LAND[1] * e - 150 * Math.sin(Math.PI * u)]; }
     if (t < T.back0) return LAND;
     const u = (t - T.back0) / (T.back1 - T.back0), e = EASE.io(u);
-    return [LAND[0] * (1 - e), LAND[1] * (1 - e) - 120 * Math.sin(Math.PI * u)];
+    return [LAND[0] * (1 - e), LAND[1] * (1 - e) - 140 * Math.sin(Math.PI * u)];
   };
   // the video frame (L16–L18) and what is inside it
   const FR = { cx: 800, cy: 295, w: 1040, h: 390 };
@@ -278,7 +278,7 @@
           [T.A, 'd1_ptL', 0.12, 'back'], [T.cheerA, 'kidCheer', 0.12, 'back'], [37.6, 'stand', 0.15],
           [T.B, 'd1_ptR', 0.12, 'back'], [42.0, 'stand', 0.15],
           [T.C, 'd1_ptR2', 0.12, 'back'], [T.cheerC, 'kidCheer', 0.12, 'back'], [47.7, 'akimbo', 0.15],
-          [T.hop, 'stand', 0.12], [T.laugh, 'd1_laugh', 0.12, 'back'], [T.rub, 'scratchStand', 0.12, 'back'], [T.rubEnd, 'stand', 0.2],
+          [T.hop, 'stand', 0.12], [T.laugh, 'd1_laugh', 0.12, 'back'], [T.rub, 'scratchStand', 0.16], [T.rubEnd, 'stand', 0.2],
           [T.fanli, 'd1_ptL', 0.12, 'back'], [63.6, 'stand', 0.2],
           [T.hit, 'd1_wow', 0.1, 'back'], [76.6, 'stand', 0.2]],
         face: [[0, 'smile'], [2.0, 'neutral', 0.1], [4.3, 'focus', 0.1], [T.puz, 'puzzled', 0.1], [T.sign, 'proudGrin', 0.06], [T.tag, 'smile', 0.1],
