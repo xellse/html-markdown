@@ -123,16 +123,22 @@
     scale: [[0, 1], [T.MARKP, 1.35, 0.15, 'out'], [T.MARKP + 0.2, 1, 0.3]], sfxAt: [[T.MARK, 'pen'], [T.MARKP, 'boop']] };
   const ringOver = (k, L, i0, i1, p) => {
     const [x0, x1] = span(L.boxes, i0, i1), h = L.size;
-    stroke(k, ringPts(k, (x0 + x1) / 2, L.y + h * 0.46, (x1 - x0) / 2 + 18, h / 2 + 12, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
+    stroke(k, ringPts(k, (x0 + x1) / 2 + 3, L.y + h * 0.42, (x1 - x0) / 2 + 24, h / 2 + 19, { n: 12, a0: -140, sweep: 385, rv: 0.05 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
   };
   const RINGS = { type: 'b1_fn', id: 'b1rg', t0: T.RING4, cues: [[T.RING4, 'pen'], [T.RING3, 'pen']],
     fn: (t, lt, k) => { ringOver(k + '.a', E3, 0, 1, EASE.out(clamp(lt / 0.35))); ringOver(k + '.b', E3, 5, 6, EASE.out(clamp((t - T.RING3) / 0.35))); } };
 
   /* ---------------- L11–L15: the rule card (lines written as they are said) ---------------- */
   const CARD_AT = [640, 470];
+  // local version of the card's "负数：以后" sticky note: the shared one (100 wide) is narrower than its own text (150)
   PROPS.b1_card = (fx, t, lt, p) => {
-    const n0 = DL.items.length;
-    PROPS.n1_card(fx, t, lt, p);
+    const n0 = DL.items.length, k = fx.id;
+    PROPS.n1_card({ ...fx, neg: undefined }, t, lt, p);
+    if (lt >= fx.neg) {
+      const u = EASE.back(clamp((lt - fx.neg) / 0.3)), y = 300 / 2 - 58, cx = -fx.w / 2 - 6, hw = 88, z = Z.annot - 1;
+      stroke(k + '.ng', rect(cx - hw, y - 28, cx + hw, y + 24), { z: z + 0.6, w: 3, fill: '#FFF6B8', draw: u });
+      text(k + '.ngt', '负数：以后', cx, y - 2, { size: 30, z: z + 0.7, anchor: 'middle', color: C.red, opacity: u });
+    }
     for (let i = n0; i < DL.items.length; i++) {
       const it = DL.items[i], m = /\.l(\d)$/.exec(it.key);
       if (!m || !it.key.startsWith(fx.id + '.')) continue;
@@ -167,8 +173,8 @@
   /* ---------------- L17–L20: scratch paper, piling up ---------------- */
   const SHEET = { w: 400, h: 170 };
   const SHEETS = [
-    { at: [900, 640], rot: -2, tx: '9 − 3' }, { at: [886, 560], rot: 2, tx: '16 − 10' }, { at: [910, 480], rot: -1.5, tx: '25 − 19' },
-    { at: [892, 400], rot: 2.5, scrib: true }, { at: [912, 320], rot: -2.5, scrib: true },
+    { at: [930, 640], rot: -2, tx: '9 − 3' }, { at: [916, 560], rot: 2, tx: '16 − 10' }, { at: [940, 480], rot: -1.5, tx: '25 − 19' },
+    { at: [922, 400], rot: 2.5, scrib: true }, { at: [942, 320], rot: -2.5, scrib: true },
   ].map((s, i) => {
     const o = { ...s, i, t0: T.SH[i], type: 'b1_sheet', id: 'b1sh' + i };
     if (s.tx) {
@@ -200,10 +206,10 @@
     },
     cues: fx => [[fx.t0, 'paper']].concat(fx.L ? [[fx.L.t0, 'pen'], [fx.L.t0 + 0.3, 'pen'], [fx.Q.t0, 'pen']] : [[fx.t0 + 0.25, 'pen'], [fx.t0 + 0.5, 'pen']]),
   };
-  const PILE_C = [900, 520];
+  const PILE_C = [930, 520];
 
   /* ---------------- L21: two boxes: not found yet / not there at all ---------------- */
-  const BOX_L = [90, 150, 610, 690], BOX_R = [690, 150, 1210, 690], GND = 650;
+  const BOX_L = [90, 172, 610, 690], BOX_R = [690, 172, 1210, 690], GND = 650;   // top below the name on the page
   const panel = (k, box, lt, cap) => {
     const [x0, y0, x1, y1] = box;
     stroke(k + '.f', rect(x0, y0, x1, y1), { z: Z.board, w: 5, fill: C.paper, draw: EASE.out(clamp(lt / 0.4)) });
