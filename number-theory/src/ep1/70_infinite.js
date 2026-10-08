@@ -1,6 +1,6 @@
-// 第 70 场 · 查到 1000（infinite）：一台火柴人电脑从左边吐出纸带（和上一场的表一样：上面是数，下面打勾），
-// 越滚越快，一直查到 1000（998 是空格）；空格还是每隔 4 个（“隔 4”弧线）；小问号：够了吗？
-// 不够：纸带接着飞出画面，“……无穷”；电脑累得冒汗；
+// 第 70 场 · 查到 1000（infinite）：一台火柴人电脑站在右边，往左吐出纸带（和上一场的表一样：上面是数，下面打勾），
+// 纸带从左往右读是 1、2、3……（最新的数紧挨电脑），越滚越快，一直查到 1000（998 是空格）；空格还是每隔 4 个（“隔 4”弧线）；小问号：够了吗？
+// 不够：纸带接着往左飞出画面，左边写“……无穷”；电脑累得冒汗；
 // 我们需要一个理由：2、6、10、14……一起亮起来，连成一条红线，越来越小，消失在远处。
 // 开场：空舞台（电脑画出来，小问号弹进来）；结尾：全部淡出。
 (() => {
@@ -66,26 +66,26 @@
   const speed = t => (P(t + 0.02) - P(t)) / 0.02;
 
   /* ---------------- the computer (a box with a screen, little hands and legs) ---------------- */
-  const PCB = { x0: 70, x1: 310, y0: 296, y1: 504 }, SX = PCB.x1;
+  const PCB = { x0: 1290, x1: 1530, y0: 296, y1: 504 }, SX = PCB.x0, PCX = (PCB.x0 + PCB.x1) / 2;   // the slot is on its left side
   const computer = {
     type: 'e1_fn', id: 'e1iPc', t0: T.PC, cues: [[T.PC, 'pen'], [T.PC + 0.25, 'pen'], [T.TAPE, 'beep'], [T.STOP, 'ding'], [T.GO, 'beep'], [T.SWEAT, 'boop']],
     fn: (t, lt, k) => {
       const p = EASE.out(clamp(lt / 0.5)), { x0, x1, y0, y1 } = PCB, z = Z.desk, v = speed(t), busy = v > 0.5;
       stroke(k + '.box', [[x0, y0], [x1, y0, 1], [x1, y1, 1], [x0, y1, 1], [x0, y0, 1]], { z, w: 6, fill: C.paper, draw: p });
       stroke(k + '.scr', superPts((x0 + x1) / 2, 382, 196, 120, 24, 7), { z: z + 0.1, w: 4, closed: true, fill: C.paper, draw: clamp(p * 1.4 - 0.4) });
-      stroke(k + '.slot', [[x1 - 2, 322], [x1 - 2, 478]], { z: z + 0.1, w: 9, draw: clamp(p * 1.4 - 0.4) });
-      [0, 1, 2].forEach(i => dot(`${k}.led${i}`, [x0 + 30 + i * 22, 474], 5, i === 0 && busy && Math.floor(t * 8) % 2 ? C.red : C.ink, z + 0.2));
+      stroke(k + '.slot', [[x0 + 2, 322], [x0 + 2, 478]], { z: z + 0.1, w: 9, draw: clamp(p * 1.4 - 0.4) });
+      [0, 1, 2].forEach(i => dot(`${k}.led${i}`, [x1 - 74 + i * 22, 474], 5, i === 0 && busy && Math.floor(t * 8) % 2 ? C.red : C.ink, z + 0.2));
       // legs and feet
-      [[130, 118], [250, 262]].forEach(([a, b], i) => stroke(`${k}.leg${i}`, [[a, y1], [b, FL], [b + (i ? 22 : -22), FL]], { z: z - 1, w: 5.5, draw: clamp(p * 1.5 - 0.5) }));
-      if (p > 0.7) shadow(k + '.sh', 190, FL + 4, 200, 1);
+      [[PCX - 60, PCX - 72], [PCX + 60, PCX + 72]].forEach(([a, b], i) => stroke(`${k}.leg${i}`, [[a, y1], [b, FL], [b + (i ? 22 : -22), FL]], { z: z - 1, w: 5.5, draw: clamp(p * 1.5 - 0.5) }));
+      if (p > 0.7) shadow(k + '.sh', PCX, FL + 4, 200, 1);
       // little hands: they crank while the tape runs
       const ph = busy ? Math.sin(t * 14) : 0, sw = t > T.SWEAT ? Math.sin(t * 9) : 0;
-      stroke(k + '.armL', [[x0, 420], [x0 - 34, 446 + 10 * ph], [x0 - 30 + 8 * sw, 488 + 6 * ph]], { z, w: 5, draw: clamp(p * 1.5 - 0.5) });
-      stroke(k + '.armR', [[x1 - 40, y1], [x1 - 8, y1 + 34 - 8 * ph], [x1 + 26, y1 + 26 + 10 * ph]], { z, w: 5, draw: clamp(p * 1.5 - 0.5) });
+      stroke(k + '.armR', [[x1, 420], [x1 + 34, 446 + 10 * ph], [x1 + 30 - 8 * sw, 488 + 6 * ph]], { z, w: 5, draw: clamp(p * 1.5 - 0.5) });
+      stroke(k + '.armL', [[x0 + 40, y1], [x0 + 8, y1 + 34 - 8 * ph], [x0 - 26, y1 + 26 + 10 * ph]], { z, w: 5, draw: clamp(p * 1.5 - 0.5) });
       // the screen: the number it is checking (computer font)
       if (lt > 0.35) {
         const n = Math.floor(P(t) + 1e-6), s = String(n);
-        text(k + '.cnt', s, (x0 + x1) / 2, 380, { size: Math.min(64, 176 / (CFG.MONO_ADV * s.length)), font: CFG.FONT_MONO, z: z + 0.3, color: C.ink });
+        text(k + '.cnt', s, PCX, 380, { size: Math.min(64, 176 / (CFG.MONO_ADV * s.length)), font: CFG.FONT_MONO, z: z + 0.3, color: C.ink });
       }
       // L6: it can never finish — sweat drops
       if (t > T.SWEAT) for (let i = 0; i < 12; i++) {
@@ -100,19 +100,19 @@
   const CW = 110, TY0 = 330, TY1 = 400, TY2 = 470;
   const TICK = layoutWriting({ text: '✓', x: 0, y: 0, size: 46, t0: 0, speed: 1e6 });
   const LEAD = 30;                                     // a strip of blank paper between the slot and the newest cell
-  const cellX = (k, t) => SX + LEAD + (P(t) - k + 0.5) * CW;   // centre of cell k (cell 1 came out first, so it is furthest right)
+  const cellX = (k, t) => SX - LEAD - (P(t) - k + 0.5) * CW;   // centre of cell k (cell 1 came out first, so it is furthest left: the tape reads 1, 2, 3 … left to right)
   const tape = {
     type: 'e1_fn', id: 'e1iTp', t0: T.TAPE, cues: [0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9, 3.2, 3.5, 3.75, 3.95, 4.1].map(x => [x + 0.02, 'tap']).concat([13.1, 13.5, 13.8, 14.1].map(x => [x, 'tap']), [[T.GO + 0.6, 'whoosh']]),
     fn: (t, lt, k) => {
-      const Pt = P(t), lead = Math.min(1640, SX + LEAD + Pt * CW), v = speed(t);
-      if (lead <= SX + 1) return;
-      [TY0, TY1, TY2].forEach((y, i) => stroke(`${k}.h${i}`, [[SX, y], [lead, y, 1]], { z: Z.board, w: i === 1 ? 3 : 4.5 }));
-      const kmax = Math.ceil(Pt), kmin = Math.max(1, Math.floor(Pt - (1640 - SX) / CW));
+      const Pt = P(t), lead = Math.max(-40, SX - LEAD - Pt * CW), v = speed(t);
+      if (lead >= SX - 1) return;
+      [TY0, TY1, TY2].forEach((y, i) => stroke(`${k}.h${i}`, [[lead, y], [SX, y, 1]], { z: Z.board, w: i === 1 ? 3 : 4.5 }));
+      const kmax = Math.ceil(Pt), kmin = Math.max(1, Math.floor(Pt - (SX + 40) / CW));
       for (let n = kmax; n >= kmin; n--) {
-        const x = cellX(n, t); if (x - CW / 2 > 1640) continue;
-        stroke(`${k}.v${n}`, [[x + CW / 2, TY0], [x + CW / 2, TY2]], { z: Z.board, w: 3.5 });
-        if (n === kmax && x - CW / 2 > SX) stroke(`${k}.v${n}L`, [[x - CW / 2, TY0], [x - CW / 2, TY2]], { z: Z.board, w: 3.5 });
-        if (x - CW / 2 < SX + 10) continue;   // still (partly) inside the computer
+        const x = cellX(n, t); if (x + CW / 2 < -40) continue;
+        stroke(`${k}.v${n}`, [[x - CW / 2, TY0], [x - CW / 2, TY2]], { z: Z.board, w: 3.5 });
+        if (n === kmax && x + CW / 2 < SX) stroke(`${k}.v${n}R`, [[x + CW / 2, TY0], [x + CW / 2, TY2]], { z: Z.board, w: 3.5 });
+        if (x + CW / 2 > SX - 10) continue;   // still (partly) inside the computer
         const s = String(n);
         text(`${k}.n${n}`, s, x, (TY0 + TY1) / 2 + 2, { size: Math.min(54, 92 / (CFG.MONO_ADV * s.length)), font: CFG.FONT_MONO, z: Z.board + 0.1 });
         if (blank(n)) { const P4 = [[x - 26, TY1 + 9], [x + 26, TY1 + 9], [x + 26, TY2 - 9], [x - 26, TY2 - 9]]; P4.forEach((a, j) => dash(`${k}.b${n}.${j}`, a, P4[(j + 1) % 4], { step: 14, on: 7, w: 2.5 })); }
@@ -122,15 +122,15 @@
       if (v > 25) {
         const a = clamp((v - 25) / 200), len = 60 + 220 * a;
         for (let i = 0; i < 6; i++) {
-          const y = i < 3 ? TY0 - 18 - i * 11 : TY2 + 18 + (i - 3) * 11, x = SX + 60 + ((i * 397 + t * 1900) % 1250);
-          stroke(`${k}.sp${i}`, [[x, y], [Math.min(1600, x + len), y]], { z: Z.set, w: 2.6, color: C.pencil, opacity: 0.85 * a, boil: 0.6 });
+          const y = i < 3 ? TY0 - 18 - i * 11 : TY2 + 18 + (i - 3) * 11, x = SX - 60 - ((i * 397 + t * 1900) % 1170);
+          stroke(`${k}.sp${i}`, [[x, y], [Math.max(0, x - len), y]], { z: Z.set, w: 2.6, color: C.pencil, opacity: 0.85 * a, boil: 0.6 });
         }
       }
     },
   };
 
   /* ---------------- L2: the blanks on screen flash; “隔 4” arcs (the tape is standing still at 1000) ---------------- */
-  const SHOWN = [998, 994, 990], xAt = n => SX + LEAD + (1000 - n + 0.5) * CW;
+  const SHOWN = [990, 994, 998], xAt = n => SX - LEAD - (1000 - n + 0.5) * CW;   // left to right
   const blanksNote = {
     type: 'e1_grp', id: 'e1iBlG', out: T.RING_OUT, dur: 0.3,
     inner: { type: 'e1_fn', id: 'e1iBl', t0: T.RING[0], cues: T.RING.map(r => [r, 'plip']).concat(T.ARC.map(a => [a, 'pen'])),
@@ -150,8 +150,8 @@
       } },
   };
 
-  /* ---------------- L5: “……无穷” where the tape runs out of the picture ---------------- */
-  const inf = { type: 'title', id: 'e1iInf', text: '……无穷', x: 1300, y: 230, size: 84, t0: T.INF, rot: -3, sfx: 'pop' };
+  /* ---------------- L5: “……无穷” on the left, where the tape runs out of the picture ---------------- */
+  const inf = { type: 'title', id: 'e1iInf', text: '……无穷', x: 300, y: 230, size: 84, t0: T.INF, rot: 3, sfx: 'pop' };
 
   const old = { type: 'e1_grp', id: 'e1iOld', out: T.OLD_OUT, inner: [tape, computer, blanksNote, inf] };
 
@@ -190,7 +190,7 @@
   const seriesG = { type: 'e1_grp', id: 'e1iSeG', out: T.OUT, inner: series };
 
   /* ---------------- 小问号 ---------------- */
-  const QX = 1290;
+  const QX = 1120;
   const qm = {
     type: 'e1_grp', id: 'e1iQmG', out: T.OUT,
     inner: {
@@ -198,7 +198,7 @@
       mood: [[0, 'neutral'], [1.6, 'surprised'], [T.STOP + 0.3, 'neutral'], [T.QSIGN, 'doubt'], [T.QDOWN, 'neutral'], [T.GO + 0.4, 'surprised'], [T.ITEM, 'neutral'], [T.ALL, 'happy']],
       act: [[0, 'idle'], [T.QSIGN, 'tap'], [T.QDOWN, 'idle'], [T.ALL, 'hop'], [T.ALL + 1.4, 'idle']],
       sign: [[0, null], [T.QSIGN, '够了吗？'], [T.QDOWN, null]],
-      gaze: [[0, [190, 380]], [1.6, [900, 400]], [T.STOP, [190, 380]], [T.RING[0], [800, 360]], [T.QSIGN, 'viewer'], [T.GO, [1000, 400]], [T.INF, [1300, 240]], [T.SWEAT, [200, 330]],
+      gaze: [[0, [1410, 380]], [1.6, [700, 400]], [T.STOP, [1410, 380]], [T.RING[0], [545, 360]], [T.QSIGN, 'viewer'], [T.GO, [600, 400]], [T.INF, [300, 240]], [T.SWEAT, [1410, 330]],
         [T.ITEM, [500, 520]], [T.LINE + 0.4, [1300, 320]], [T.ALL, 'viewer']],
     },
   };

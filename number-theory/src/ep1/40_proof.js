@@ -336,6 +336,7 @@
           const u = clamp(((t - T.CORE99) / 0.8) * 9 - i); if (u <= 0) continue;
           const y = yt + (i + 1) * g, a = EASE.back(clamp(u / 0.6));
           for (let j = 0; j < 9; j++) {
+            if (t >= T.L4949 && i === ell && Math.abs(j - ell) <= 3) continue;   // under the 49 × 49 patch
             if (i === ell && j === ell) text(`${k}.qc`, '⋱', bx + j * g, y, { size: g * 0.9, z: Z.front, color: C.pencil, opacity: clamp(u) });
             else if (i === ell) text(`${k}.qv${j}`, '⋮', bx + j * g, y, { size: g * 0.9, z: Z.front, color: C.pencil, opacity: clamp(u) });
             else if (j === ell) text(`${k}.qh${i}`, '⋯', bx + j * g, y, { size: g * 0.9, z: Z.front, color: C.pencil, opacity: clamp(u) });
@@ -398,7 +399,7 @@
       return c;
     },
   };
-  const SLOT_CX = [150, 380, 640, 930, 1240], SLOT_CY = 330;
+  const SLOT_CX = [140, 410, 660, 945, 1240], SLOT_CY = 330;
   const slotT = n => (n === 0
     ? { pile: T.ONE_PILE, lone: T.ONE_HOP, ring: T.ONE_RING, box: T.ONE_BOX, core: T.ONE_SQ }
     : { pile: T.PILES + 0.2 * (n - 1), lone: T.LONE + 0.12 * (n - 1), ring: T.LONE + 0.4 + 0.12 * (n - 1), pair: T.PAIR + 0.1 * (n - 1), oval: T.OVAL + 0.1 * (n - 1),
@@ -413,7 +414,7 @@
   const EQ1W = writeWidth('(n+1)²', EQ.size), EQ_A = EQ.x + EQ1W * 0.4;   // the arrow from (n+1)² down to the big square
 
   /* ---------------- the check (L20–L21): red, '=' signs in one column ---------------- */
-  const VX = 1080, VS = 52;
+  const VX = 1110, VS = 52;
   const vLine = (id, s, y, t0) => {
     const L = layoutWriting({ text: s, x: 0, y, size: VS, t0, speed: 3000 }), eq = L.boxes.findIndex(b => b.ch === '=');
     const x = eq >= 0 ? VX - L.boxes[eq].x : VX - L.width - 0.44 * VS;   // no '=' yet: end where the ' =' would start
@@ -433,7 +434,7 @@
   const TITLE = '每一个正奇数，都是两个平方的差', TS = 62, TX = 640 - textWidth(TITLE, TS) / 2, TY = 205;
 
   /* ---------------- characters ---------------- */
-  const JX = 1490, QX = 1335;
+  const JX = 1490, QX = 1318;
   const exitWalk = makeWalk(T.END, T.END + 0.6, 5.6);
 
   defineScene({
@@ -531,9 +532,9 @@
         { type: 'c1_tag', id: 'c1n9k', glyph: true, text: '1', at: [N9.xr + 42, N9.yt - 44], size: 46, t0: T.TAG1 },
         { type: 'c1_fade', id: 'c1n98F', out: T.T98_OUT, dur: 0.25, inner: { type: 'c1_tag', id: 'c1n98', glyph: true, text: '98', at: [1110, 420], size: 52, t0: T.T98 } },
         { type: 'c1_tag', id: 'c1n9a', glyph: true, text: '49', at: [N9.bx + 4 * N9.g, N9.yt - 56], size: 46, t0: T.L49A },
-        { type: 'c1_tag', id: 'c1n9b', glyph: true, text: '49', at: [N9.xr + 60, N9.yt + 5 * N9.g], size: 46, t0: T.L49B },
+        { type: 'c1_tag', id: 'c1n9b', glyph: true, text: '49', at: [N9.xr + 60, N9.yt + 7 * N9.g], size: 46, t0: T.L49B },
         { type: 'c1_tag', id: 'c1n9c', glyph: true, text: '49 × 49', at: [N9.bx + 4 * N9.g, N9.yt + 5 * N9.g], size: 54, t0: T.L4949, color: 'ink', back: true, w: 5.5 },
-        { type: 'c1_tag', id: 'c1n9d', glyph: true, text: '50 × 50', at: [(N9.bx + N9.xr) / 2, N9.by + 54], size: 50, t0: T.L5050, color: 'ink', w: 5.5 },
+        { type: 'c1_tag', id: 'c1n9d', glyph: true, text: '50 × 50', at: [(N9.bx + N9.xr) / 2, N9.by + 62], size: 50, t0: T.L5050, color: 'ink', w: 5.5 },
         V1, V2, V3, V3B, VCK,
       ] },
 
@@ -550,8 +551,11 @@
         { type: 'title', id: 'c1rwd', text: '……', x: ROW.x0 + ODDS.length * ROW.dx + 10, y: ROW.y + ROW.size * 0.62, size: 56, t0: T.ROW_DOTS, sfx: 'pop' },
         { type: 'scribe', id: 'c1tt', text: TITLE, x: TX, y: TY, size: TS, t0: T.TITLE, cps: 4.2, z: Z.annot, sfx: 'pen' },
         { type: 'band', id: 'c1ttH', rect: [TX, TY - 34, textWidth(TITLE, TS), 68], t0: T.HI, dur: 0.6 },
-        { type: 'ringRect', id: 'c1ttR', rect: [TX - 4, TY - 32, TS * 3 + 8, 64], t0: T.RING, pad: 12 },
-        { type: 'prop', id: 'c1card', kind: 'n1_card', at: [640, 566], t0: T.CARD, lines: ['两个数都是 0 或正整数'], w: 560, h: 110, drawDur: 0.4, sfxAt: [[T.CARD, 'paper']] },
+        { type: 'c1_fn', id: 'c1ttU', t0: T.RING, cues: [[T.RING, 'pen']], fn: (t, lt, k) => {   // 每一个: underlined twice in red
+          stroke(k + '.a', [[TX - 6, TY + 44], [TX + TS * 1.5, TY + 46], [TX + TS * 3 + 6, TY + 42]], { z: Z.annot, w: 5, color: C.red, draw: EASE.out(clamp(lt / 0.3)) });
+          stroke(k + '.b', [[TX + 4, TY + 56], [TX + TS * 1.5, TY + 57], [TX + TS * 3 - 4, TY + 54]], { z: Z.annot, w: 4, color: C.red, draw: EASE.out(clamp((lt - 0.2) / 0.3)) });
+        } },
+        { type: 'prop', id: 'c1card', kind: 'n1_card', at: [640, 566], t0: T.CARD, lines: ['两个数都是 0 或正整数'], w: 500, h: 110, size: 40, drawDur: 0.4, sfxAt: [[T.CARD, 'paper']] },
       ] },
     ],
     subs: [
