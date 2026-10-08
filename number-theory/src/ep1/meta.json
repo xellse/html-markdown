@@ -1,0 +1,69 @@
+{
+  "series": "一道题长大了",
+  "title": "一道题长大了 第1集",
+  "desc": "【待填写】",
+  "h1": "第1集 · 7 找到了，6 呢？",
+  "kicker": "一道题长大了 · 数论动画",
+  "aria": "【待填写：给读屏器的画面描述】一道题长大了 · 第1集 · 7 找到了，6 呢？",
+  "poster_label": "播放 · 第1集",
+  "poster": 40,
+  "out": "episode-1.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+5%",
+        "pitch": "+0Hz"
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      }
+    },
+    "music": {
+      "title": "main",
+      "open": "main",
+      "six": "calm",
+      "bands": "calm",
+      "proof": "calm",
+      "evens": "chip",
+      "table": "sneaky",
+      "infinite": "sneaky",
+      "ending": "turn",
+      "end": "turn"
+    }
+  }
+}

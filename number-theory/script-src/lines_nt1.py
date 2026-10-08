@@ -1,5 +1,12 @@
 from timing import lay
-import json
+import json, hashlib, os
+_M = json.load(open('/home/user/html-markdown/number-theory/src/ep1/meta.json', encoding='utf-8'))['audio']['voices']
+def real(voice, say):
+    vc = _M[voice]; h = hashlib.sha1(json.dumps([vc, say], ensure_ascii=False).encode()).hexdigest()[:16]
+    f = f'/home/user/html-markdown/number-theory/audio/voice/{h}.mp3'
+    if not os.path.exists(f): return None
+    from mutagen.mp3 import MP3
+    return MP3(f).info.length
 K='kid'; Q='qm'
 S = {
 'title': [('一道题长大了，第一集：7找到了，6呢？', None, 0, '一道题长大了。第一集：七找到了，六呢？', True)],
@@ -77,11 +84,6 @@ S = {
           ('所以，1、3、5、7……每一个正奇数，', None, 0.6, '所以，一、三、五、七……每一个正奇数，'),
           ('都是两个平方的差。', None, 0.1),
           ('不是试出来的几个，是每一个。', None, 0.5)],
-'pause1': [('轮到你了。', None, 0),
-           ('37是哪两个平方的差？', None, 0.3, '三十七是哪两个平方的差？'),
-           ('37拿掉1个，剩36，每条胳膊18，', None, 0.8, '三十七拿掉一个，剩三十六，每条胳膊十八，'),
-           ('包住18×18，变成19×19：', None, 0.2, '包住十八乘十八，变成十九乘十九：'),
-           ('361减324，正好37。', None, 0.3, '三百六十一减三百二十四，正好三十七。')],
 'evens': [('奇数解决了。偶数呢？', None, 0),
           ('“2找不到，6也找不到……”', K, 0.4, '二找不到，六也找不到……'),
           ('“偶数肯定都不行！”', K, 0.2, '偶数肯定都不行！'),
@@ -123,15 +125,15 @@ S = {
            ('还是根本没有？还不知道。', None, 0.1),
            ('试出来的，是这几个；', None, 0.8),
            ('想明白的，是每一个。', None, 0.4),
-           ('下集之前，算一算：', None, 0.8),
-           ('1、4、9、16、25，除以4各余几？', None, 0.2, '一、四、九、十六、二十五，除以四，各余几？')],
+           ('下一集，我们换一扇门：', None, 0.8),
+           ('把平方数四个四个分组，看看会剩下几个。', None, 0.2)],
 'end': [('下集：不用试遍所有数。', None, 0.3),
         ('《一道题长大了》，第一集完。', None, 0.6)],
 }
 out = {}
 tot = 0
 for k, lines in S.items():
-    subs, dur = lay(lines)
+    subs, dur = lay(lines, real=real)
     out[k] = {'subs': subs, 'dur': dur}
     tot += dur
     chars = sum(len((l[3] if len(l) > 3 and l[3] else l[0])) for l in lines)

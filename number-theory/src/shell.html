@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESC}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=VT323&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+{{AUDIO_TAG}}
+<style>
+/* Layout: one column — a sheet of paper (the stage) lying on a desk, with the player bar under it. */
+:root{
+  --bg:#F2EEE5; --fg:#1E1E1E; --muted:#6B665D; --surface:#FFFDF8; --border:#D8D0C0;
+  --accent:#D23A3F; --btn-bg:#1E1E1E; --btn-fg:#FBF8F1; --focus:#2F74C0; --shadow:rgba(40,30,10,.10);
+  --sw-ink:#1E1E1E; --sw-red:#D23A3F; --sw-hi:#FFE066;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161519; --fg:#ECE8DF; --muted:#A39E94; --surface:#211F25; --border:#3A3740;
+    --accent:#FF6E72; --btn-bg:#ECE8DF; --btn-fg:#161519; --focus:#8CB8FF; --shadow:rgba(0,0,0,.4);
+    --sw-ink:#ECE8DF; --sw-red:#FF6E72; --sw-hi:#FFE066; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161519; --fg:#ECE8DF; --muted:#A39E94; --surface:#211F25; --border:#3A3740;
+  --accent:#FF6E72; --btn-bg:#ECE8DF; --btn-fg:#161519; --focus:#8CB8FF; --shadow:rgba(0,0,0,.4);
+  --sw-ink:#ECE8DF; --sw-red:#FF6E72; --sw-hi:#FFE066; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","Patrick Hand",system-ui,sans-serif;overflow-x:hidden}
+.wrap{max-width:1100px;margin:0 auto;padding-block:18px 32px;padding-inline:16px}
+.head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.head h1{font-weight:400;font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:.02em;text-wrap:balance}
+.head .kicker{margin:0;color:var(--muted);font-size:15px}
+#stage{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;background:#FBF8F1;border-radius:12px;overflow:hidden;box-shadow:0 1px 0 var(--border),0 8px 28px var(--shadow);user-select:none;-webkit-user-select:none}
+#stage > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.overlay{position:absolute;inset:0;border:0;padding:0;margin:0;background:rgba(251,248,241,.18);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font:inherit;color:#1E1E1E}
+.overlay[hidden]{display:none}
+.overlay .disc{width:clamp(64px,13vw,124px);height:clamp(64px,13vw,124px);border-radius:50%;background:#1E1E1E;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(251,248,241,.85);transition:transform .15s}
+.overlay:hover .disc{transform:scale(1.06)}
+.overlay .disc svg{position:static;width:42%;height:42%;margin-left:8%}
+.overlay .plabel{background:#FBF8F1;padding:2px 12px;border-radius:999px;font-size:clamp(14px,2.2vw,20px)}
+.overlay:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.overlay.think{background:rgba(251,248,241,0);justify-content:flex-end;padding-bottom:5%}
+.overlay.think .plabel{background:#D23A3F;color:#FBF8F1;font-size:clamp(16px,2.6vw,26px);padding:6px 18px;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.bar{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.btn{height:44px;min-width:44px;padding:0 14px;border-radius:22px;border:1.5px solid var(--border);background:var(--surface);color:var(--fg);font:inherit;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn svg{width:18px;height:18px;fill:currentColor}
+.btn.primary{background:var(--btn-bg);color:var(--btn-fg);border-color:var(--btn-bg);padding:0;width:48px;height:48px;border-radius:24px}
+.btn:focus-visible,#scrub:focus-visible,.chap:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn.toggle[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.btn.toggle[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+#scrub{flex:1 1 180px;min-width:120px;accent-color:var(--accent);height:28px}
+#time{font-family:"Patrick Hand",monospace;font-size:18px;min-width:96px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.chapters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.chap{font:inherit;font-size:15px;border:1.5px solid var(--border);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;display:inline-flex;gap:6px;align-items:baseline}
+.chap .ct{font-family:"Patrick Hand",monospace;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.chap[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
+.legend{margin:14px 2px 0;color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.credits{margin:10px 2px 0;color:var(--muted);font-size:13px;font-family:system-ui,sans-serif;line-height:1.5}
+.sw{width:22px;height:6px;border-radius:3px;display:inline-block}
+.sw.ink{background:var(--sw-ink)} .sw.red{background:var(--sw-red)} .sw.hi{background:var(--sw-hi);height:12px;opacity:.9}
+@media (max-width:560px){
+  #scrub{order:10;flex-basis:100%}
+  .btn.toggle{padding:0 10px;font-size:15px}
+  .head .kicker{font-size:13px}
+  .chap{font-size:14px;padding:5px 10px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>{{H1}}</h1>
+    <p class="kicker">{{KICKER}}</p>
+  </header>
+
+  <div id="stage" role="img" aria-label="{{ARIA}}">
+    <svg id="svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <rect width="1600" height="900" fill="#FBF8F1"/>
+      <g id="layer"></g>
+    </svg>
+    <button id="poster" class="overlay" type="button" aria-label="播放动画">
+      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17l15-8.5z" fill="#FBF8F1"/></svg></span>
+      <span class="plabel">{{POSTER_LABEL}}</span>
+    </button>
+    <button id="think" class="overlay think" type="button" aria-label="继续播放，看答案" hidden>
+      <span class="plabel">想好了吗？点这里看答案 ▶</span>
+    </button>
+  </div>
+
+  <div class="bar" role="group" aria-label="播放控制">
+    <button id="btnPlay" class="btn primary" type="button" aria-label="播放"></button>
+    <button id="btnRestart" class="btn" type="button" aria-label="从头播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+    <input id="scrub" type="range" min="0" max="10" step="0.1" value="0" aria-label="播放进度（秒）">
+    <output id="time" aria-live="off">0:00 / 0:00</output>
+    <button id="btnNarr" class="btn toggle" type="button" aria-pressed="true" title="旁白配音">配音</button>
+    <button id="btnMusic" class="btn toggle" type="button" aria-pressed="true" title="背景音乐">音乐</button>
+    <button id="btnSnd" class="btn toggle" type="button" aria-pressed="true" title="脚步、粉笔、弹跳等小音效">音效</button>
+  </div>
+  <ol id="chapters" class="chapters" aria-label="章节"></ol>
+  <p class="legend">
+    <span><i class="sw ink"></i>{{LEGEND_INK}}</span>
+    <span><i class="sw red"></i>{{LEGEND_RED}}</span>
+    <span><i class="sw hi"></i>{{LEGEND_HI}}</span>
+  </p>
+  <p id="credits" class="credits" hidden></p>
+</main>
+
+<script>
+'use strict';
+/*@@ENGINE@@*/
+/*@@SCENES@@*/
+/*@@BOOT@@*/
+</script>
+</body>
+</html>
