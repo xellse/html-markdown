@@ -3,8 +3,9 @@ import sys, json
 def units(s): return sum(0.5 if ch.isascii() and ch.isalnum() else 0 if ch.isspace() else 1 for ch in s)
 PACE = {'narr': (0.2, 0.8), 'kid': (0.19, 0.95), 'qm': (0.2, 0.8)}
 def vis(s): return len(s.strip('“”"'))   # same rule as tools/check_timing.py
-def lay(lines, start=0.3, margin=0.25, gap=0.1, tail=0.5, real=None, speed=1.0):
-    # speed: estimated clip length multiplier for a faster TTS rate (e.g. 0.88 for narration at +15% instead of +5%)
+def lay(lines, start=0.3, margin=0.25, gap=0.1, tail=0.5, real=None, speed=1.0, real_pad=0.3):
+    # speed: estimated clip length multiplier for a faster TTS rate (e.g. 0.88 for narration at +20% instead of +5%)
+    # real_pad: with real clip lengths, a line lasts at least clip + real_pad (0.3 = clip + the default margin + 0.05)
     t = start; out = []
     for L in lines:
         text, voice, hold, say, hide = (list(L) + [None, None, None, None])[:5]
@@ -13,7 +14,7 @@ def lay(lines, start=0.3, margin=0.25, gap=0.1, tail=0.5, real=None, speed=1.0):
         a, b = PACE[voice]; d = (a * units(say or text) + b) * speed + margin
         if real:
             rd = real(voice, say or text)
-            if rd: d = max(d, rd + 0.3)
+            if rd: d = max(d, rd + real_pad)
         t0, t1 = round(t, 2), round(t + d, 2)
         assert hide or vis(text) <= 20, (text, vis(text))
         o = {'t0': t0, 't1': t1, 'text': text}
