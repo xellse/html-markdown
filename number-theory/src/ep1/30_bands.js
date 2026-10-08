@@ -17,10 +17,11 @@
     ROW: { 2: 9.65, 3: 13.3, 4: 17.0 },          // "1 → 4" …
     PLUS: { 2: 10.9, 3: 14.55, 4: 18.25 },       // "+3" … ("多了3个")
     CHEER: 20.7, BAND: 21.1, CHEER_END: 24.9,
-    RAISE: 26.4, MARK: 26.55, FLASH: 26.7, FLY: 28.25, LAND: 28.95, DOWN: 29.1,
-    OUT1: 31.45, SHR: 31.6, SHR1: 32.25, SA: 32.3, SB: 32.5, LBL: 32.75,
-    QSIGN: 35.4, TOWER: 35.6, LOOK: 35.85,
-    EXIT0: 38.85, EXIT1: 39.9, OUT: 39.4, DUR: 40.0,
+    RAISE: 26.4, MARK: 26.55, FLASH: 26.7, FLASH_OUT: 30.8, FLY: 27.9, LAND: 28.6, DOWN: 28.75, SPLIT: 29.6, SPLIT1: 30.25,
+    // L8 and L9 sit 0.5 s later than in the script (so the three little ┐ get a 1.5 s hold)
+    OUT1: 31.95, SHR: 32.1, SHR1: 32.75, SA: 32.8, SB: 33.0, LBL: 33.25,
+    QSIGN: 35.9, TOWER: 36.1, LOOK: 36.35,
+    EXIT0: 39.35, EXIT1: 40.4, OUT: 39.9, DUR: 40.5,
   };
 
   /* ---------------- helpers ---------------- */
@@ -58,7 +59,7 @@
   // each layer: its dots only (the inner square is already there), then its arms (solid boxes + dashed corner)
   const layerDots = N => ({ type: 'n1_dots', id: 'e1bL' + N, x: BL[0], y: top(N), N, gap: G, t0: T.S[N], pop: 0.4, hide: (i, j) => !(i === 0 || j === N - 1) });
   const layerArms = (N, t1) => ({ type: 'n1_dots', id: 'e1bA' + N, x: BL[0], y: top(N), N, gap: G, t0: T.S[N] + 0.35, arms: { t: T.S[N] + 0.4 }, hide: () => true, ...(t1 ? { t1 } : {}) });
-  const layerFlash = (N, t) => ({ type: 'n1_dots', id: 'e1bF' + N, x: BL[0], y: top(N), N, gap: G, t0: t, arms: { t }, hide: () => true, t1: t + 0.75 });
+  const layerFlash = (N, t) => ({ type: 'n1_dots', id: 'e1bF' + N, x: BL[0], y: top(N), N, gap: G, t0: t, arms: { t }, hide: () => true, t1: T.FLASH_OUT });
   const one = { type: 'n1_dots', id: 'e1b1', x: BL[0], y: BL[1], N: 1, gap: G, t0: T.ONE };
   // L8: the square shrinks into the top-left corner and two smaller ones join it: 2×2, 3×3, 4×4 in a row
   const SS = 0.55, XF = [400 - SS * BL[0], 330 - SS * BL[1]];
@@ -109,21 +110,26 @@
       { type: 'band', id: 'e1bTb', rect: [906, 300, 112, 350], t0: T.BAND, dur: 0.45 }],
   };
 
-  /* ---------------- L7: Jasper's mark ┐ flies onto the outer layer ---------------- */
-  const S0 = 84, S1 = 3 * G + 30, CORNER = [BL[0] + 3 * G, top(4)], C1 = [CORNER[0] - S1 / 2, CORNER[1] + S1 / 2], MID = [860, 210];
+  /* ---------------- L7: Jasper's mark ┐ flies over and lies beside the outer layer (outside, same size: “一个样”),
+     then splits into three little ┐ written after +3, +5, +7 (each of them is a difference of two squares) ---------------- */
+  const S0 = 84, S1 = 3 * G, OFF = 70, CORNER = [BL[0] + 3 * G + OFF, top(4) - OFF], C1 = [CORNER[0] - S1 / 2, CORNER[1] + S1 / 2], MID = [860, 210];
+  const SM = 40, MID2 = [760, 170], TGT = [2, 3, 4].map(N => [1052, ROW_Y[N] + RS / 2]);
+  const bez = (A, M, B, u) => [lerp(lerp(A[0], M[0], u), lerp(M[0], B[0], u), u), lerp(lerp(A[1], M[1], u), lerp(M[1], B[1], u), u)];
   const mark = {
     type: 'e1_grp', id: 'e1bMkG', out: T.OUT1, dur: 0.3,
     inner: {
-      type: 'e1_fn', id: 'e1bMk', t0: T.MARK, cues: [[T.MARK, 'pen'], [T.FLY, 'whoosh'], [T.LAND, 'ding']],
+      type: 'e1_fn', id: 'e1bMk', t0: T.MARK, cues: [[T.MARK, 'pen'], [T.FLY, 'whoosh'], [T.LAND, 'ding'], [T.SPLIT, 'whoosh'], ...TGT.map((_, i) => [T.SPLIT1 + i * 0.08, 'pen'])],
       fn: (t, lt, k, F) => {
         const a = F.anchors.kid; if (!a) return;
-        const h = a.handL, c0 = [h[0] - S0 / 2 + 8, h[1] - S0 / 2 - 6];   // held by the foot of the ┐
-        const u = EASE.io(clamp((t - T.FLY) / (T.LAND - T.FLY)));
-        const c = u <= 0 ? c0 : [lerp(lerp(c0[0], MID[0], u), lerp(MID[0], C1[0], u), u), lerp(lerp(c0[1], MID[1], u), lerp(MID[1], C1[1], u), u)];
-        const s = lerp(S0, S1, u);
-        DL.save(); DL.translate(c[0], c[1]);
-        PROPS.n1_mark({ id: k, size: s, w: 7 }, t, lt, EASE.out(clamp(lt / 0.3)));
-        DL.restore();
+        const p = EASE.out(clamp(lt / 0.3));
+        const draw = (key, c, s) => { DL.save(); DL.translate(c[0], c[1]); PROPS.n1_mark({ id: key, size: s, w: s > 60 ? 7 : 6 }, t, lt, p); DL.restore(); };
+        if (t < T.SPLIT) {
+          const h = a.handL, c0 = [h[0] - S0 / 2 + 8, h[1] - S0 / 2 - 6];   // held by the foot of the ┐ (the arm stays up until it lands)
+          const u = EASE.io(clamp((t - T.FLY) / (T.LAND - T.FLY)));
+          draw(k, u <= 0 ? c0 : bez(c0, MID, C1, u), lerp(S0, S1, u));
+          return;
+        }
+        TGT.forEach((g, i) => { const v = EASE.io(clamp((t - T.SPLIT - i * 0.08) / (T.SPLIT1 - T.SPLIT))); draw(i ? `${k}.${i}` : k, bez(C1, MID2, g, v), lerp(S1, SM, v)); });
       },
     },
   };
@@ -167,7 +173,7 @@
       act: [[0, 'idle'], [T.CHEER + 0.2, 'hop'], [T.CHEER + 1.6, 'idle'], [T.QSIGN, 'tap'], [T.EXIT0 - 0.3, 'idle']],
       sign: [[0, null], [T.QSIGN, '第一百层？'], [T.EXIT0, null]],
       gaze: [[0, [SIX_C[0], SIX_C[1]]], [T.PARK1, PK_AT], [T.ONE, BL], [T.S[2], [BL[0] + 60, BL[1] - 60]], [T.ROW[2] + 0.6, [820, 420]], [T.S[4], [BL[0] + 140, BL[1] - 140]], [T.PLUS[4], [960, 600]],
-        [T.CHEER, 'kid'], [T.RAISE + 0.3, 'kid'], [T.FLY + 0.2, C1], [T.SHR1, [300, 240]], [T.QSIGN, 'viewer'], [T.TOWER + 0.5, [TX, 200]]],
+        [T.CHEER, 'kid'], [T.RAISE + 0.3, 'kid'], [T.FLY + 0.2, C1], [T.SPLIT + 0.3, [1050, 480]], [T.SHR1, [300, 240]], [T.QSIGN, 'viewer'], [T.TOWER + 0.5, [TX, 200]]],
     },
   };
 
@@ -188,7 +194,7 @@
         turn: [[0, -0.35], [T.EXIT0, 0.5, 0.1]],
         gaze: [[0, [SIX_C[0], SIX_C[1]]], [T.PARK, PK_AT], [T.PARK1 + 0.3, 'viewer'], [T.ONE, BL], [T.S[2], [BL[0] + 50, BL[1] - 50]], [T.ROW[2] + 0.3, [800, 360]], [T.S[3], [BL[0] + 90, BL[1] - 90]],
           [T.ROW[3] + 0.3, [800, 480]], [T.S[4], [BL[0] + 140, BL[1] - 140]], [T.ROW[4] + 0.3, [820, 600]], [T.CHEER, [960, 480]], [T.CHEER + 1.4, 'viewer'],
-          [T.RAISE, [BL[0] + 140, BL[1] - 140]], [T.FLY, C1], [T.SHR1, [300, 250]], [T.LOOK, [TX, -60]], [T.EXIT0, [1800, 600]]],
+          [T.RAISE, [BL[0] + 140, BL[1] - 140]], [T.FLY, C1], [T.SPLIT + 0.2, [1050, 480]], [T.SHR1, [300, 250]], [T.LOOK, [TX, -60]], [T.EXIT0, [1800, 600]]],
       },
     },
     steps: [{ t0: T.EXIT0, t1: T.EXIT1, hz: 5.2 }],
@@ -201,8 +207,8 @@
       { t0: 16.66, t1: 19.91, text: '9变成16，多了7个。', say: '九变成十六，多了七个。' },
       { t0: 20.61, t1: 24.73, text: '“3、5、7……都是奇数！”', voice: 'kid', say: '三、五、七……都是奇数！' },
       { t0: 26.33, t1: 30.76, text: '“每一圈都是拐角，跟我的记号一个样！”', voice: 'kid', say: '每一圈都是拐角，跟我的记号一个样！' },
-      { t0: 31.46, t1: 34.93, text: '可是，我们只看了三层。' },
-      { t0: 35.33, t1: 38.58, text: '“第一百层，也是奇数吗？”', voice: 'qm', say: '第一百层，也是奇数吗？' },
+      { t0: 31.96, t1: 35.43, text: '可是，我们只看了三层。' },
+      { t0: 35.83, t1: 39.08, text: '“第一百层，也是奇数吗？”', voice: 'qm', say: '第一百层，也是奇数吗？' },
     ],
   });
 })();

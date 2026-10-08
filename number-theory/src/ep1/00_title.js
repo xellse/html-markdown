@@ -6,7 +6,11 @@
     fx: [
       F(5.5, { type: 'title', id: 'tt', text: '一道题长大了', x: 800, y: 210, size: 140, t0: -0.15, underline: true, sfx: 'stamp' }),
       F(5.5, { type: 'title', id: 'ep', text: '第 1 集', x: 800, y: 372, size: 60, t0: 0.6, color: 'red', rot: -3 }),
-      F(5.5, { type: 'title', id: 'a', text: '7 找到了，6 呢？', x: 800, y: 500, size: 96, t0: 1.1, color: 'red', rot: -2, font: CFG.FONT_MIX }),
+      // "7 找到了，6 呢？": the digits in the same handwriting as the rest of the episode
+      F(5.5, { type: 'write', id: 'a7', text: '7', x: 424, y: 452, size: 96, t0: 1.1, speed: 2600, color: 'red' }),
+      F(5.5, { type: 'title', id: 'a1', text: '找到了，', x: 498, y: 500, size: 96, t0: 1.25, color: 'red', anchor: 'start' }),
+      F(5.5, { type: 'write', id: 'a6', text: '6', x: 872, y: 452, size: 96, t0: 1.45, speed: 2600, color: 'red' }),
+      F(5.5, { type: 'title', id: 'a2', text: '呢？', x: 946, y: 500, size: 96, t0: 1.6, color: 'red', anchor: 'start' }),
       { type: 'n1_dots', id: 'd', x: 722, y: 600, N: 4, gap: 52, t0: 1.8, t1: 5.4, hide: (i, j) => i >= 1 && j <= 2, arms: { t: 2.6 } },
     ],
     subs: [

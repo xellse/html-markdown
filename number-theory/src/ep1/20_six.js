@@ -125,6 +125,13 @@
     const [x0, x1] = span(L.boxes, i0, i1), h = L.size;
     stroke(k, ringPts(k, (x0 + x1) / 2 + 3, L.y + h * 0.42, (x1 - x0) / 2 + 24, h / 2 + 19, { n: 12, a0: -140, sweep: 385, rv: 0.05 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
   };
+  // L12 "两个数": red rings round the two numbers themselves, the bases 4 and 3 (not the little ²); they stay through L13 (前一个 / 后一个)
+  const ringBase = (k, L, i, p) => {
+    const b = L.boxes[i], h = L.size;
+    stroke(k, ringPts(k, b.x + b.w / 2 - 3, L.y + h * 0.52, b.w / 2 + 10, h / 2 + 12, { n: 12, a0: -140, sweep: 385, rv: 0.05 }), { z: Z.annot, w: 4.5, color: C.red, draw: p });
+  };
+  const BASES = { type: 'b1_fn', id: 'b1bs', t0: T.CL1, cues: [[T.CL1, 'pen'], [T.CL1 + 0.3, 'pen']],
+    fn: (t, lt, k) => { ringBase(k + '.a', E3, 0, EASE.out(clamp(lt / 0.3))); ringBase(k + '.b', E3, 5, EASE.out(clamp((lt - 0.3) / 0.3))); } };
   const RINGS = { type: 'b1_fn', id: 'b1rg', t0: T.RING4, cues: [[T.RING4, 'pen'], [T.RING3, 'pen']],
     fn: (t, lt, k) => { ringOver(k + '.a', E3, 0, 1, EASE.out(clamp(lt / 0.35))); ringOver(k + '.b', E3, 5, 6, EASE.out(clamp((t - T.RING3) / 0.35))); } };
 
@@ -304,7 +311,7 @@
           [T.SQ[0], 0.94, 0.08], [T.SQ[0] + 0.08, 1, 0.12], [T.SQ[1], 0.94, 0.08], [T.SQ[1] + 0.08, 1, 0.12]],
         gaze: [[0, 'viewer'], [0.9, 'name'], [T.E1, 'e1'], [T.G4, 'grids'], [T.E2, 'e2'], [T.NOT42 + 0.2, 'n42'], [T.BIG, 'big'], [T.E3, 'e3'],
           [T.POINT1, 'mark'], [T.PROUD, 'viewer'], [T.QS1 + 0.1, 'qmh'], [T.POINT2, 'e3'], [T.POINT2_OFF, 'qmh'],
-          [T.QS2_OFF, 'card'], [T.W1a, 'qrow'], [T.SW[0] - 0.2, 'sh0'], [T.SW[1] - 0.2, 'sh1'], [T.SW[2] - 0.2, 'sh2'], [T.SH[3], 'pile'],
+          [T.QS2_OFF, 'card'], [T.CL1, 'e3'], [T.CL1 + 1.1, 'card'], [T.W1a, 'qrow'], [T.SW[0] - 0.2, 'sh0'], [T.SW[1] - 0.2, 'sh1'], [T.SW[2] - 0.2, 'sh2'], [T.SH[3], 'pile'],
           [T.SLOT, 'slot'], [T.THINK, 'panelL'], [T.PR + 0.1, 'panelR'], [T.QS3_OFF - 0.3, 'viewer']],
       },
     },
@@ -333,6 +340,7 @@
       ] },
       { type: 'b1_grp', id: 'b1hdr', out: T.D_OUT, dur: 0.4, xf: HDR_XF, inner: [
         E3, MARK, { type: 'b1_grp', id: 'b1rgG', out: T.A_OUT, dur: 0.35, inner: RINGS },
+        { type: 'b1_grp', id: 'b1bsG', out: T.CARD_OUT, dur: 0.4, inner: BASES },
       ] },
 
       // L11–L15: the rule card; at L16 it shrinks away toward the top-right corner

@@ -207,8 +207,16 @@ COMP.n1_map = {
         const u = clamp(since(fx.steps, i) / 0.35);
         text(key + '.q', N1_STEP_TXT[i], x0 - 10, y - 30, { size: 36, z: Z.annot, color: C.red, anchor: 'end', opacity: u * op, halo: true });
       }
-      if (has(fx.ticks, i)) text(key + '.tk', '✓', x0 + 30, y - 30, { size: 44, z: Z.annot, color: C.red, anchor: 'middle', opacity: clamp(since(fx.ticks, i) / 0.25) * op });
-      if (has(fx.qs, i)) { const b = 1 + 0.12 * Math.sin(Math.max(0, since(fx.qs, i)) * 9); text(key + '.qq', '?', x0 + 80, y - 30, { size: 44 * b, z: Z.annot, color: C.red, anchor: 'middle', opacity: clamp(since(fx.qs, i) / 0.25) * op }); }
+      if (has(fx.ticks, i)) {   // odd side: a big tick with 奇 under it, inside the stair body
+        const u = clamp(since(fx.ticks, i) / 0.25) * op;
+        text(key + '.tk', '✓', x0 + 24, y - 34, { size: 58, z: Z.annot, color: C.red, anchor: 'middle', opacity: u });
+        text(key + '.tkl', '奇', x0 + 24, y + 40, { size: 36, z: Z.annot, color: C.red, anchor: 'middle', opacity: u });
+      }
+      if (has(fx.qs, i)) {      // even side: a pulsing ? with 偶 under it
+        const u = clamp(since(fx.qs, i) / 0.25) * op, b = 1 + 0.12 * Math.sin(Math.max(0, since(fx.qs, i)) * 9);
+        text(key + '.qq', '?', x0 + 96, y - 34, { size: 58 * b, z: Z.annot, color: C.red, anchor: 'middle', opacity: u });
+        text(key + '.qql', '偶', x0 + 96, y + 40, { size: 36, z: Z.annot, color: C.red, anchor: 'middle', opacity: u });
+      }
     }
     // fog with blurry signposts
     if (fx.fog !== false) {
@@ -218,9 +226,9 @@ COMP.n1_map = {
         stroke(`${k}.sp${q}`, [[cx, cy + 70], [cx, cy - 10]], { z: Z.set, w: 4, color: C.pencil, opacity: fu * 0.8 });
         stroke(`${k}.sb${q}`, [[cx - 38, cy - 34], [cx + 38, cy - 34, 1], [cx + 38, cy - 4, 1], [cx - 38, cy - 4, 1], [cx - 38, cy - 34, 1]], { z: Z.set, w: 3, color: C.pencil, opacity: fu * 0.8 });
       }
-      for (let q = 0; q < 6; q++) {
-        const cx = 1000 + q * 85, cy = 150 + (q % 3) * 35;
-        stroke(`${k}.fog${q}`, ringPts(`${k}.fg${q}`, cx, cy, 90, 34, { n: 14 }), { z: Z.set + 2, w: 30, color: '#E9E4D8', closed: true, fill: '#EFEAE0', opacity: 0.9 * fu, boil: 0.5 });
+      for (let q = 0; q < 6; q++) {   // fog puffs, kept inside the map frame (x < 1490, y > 120)
+        const cx = 960 + q * 80, cy = 172 + (q % 3) * 28;
+        stroke(`${k}.fog${q}`, ringPts(`${k}.fg${q}`, cx, cy, 86, 32, { n: 14 }), { z: Z.set + 2, w: 18, color: '#EFEAE0', closed: true, fill: '#EFEAE0', opacity: 0.92 * fu, boil: 0.5 });
       }
     }
   },

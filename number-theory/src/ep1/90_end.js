@@ -7,7 +7,7 @@
     for (let r = 0; r < 4; r++) {
       const y = r * (H + 18), u = clamp(p * 4 - r);
       stroke(`${k}.l${r}`, [[0, y], [W, y, 1], [W, y + H, 1], [0, y + H, 1], [0, y, 1]], { z: Z.set, w: 4, draw: u, fill: r === 0 ? '#3A3A3A' : C.paper });
-      if (r === 1) for (let q = 0; q < 24; q++) stroke(`${k}.s${q}`, [[q * 38 + 10, y + H - 6], [q * 38 + 40, y + 6]], { z: Z.set + 0.2, w: 3, draw: u });
+      if (r === 1) for (let q = 0; q < 23; q++) stroke(`${k}.s${q}`, [[q * 38 + 10, y + H - 6], [Math.min(W - 6, q * 38 + 40), y + 6]], { z: Z.set + 0.2, w: 3, draw: u });
       if (r === 2) for (let q = 0; q < 45; q++) dot(`${k}.d${q}`, [q * 20 + 10, y + H / 2 + ((q % 2) ? 12 : -12)], 4, C.ink, Z.set + 0.2);
       text(`${k}.n${r}`, '余 ' + r, -70, y + H / 2, { size: 40, z: Z.set + 0.3, anchor: 'middle', font: CFG.FONT_MIX, opacity: u });
     }

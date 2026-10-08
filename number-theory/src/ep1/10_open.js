@@ -68,7 +68,7 @@
   // ---- the zoomed-in page: a sheet of exercise paper with a callout tail pointing at the open book
   PROPS.a1_page = (fx, t, lt, p) => {
     const k = fx.id, z = 13;
-    stroke(k + '.o', [[360, 112], [1110, 112, 1], [1110, 448, 1], [1222, 604, 1], [1110, 528, 1], [1110, 556, 1], [360, 556, 1], [360, 112, 1]], { z, w: 4.5, fill: C.paper, draw: p });
+    stroke(k + '.o', [[360, 112], [1110, 112, 1], [1110, 448, 1], [1204, 604, 1], [1110, 528, 1], [1110, 556, 1], [360, 556, 1], [360, 112, 1]], { z, w: 4.5, fill: C.paper, draw: p });
     for (let i = 0; i < 5; i++) stroke(`${k}.r${i}`, [[386, 208 + i * 78], [1086, 208 + i * 78]], { z: z + 0.1, w: 2, color: C.pencil, opacity: 0.6, draw: clamp(p * 2 - 0.8 - i * 0.1) });
   };
 
@@ -136,7 +136,7 @@
   };
 
   // ---- the little question mark's path: a chain of hops [t0, t1, from, to, height]
-  const BOOK = [325, 470], FLOOR = [780, 778], NB = [1262, 618], MAPR = [1140, 752], FOOT = [440, 752];
+  const BOOK = [325, 470], FLOOR = [780, 778], NB = [1285, 618], MAPR = [1140, 752], FOOT = [440, 752];
   const HOPS = [
     [7.85, 8.45, BOOK, FLOOR, 150], [8.55, 9.25, FLOOR, NB, 200],                     // L3: book → floor → notebook
     [22.95, 23.35, NB, MAPR, 60], [23.45, 24.15, MAPR, FOOT, 400],                     // L7: down onto the map, over the stairs
@@ -172,14 +172,14 @@
 
   defineScene({
     id: 'open', chapter: '开场：一张地图', dur: DUR, floor: FL,
-    cast: { kid: { ...N1.kid, desk: [1316, 626] } },
+    cast: { kid: { ...N1.kid, desk: [1335, 627] } },
     tracks: {
       kid: {
         pos: [[0, [1455, FL]], [MAP0 + 0.05, [2400, FL], 0]],
         pose: [[0, a1_scribble], [14.5, 'a1_write', 0.12], [18.45, 'a1_look', 0.12, 'back']],
         face: [[0, 'focus'], [18.45, 'idea', 0.06], [19.5, 'grin', 0.08]],
         turn: [[0, -0.35]],
-        gaze: [[0, [1310, 628]], [18.45, [1262, 500]]],
+        gaze: [[0, [1330, 628]], [18.45, [1285, 500]]],
       },
     },
     fx: [

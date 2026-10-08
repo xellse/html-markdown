@@ -9,6 +9,12 @@
     for (let q = 0; q < 3; q++) { dot(`${k}.a${q}`, [-70 + q * 46, -h / 2 + 62], 9, C.ink, Z.board + 1); dot(`${k}.b${q}`, [-70 + q * 46, -h / 2 + 86], 9, C.ink, Z.board + 1); }
     dot(k + '.c', [-70 + 3 * 46, -h / 2 + 74], 9, C.red, Z.board + 1);
   };
+  // 9 dots in a row, ringed as 4 | 4 | 1 (the last one red) — one example only, the rule is next episode's
+  PROPS.h1_group9 = (fx, t, lt, p) => {
+    const k = fx.id, xs = [0, 36, 72, 108, 170, 206, 242, 278, 340];
+    xs.forEach((x, i) => { if (p * 9 > i) dot(`${k}.d${i}`, [x, 0], 11, i === 8 ? C.red : C.ink, Z.front); });
+    if (lt > 0.7) [[0, 108], [170, 278]].forEach(([a, b], g) => stroke(`${k}.r${g}`, ringPts(`${k}.rp${g}`, (a + b) / 2, 0, (b - a) / 2 + 24, 26, { n: 16 }), { z: Z.annot, w: 4, color: C.red, closed: true, draw: clamp((lt - 0.7 - g * 0.25) / 0.35) }));
+  };
   defineScene({
     id: 'ending', chapter: '第一步', dur: 33.2, floor: N1.FL,
     cast: { kid: N1.kid },
@@ -27,10 +33,17 @@
       { type: 'n1_map', id: 'map', t0: 0, t1: 15.9, doorL: [[0, 0]], doorR: [[0, 0]], lit: [[0.4, 0], [0.7, 1]],
          steps: [[0.4, 0], [0.7, 1]], ticks: [[4.4, 0], [5.4, 1]], qs: [[8.8, 0], [9.6, 1]] },
       F(23.6, { type: 'title', id: 'g1', text: '试出来的，是这几个；', x: 640, y: 300, size: 84, t0: 16.7 }),
-      F(23.6, { type: 'title', id: 'g2', text: '想明白的，是每一个。', x: 700, y: 470, size: 84, t0: 20.3, color: 'red', underline: true }),
+      F(23.6, { type: 'title', id: 'g2', text: '想明白的，是每一个。', x: 700, y: 470, size: 84, t0: 20.3 }),
+      { type: 'band', id: 'g2b', rect: [272, 428, 856, 88], t0: 20.9, dur: 0.5, t1: 23.6 },
       F(32.0, { type: 'prop', kind: 'h1_door', id: 'door', at: [560, 430], t0: 24.3 }),
-      F(32.4, { type: 'write', id: 'sq', text: '1 4 9 16 25 …', x: 820, y: 300, size: 76, t0: 27.9, speed: 2400 }),
-      F(32.4, { type: 'title', id: 'q', text: '÷ 4，剩下几个？', x: 1010, y: 520, size: 64, t0: 29.6, color: 'red', rot: -2, font: CFG.FONT_MIX }),
+      // the square numbers, each labelled as a square (1², 2², …), then one teaser: 9 dots grouped by 4
+      ...[['1', '1²', 760], ['4', '2²', 880], ['9', '3²', 1000], ['16', '4²', 1130], ['25', '5²', 1280]].flatMap(([n, sq, x], i) => [
+        F(32.4, { type: 'write', id: 'sq' + i, text: n, x, y: 300, size: 76, t0: 27.9 + i * 0.25, speed: 2400, anchor: 'middle' }),
+        F(32.4, { type: 'write', id: 'sl' + i, text: sq, x, y: 228, size: 44, t0: 28.6 + i * 0.2, speed: 2400, anchor: 'middle', color: 'red' }),
+      ]),
+      F(32.4, { type: 'write', id: 'dots', text: '…', x: 1360, y: 300, size: 76, t0: 29.2, speed: 2400 }),
+      F(32.4, { type: 'prop', kind: 'h1_group9', id: 'g9', at: [760, 470], t0: 29.6 }),
+      F(32.4, { type: 'title', id: 'q', text: '4 个一组，剩下几个？', x: 930, y: 600, size: 60, t0: 30.4, color: 'red', rot: -2 }),
     ],
     subs: [
     {"t0": 0.3, "t1": 3.95, "text": "今天，我们走上了两级台阶："},

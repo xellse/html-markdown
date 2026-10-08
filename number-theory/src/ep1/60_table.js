@@ -62,8 +62,9 @@
   });
 
   /* ---------------- the table: numbers on top, ticks below ---------------- */
-  const X0 = 100, CW = 80, Y0 = 232, CH = 96, X1 = X0 + 16 * CW, Y1 = Y0 + CH, Y2 = Y0 + 2 * CH;
-  const cx = n => X0 + (n - 0.5) * CW, NY = Y0 + CH / 2, NS = 52, KS = 54, numTop = Y0 + (CH - NS) / 2, tickTop = Y1 + (CH - KS) / 2;
+  const X0 = 60, CW = 82, Y0 = 232, CH = 96, X1 = X0 + 16 * CW, Y1 = Y0 + CH, Y2 = Y0 + 2 * CH;
+  const cx = n => X0 + (n - 0.5) * CW, NY = Y0 + CH / 2, NS = 52, KS = 54, tickTop = Y1 + (CH - KS) / 2;
+  const nSize = n => (n >= 10 ? 44 : NS), nTop = n => Y0 + (CH - nSize(n)) / 2;   // two-digit numbers at 0.85× so they keep clear of the cell lines
   const grid = {
     type: 'e1_fn', id: 'e1tGr', t0: T.GRID, cues: [[T.GRID, 'pen'], [T.GRID + 0.3, 'pen']],
     fn: (t, lt, k) => {
@@ -75,7 +76,7 @@
   // numbers 1–16, written one after another; the blank ones can pulse (L4, L7)
   const PULSE_AT = { 2: [T.FLASH[0], T.PULSE[0]], 6: [T.FLASH[1], T.PULSE[1]], 10: [T.FLASH[2]], 14: [T.FLASH[3]] };
   const num = n => {
-    const w = W('e1tN' + n, String(n), cx(n), numTop, NS, T.NUM + (n - 1) * T.NUM_DT, { anchor: 'middle', speed: 4200, sfx: 'pen', silent: n % 3 !== 1 });
+    const w = W('e1tN' + n, String(n), cx(n), nTop(n), nSize(n), T.NUM + (n - 1) * T.NUM_DT, { anchor: 'middle', speed: 4200, sfx: 'pen', silent: n % 3 !== 1 });
     if (!PULSE_AT[n]) return w;
     const S = 1.3, c = [cx(n), NY], at = s => [c[0] - s * c[0], c[1] - s * c[1], s];
     const xf = [[0, at(1)]]; PULSE_AT[n].forEach(p => xf.push([p, at(S), 0.1, 'out'], [p + 0.12, at(1), 0.25, 'io']));
@@ -106,8 +107,8 @@
     },
   };
   const ext = [EXT,
-    W('e1tN17', '17', cx(17), numTop, NS, T.EXT + 0.15, { anchor: 'middle', speed: 4200, sfx: 'pen' }),
-    W('e1tN18', '18', cx(18), numTop, NS, T.EXT + 0.35, { anchor: 'middle', speed: 4200, sfx: 'pen' }),
+    W('e1tN17', '17', cx(17), nTop(17), nSize(17), T.EXT + 0.15, { anchor: 'middle', speed: 4200, sfx: 'pen' }),
+    W('e1tN18', '18', cx(18), nTop(18), nSize(18), T.EXT + 0.35, { anchor: 'middle', speed: 4200, sfx: 'pen' }),
     W('e1tK17', '✓', cx(17), tickTop, KS, T.EXT + 0.55, { anchor: 'middle', color: 'red', speed: 3400 }),
     W('e1tQ18', '?', cx(18), tickTop, KS, T.Q18, { anchor: 'middle', color: 'red', speed: 2600 }),
   ];
@@ -123,8 +124,9 @@
     fn: (t, lt, k) => {
       LIT.forEach(([n, tl]) => {
         const u = clamp((t - tl) / 0.25); if (u <= 0) return;
-        let s = EASE.back(u); const pv = RING_PULSE[n] !== undefined ? (t - RING_PULSE[n]) / 0.4 : -1; if (pv > 0 && pv < 1) s *= 1 + 0.25 * Math.sin(Math.PI * pv);
-        stroke(`${k}.r${n}`, ringPts(`${k}.r${n}`, cx(n), NY, (n >= 10 ? 38 : 34) * s, 38 * s, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red });
+        const pv = RING_PULSE[n] !== undefined ? (t - RING_PULSE[n]) / 0.4 : -1, s = pv > 0 && pv < 1 ? 1 + 0.1 * Math.sin(Math.PI * pv) : 1;
+        // inside the cell (half-width 41): two-digit numbers are written smaller, so one ring size fits all
+        stroke(`${k}.r${n}`, ringPts(`${k}.r${n}`, cx(n), NY, 32 * s, 37 * s, { n: 12, a0: -140, sweep: 385, rv: 0.04 }), { z: Z.annot, w: 4.5, color: C.red, draw: EASE.out(u) });
       });
       // the hopping red dot
       HOPS.forEach(([a, b, h0, h1], i) => {
