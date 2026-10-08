@@ -21,8 +21,8 @@
     RING: [5.0, 5.2, 5.4], ARC: [5.85, 6.25], RING_OUT: 12.55,
     QSIGN: 9.05, QDOWN: 12.3,
     GO: 12.9, INF: 17.6, SWEAT: 20.75,
-    OLD_OUT: 24.1,
-    ITEM: 24.75, LIT: 25.65, LINE: 25.95, ALL: 29.6,
+    OLD_OUT: 24.05,
+    ITEM: 24.4, LIT: 25.65, LINE: 25.95, ALL: 29.6,
     OUT: 32.4, DUR: 33.0,
   };
 
@@ -99,17 +99,20 @@
   /* ---------------- the tape: numbers on top, ticks below (like the table) ---------------- */
   const CW = 110, TY0 = 330, TY1 = 400, TY2 = 470;
   const TICK = layoutWriting({ text: '✓', x: 0, y: 0, size: 46, t0: 0, speed: 1e6 });
-  const cellX = (k, t) => SX + (P(t) - k + 0.5) * CW;   // centre of cell k (cell 1 came out first, so it is furthest right)
+  const LEAD = 30;                                     // a strip of blank paper between the slot and the newest cell
+  const cellX = (k, t) => SX + LEAD + (P(t) - k + 0.5) * CW;   // centre of cell k (cell 1 came out first, so it is furthest right)
   const tape = {
     type: 'e1_fn', id: 'e1iTp', t0: T.TAPE, cues: [0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9, 3.2, 3.5, 3.75, 3.95, 4.1].map(x => [x + 0.02, 'tap']).concat([13.1, 13.5, 13.8, 14.1].map(x => [x, 'tap']), [[T.GO + 0.6, 'whoosh']]),
     fn: (t, lt, k) => {
-      const Pt = P(t), lead = Math.min(1640, SX + Pt * CW), v = speed(t);
+      const Pt = P(t), lead = Math.min(1640, SX + LEAD + Pt * CW), v = speed(t);
       if (lead <= SX + 1) return;
       [TY0, TY1, TY2].forEach((y, i) => stroke(`${k}.h${i}`, [[SX, y], [lead, y, 1]], { z: Z.board, w: i === 1 ? 3 : 4.5 }));
       const kmax = Math.ceil(Pt), kmin = Math.max(1, Math.floor(Pt - (1640 - SX) / CW));
       for (let n = kmax; n >= kmin; n--) {
         const x = cellX(n, t); if (x - CW / 2 > 1640) continue;
         stroke(`${k}.v${n}`, [[x + CW / 2, TY0], [x + CW / 2, TY2]], { z: Z.board, w: 3.5 });
+        if (n === kmax && x - CW / 2 > SX) stroke(`${k}.v${n}L`, [[x - CW / 2, TY0], [x - CW / 2, TY2]], { z: Z.board, w: 3.5 });
+        if (x - CW / 2 < SX + 10) continue;   // still (partly) inside the computer
         const s = String(n);
         text(`${k}.n${n}`, s, x, (TY0 + TY1) / 2 + 2, { size: Math.min(54, 92 / (CFG.MONO_ADV * s.length)), font: CFG.FONT_MONO, z: Z.board + 0.1 });
         if (blank(n)) { const P4 = [[x - 26, TY1 + 9], [x + 26, TY1 + 9], [x + 26, TY2 - 9], [x - 26, TY2 - 9]]; P4.forEach((a, j) => dash(`${k}.b${n}.${j}`, a, P4[(j + 1) % 4], { step: 14, on: 7, w: 2.5 })); }
@@ -127,15 +130,14 @@
   };
 
   /* ---------------- L2: the blanks on screen flash; “隔 4” arcs (the tape is standing still at 1000) ---------------- */
-  const SHOWN = [998, 994, 990], xAt = n => SX + (1000 - n + 0.5) * CW;
+  const SHOWN = [998, 994, 990], xAt = n => SX + LEAD + (1000 - n + 0.5) * CW;
   const blanksNote = {
     type: 'e1_grp', id: 'e1iBlG', out: T.RING_OUT, dur: 0.3,
     inner: { type: 'e1_fn', id: 'e1iBl', t0: T.RING[0], cues: T.RING.map(r => [r, 'plip']).concat(T.ARC.map(a => [a, 'pen'])),
       fn: (t, lt, k) => {
         SHOWN.forEach((n, i) => {
           const u = clamp((t - T.RING[i]) / 0.25); if (u <= 0) return;
-          const s = EASE.back(u);
-          stroke(`${k}.r${i}`, ringPts(`${k}.r${i}`, xAt(n), (TY0 + TY1) / 2 + 2, 50 * s, 34 * s, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red });
+          stroke(`${k}.r${i}`, ringPts(`${k}.r${i}`, xAt(n), (TY0 + TY1) / 2 + 2, 58, 40, { n: 12, a0: -140, sweep: 385, rv: 0.06 }), { z: Z.annot, w: 5, color: C.red, draw: EASE.out(u) });
         });
         T.ARC.forEach((ta, i) => {
           const p = EASE.out(clamp((t - ta) / 0.35)); if (p <= 0) return;
