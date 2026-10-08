@@ -22,7 +22,7 @@ COMP.n1_desk = {
     stroke(k + '.l1', [[x - 150, y], [x - 150, fx.floor ?? N1.FL]], { ...o, w: 5 });
     stroke(k + '.l2', [[x + 150, y], [x + 150, fx.floor ?? N1.FL]], { ...o, w: 5 });
     stroke(k + '.bk', [[x - 120, y - 6], [x - 110, y - 46, 1], [x + 20, y - 40, 1], [x + 10, y - 2, 1]], { z: z + 0.2, w: 4, closed: true, fill: C.paper, draw: pin, opacity: pout });
-    if (pin > 0.6) text(k + '.nm', 'Jasper', x - 50, y - 24, { size: 34, z: z + 0.3, rot: -4, opacity: pout });
+    if (pin > 0.6) text(k + '.nm', 'Jasper', x - 50, y - 24, { size: 36, z: z + 0.3, rot: -4, opacity: pout });
   },
   cues: fx => (fx.t0 >= 0 ? [[fx.t0, 'paper']] : []),
 };
@@ -191,7 +191,9 @@ COMP.n1_map = {
       }
       F.targets[`${k}.door${side}`] = [cx, 470];
     };
-    door('L', 300, (last(fx.doorL) ?? 0) * 1); door('R', 1300, (last(fx.doorR) ?? 0) * 1);
+    // door keyframes: [t, on] (or [t, _, on]); the latest one at or before t wins
+    const doorOn = arr => { let v = 0; for (const e of arr || []) if (t >= e[0]) v = e.length > 2 ? e[2] : e[1]; return clamp(+v || 0); };
+    door('L', 300, doorOn(fx.doorL)); door('R', 1300, doorOn(fx.doorR));
     // five steps between the doors: one staircase outline; tread i spans x 520+112i .. 520+112(i+1) at y 700-92i
     const sx = i => 520 + i * 112, sy = i => 700 - i * 92;
     const outline = [[470, 700]]; for (let i = 0; i < 5; i++) { outline.push([sx(i + 1), sy(i), 1]); if (i < 4) outline.push([sx(i + 1), sy(i + 1), 1]); }
@@ -203,7 +205,7 @@ COMP.n1_map = {
       if (has(fx.lit, i)) stroke(key + '.lit', [[x0 + 6, y - 8], [x1 - 6, y - 8]], { z: Z.hi, w: 16, color: C.hi, draw: clamp(since(fx.lit, i) / 0.4), opacity: 0.9 * op });
       if (has(fx.steps, i)) {
         const u = clamp(since(fx.steps, i) / 0.35);
-        text(key + '.q', N1_STEP_TXT[i], x0 - 10, y - 30, { size: 34, z: Z.annot, color: C.red, anchor: 'end', opacity: u * op, halo: true });
+        text(key + '.q', N1_STEP_TXT[i], x0 - 10, y - 30, { size: 36, z: Z.annot, color: C.red, anchor: 'end', opacity: u * op, halo: true });
       }
       if (has(fx.ticks, i)) text(key + '.tk', '✓', x0 + 30, y - 30, { size: 44, z: Z.annot, color: C.red, anchor: 'middle', opacity: clamp(since(fx.ticks, i) / 0.25) * op });
       if (has(fx.qs, i)) { const b = 1 + 0.12 * Math.sin(Math.max(0, since(fx.qs, i)) * 9); text(key + '.qq', '?', x0 + 80, y - 30, { size: 44 * b, z: Z.annot, color: C.red, anchor: 'middle', opacity: clamp(since(fx.qs, i) / 0.25) * op }); }
