@@ -3,13 +3,14 @@ import sys, json
 def units(s): return sum(0.5 if ch.isascii() and ch.isalnum() else 0 if ch.isspace() else 1 for ch in s)
 PACE = {'narr': (0.2, 0.8), 'kid': (0.19, 0.95), 'qm': (0.2, 0.8)}
 def vis(s): return len(s.strip('“”"'))   # same rule as tools/check_timing.py
-def lay(lines, start=0.3, margin=0.25, gap=0.1, tail=0.5, real=None):
+def lay(lines, start=0.3, margin=0.25, gap=0.1, tail=0.5, real=None, speed=1.0):
+    # speed: estimated clip length multiplier for a faster TTS rate (e.g. 0.88 for narration at +15% instead of +5%)
     t = start; out = []
     for L in lines:
         text, voice, hold, say, hide = (list(L) + [None, None, None, None])[:5]
         voice = voice or 'narr'; hold = hold or 0
         t += hold
-        a, b = PACE[voice]; d = a * units(say or text) + b + margin
+        a, b = PACE[voice]; d = (a * units(say or text) + b) * speed + margin
         if real:
             rd = real(voice, say or text)
             if rd: d = max(d, rd + 0.3)
