@@ -15,10 +15,10 @@
     tracks: {
       kid: {
         enter: 16.2,
-        pos: [[0, [1350, N1.FL]]],
-        pose: [[0, 'stand'], [16.2, 'kidCheer', 0.15, 'back'], [17.4, 'stand', 0.2], [24.0, 'thinkStand', 0.2], [32.2, 'stand', 0.2]],
+        pos: [[0, [1350, N1.FL]], [32.25, [1350, N1.FL]], [32.3, [1760, N1.FL], 0.75, 'in']],
+        pose: [[0, 'stand'], [16.2, 'kidCheer', 0.15, 'out'], [17.4, 'stand', 0.2], [24.0, 'thinkStand', 0.2], [32.3, makeWalk(32.3, 33.05, 5.2)]],
         face: [[0, 'smile'], [16.2, 'joy', 0.05], [17.4, 'smile', 0.1], [24.0, 'focus', 0.08], [28.0, 'idea', 0.06]],
-        turn: [[0, -0.4]],
+        turn: [[0, -0.4], [32.25, 0.8, 0.1]],
         gaze: [[0, 'viewer'], [24.2, 'door']],
       },
     },
@@ -28,7 +28,7 @@
          steps: [[0.4, 0], [0.7, 1]], ticks: [[4.4, 0], [5.4, 1]], qs: [[8.8, 0], [9.6, 1]] },
       F(23.6, { type: 'title', id: 'g1', text: '试出来的，是这几个；', x: 640, y: 300, size: 84, t0: 16.7 }),
       F(23.6, { type: 'title', id: 'g2', text: '想明白的，是每一个。', x: 700, y: 470, size: 84, t0: 20.3, color: 'red', underline: true }),
-      { type: 'prop', kind: 'h1_door', id: 'door', at: [560, 430], t0: 24.3, t1: 32.4 },
+      F(32.0, { type: 'prop', kind: 'h1_door', id: 'door', at: [560, 430], t0: 24.3 }),
       F(32.4, { type: 'write', id: 'sq', text: '1 4 9 16 25 …', x: 820, y: 300, size: 76, t0: 27.9, speed: 2400 }),
       F(32.4, { type: 'title', id: 'q', text: '÷ 4，剩下几个？', x: 1010, y: 520, size: 64, t0: 29.6, color: 'red', rot: -2, font: CFG.FONT_MIX }),
     ],

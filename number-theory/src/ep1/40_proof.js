@@ -457,7 +457,7 @@
     },
     steps: [{ t0: T.END, t1: T.END + 0.6, hz: 5.6 }],
     fx: [
-      { type: 'prop', id: 'c1fl', kind: 'c1_floor', at: [0, 0], t0: 0, drawDur: 0.4, t1: T.DUR + 1 },
+      { type: 'n1_fade', f0: T.DUR - 0.6, fd: 0.35, inner: { type: 'prop', id: 'c1fl', kind: 'c1_floor', at: [0, 0], t0: 0, drawDur: 0.4 } },
 
       /* L1: the three layers counted before (2×2, 3×3, 4×4 with their new layer outlined), then they shrink away */
       { type: 'c1_fade', id: 'c1oldF', out: T.OLD_OUT, dur: 0.45, about: [600, 440], shrink: 0.6, whoosh: true, inner: [

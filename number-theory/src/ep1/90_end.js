@@ -16,7 +16,7 @@
     id: 'end', dur: 9.0, floor: N1.FL,
     fx: [
       F(4.3, { type: 'title', id: 'nx', text: '下集：不用试遍所有数', x: 800, y: 170, size: 80, t0: 0.5, color: 'red' }),
-      { type: 'prop', kind: 'h1_lanes', id: 'lanes', at: [400, 280], t0: 0.9, t1: 4.0, drawDur: 1.2 },
+      F(3.7, { type: 'prop', kind: 'h1_lanes', id: 'lanes', at: [400, 280], t0: 0.9, drawDur: 1.2 }),
       { type: 'title', id: 'fin', text: '《一道题长大了》', x: 800, y: 330, size: 96, t0: 4.6, sfx: 'stamp' },
       { type: 'title', id: 'fin2', text: '第一集 · 完', x: 800, y: 480, size: 72, t0: 5.0, color: 'red', rot: -2 },
     ],
