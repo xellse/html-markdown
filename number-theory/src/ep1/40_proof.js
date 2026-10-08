@@ -36,8 +36,11 @@
     ROLL: 11.85, R: [13.05, 13.5, 13.9, 14.35, 15.0], ROLL_OUT: 16.45,
     // L5–L8: one more layer round it
     PREV: 17.3, COL: 21.5, BOXC: 22.25, LABC: 23.15, ROW: 24.9, BOXR: 25.6, LABR: 26.55, COR: 28.45, BOXK: 28.95, LABK: 29.6,
+    // after L8 (no words): the big square has n + 1 a side — red braces, then (n+1) × (n+1) → (n+1)²
+    BRT: 30.15, BRTL: 30.4, BRR: 30.7, BRRL: 30.95, BIG: 31.45, PRE_A: 31.95, PRE: 32.1, PRE_ARR: 33.12,
+    // ---- everything below is 1.5 s later than the script (room for the n + 1 beat) ----
     // L9: big square − the old square
-    DIM_OUT: 31.15, EQ1: 31.55, BIG: 31.6, BIGA: 32.05, EQ2: 32.5, EQ2B: 32.68, CUT: 32.95, HOLE: 34.0, N2: 34.2, BIG_OUT: 34.9,
+    DIM_OUT: 31.15, EQ1: 31.85, EQ2: 32.5, EQ2B: 32.68, CUT: 32.95, HOLE: 34.0, N2: 34.2, BIG_OUT: 34.9,
     // L10: = n + n + 1
     EQ3: 35.75, LAYER: 35.95, EQN1: 37.45, EQP1: 37.75, EQN2: 37.95, EQP2: 38.3, EQ1C: 38.55,
     // L11–L12: pair them up, one is left over; odd
@@ -49,7 +52,7 @@
     // L16–L21: 99
     PILE: 60.95, T99: 61.35, PICK: 63.85, FLY: 64.6, KR: 65.35, TAG1: 65.6, T98: 67.85, T98_OUT: 68.85, SPLIT: 68.95, ARMS: 70.55, L49A: 71.0, L49B: 71.45,
     CORE99: 73.5, L4949: 75.05, BIG99: 77.5, L5050: 78.3, V1: 79.35, V2: 80.45, V3: 82.35, V3B: 84.6, VCK: 85.45, OUT99: 87.2,
-    // L22–L24 (+0.6 s): 3, 5, 7, 9 taken apart together
+    // L22–L24 (+0.6 s more): 3, 5, 7, 9 and "any odd number" taken apart together
     NUMS: 88.35, PILES: 88.45, LONE: 91.0, PAIR: 93.05, OVAL: 93.6, OVAL_OUT: 94.9, UNF: 95.1, BOX: 96.15, CORES: 98.1, OUTL: 99.8, LABS: 100.3,
     // L25: even 1
     ONE_NUM: 102.75, ONE_PILE: 102.85, ONE_HOP: 103.35, ONE_RING: 103.75, ONE_BOX: 104.0, ONE_SQ: 104.3, ONE_LAB: 104.55, SMALL_OUT: 107.05,
@@ -57,6 +60,7 @@
     ROWN: [108.3, 108.75, 109.2, 109.65, 110.0, 110.2, 110.4, 110.6], ROW_DOTS: 110.8, TITLE: 111.2, HI: 114.9, CARD: 115.7, RING: 119.1,
     END: 120.95, DUR: 121.6,
   };
+  { let on = false; for (const key of Object.keys(T)) { if (key === 'DIM_OUT') on = true; if (on) T[key] = Array.isArray(T[key]) ? T[key].map(v => +(v + 1.5).toFixed(3)) : +(T[key] + 1.5).toFixed(3); } }
 
   /* ---------------- helpers ---------------- */
   const fadeFrom = (n0, a) => { if (a >= 1) return; for (let i = n0; i < DL.items.length; i++) { const at = DL.items[i].attrs; at.opacity = +((at.opacity ?? 1) * a).toFixed(3); } };
@@ -90,7 +94,7 @@
   };
   const armPt = (P, s, g) => { const d = (s - P.sm) * g, r = P.a * RAD; return [P.c[0] - Math.sin(r) * d, P.c[1] + Math.cos(r) * d]; };
 
-  /** a group; from `out` on it fades (and optionally shrinks toward `about`) over `dur` */
+  /** a group; from `out` on it fades (and optionally shrinks toward `about`) over `dur`; hide: [[a, b]] = gone from a to b (0.2 s fades) */
   COMP.c1_fade = {
     init(fx) {
       fx.inner = [].concat(fx.inner);
@@ -100,12 +104,14 @@
     draw(fx, t, F) {
       const u = fx.out === undefined ? 0 : clamp((t - fx.out) / (fx.dur ?? 0.35));
       if (u >= 1) return;
+      let h = 1; (fx.hide || []).forEach(([a, b]) => { if (t >= a) h = Math.min(h, Math.max(1 - clamp((t - a) / 0.2), clamp((t - b) / 0.25))); });
+      if (h <= 0.001) return;
       const n0 = DL.items.length;
       DL.save();
       if (u > 0 && fx.about) DL.about(fx.about[0], fx.about[1], () => DL.scale(1 - (fx.shrink ?? 0.3) * EASE.in(u)));
       fx.inner.forEach(f => COMP[f.type].draw(f, t, F));
       DL.restore();
-      fadeFrom(n0, 1 - u);
+      fadeFrom(n0, (1 - u) * h);
     },
     cues: fx => fx.inner.flatMap(f => (COMP[f.type].cues ? COMP[f.type].cues(f) : [])).concat(fx.out !== undefined && fx.whoosh ? [[fx.out, 'whoosh']] : []),
   };
@@ -200,16 +206,22 @@
       if (fx.prev && t >= fx.prev.t) { const o = 1 - clamp((t - fx.prev.t1) / 0.3); if (o > 0) dashRect(k + '.pv', blx - 22, yc - 22, xc + 22, bly + 22, EASE.out(clamp((t - fx.prev.t) / 0.6)), o * op); }
       if (fx.big && t >= fx.big.t) { const o = 1 - clamp((t - fx.big.t1) / 0.3); if (o > 0) stroke(k + '.big', rectPts(blx - 22, yc - 22, xc + 22, bly + 22), { z: Z.set + 1, w: 3.5, draw: EASE.out(clamp((t - fx.big.t) / 0.5)), opacity: o * op }); }
       if (fx.hole && t >= fx.hole.t) { const o = 1 - clamp((t - fx.hole.t1) / 0.3); if (o > 0) dashRect(k + '.hl', blx - pad, yc + g - pad, blx + 6 * g + pad, bly + pad, EASE.out(clamp((t - fx.hole.t) / 0.5)), o * op); }
-      // the old square (n × n), row by row; the cut rings it in red and fades it away
+      // the old square (n × n), row by row; the cut rings it in red and fades it away.
+      // pre: while the roll says n = 0, 1, 2 the square really is empty / 1 dot / 2 × 2 (bottom-left fixed), then back to the general one
+      let pv = 'g', pT = -1; (fx.pre || []).forEach(([tt, v]) => { if (t >= tt) { pv = v; pT = tt; } });
+      const pp = pT >= 0 ? Math.max(0.01, EASE.back(clamp((t - pT) / 0.22))) : null;
       const cutU = fx.cut ? clamp((t - fx.cut.t - 0.45) / 0.5) : 0;
-      if (gen && cutU < 1) {
+      if (gen && pv !== 'g') {
+        if (pv === 0) dashRect(k + '.z', blx - g * 0.55, bly - g * 0.55, blx + g * 0.55, bly + g * 0.55, clamp((t - pT) / 0.3), op);
+        else for (let i = 0; i < pv; i++) for (let j = 0; j < pv; j++) dotO(`${k}.c${i}_${j}`, [blx + j * g, bly - (pv - 1 - i) * g], R * pp, C.ink, Z.front, op);
+      } else if (gen && cutU < 1) {
         const co = op * (1 - cutU);
         for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
           if (i === ell || j === ell) continue;
-          const a = EASE.back(clamp((lt - (i / (n - 1)) * 0.6) / 0.22));
+          const a = pp ?? EASE.back(clamp((lt - (i / (n - 1)) * 0.6) / 0.22));
           if (a > 0) dotO(`${k}.c${i}_${j}`, [blx + j * g, yc + (i + 1) * g], R * a, C.ink, Z.front, co);
         }
-        const ea = clamp((lt - 0.55) / 0.3) * co;
+        const ea = (pp !== null ? clamp((t - pT) / 0.2) : clamp((lt - 0.55) / 0.3)) * co;
         if (ea > 0.01) {
           for (let j = 0; j < n; j++) if (j !== ell) text(`${k}.ev${j}`, '⋮', blx + j * g, yc + (ell + 1) * g, { size: EL, z: Z.front, opacity: ea });
           for (let i = 0; i < n; i++) if (i !== ell) text(`${k}.eh${i}`, '⋯', blx + ell * g, yc + (i + 1) * g, { size: EL, z: Z.front, opacity: ea });
@@ -267,6 +279,7 @@
       if (fx.pairs) c.push([fx.pairs.t, 'pen']);
       (fx.wig || []).forEach(w => c.push([w, 'boing']));
       (fx.nv || []).forEach(([tt]) => c.push([tt, 'pop']));
+      (fx.pre || []).forEach(([tt]) => c.push([tt, 'pop']));
       if (fx.unfold) c.push([fx.unfold.t, 'whoosh']);
       (fx.flash || []).forEach(([tt]) => c.push([tt, 'plip']));
       return c;
@@ -407,11 +420,23 @@
   const slotX = n => SLOT_CX[n] - n * OG / 2;   // centre of the finished square
 
   /* ---------------- the equation (L9–L10), laid out once so its pieces can be written at their own moments ---------------- */
-  const EQ = { x: 214, y: 104, size: 60, segs: [['(n+1)²', T.EQ1], ['−', T.EQ2], ['n²', T.EQ2B], ['=', T.EQ3], ['n', T.EQN1], ['+', T.EQP1], ['n', T.EQN2], ['+', T.EQP2], ['1', T.EQ1C]] };
+  // first, small: (n+1) × (n+1) →   (written the way six wrote 4 × 4 → 4²); then the equation in full size
+  const PRE = { x: 150, y: 106, size: 38, text: '(n+1) × (n+1)' };
+  PRE.w = writeWidth(PRE.text, PRE.size); PRE.ax = PRE.x + PRE.w + 14;
+  const EQ = { x: PRE.ax + writeWidth('→', PRE.size) + 18, y: 104, size: 56, segs: [['(n+1)²', T.EQ1], ['−', T.EQ2], ['n²', T.EQ2B], ['=', T.EQ3], ['n', T.EQN1], ['+', T.EQP1], ['n', T.EQN2], ['+', T.EQP2], ['1', T.EQ1C]] };
   const EQL = layoutWriting({ text: EQ.segs.map(s => s[0]).join(' '), x: EQ.x, y: EQ.y, size: EQ.size, t0: 0, speed: 1 });
   let ci = 0;
   const eqFx = EQ.segs.map(([s, t0], i) => { const fx = { type: 'write', id: `c1eq${i}`, text: s, x: EQL.boxes[ci].x, y: EQ.y, size: EQ.size, t0, speed: 2400, w: 5.5, sfx: 'chalk' }; ci += [...s].length + 1; return fx; });
-  const EQ1W = writeWidth('(n+1)²', EQ.size), EQ_A = EQ.x + EQ1W * 0.4;   // the arrow from (n+1)² down to the big square
+  const preFx = [
+    { type: 'write', id: 'c1pre', text: PRE.text, x: PRE.x, y: PRE.y, size: PRE.size, t0: T.PRE, speed: 2400, w: 4.5, sfx: 'chalk' },
+    { type: 'write', id: 'c1prea', text: '→', x: PRE.ax, y: PRE.y, size: PRE.size, t0: T.PRE_ARR, speed: 2400, w: 4.5, sfx: 'chalk' },
+  ];
+  /** a red brace along one side of the big square, the bump pointing away from the square: from a to b, bump on side `out` (unit normal) */
+  const brace = (key, a, b, out, d) => {
+    const L = dist(a, b), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L, P = (s, h) => [a[0] + ux * s + out[0] * h, a[1] + uy * s + out[1] * h];
+    stroke(key, [P(0, -10), P(10, 0, 1), P(L / 2 - 12, 0), P(L / 2, 11, 1), P(L / 2 + 12, 0), P(L - 10, 0), P(L, -10, 1)], { z: Z.annot, w: 4, color: C.red, draw: d });
+  };
+  const BR = { y: G_YC - 94, x: G_XC + 110 };   // top brace row, right brace column
 
   /* ---------------- the check (L20–L21): red, '=' signs in one column ---------------- */
   const VX = 1110, VS = 52;
@@ -501,7 +526,18 @@
 
       // L9–L10: (n+1)² − n² = n + n + 1
       { type: 'c1_fade', id: 'c1eqF', out: T.STAGE_OUT, inner: eqFx },
-      { type: 'c1_fade', id: 'c1eqaF', out: T.BIG_OUT, inner: { type: 'c1_fn', id: 'c1eqa', t0: T.BIGA, cues: [[T.BIGA, 'pen']], fn: (t, lt, k) => arrow(k, [EQ_A, EQ.y + EQ.size + 14], [EQ_A, G_YC - 22 - 12], { p: EASE.out(clamp(lt / 0.3)), bend: 0.1, color: C.red, w: 4, head: 18 }) } },
+      { type: 'c1_fade', id: 'c1eqpF', out: T.STAGE_OUT, inner: preFx },
+      // after L8: n + 1 a side (top: the n of the row and the corner; right: the n of the column and the corner)
+      { type: 'c1_fade', id: 'c1brF', out: T.LAB_OUT, inner: [
+        { type: 'c1_fn', id: 'c1br', t0: T.BRT, cues: [[T.BRT, 'pen'], [T.BRR, 'pen']], fn: (t, lt, k) => {
+          const g = GEN.g;
+          brace(k + '.t', [GEN.bl[0] - 14, BR.y], [G_XC + 14, BR.y], [0, -1], EASE.out(clamp(lt / 0.4)));
+          if (t >= T.BRR) brace(k + '.r', [BR.x, G_YC - 14], [BR.x, GEN.bl[1] + 14], [1, 0], EASE.out(clamp((t - T.BRR) / 0.4)));
+          if (t >= T.PRE_A) arrow(k + '.a', [GEN.bl[0] + 3.5 * g - 44, BR.y - 40], [PRE.x + PRE.w * 0.62, PRE.y + PRE.size + 10], { p: EASE.out(clamp((t - T.PRE_A) / 0.3)), bend: -0.25, color: C.red, w: 4, head: 14 });
+        } },
+        { type: 'c1_tag', id: 'c1brT', glyph: true, text: 'n+1', at: [GEN.bl[0] + 3.5 * GEN.g, BR.y - 34], size: 44, t0: T.BRTL, pulse: [T.PRE + 0.1] },
+        { type: 'c1_tag', id: 'c1brR', glyph: true, text: 'n+1', at: [BR.x + 58, (G_YC + GEN.bl[1]) / 2], size: 44, t0: T.BRRL, pulse: [T.PRE + 0.6] },
+      ] },
       { type: 'c1_fade', id: 'c1n2F', out: T.LAB_OUT, inner: { type: 'c1_tag', id: 'c1n2', glyph: true, text: 'n²', at: [GEN.bl[0] + 3 * GEN.g, G_YC + 4 * GEN.g], size: 76, t0: T.N2, color: 'ink', w: 6 } },
 
       // L11: the one left over
