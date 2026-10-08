@@ -1,11 +1,13 @@
 // 第 40 场 · 每一个正奇数（proof）——全集最重要的一场：不跳步的证明，画面一步一步跟着旁白。
-// L1 先前数过的三层（3、5、7）缩走 → L2–L4 随便多大的正方形（每边 n 个点，省略号表示一般的 n；旁边滚动 n = 0、1、2、100……）
+// L1 先前数过的三层（3、5、7）缩走 → L2–L4 随便多大的正方形（每边 n 个点，省略号表示一般的 n；旁边滚动 n = 0、1、2、100……，
+//    图形同步变成空框、1 个点、2×2，说到 100 再回到带省略号的正方形）
 // → L5–L8 外面包一层（虚线预告大一号）：右边一列 n 个、上边一行 n 个、角上 1 个（全集固定画法：胳膊实线框 + 角上虚线圈）
+// → （无旁白，L9 起整体后移 1.5 秒）红笔括线：大正方形每边 n+1 个；小字 (n+1) × (n+1) → (n+1)²
 // → L9–L10 手写 (n+1)² − n² = n + n + 1：大正方形描实、原来的正方形被红圈拿掉（洞里写 n²），n、n、1 和图上的标签一起跳
 // → L11–L12 右胳膊整条转到上胳膊上方，一个对一个，红椭圆配对，角上的 1 落单 → 黄色：总剩一个的数，就是奇数
 // → L13 n = 1、2、3、100 图形跟着变 → L14–L15 小问号：反过来呢？（图形翻回一圈的样子）
 // → L16–L21 99：11×9 一堆 → 拿出 1 个放在角上 → 98 个飞成两条各 49 的长胳膊（中间省略）→ 包住 49×49 → 50×50 → 红笔核对
-// → L22–L24 3、5、7、9 一起拆开（拿掉落单的 1 个、两两配对、"反折"成两条胳膊、包住正方形、补成大一号）→ L25 1 = 1² − 0²
+// → L22–L24 3、5、7、9 和"随便一个奇数"（带省略号）一起拆开（拿掉落单的 1 个、两两配对、"反折"成两条胳膊、包住正方形、补成大一号）→ L25 1² − 0²
 // → L26–L28 1、3、5、7……一个个打上 Jasper 的 ┐ 记号；黄色：每一个正奇数，都是两个平方的差；钉上范围卡片。
 // 开场：空舞台（Jasper、小问号 0.15 秒内弹进来）；结尾：最后 0.6 秒全部淡出，Jasper 和小问号走出右边。
 (() => {
@@ -21,8 +23,8 @@
   [(a, b, c) => a * b === c, (a, b, c) => a * b === c, (a, b, c) => a - b === c].forEach((f, i) => { const m = CHECK[i].match(/\d+/g).map(Number); if (!f(...m)) console.error('c1_proof: wrong check line', CHECK[i]); });
   const SLOTS = [1, 3, 5, 7, 9].map(k => ({ k, n: (k - 1) / 2 }));
   SLOTS.forEach(({ k, n }) => { if (sq(n + 1) - sq(n) !== k) console.error('c1_proof: slot', k); });
-  const SLOT_LAB = SLOTS.map(({ k, n }) => (k === 1 ? '1 = 1² − 0²' : `${n + 1}² − ${n}²`));
-  if (SLOT_LAB.join('|') !== '1 = 1² − 0²|2² − 1²|3² − 2²|4² − 3²|5² − 4²') console.error('c1_proof: slot labels', SLOT_LAB);
+  const SLOT_LAB = SLOTS.map(({ n }) => `${n + 1}² − ${n}²`).concat(['(n+1)² − n²']);   // the sixth slot: "any odd number"
+  if (SLOT_LAB.join('|') !== '1² − 0²|2² − 1²|3² − 2²|4² − 3²|5² − 4²|(n+1)² − n²') console.error('c1_proof: slot labels', SLOT_LAB);
   const ODDS = [1, 3, 5, 7, 9, 11, 13, 15];
   if (!ODDS.every(k => k % 2 === 1 && sq((k + 1) / 2) - sq((k - 1) / 2) === k)) console.error('c1_proof: odd row', ODDS);
 
@@ -365,16 +367,17 @@
       [T.ARMS, 'pen'], [T.CORE99, 'swish'], [T.BIG99, 'pen']],
   };
 
-  /* ---------------- L22–L25: 1, 3, 5, 7, 9 taken apart ----------------
-   * {id, n, cx, cy (the corner), T: {pile, lone, ring, pair, oval, ovalOut, unf, box, core, outl}}
+  /* ---------------- L22–L25: 1, 3, 5, 7, 9 and "any odd number" taken apart ----------------
+   * {id, n, ell (optional: the ellipsis column, counted from the corner — the "any odd number" slot), cx, cy (the corner),
+   *  T: {pile, lone, ring, pair, oval, ovalOut, unf, box, core, outl}}
    * The heap is a row of 2n + 1 dots under the corner row; the right-most hops up into the corner, the rest hop into pairs
    * (that is the folded picture from before), the pairs are ringed, then the upper row swings down into the right arm. */
-  const OG = 40, OR = 7, OPAD = OG * 0.36;
+  const OG = 36, OR = 6.5, OPAD = OG * 0.36, OH = OG / 2;
   COMP.c1_odd = {
     draw(fx, t) {
       const S = fx.T; if (t < S.pile) return;
-      const k = fx.id, n = fx.n, cx = fx.cx, cy = fx.cy;
-      const heapP = j => [cx - 20 - j * 20, cy + 50];
+      const k = fx.id, n = fx.n, cx = fx.cx, cy = fx.cy, me = fx.ell ?? -1, ie = me > 0 ? n + 1 - me : -1, EL = OG * 0.9;
+      const heapP = j => [cx - OH - j * OH, cy + 50];
       const hopTo = (a, b, u, h) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u) - h * Math.sin(Math.PI * u)];
       const pa = j => EASE.back(clamp((t - S.pile - (2 * n - j) * 0.04) / 0.22));
       // the odd one out → the corner
@@ -385,13 +388,20 @@
       const fu = S.unf !== undefined ? 1 - EASE.io(clamp((t - S.unf) / 0.9)) : 1;
       for (let m = 1; m <= n; m++) {
         const pu = EASE.io(clamp((t - S.pair - (m - 1) * 0.05) / 0.35));
+        if (m === me) {   // the elided pair: one ellipsis in the heap, then one in each row; the upper one turns with the arm
+          const mid = lerp2(heapP(2 * m - 1), heapP(2 * m), 0.5), a = clamp(pa(2 * m)), lo = hopTo(mid, [cx - m * OG, cy], pu, 14);
+          text(`${k}.ea`, '⋯', lo[0], lo[1], { size: EL, z: Z.front, opacity: a });
+          if (t >= S.unf) { const P = armPose(cx, cy, n, OG, fu), q = armPt(P, n + 1 - m, OG); DL.save(); DL.translate(q[0], q[1]); DL.rotate(P.a); text(`${k}.eb`, '⋮', 0, 0, { size: EL, z: Z.front }); DL.restore(); }
+          else if (pu > 0) { const up = hopTo(mid, [cx - m * OG, cy - OG], pu, 22); text(`${k}.eb`, '⋯', up[0], up[1], { size: EL, z: Z.front, opacity: a }); }
+          continue;
+        }
         dotO(`${k}.a${m}`, hopTo(heapP(2 * m - 1), [cx - m * OG, cy], pu, 14), OR * pa(2 * m - 1), C.ink, Z.front);
         const up = t >= S.unf ? armPt(armPose(cx, cy, n, OG, fu), n + 1 - m, OG) : hopTo(heapP(2 * m), [cx - m * OG, cy - OG], pu, 22);
         dotO(`${k}.b${m}`, up, OR * pa(2 * m), C.ink, Z.front);
       }
       if (n > 0 && t >= S.oval) {
         const o = 1 - clamp((t - S.ovalOut) / 0.25);
-        if (o > 0) for (let m = 1; m <= n; m++) pairOval(`${k}.ov${m}`, cx - m * OG, cy, OG, clamp((t - S.oval - (m - 1) * 0.08) / 0.3), o);
+        if (o > 0) for (let m = 1; m <= n; m++) if (m !== me) pairOval(`${k}.ov${m}`, cx - m * OG, cy, OG, clamp((t - S.oval - (m - 1) * 0.08) / 0.3), o);
       }
       // the two arms (empty for 1)
       if (t >= S.box) {
@@ -401,8 +411,15 @@
       }
       // the square inside (pencil); for 1 it is a 0 × 0 "empty square"
       if (t >= S.core) {
-        if (n > 0) for (let i = 1; i <= n; i++) for (let c = 1; c <= n; c++) { const a = EASE.back(clamp((t - S.core - (i - 1) * 0.08) / 0.22)); if (a > 0) dotO(`${k}.q${i}_${c}`, [cx - c * OG, cy + i * OG], OR * 0.9 * a, C.pencil, Z.front - 1); }
-        else dashRect(k + '.e', cx - OG - 13, cy + OG - 13, cx - OG + 13, cy + OG + 13, EASE.out(clamp((t - S.core) / 0.4)), 1);
+        if (n > 0) for (let i = 1; i <= n; i++) for (let c = 1; c <= n; c++) {
+          const a = EASE.back(clamp((t - S.core - (i - 1) * 0.08) / 0.22)); if (a <= 0) continue;
+          const q = [cx - c * OG, cy + i * OG], o = { size: EL, z: Z.front, color: C.pencil, opacity: clamp(a) };
+          if (i === ie && c === me) text(`${k}.qe`, '⋱', q[0], q[1], o);
+          else if (i === ie) text(`${k}.qv${c}`, '⋮', q[0], q[1], o);
+          else if (c === me) text(`${k}.qh${i}`, '⋯', q[0], q[1], o);
+          else dotO(`${k}.q${i}_${c}`, q, OR * 0.9 * a, C.pencil, Z.front - 1);
+        }
+        else dashRect(k + '.e', cx - OG - 12, cy + OG - 12, cx - OG + 12, cy + OG + 12, EASE.out(clamp((t - S.core) / 0.4)), 1);
       }
       if (n > 0 && t >= S.outl) stroke(k + '.ol', rectPts(cx - n * OG - 22, cy - 22, cx + 22, cy + n * OG + 22), { z: Z.set + 1, w: 3, draw: EASE.out(clamp((t - S.outl) / 0.5)) });
     },
@@ -412,12 +429,14 @@
       return c;
     },
   };
-  const SLOT_CX = [140, 410, 660, 945, 1240], SLOT_CY = 330;
-  const slotT = n => (n === 0
+  // six slots: 1, 3, 5, 7, 9 and "any odd number" (5 places a side, the 3rd an ellipsis); x = centre of the finished square, all inside x 80–1520
+  const SL = SLOTS.map(o => ({ ...o })).concat([{ k: 'any', n: 5, ell: 3 }]);
+  const SLOT_C = [160, 345, 530, 720, 935, 1200], SLOT_CY = 330;
+  const slotCX = i => SLOT_C[i] + SL[i].n * OG / 2;   // the corner
+  const slotT = i => (i === 0
     ? { pile: T.ONE_PILE, lone: T.ONE_HOP, ring: T.ONE_RING, box: T.ONE_BOX, core: T.ONE_SQ }
-    : { pile: T.PILES + 0.2 * (n - 1), lone: T.LONE + 0.12 * (n - 1), ring: T.LONE + 0.4 + 0.12 * (n - 1), pair: T.PAIR + 0.1 * (n - 1), oval: T.OVAL + 0.1 * (n - 1),
-        ovalOut: T.OVAL_OUT, unf: T.UNF + 0.08 * (n - 1), box: T.BOX, core: T.CORES + 0.1 * (n - 1), outl: T.OUTL + 0.1 * (n - 1) });
-  const slotX = n => SLOT_CX[n] - n * OG / 2;   // centre of the finished square
+    : { pile: T.PILES + 0.2 * (i - 1), lone: T.LONE + 0.12 * (i - 1), ring: T.LONE + 0.4 + 0.12 * (i - 1), pair: T.PAIR + 0.1 * (i - 1), oval: T.OVAL + 0.1 * (i - 1),
+        ovalOut: T.OVAL_OUT, unf: T.UNF + 0.08 * (i - 1), box: T.BOX, core: T.CORES + 0.1 * (i - 1), outl: T.OUTL + 0.1 * (i - 1) });
 
   /* ---------------- the equation (L9–L10), laid out once so its pieces can be written at their own moments ---------------- */
   // first, small: (n+1) × (n+1) →   (written the way six wrote 4 × 4 → 4²); then the equation in full size
@@ -436,7 +455,7 @@
     const L = dist(a, b), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L, P = (s, h) => [a[0] + ux * s + out[0] * h, a[1] + uy * s + out[1] * h];
     stroke(key, [P(0, -10), P(10, 0, 1), P(L / 2 - 12, 0), P(L / 2, 11, 1), P(L / 2 + 12, 0), P(L - 10, 0), P(L, -10, 1)], { z: Z.annot, w: 4, color: C.red, draw: d });
   };
-  const BR = { y: G_YC - 94, x: G_XC + 110 };   // top brace row, right brace column
+  const BR = { y: G_YC - 90, x: G_XC + 110 };   // top brace row, right brace column
 
   /* ---------------- the check (L20–L21): red, '=' signs in one column ---------------- */
   const VX = 1110, VS = 52;
@@ -451,9 +470,11 @@
   const VCK = { type: 'write', id: 'c1vck', text: '✓', x: VX + writeWidth('= 99', VS) + 26, y: 466, size: 60, t0: T.VCK, speed: 2600, color: 'red', z: Z.annot, sfx: 'pen', w: 6 };
 
   /* ---------------- the last picture (L26–L28) ---------------- */
-  const ROW = { y: 336, size: 64, x0: 150, dx: 118 };
-  const rowFx = ODDS.map((v, i) => ({ type: 'write', id: `c1rw${i}`, text: String(v), x: ROW.x0 + i * ROW.dx, y: ROW.y, size: ROW.size, t0: T.ROWN[i], speed: 2600, anchor: 'middle', w: 5.5, sfx: 'pen' }));
-  rowFx.forEach(f => layoutWriting(f));
+  // the row of odd numbers, laid out one after another: number, its ┐ mark, then a clear gap before the next number
+  const ROW = { y: 336, size: 64, x0: 150 };
+  let rx = ROW.x0;
+  const rowFx = ODDS.map((v, i) => { const f = { type: 'write', id: `c1rw${i}`, text: String(v), x: rx, y: ROW.y, size: ROW.size, t0: T.ROWN[i], speed: 2600, w: 5.5, sfx: 'pen' }; layoutWriting(f); rx += f.width + 22 + 13 + 48; return f; });
+  ROW.end = rx;
   const markFx = rowFx.map((f, i) => ({ type: 'prop', id: `c1mk${i}`, kind: 'n1_mark', at: [f.x + f.width + 22, ROW.y + 10], t0: T.ROWN[i] + 0.22, size: 26, w: 5, drawDur: 0.25, sfxAt: [[T.ROWN[i] + 0.22, 'pen']] }));
   const CX0 = 560 - textWidth('总剩一个的数，就是奇数。', 60) / 2;   // the L12 line
   const TITLE = '每一个正奇数，都是两个平方的差', TS = 62, TX = 640 - textWidth(TITLE, TS) / 2, TY = 205;
@@ -494,13 +515,14 @@
 
       /* L2–L15: the general square */
       { type: 'c1_gen', id: 'c1g', bl: GEN.bl, g: GEN.g, t0: T.CORE, t1: T.GEN_OUT,
+        pre: T.R.slice(0, 4).map((tt, i) => [tt, [0, 1, 2, 'g'][i]]),
         prev: { t: T.PREV, t1: T.BIG }, col: T.COL, boxC: T.BOXC, row: T.ROW, boxR: T.BOXR, cor: T.COR, boxK: T.BOXK,
         big: { t: T.BIG, t1: T.BIG_OUT }, cut: { t: T.CUT }, hole: { t: T.HOLE, t1: T.LAB_OUT },
         flash: [[T.LAYER, 'L'], [T.EQN1, 'C'], [T.EQN2, 'R'], [T.EQ1C, 'K']],
         fold: { t: T.FOLD, dur: 1.0 }, pairs: { t: T.PAIRS }, wig: [T.WIG], nv: T.NV.map((tt, i) => [tt, [1, 2, 3, 'g'][i]]), unfold: { t: T.UNFOLD, dur: 0.9 } },
 
       // L3: n dots a side (dimension lines with the n in the gap)
-      { type: 'c1_fade', id: 'c1dimF', out: T.DIM_OUT, inner: [
+      { type: 'c1_fade', id: 'c1dimF', out: T.DIM_OUT, hide: [[T.R[0] - 0.05, T.R[3]]], inner: [
         { type: 'c1_fn', id: 'c1dim', t0: T.DIM_L, cues: [[T.DIM_L, 'pen'], [T.DIM_B, 'pen']], fn: (t, lt, k) => {
           const [blx, bly] = GEN.bl, g = GEN.g, y0 = G_YC + g, x1 = blx + 6 * g, xl = blx - 52, yb = bly + 52, my = (y0 + bly) / 2, mx = (blx + x1) / 2;
           const u = EASE.out(clamp(lt / 0.4)), v = EASE.out(clamp((t - T.DIM_B) / 0.4)), o = { z: Z.set + 1, w: 3 };
@@ -533,10 +555,10 @@
           const g = GEN.g;
           brace(k + '.t', [GEN.bl[0] - 14, BR.y], [G_XC + 14, BR.y], [0, -1], EASE.out(clamp(lt / 0.4)));
           if (t >= T.BRR) brace(k + '.r', [BR.x, G_YC - 14], [BR.x, GEN.bl[1] + 14], [1, 0], EASE.out(clamp((t - T.BRR) / 0.4)));
-          if (t >= T.PRE_A) arrow(k + '.a', [GEN.bl[0] + 3.5 * g - 44, BR.y - 40], [PRE.x + PRE.w * 0.62, PRE.y + PRE.size + 10], { p: EASE.out(clamp((t - T.PRE_A) / 0.3)), bend: -0.25, color: C.red, w: 4, head: 14 });
+          if (t >= T.PRE_A) arrow(k + '.a', [GEN.bl[0] + 3.5 * g - 46, BR.y - 48], [PRE.x + PRE.w * 0.62, PRE.y + PRE.size + 10], { p: EASE.out(clamp((t - T.PRE_A) / 0.3)), bend: -0.25, color: C.red, w: 4, head: 14 });
         } },
-        { type: 'c1_tag', id: 'c1brT', glyph: true, text: 'n+1', at: [GEN.bl[0] + 3.5 * GEN.g, BR.y - 34], size: 44, t0: T.BRTL, pulse: [T.PRE + 0.1] },
-        { type: 'c1_tag', id: 'c1brR', glyph: true, text: 'n+1', at: [BR.x + 58, (G_YC + GEN.bl[1]) / 2], size: 44, t0: T.BRRL, pulse: [T.PRE + 0.6] },
+        { type: 'c1_tag', id: 'c1brT', glyph: true, text: 'n+1', at: [GEN.bl[0] + 3.5 * GEN.g, BR.y - 44], size: 44, t0: T.BRTL, pulse: [T.PRE + 0.1] },
+        { type: 'c1_tag', id: 'c1brR', glyph: true, text: 'n+1', at: [BR.x + 68, (G_YC + GEN.bl[1]) / 2], size: 44, t0: T.BRRL, pulse: [T.PRE + 0.6] },
       ] },
       { type: 'c1_fade', id: 'c1n2F', out: T.LAB_OUT, inner: { type: 'c1_tag', id: 'c1n2', glyph: true, text: 'n²', at: [GEN.bl[0] + 3 * GEN.g, G_YC + 4 * GEN.g], size: 76, t0: T.N2, color: 'ink', w: 6 } },
 
@@ -574,17 +596,19 @@
         V1, V2, V3, V3B, VCK,
       ] },
 
-      /* L22–L25: 1, 3, 5, 7, 9 */
-      { type: 'c1_fade', id: 'c1oddF', out: T.SMALL_OUT, whoosh: true, inner: SLOTS.flatMap(({ k, n }) => [
-        { type: 'c1_odd', id: `c1s${n}`, n, cx: SLOT_CX[n], cy: SLOT_CY, T: slotT(n) },
-        { type: 'write', id: `c1sn${n}`, text: String(k), x: slotX(n), y: 196, size: 58, t0: n === 0 ? T.ONE_NUM : T.NUMS + 0.2 * (n - 1), speed: 2600, anchor: 'middle', w: 5.5 },
-        { type: 'write', id: `c1sl${n}`, text: SLOT_LAB[n], x: slotX(n), y: 566, size: 44, t0: n === 0 ? T.ONE_LAB : T.LABS + 0.3 * (n - 1), speed: 3000, anchor: 'middle', color: 'red', z: Z.annot, sfx: 'pen', w: 5 },
+      /* L22–L25: 1, 3, 5, 7, 9 and any odd number */
+      { type: 'c1_fade', id: 'c1oddF', out: T.SMALL_OUT, whoosh: true, inner: SL.flatMap(({ k, n, ell }, i) => [
+        { type: 'c1_odd', id: `c1s${i}`, n, ell, cx: slotCX(i), cy: SLOT_CY, T: slotT(i) },
+        k === 'any'
+          ? { type: 'title', id: `c1sn${i}`, text: '随便一个奇数', x: SLOT_C[i], y: 226, size: 40, t0: T.NUMS + 0.2 * (i - 1), sfx: 'pop' }
+          : { type: 'write', id: `c1sn${i}`, text: String(k), x: SLOT_C[i], y: 196, size: 58, t0: i === 0 ? T.ONE_NUM : T.NUMS + 0.2 * (i - 1), speed: 2600, anchor: 'middle', w: 5.5 },
+        { type: 'write', id: `c1sl${i}`, text: SLOT_LAB[i], x: SLOT_C[i], y: 566, size: 44, t0: i === 0 ? T.ONE_LAB : T.LABS + 0.3 * (i - 1), speed: 3000, anchor: 'middle', color: 'red', z: Z.annot, sfx: 'pen', w: 5 },
       ]) },
 
       /* L26–L28: every positive odd number */
       { type: 'c1_fade', id: 'c1endF', out: T.END, dur: 0.35, inner: [
         ...rowFx, ...markFx,
-        { type: 'title', id: 'c1rwd', text: '……', x: ROW.x0 + ODDS.length * ROW.dx + 10, y: ROW.y + ROW.size * 0.62, size: 56, t0: T.ROW_DOTS, sfx: 'pop' },
+        { type: 'title', id: 'c1rwd', text: '……', x: ROW.end + 10, y: ROW.y + ROW.size * 0.62, size: 56, t0: T.ROW_DOTS, sfx: 'pop' },
         { type: 'scribe', id: 'c1tt', text: TITLE, x: TX, y: TY, size: TS, t0: T.TITLE, cps: 4.2, z: Z.annot, sfx: 'pen' },
         { type: 'band', id: 'c1ttH', rect: [TX, TY - 34, textWidth(TITLE, TS), 68], t0: T.HI, dur: 0.6 },
         { type: 'c1_fn', id: 'c1ttU', t0: T.RING, cues: [[T.RING, 'pen']], fn: (t, lt, k) => {   // 每一个: underlined twice in red
@@ -603,26 +627,26 @@
       { t0: 21.38, t1: 24.46, text: '右边加一列，n个；', say: '右边加一列，n 个；' },   // L6
       { t0: 24.76, t1: 27.99, text: '上边加一行，也是n个；', say: '上边加一行，也是 n 个；' },   // L7
       { t0: 28.29, t1: 30.97, text: '角上，再加1个。', say: '角上，再加一个。' },   // L8
-      { t0: 31.47, t1: 35.32, text: '大正方形减掉原来的正方形，' },   // L9
-      { t0: 35.52, t1: 39.54, text: '剩下的就是这一圈：n加n加1。', say: '剩下的就是这一圈：n 加 n 加一。' },   // L10
-      { t0: 40.04, t1: 44.19, text: '两个n两两配对，多出的1落了单：', say: '两个 n 两两配对，多出的一落了单：' },   // L11
-      { t0: 44.39, t1: 47.84, text: '总剩一个的数，就是奇数。' },   // L12
-      { t0: 48.34, t1: 52.31, text: '这样算，不管n是几，都一样。', say: '这样算，不管 n 是几，都一样。' },   // L13
-      { t0: 53.01, t1: 55.26, text: '“那反过来呢？”', voice: 'qm', say: '那反过来呢？' },   // L14
-      { t0: 55.56, t1: 60.41, text: '“随便给一个奇数，都能做成这样的一圈吗？”', voice: 'qm', say: '随便给一个奇数，都能做成这样的一圈吗？' },   // L15
-      { t0: 60.91, t1: 63.2, text: '比如99。', say: '比如九十九。' },   // L16
-      { t0: 63.5, t1: 67.35, text: '先拿出落单的1个，放在角上，', say: '先拿出落单的一个，放在角上，' },   // L17
-      { t0: 67.65, t1: 72.9, text: '剩下98个，分成两条胳膊，每条49个。', say: '剩下九十八个，分成两条胳膊，每条四十九个。' },   // L18
-      { t0: 73.3, t1: 77.15, text: '包住49×49的正方形，', say: '包住四十九乘四十九的正方形，' },   // L19
-      { t0: 77.35, t1: 80.4, text: '正好变成50×50。', say: '正好变成五十乘五十。' },   // L20
-      { t0: 81.0, t1: 86.7, text: '核对一下：2500减2401，正好99。', say: '核对一下：两千五百减两千四百零一，正好九十九。' },   // L21
-      { t0: 88.2, t1: 92.65, text: '任何奇数都能这样：拿掉落单的1个，', say: '任何奇数都能这样：拿掉落单的一个，' },   // L22 (+0.6)
-      { t0: 92.85, t1: 97.7, text: '剩下的两两配对，分成两条一样长的胳膊，' },   // L23
-      { t0: 97.9, t1: 101.95, text: '包住一个正方形，补成大一号的。' },   // L24
-      { t0: 102.65, t1: 106.9, text: '就连1也行：1的平方减0的平方。', say: '就连一也行：一的平方减零的平方。' },   // L25
-      { t0: 107.6, t1: 113.32, text: '所以，1、3、5、7……每一个正奇数，', say: '所以，一、三、五、七……每一个正奇数，' },   // L26
-      { t0: 113.52, t1: 116.37, text: '都是两个平方的差。' },   // L27
-      { t0: 116.97, t1: 120.82, text: '不是试出来的几个，是每一个。' },   // L28
+      { t0: 32.97, t1: 36.82, text: '大正方形减掉原来的正方形，' },   // L9 (+1.5)
+      { t0: 37.02, t1: 41.04, text: '剩下的就是这一圈：n加n加1。', say: '剩下的就是这一圈：n 加 n 加一。' },   // L10 (+1.5)
+      { t0: 41.54, t1: 45.69, text: '两个n两两配对，多出的1落了单：', say: '两个 n 两两配对，多出的一落了单：' },   // L11 (+1.5)
+      { t0: 45.89, t1: 49.34, text: '总剩一个的数，就是奇数。' },   // L12 (+1.5)
+      { t0: 49.84, t1: 53.81, text: '这样算，不管n是几，都一样。', say: '这样算，不管 n 是几，都一样。' },   // L13 (+1.5)
+      { t0: 54.51, t1: 56.76, text: '“那反过来呢？”', voice: 'qm', say: '那反过来呢？' },   // L14 (+1.5)
+      { t0: 57.06, t1: 61.91, text: '“随便给一个奇数，都能做成这样的一圈吗？”', voice: 'qm', say: '随便给一个奇数，都能做成这样的一圈吗？' },   // L15 (+1.5)
+      { t0: 62.41, t1: 64.7, text: '比如99。', say: '比如九十九。' },   // L16 (+1.5)
+      { t0: 65, t1: 68.85, text: '先拿出落单的1个，放在角上，', say: '先拿出落单的一个，放在角上，' },   // L17 (+1.5)
+      { t0: 69.15, t1: 74.4, text: '剩下98个，分成两条胳膊，每条49个。', say: '剩下九十八个，分成两条胳膊，每条四十九个。' },   // L18 (+1.5)
+      { t0: 74.8, t1: 78.65, text: '包住49×49的正方形，', say: '包住四十九乘四十九的正方形，' },   // L19 (+1.5)
+      { t0: 78.85, t1: 81.9, text: '正好变成50×50。', say: '正好变成五十乘五十。' },   // L20 (+1.5)
+      { t0: 82.5, t1: 88.2, text: '核对一下：2500减2401，正好99。', say: '核对一下：两千五百减两千四百零一，正好九十九。' },   // L21 (+1.5)
+      { t0: 89.7, t1: 94.15, text: '任何奇数都能这样：拿掉落单的1个，', say: '任何奇数都能这样：拿掉落单的一个，' },   // L22 (+2.1)
+      { t0: 94.35, t1: 99.2, text: '剩下的两两配对，分成两条一样长的胳膊，' },   // L23 (+2.1)
+      { t0: 99.4, t1: 103.45, text: '包住一个正方形，补成大一号的。' },   // L24 (+2.1)
+      { t0: 104.15, t1: 108.4, text: '就连1也行：1的平方减0的平方。', say: '就连一也行：一的平方减零的平方。' },   // L25 (+2.1)
+      { t0: 109.1, t1: 114.82, text: '所以，1、3、5、7……每一个正奇数，', say: '所以，一、三、五、七……每一个正奇数，' },   // L26 (+2.1)
+      { t0: 115.02, t1: 117.87, text: '都是两个平方的差。' },   // L27 (+2.1)
+      { t0: 118.47, t1: 122.32, text: '不是试出来的几个，是每一个。' },   // L28 (+2.1)
     ],
   });
 })();

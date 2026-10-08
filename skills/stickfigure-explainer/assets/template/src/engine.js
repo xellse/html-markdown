@@ -241,7 +241,12 @@ const GLYPH = {
   '<': { w: .56, s: [[[.5, .38], [.06, .64, 1], [.5, .9]]] },
   '>': { w: .56, s: [[[.06, .38], [.5, .64, 1], [.06, .9]]] },
   '÷': { w: .62, s: [[[.06, .6], [.56, .6]], [[.3, .34], [.31, .38]], [[.3, .82], [.31, .86]]] },
+  '²': { w: .36, s: [[[.05, .04], [.13, -.06], [.24, -.08], [.32, 0], [.3, .12], [.17, .27], [.04, .42, 1], [.34, .41]]] },
+  'n': { w: .56, s: [[[.08, .42], [.08, 1, 1]], [[.08, .62], [.2, .46], [.34, .42], [.47, .5], [.49, .7], [.49, 1]]] },
+  'a': { w: .56, s: [[[.46, .52], [.32, .42], [.14, .5], [.08, .76], [.18, .98], [.34, .98], [.47, .8]], [[.47, .44], [.48, 1]]] },
+  'b': { w: .56, s: [[[.1, 0], [.1, 1, 1]], [[.1, .64], [.24, .46], [.4, .46], [.5, .66], [.46, .9], [.3, 1], [.1, .94]]] },
 };
+GLYPH['−'] = GLYPH['-'];   // U+2212 minus, as typed in scripts
 function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += dist(pts[i - 1], pts[i]); return L; }
 function pointAt(pts, u) {
   const L = polyLen(pts) * u; let acc = 0;
@@ -1434,24 +1439,26 @@ const AUD = (() => {
   const b64 = str => { const bin = atob(str), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a.buffer; };
   // callback form of decodeAudioData for older Safari
   const decode = str => new Promise((res, rej) => { try { ctx.decodeAudioData(b64(str), res, rej); } catch (e) { rej(e); } });
-  return { ensure, decode, get ctx() { return ctx; }, bus: k => bus[k] };
+  /** swap in another context + buses (offline rendering); returns a function that restores the live ones */
+  function swap(c2, b2) { const c0 = ctx, b0 = { ...bus }; ctx = c2; Object.assign(bus, b2); return () => { ctx = c0; Object.assign(bus, b0); }; }
+  return { ensure, decode, swap, get ctx() { return ctx; }, bus: k => bus[k] };
 })();
 
 /* SOUND EFFECTS  — tiny synth on the sfx bus. Scenes add sounds with SFX.define(name, (tone, noise) => …) */
 const SFX = (() => {
-  let noiseBuf = null;
+  let noiseBuf = null, base = 0;   // base: extra start time (offline rendering schedules every sound at its cue time)
   const env = (g, t, a, d, pk) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
   function tone(type, f0, f1, dur, pk, lfo, delay = 0) {
-    const ctx = AUD.ctx, t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + base + delay, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
     if (lfo) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = lfo[0]; lg.gain.value = lfo[1]; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur + 0.05); }
     env(g, t, 0.006, dur, pk); o.connect(g).connect(AUD.bus('sfx')); o.start(t); o.stop(t + dur + 0.05);
   }
   function noise(type, freq, q, dur, pk, f1, delay = 0) {
-    const ctx = AUD.ctx, t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    const ctx = AUD.ctx, t = ctx.currentTime + base + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     if (!noiseBuf) { noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = rnd(77, i, 3); }
     s.buffer = noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur); f.Q.value = q;
-    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(AUD.bus('sfx')); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+    env(g, t, 0.004, dur, pk); s.connect(f).connect(g).connect(AUD.bus('sfx')); s.start(t, (rnd(91, Math.round(t * 1000), 1) + 1) * 0.25); s.stop(t + dur + 0.05);
   }
   const LIB = {
     step() { tone('sine', 180, 70, 0.08, 0.32); noise('lowpass', 700, 0.8, 0.04, 0.06); },
@@ -1480,6 +1487,8 @@ const SFX = (() => {
     unlock: AUD.ensure,
     define(name, fn) { LIB[name] = () => fn(tone, noise); },
     play(n) { const ctx = AUD.ctx; if (!ctx || ctx.state !== 'running') return; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } },
+    /** offline rendering: schedule sound n at absolute context time `when` */
+    at(n, when) { base = when; try { LIB[n] && LIB[n](); } catch (e) { /* ignore */ } base = 0; },
   };
 })();
 
@@ -1570,3 +1579,54 @@ const MUSIC = (() => {
     },
   };
 })();
+
+/* =====================================================================
+   OFFLINE AUDIO  — the whole episode's sound (voice + music + sfx) mixed exactly as the player plays it,
+   for exporting a video (tools/export_video.cjs). Assumes no voice line overruns its slot (audio.py reports them).
+   ===================================================================== */
+async function renderEpisodeAudio(sr = 48000) {
+  const pack = window.TAO_AUDIO || {}, D = EP.dur + 0.5;
+  const ctx = new OfflineAudioContext(2, Math.ceil(D * sr), sr);
+  const master = ctx.createGain(); master.connect(ctx.destination);
+  const bus = {}; for (const k of ['sfx', 'voice', 'music']) { bus[k] = ctx.createGain(); bus[k].gain.value = LEVEL[k]; bus[k].connect(master); }
+  const restore = AUD.swap(ctx, bus);
+  try {
+    const dec = async obj => { const out = {}; for (const k of Object.keys(obj || {})) { try { out[k] = await AUD.decode(obj[k].b); } catch (e) { console.error('decode failed', k); } } return out; };
+    const vbuf = await dec(pack.voice), mbuf = await dec(pack.music);
+    // voice + sfx at their cue times; the music bed ducks while a line is spoken
+    const mg = bus.music.gain;
+    for (const c of EP.cues) {
+      if (c.sfx) SFX.at(c.sfx, c.t);
+      if (c.say && vbuf[c.key]) {
+        const b = vbuf[c.key], s = ctx.createBufferSource(); s.buffer = b; s.connect(bus.voice); s.start(c.t);
+        mg.setTargetAtTime(LEVEL.duck, c.t, 0.08); mg.setTargetAtTime(LEVEL.music, c.t + b.duration - 0.03, 0.35);
+      }
+    }
+    // music: one looping bed per run of scenes with the same key, restarted at the run's first scene, cross-faded
+    const runs = [];
+    for (const sc of EP.scenes) {
+      const key = (EP.music || {})[sc.id] || null, last = runs[runs.length - 1];
+      if (last && last.key === key) last.end = sc.start + sc.dur; else runs.push({ key, start: sc.start, end: sc.start + sc.dur });
+    }
+    runs.forEach((r, i) => {
+      const b = r.key && mbuf[r.key]; if (!b) return;
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; s.loop = true; s.connect(g).connect(bus.music);
+      const fade = i === runs.length - 1 ? 1.5 : 0.8;
+      g.gain.setValueAtTime(0.0001, r.start); g.gain.linearRampToValueAtTime(1, r.start + 0.7);
+      g.gain.setValueAtTime(1, r.end); g.gain.linearRampToValueAtTime(0.0001, r.end + fade);
+      s.start(r.start, 0); s.stop(r.end + fade + 0.05);
+    });
+    return await ctx.startRendering();
+  } finally { restore(); }
+}
+/** encode an AudioBuffer as 16-bit PCM WAV bytes */
+function wavBytes(ab) {
+  const ch = ab.numberOfChannels, n = ab.length, sr = ab.sampleRate, data = new DataView(new ArrayBuffer(44 + n * ch * 2));
+  const W = (o, str) => { for (let i = 0; i < str.length; i++) data.setUint8(o + i, str.charCodeAt(i)); };
+  W(0, 'RIFF'); data.setUint32(4, 36 + n * ch * 2, true); W(8, 'WAVE'); W(12, 'fmt '); data.setUint32(16, 16, true);
+  data.setUint16(20, 1, true); data.setUint16(22, ch, true); data.setUint32(24, sr, true); data.setUint32(28, sr * ch * 2, true);
+  data.setUint16(32, ch * 2, true); data.setUint16(34, 16, true); W(36, 'data'); data.setUint32(40, n * ch * 2, true);
+  const chans = []; for (let c = 0; c < ch; c++) chans.push(ab.getChannelData(c));
+  let o = 44; for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, chans[c][i])); data.setInt16(o, v < 0 ? v * 0x8000 : v * 0x7fff, true); o += 2; }
+  return new Uint8Array(data.buffer);
+}

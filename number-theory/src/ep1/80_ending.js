@@ -43,7 +43,7 @@
       ]),
       F(32.4, { type: 'write', id: 'dots', text: '…', x: 1360, y: 300, size: 76, t0: 29.2, speed: 2400 }),
       F(32.4, { type: 'prop', kind: 'h1_group9', id: 'g9', at: [760, 470], t0: 29.6 }),
-      F(32.4, { type: 'title', id: 'q', text: '4 个一组，剩下几个？', x: 930, y: 600, size: 60, t0: 30.4, color: 'red', rot: -2 }),
+      F(32.4, { type: 'title', id: 'q', text: '4 个一组，剩下几个？', x: 990, y: 600, size: 54, t0: 30.4, color: 'red', rot: -2 }),
     ],
     subs: [
     {"t0": 0.3, "t1": 3.95, "text": "今天，我们走上了两级台阶："},

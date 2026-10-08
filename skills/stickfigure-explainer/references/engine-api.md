@@ -160,7 +160,7 @@ project/
 | type | 主要参数 | 用途 |
 |---|---|---|
 | `ageStamp` | `age`（+`suffix`，默认'岁'）或 `label`（'唐朝'、'第1步'）、`place`（飘带文字）、`center`、`R: 150`、`dockT`、`dock: [1486, 108]`、`dockScale: 0.46`、`pulse: [t…]`、`t1`（0.25 秒缩小消失，换年龄前用）、`key`（两个印章同时在画面上时用不同的 key） | 红色印章，先盖在中央，再停靠到角落 |
-| `write` | `text`、`x`、`y`（字顶）、`size`、`speed`（单位/秒）、`gap`、`glyphGap`、`track`、`color: 'red'`、`w`、`z`、`sfx`、`endSfx`、`silent` | 手写数学，只支持 GLYPH 里的字符 |
+| `write` | `text`、`x`、`y`（字顶）、`size`、`speed`（单位/秒）、`gap`、`glyphGap`、`track`、`color: 'red'`、`w`、`z`、`sfx`、`endSfx`、`silent` | 手写数学，只支持 GLYPH 里的字符：0–9 x + - −（Unicode 减号，等同 -）× ÷ = ≠ < > ✓ , . ? □ ( ) … → ² n a b |
 | `highlight` | `of`（某个 write 的 id）、`t0`、`dur` | 黄色荧光笔划过整行 |
 | `ring` | `of`、`glyph`（字符序号，空格也算） | 红笔圈出一个字符 |
 | `label` | `text` 或 `[行1, 行2]`、`at`、`rot`、`target`、`bend`、`gap`、`size`、`color: 'ink'` | 红笔标注加箭头 |
@@ -300,18 +300,20 @@ python3 build.py ep1 --only 10_,20_ -o /tmp/t.html     # 只构建部分场景�
 python3 tools/check_timing.py ep1                      # 生成配音前检查字幕
 python3 tools/audio.py ep1                             # 生成配音和配乐包，列出超出时长的句子，并自动重新构建页面
 NODE_PATH=$(npm root -g) node <skill>/scripts/capture.cjs episode-1.html frames "every:5" 1280   # 每 5 秒一段、取每段中点截一帧（2.5, 7.5, …）
+NODE_PATH=$(npm root -g) node tools/export_video.cjs episode-1.html ep1-4k.mp4 --jobs 3                 # 导出 MP4（默认 4K 24 帧；--res 1920x1080、--from/--to 只导一段）
 python3 <skill>/scripts/sheet.py frames sheet.png 4 480                                          # 拼成一张缩略图，用 Read 看
 NODE_PATH=$(npm root -g) node <skill>/scripts/playtest.cjs episode-1.html out                    # 真实播放器测试
 python3 <skill>/scripts/gif.py frames_fps gif.gif 12 640                                         # 需要时出 GIF（配合 "fps:12"）
 ```
-- 页面提供的测试接口：`window.__seek(t)`、`__duration`、`__scenes`、`__audio()`。
+- 页面提供的测试接口：`window.__seek(t)`、`__duration`、`__scenes`、`__audio()`；导出视频用的 `__renderAudio(sr)`（整集声音离线混音：配音、配乐和压低、音效）和 `__wavChunk(i, n)`。
+- **导出视频**：画面逐帧调用 `render(t)` 截图（不是录屏），声音由 `renderEpisodeAudio` 按播放器的规则离线混出来，所以要求没有配音超时（audio.py 报的超时句子要先改掉），也不要用互动停顿（视频里不会停）。
 - `frames/console.txt` 必须为空。里面出现 "no web font loaded" 时，见 environment.md。
 - 页面加载就出错时，capture.cjs 会直接打印控制台内容并退出。常见原因是场景代码报错，或者 `--only` 漏掉了依赖。
 
 ## 12. 常见坑
 - **key 不稳定或重复**，会导致图元闪烁或串位。key 要带组件 id；循环里带上下标。
 - **`highlight` 和 `ring` 只能作用于 `write`**。代码、打字文字、任意区域，用 `band`、`strike`、`ringRect` 配合 `rect`。
-- **中文和英文字母不能一笔笔写**（GLYPH 里只有数字和数学符号），用 `scribe` 逐字出现；代码用 `codeBlock`。
+- **中文和大多数英文字母不能一笔笔写**（GLYPH 里只有数字、数学符号和 ²、n、a、b），用 `scribe` 逐字出现；代码用 `codeBlock`。
 - **SVG 会吞掉连续空格**：引擎的 `text` 已经加了 `white-space: pre`，缩进可以直接写成空格。
 - **共享代码**：写进 `_xx_shared.js`。不要让后面的场景依赖前面场景文件里的全局变量，否则 `--only` 单独测试时会报错。
 - **孩子举手、挠头时手被头挡住**：用 `armScale` 1.5–1.75 的姿势（kidCheer、scratchStand）。

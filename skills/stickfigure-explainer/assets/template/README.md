@@ -5,7 +5,8 @@
 ```bash
 python3 build.py ep1          # → episode-1.html
 python3 tools/audio.py ep1    # 配音和配乐 → episode-1.audio.js（构建时会自动带上）
-NODE_PATH=$(npm root -g) node tools/lint_frames.cjs episode-1.html > lint.md   # 自动查画面问题（压脸、线穿字、一帧消失、小字……）
+NODE_PATH=$(npm root -g) node tools/lint_frames.cjs episode-1.html > lint.md
+NODE_PATH=$(npm root -g) node tools/export_video.cjs episode-1.html ep1-4k.mp4 --jobs 3   # 导出 4K MP4   # 自动查画面问题（压脸、线穿字、一帧消失、小字……）
 ```
 
 ## 目录
