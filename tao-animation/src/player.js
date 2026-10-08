@@ -156,6 +156,10 @@ window.render = render;
 window.__duration = EP.dur;
 window.__scenes = EP.scenes.map(s => ({ id: s.id, chapter: s.chapter || null, start: +s.start.toFixed(3), dur: s.dur }));
 window.__seek = t => { seek(t); render(P.t); P.lastQ = Math.floor(P.t * CFG.FPS + 1e-6); };
+// video export hooks (tools/export_video.cjs): mix the episode's sound offline, then hand it out in base64 chunks
+window.__renderAudio = async (sr = 48000, holds = []) => { window.__wav = wavBytes(await renderEpisodeAudio(sr, holds)); return window.__wav.length; };
+window.__pauses = EP.pauses.slice();
+window.__wavChunk = (i, n) => { const a = window.__wav.subarray(i, i + n); let s = ''; for (let k = 0; k < a.length; k += 0x8000) s += String.fromCharCode.apply(null, a.subarray(k, k + 0x8000)); return btoa(s); };
 window.__audio = () => ({ ctx: AUD.ctx && AUD.ctx.state, music: MUSIC.current(), talking: NARR.busy(), t: P.t, playing: P.playing, waiting: P.waiting });
 
 paint(Math.min(EP.poster, EP.dur), true); syncUI();

@@ -1584,8 +1584,12 @@ const MUSIC = (() => {
    OFFLINE AUDIO  — the whole episode's sound (voice + music + sfx) mixed exactly as the player plays it,
    for exporting a video (tools/export_video.cjs). Assumes no voice line overruns its slot (audio.py reports them).
    ===================================================================== */
-async function renderEpisodeAudio(sr = 48000) {
-  const pack = window.TAO_AUDIO || {}, D = EP.dur + 0.5;
+async function renderEpisodeAudio(sr = 48000, holds = []) {
+  // holds: [[p, H], …] — the video holds the picture for H seconds at each "轮到你了" pause p (episode time),
+  // playing the think bed meanwhile, exactly like the player waiting for a tap. Everything after p moves later by H.
+  const pack = window.TAO_AUDIO || {}, HS = holds.slice().sort((x, y) => x[0] - y[0]);
+  const shift = t => t + HS.reduce((s, [p, H]) => s + (p < t - 1e-6 ? H : 0), 0);
+  const D = EP.dur + HS.reduce((s, h) => s + h[1], 0) + 0.5;
   const ctx = new OfflineAudioContext(2, Math.ceil(D * sr), sr);
   const master = ctx.createGain(); master.connect(ctx.destination);
   const bus = {}; for (const k of ['sfx', 'voice', 'music']) { bus[k] = ctx.createGain(); bus[k].gain.value = LEVEL[k]; bus[k].connect(master); }
@@ -1596,26 +1600,38 @@ async function renderEpisodeAudio(sr = 48000) {
     // voice + sfx at their cue times; the music bed ducks while a line is spoken
     const mg = bus.music.gain;
     for (const c of EP.cues) {
-      if (c.sfx) SFX.at(c.sfx, c.t);
+      const t = shift(c.t);
+      if (c.sfx) SFX.at(c.sfx, t);
       if (c.say && vbuf[c.key]) {
-        const b = vbuf[c.key], s = ctx.createBufferSource(); s.buffer = b; s.connect(bus.voice); s.start(c.t);
-        mg.setTargetAtTime(LEVEL.duck, c.t, 0.08); mg.setTargetAtTime(LEVEL.music, c.t + b.duration - 0.03, 0.35);
+        const b = vbuf[c.key], s = ctx.createBufferSource(); s.buffer = b; s.connect(bus.voice); s.start(t);
+        mg.setTargetAtTime(LEVEL.duck, t, 0.08); mg.setTargetAtTime(LEVEL.music, t + b.duration - 0.03, 0.35);
       }
     }
-    // music: one looping bed per run of scenes with the same key, restarted at the run's first scene, cross-faded
+    // music: one looping bed per run of scenes with the same key (restarted at the run's first scene), cross-faded;
+    // a hold inside a run pauses that bed, plays the think bed, then the bed resumes where the episode is
     const runs = [];
     for (const sc of EP.scenes) {
       const key = (EP.music || {})[sc.id] || null, last = runs[runs.length - 1];
       if (last && last.key === key) last.end = sc.start + sc.dur; else runs.push({ key, start: sc.start, end: sc.start + sc.dur });
     }
+    const plays = [];
     runs.forEach((r, i) => {
-      const b = r.key && mbuf[r.key]; if (!b) return;
-      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; s.loop = true; s.connect(g).connect(bus.music);
-      const fade = i === runs.length - 1 ? 1.5 : 0.8;
-      g.gain.setValueAtTime(0.0001, r.start); g.gain.linearRampToValueAtTime(1, r.start + 0.7);
-      g.gain.setValueAtTime(1, r.end); g.gain.linearRampToValueAtTime(0.0001, r.end + fade);
-      s.start(r.start, 0); s.stop(r.end + fade + 0.05);
+      let from = r.start, vFrom = shift(r.start);   // episode time / video time where the current piece of this bed starts
+      for (const [p, H] of HS) {
+        if (p <= r.start || p >= r.end) continue;
+        plays.push({ key: r.key, v0: vFrom, v1: shift(p), offset: from - r.start, fadeOut: 0.8 });
+        plays.push({ key: EP.think, v0: shift(p), v1: shift(p) + H, offset: 0, fadeOut: 0.8 });
+        from = p; vFrom = shift(p) + H;
+      }
+      plays.push({ key: r.key, v0: vFrom, v1: shift(r.end), offset: from - r.start, fadeOut: i === runs.length - 1 ? 1.5 : 0.8 });
     });
+    for (const pl of plays) {
+      const b = pl.key && mbuf[pl.key]; if (!b || pl.v1 <= pl.v0) continue;
+      const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; s.loop = true; s.connect(g).connect(bus.music);
+      g.gain.setValueAtTime(0.0001, pl.v0); g.gain.linearRampToValueAtTime(1, pl.v0 + 0.7);
+      g.gain.setValueAtTime(1, pl.v1); g.gain.linearRampToValueAtTime(0.0001, pl.v1 + pl.fadeOut);
+      s.start(pl.v0, ((pl.offset % b.duration) + b.duration) % b.duration); s.stop(pl.v1 + pl.fadeOut + 0.05);
+    }
     return await ctx.startRendering();
   } finally { restore(); }
 }
