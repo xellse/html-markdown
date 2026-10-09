@@ -40,7 +40,7 @@
 
   /* ---------------- 平方检查站（一张单独的白卡，不带跑道花纹）---------------- */
   const CARD = [300, 190, 1160, 575], MID = 730, GATE = 470, FLOOR = 548, BRY = 504, BS = 1.3;
-  const ST_UP = [215, -44], ST_DN = [215, 26];          // stamps, relative to their brick
+  const ST_UP = [185, -44], ST_DN = [185, 26];          // close to their own brick: 2025's group and 2021's group stay ≥ 60 px apart
   const red = (k, s, x, y, size, o = {}) => text(k, s, x, y, { size, color: C.red, z: Z.annot, ...o });
   /** a red rubber stamp: slams in at t0 */
   const stamp = (k, s, cx, cy, t0, t, op = 1) => {
@@ -109,13 +109,19 @@
   ] };
 
   /* ---------------- 2021、2025 两块白砖（r = null：不刷花纹）和它们的章 ---------------- */
+  const X21R = 870;                                     // 2021's place after 2025 arrives
   const X21 = t => {
     let x = lerp(120, GATE, EASE.out(clamp((t - T.B21) / 0.7)));
-    x += (850 - GATE) * EASE.io(clamp((t - T.MOVE) / 0.6));
+    x += (X21R - GATE) * EASE.io(clamp((t - T.MOVE) / 0.6));
     return lerp(x, MID, EASE.io(clamp((t - T.SPLIT - 0.1) / 0.6)));
   };
   const Y21 = t => lerp(BRY, 450, EASE.io(clamp((t - T.SPLIT - 0.1) / 0.6)));
   const X25 = t => lerp(120, GATE, EASE.out(clamp((t - T.B25) / 0.7)));
+  {
+    const half = (str) => (textWidth(str, 38) * 0.95 + 34) / 2 + 4, bw = 96 * BS / 2;   // stamp half-width (+ rotation slack), brick half-width
+    const r25 = GATE + ST_UP[0] + Math.max(half('0 或 1 ✓'), half('是平方')), l21 = X21R - bw, r21 = X21R + ST_DN[0] + Math.max(half('0 或 1 ✓'), half('不是平方'));
+    if (l21 - r25 < 60 || r21 > CARD[2] - 6) console.error('n2x_enough: stamp groups crowd each other or leave the card', r25, l21, r21);
+  }
   const bricks = {
     type: 'n2_fn', id: 'n2xbr', t0: T.B21,
     cues: [[T.B21, 'whoosh'], [T.ST21, 'stamp'], [T.NOT, 'stamp'], [T.MOVE, 'swish'], [T.B25, 'whoosh'], [T.IS, 'stamp'], [T.ST25, 'stamp'], [T.MARK, 'pen']],
@@ -131,7 +137,7 @@
         stamp(k + '.a2', '不是平方', x + ST_DN[0], y + ST_DN[1], T.NOT, t);
         N2.fadeFrom(m0, prep);
       }
-      if (t >= T.MARK) { DL.save(); DL.translate(x + 82, y - 52); PROPS.n1_mark({ id: k + '.am', size: 40 }, t, t - T.MARK, EASE.out(clamp((t - T.MARK) / 0.35))); DL.restore(); }
+      if (t >= T.MARK) { DL.save(); DL.translate(x + 78, y - 54); PROPS.n1_mark({ id: k + '.am', size: 40 }, t, t - T.MARK, EASE.out(clamp((t - T.MARK) / 0.35))); DL.restore(); }
       // 2025
       if (t >= T.B25 && prep > 0) {
         const m0 = DL.items.length, x5 = X25(t);

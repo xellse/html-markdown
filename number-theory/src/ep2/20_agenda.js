@@ -204,9 +204,9 @@
   const QS = 0.65, QTX = 740 - 650 * QS, QTY = 350 - 172 * QS;                         // one of three boards
   const [AG2x, AG2y] = N2.HUD_GEO.ag(2), BS3 = 0.07;
   const panels = {
-    type: 'n2_panels', id: 'g2pn', t0: T.PN, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.TO_BAR + 0.08,
+    type: 'n2_panels', id: 'g2pn', t0: T.PN, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.TO_BAR + 0.12,
     xf: [[0, [800 - 650 * 0.3, 430 - 431 * 0.3, 0.3]], [T.PN_GROW, [PTX, PTY, PS], 0.6, 'io'], [T.PN_SHRINK, [QTX, QTY, QS], 0.5, 'io'],
-      [T.TO_BAR, [AG2x - 650 * BS3, AG2y - 431 * BS3, BS3], T.BAR_DUR, 'in']],
+      [T.TO_BAR, [AG2x - 650 * BS3, AG2y - 431 * BS3, BS3], T.BAR_DUR, 'out']],
   };
   // the two boards ① ② the little question mark holds up, then hangs in the row; all three fly into the agenda bar
   const QM_AT = [1420, FL], QMS = 150 / 200, QSIGN = 52;
@@ -214,11 +214,11 @@
   COMP.g2_boards = {
     draw(fx, t) {
       if (t < Math.min(T.DET1, T.Y2)) return;
-      const k = fx.id, n0 = DL.items.length, fo = clamp((t - T.TO_BAR - 0.08) / 0.25); if (fo >= 1) return;
+      const k = fx.id, n0 = DL.items.length, fo = clamp((t - T.TO_BAR - 0.15) / 0.2); if (fo >= 1) return;
       BOARDS.forEach((B, i) => {
         if (t < B.det) return;
         const size = 40, tw = textWidth(B.s, size) + 40, from = [QM_AT[0] - 70 * QMS, QM_AT[1] - 262 * QMS], fs = (textWidth(B.s, QSIGN) + 40) * QMS / tw;
-        const u = EASE.io(clamp((t - B.det) / T.DET_DUR)), bu = EASE.in(clamp((t - T.TO_BAR) / T.BAR_DUR)), [ax, ay] = N2.HUD_GEO.ag(i);
+        const u = EASE.io(clamp((t - B.det) / T.DET_DUR)), bu = EASE.out(clamp((t - T.TO_BAR) / T.BAR_DUR)), [ax, ay] = N2.HUD_GEO.ag(i);
         // up first, then across: the board never passes over the two panels below the row
         let p = [lerp(from[0], B.at[0], EASE.io(u)), lerp(from[1], B.at[1], EASE.out(clamp(u * 1.8)))], s = lerp(fs, 1, u);
         if (bu > 0) { p = lerp2(B.at, [ax, ay], bu); s = lerp(1, 0.1, bu); }
@@ -230,7 +230,7 @@
         if (nu > 0) text(`${k}.n${i}`, N2.CIRC[i], B.at[0] - tw / 2 - 30, B.at[1] - 26, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: nu, scale: lerp(0.5, 1, EASE.back(nu)) });
       });
       // ③ = "余2：" over the two panels (the question from the start of the episode); it flies into the bar with them
-      const yu = clamp((t - T.Y2) / 0.3), bu3 = EASE.in(clamp((t - T.TO_BAR) / T.BAR_DUR));
+      const yu = clamp((t - T.Y2) / 0.3), bu3 = EASE.out(clamp((t - T.TO_BAR) / T.BAR_DUR));
       if (yu > 0) {
         const [ax, ay] = N2.HUD_GEO.ag(2), p = lerp2([QTX + 90 * QS + 4, QTY + 172 * QS - 34], [ax, ay], bu3), s = lerp(1, 0.1, bu3);
         DL.save(); DL.translate(p[0], p[1]); DL.scale(Math.max(0.01, s));

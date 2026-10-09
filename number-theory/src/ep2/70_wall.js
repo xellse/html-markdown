@@ -8,8 +8,10 @@
 //        红字"空"，顶栏跑道条余 2 那条红圈；空格下面立起一面墙。
 //   L4–L5 一个小火柴人推着 6 的砖（网点）从左边走来；6 的花纹签和空格的花纹签一起红圈（6 只在余 2 那条）；
 //        证明栈第 6 行；小人轻轻撞上墙、弹回来，冒出红色小星。
-//   L6   表、结果行、墙、小人淡出；卡③"大平方减小平方 ÷ 4：只余 0、1、3"写出来，下面钉范围卡；证明栈第 7 行。
-//   L7   卡③和范围卡一起缩进顶栏；议程 ② 打勾；红笔顺着证明栈从"假设"一路画到"撞墙"，整列亮起；"这叫反证法"时盖章。
+//   L6   表和四块砖淡出（25.0）；"6根本没有"时 6 旁边盖一张白卡"6 / ✗ 没有小拐角"（dark 场 2026 卡的画法）；证明栈第 7 行；
+//        6、墙、小人、结果行一直留到 29.0 才淡出。卡③"大平方减小平方 ÷ 4：只余 0、1、3"从 28.4 起写在左上（原来表的位置）。
+//   L7   范围卡钉在卡③下面（30.3）；卡③和范围卡一起缩进顶栏（30.9）；议程 ② 打勾（31.5）；红笔顺着证明栈从"假设"一路画到"撞墙"，
+//        整列亮起；"这叫反证法"时盖章（33.3）。
 // 开场 = 顶栏收起 + 议程条 + 证明栈 0–4 行（第 4 行当前）+ 范围卡；
 // 结尾 = 顶栏展开（卡①②③）+ 议程条（①②打勾）+ 证明栈 0–7 行全亮、盖章 + 范围卡（dark 场接着用）。
 (() => {
@@ -26,7 +28,8 @@
     // L4–L5: the little stick figure with the 6
     mini: 16.1, ring6: 16.4, ring6Out: 17.9, w1: [16.1, 17.3], w2: [18.3, 20.4], w3: [21.1, 23.6], bonk: 23.6, st6: 22.3,
     // L6–L7
-    clear: 25.0, card: 25.6, st7: 27.3, scope: 27.45, dock: 29.55, tick: 30.15, trace: 30.85, all: 31.1, stamp: 33.3, traceOut: 33.85,
+    // clear: the table and the four bricks go (frees the upper area); xcard: "6 根本没有" stamps ✗ next to the 6; clear2: the 6, the wall, the figure, the result row go
+    clear: 25.0, xcard: 26.9, st7: 27.3, card: 28.4, clear2: 29.0, scope: 30.3, dock: 30.9, tick: 31.5, trace: 30.85, all: 31.1, stamp: 33.3, traceOut: 33.85,
   };
 
   /* ---------------- self-check ---------------- */
@@ -176,9 +179,10 @@
   };
 
   /* ---------------- L6–L7: card ③ and its scope card ---------------- */
-  const CARD3 = { at: [560, 345], w: 640 };
-  const SC3 = { at: [560, 548], w: 470, h: 140, size: 36, lines: ['两个数从 0、1、2……里挑，', '叫 a、b，a > b'] };
+  const CARD3 = { at: [450, 300], w: 560 };   // upper-left, where the table was
+  const SC3 = { at: [450, 480], w: 470, h: 140, size: 36, lines: ['两个数从 0、1、2……里挑，', '叫 a、b，a > b'] };
   const HUD3 = N2.HUD_GEO.card(3);
+  const XC = [300, 705];                      // the ✗ card, left of the dazed figure, under the result row
 
   /** fades (over d s from t0) every item already drawn this frame whose key starts with one of `keys`: keep these at the end of fx */
   COMP.q2_fade = {
@@ -200,7 +204,7 @@
         pose: [[0, miniPose]],
         face: [[0, 'focus'], [T.ring6, 'smile', 0.1], [T.w3[0], 'effort', 0.1], [T.bonk, 'jaw', 0.04], [T.bonk + 0.6, 'sheepish', 0.15]],
         turn: [[0, 0.35]],
-        gaze: [[0, [800, 700]], [T.bonk + 0.6, 'viewer']],
+        gaze: [[0, [800, 700]], [T.bonk + 0.6, 'viewer'], [T.xcard + 0.1, XC]],
         squash: [[0, 1], [T.bonk, 0.86, 0.05], [T.bonk + 0.05, 1, 0.3, 'back']],
       },
     },
@@ -226,8 +230,18 @@
         N2.fadeFrom(n0, o);
       } },
       { type: 'n2_grp', id: 'q2flG', out: T.clear, inner: [{ type: 'q2_fly', id: 'q2fl' }, ...TICKS] },
-      { type: 'n2_grp', id: 'q2rwG', out: T.clear, inner: [{ type: 'q2_row', id: 'q2rw' }, { type: 'q2_wall', id: 'q2wl' }] },
-      { type: 'n2_grp', id: 'q2cyG', out: T.clear, inner: { type: 'q2_carry', id: 'q2cy' } },
+      { type: 'n2_grp', id: 'q2rwG', out: T.clear2, inner: [{ type: 'q2_row', id: 'q2rw' }, { type: 'q2_wall', id: 'q2wl' }] },
+      { type: 'n2_grp', id: 'q2cyG', out: T.clear2, inner: { type: 'q2_carry', id: 'q2cy' } },
+      // L6 "6根本没有小拐角": a white card stamped next to the 6 (the look of dark's 2026 card)
+      { type: 'n2_grp', id: 'q2xcG', out: T.clear2, inner: { type: 'n2_fn', id: 'q2xc', t0: T.xcard, cues: [[T.xcard, 'stamp']], fn: (t, lt, k) => {
+        const n0 = DL.items.length, s = lerp(1.6, 1, EASE.back(clamp(lt / 0.22)));
+        DL.save(); DL.translate(XC[0], XC[1]); DL.rotate(-4); DL.scale(s);
+        stroke(k + '.bk', N2.box(-150, -65, 150, 65), { z: Z.annot + 2, w: 4, fill: '#FFFFFF' });
+        text(k + '.n', '6', 0, -30, { size: 40, z: Z.annot + 2.2, font: CFG.FONT_MIX });
+        text(k + '.x', '✗', -112, 30, { size: 50, color: C.red, z: Z.annot + 2.2, font: CFG.FONT_MIX });
+        text(k + '.t', '没有小拐角', 22, 30, { size: 40, z: Z.annot + 2.2 });
+        DL.restore(); N2.fadeFrom(n0, clamp(lt * 6));
+      } } },
       { type: 'n2_star', id: 'q2star', at: [BX - 70 + 4, FL - 150], r: 20, t0: T.bonk + 0.05, dur: 1.4 },
 
       // L6–L7: card ③ with its scope card, both fly into the top bar
@@ -243,7 +257,7 @@
       } },
 
       // exits that must stay last
-      { type: 'q2_fade', t0: T.clear, keys: ['q2m.'] },
+      { type: 'q2_fade', t0: T.clear2, keys: ['q2m.'] },
     ],
     subs: [
       { t0: 0.6, t1: 5.89, text: '所以两个平方相减，零头只能是0、1、3：', say: '所以两个平方相减，零头只能是零、一、三：' },

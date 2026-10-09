@@ -32,8 +32,8 @@
     A: 14.6, K250: 15.9, K507: 16.7, NOTE: 18.4,             // speed-up; 998 (and the 1000 flash); 2026; "……没有尽头"
     MINI_PULSE: 20.0, MINI_OUT: 23.1,
     REW: 23.6, REW_D: 0.8,                                  // the tape whooshes back to its start
-    TAG: 24.5, SWAP: 25.9, CARD: 26.9,
-    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, PANELS: 31.5, STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,
+    TAG: 24.4, SWAP: 26.7, CARD: 27.3,                       // the old tag stands ~1.8 s before it is torn off (on "每一个")
+    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, TAPE_OUT: 30.95, PANELS: 31.5,   // tape + tag leave before the panels come in STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,
     CLR2: 33.9, WALK: 33.8,
     CUPS: 34.6, FLIPS: [36.9, 37.5, 38.1, 40.2, 41.6], CHAM: 39.0, BOXT: 41.0, ARR: [41.5, 41.85], ICONS_OUT: 43.45,
     FLASH1: 43.9, GRP: 44.15, REMHI: 44.7, REMARR: 45.1, GIN1: 45.9, GOUT: 46.6, GIN2: 47.25, REMPULSE: 47.8,
@@ -67,12 +67,12 @@
   const blurAt = t => clamp((Math.abs(vel(t)) - 10) / 20);
   const brickX = (k, off) => BX0 + CW * (k + 0.5 - off);
 
-  const lane = { type: 'n2_lanes', id: 'd2ln', x: LN.x, y: LN.y - 2 * (LN.H + 16), W: 1520, H: LN.H, gap: 16, head: LN.head, lanes: [2], labelSize: 44, t0: T.LANE, t1: T.CLR2 };
+  const lane = { type: 'n2_lanes', id: 'd2ln', x: LN.x, y: LN.y - 2 * (LN.H + 16), W: 1520, H: LN.H, gap: 16, head: LN.head, lanes: [2], labelSize: 44, t0: T.LANE, t1: T.TAPE_OUT };
   const tape = {
     type: 'n2_fn', id: 'd2tp', t0: T.BRICKS,
     cues: [[T.BRICKS, 'pop'], ...OUT5.slice(0, 5).map(x => [x - 0.05, 'tap']), [T.A + 0.3, 'whoosh'], [T.REW, 'swish'], [T.REW + 0.2, 'whoosh']],
     fn: (t, lt, k) => {
-      const op = 1 - clamp((t - T.CLR2) / 0.35); if (op <= 0) return;
+      const op = 1 - clamp((t - T.TAPE_OUT) / 0.35); if (op <= 0) return;
       const off = OFF(t), b = blurAt(t), Kt = K(t), n0 = DL.items.length;
       // crisp bricks (they fade into the blur as the tape speeds up, and back out of it when the rewind stops)
       if (b < 1) {
@@ -170,7 +170,7 @@
 
   /* ---------------- 第 1 集表上的"猜想（还没证明）"标签：飞回来贴在 2 上方，撕下换成"证明了 ✓"；旁边钉范围卡 ---------------- */
   const B0X = brickX(0, 0);
-  const tag = { type: 'n2_tag', id: 'd2tag', text: '猜想（还没证明）', size: 50, rot: -3, t0: T.TAG, pos: [[0, [-260, 150]], [T.TAG, [B0X, 326], 0.5, 'out']], swap: T.SWAP, t1: T.CLR2 };
+  const tag = { type: 'n2_tag', id: 'd2tag', text: '猜想（还没证明）', size: 50, rot: -3, t0: T.TAG, pos: [[0, [-260, 150]], [T.TAG, [B0X, 326], 0.5, 'out']], swap: T.SWAP, t1: T.TAPE_OUT };
   const SCOPE2 = { at: [790, 305], w: 446, h: 110 };
   const scope2 = { type: 'n2_grp', id: 'd2scG', out: T.CLR2, inner: { type: 'prop', kind: 'n1_card', id: 'd2sc', at: SCOPE2.at, w: SCOPE2.w, h: SCOPE2.h, size: 36, lines: ['两个数从 0、1、2……里挑'], t0: T.CARD, sfxAt: [[T.CARD, 'paper']] } };
 
