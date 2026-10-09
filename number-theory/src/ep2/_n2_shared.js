@@ -331,7 +331,7 @@ COMP.n2_tag = {
     const u = clamp((t - fx.t0) / 0.25);
     const torn = fx.swap !== undefined ? clamp((t - fx.swap) / 0.5) : 0;
     if (torn < 1) {
-      DL.save(); DL.translate(x + 30 * torn, y + 160 * torn * torn); DL.rotate(rot + 50 * torn); DL.scale(Math.max(0.01, lerp(1.5, 1, EASE.back(u))));
+      DL.save(); DL.translate(x - 150 * torn, y - 30 * torn + 90 * torn * torn); DL.rotate(rot - 60 * torn);   // torn off sideways, not down over what is below DL.scale(Math.max(0.01, lerp(1.5, 1, EASE.back(u))));
       const a = n0; box(k + '.r', fx.text || '猜想', C.red, C.paper, size);
       text(k + '.rt', fx.text || '猜想', 0, 2, { size, color: C.red, z: Z.annot + 1.2, anchor: 'middle' });
       N2.fadeFrom(a, clamp(u * 3) * (1 - torn));
@@ -459,6 +459,7 @@ PROPS.n2_group9 = (fx, t, lt, p) => {
    { type:'n2_panels', id, t0, xf: [[t, [tx, ty, s]]],   // 原尺寸：左格 [90,172,610,690]，右格 [690,172,1210,690]；xf 缩放移动（缩成小卡用）
      stamp: t,                          // 右格"根本没有"上盖红章 ✓
      lock: t, lockOut: t,               // 右格旁边挂锁牌"这个世界上谁都做不到"（引用①后半）；lockOut 起淡出
+     lockAt: [x, y], lockAbs: 0.9,      // 可选：锁牌挂点（两格自己的坐标，默认 [1250, 300]）；锁牌按这个绝对缩放画，不跟着 xf 变小
      t1 }                               // 0.35 秒淡出
    发布命名点 <id>.L、<id>.R（两格中心，已按 xf 换算）。 */
 COMP.n2_panels = {
@@ -499,7 +500,8 @@ COMP.n2_panels = {
     }
     if (fx.lock !== undefined && t >= fx.lock) {
       const lu = EASE.back(clamp((t - fx.lock) / 0.3)), lo = fx.lockOut !== undefined ? 1 - clamp((t - fx.lockOut) / 0.35) : 1, m0 = DL.items.length;
-      DL.save(); DL.translate(1250, 300); DL.rotate(4 * Math.sin((t - fx.lock) * 3) * (1 - clamp((t - fx.lock) / 1.5))); DL.scale(Math.max(0.01, lu));
+      const [lx, ly] = fx.lockAt || [1250, 300], ls = fx.lockAbs ? fx.lockAbs / s : 1;   // lockAbs: draw the sign at this absolute scale, whatever the panels' xf scale
+      DL.save(); DL.translate(lx, ly); DL.rotate(4 * Math.sin((t - fx.lock) * 3) * (1 - clamp((t - fx.lock) / 1.5))); DL.scale(Math.max(0.01, lu * ls));
       stroke(k + '.ls', [[-120, 0], [0, -60, 1], [120, 0]], { z: Z.annot, w: 3 });
       stroke(k + '.lb', N2.box(-170, 0, 170, 130), { z: Z.annot, w: 4.5, fill: '#F3E3C3' });
       text(k + '.lt1', '这个世界上', 0, 40, { size: 40, z: Z.annot + 0.2, anchor: 'middle' });

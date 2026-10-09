@@ -369,7 +369,7 @@
     fx: [
       { type: 'n2_hud', id: 'hud', at: 'odd', dock: [[T.DOCK, 2]], tick: [[T.TICK, 0]] },
       // a short pencil floor under Jasper
-      { type: 'n2_fn', id: 'o2fl', t0: 0, fn: (t, lt, k) => { const o = 1 - clamp((t - T.KID_GONE) / 0.1); if (o > 0) stroke(k, [[960, FL], [1300, FL + 2], [1590, FL - 1]], { z: Z.set, w: 2.2, color: C.pencil, draw: EASE.out(clamp(lt / 0.4)), opacity: 0.8 * o }); } },
+      { type: 'n2_fn', id: 'o2fl', t0: 0, fn: (t, lt, k) => { const o = 1 - clamp((t - Math.min(T.KID_GONE, T.DUR - 0.5)) / 0.35); if (o > 0) stroke(k, [[960, FL], [1300, FL + 2], [1590, FL - 1]], { z: Z.set, w: 2.2, color: C.pencil, draw: EASE.out(clamp(lt / 0.4)), opacity: 0.8 * o }); } },
 
       // the two pictures (7 × 7 and the general square) with everything on them; they shrink to the left and go
       { type: 'n2_grp', id: 'o2pics', out: T.SHRINK + 0.1, dur: 0.45, xf: [[0, [0, 0, 1]], [T.SHRINK, [40, 120, 0.7], 0.55, 'in']], inner: [
@@ -380,8 +380,8 @@
         { type: 'n2_grp', id: 'o2outG', out: T.OUTER_OUT, dur: 0.3, inner: [outerLines, ...outerLabels] },
         { type: 'n2_grp', id: 'o2inG', out: T.INNER_OUT, dur: 0.3, inner: [innerLines, ...innerText] },
         { type: 'n2_grp', id: 'o2m0G', t0: T.M0L, inner: [
-          W('o2m0w', 'm = 0', GN.cx - 205, GB + 22, 40, T.M0L),
-          { type: 'scribe', id: 'o2m0t', text: '：只剩中心 1 个', x: GN.cx - 205 + writeWidth('m = 0', 40) + 8, y: GB + 42, size: 40, t0: T.M0L + 0.3, cps: 16, z: Z.annot, sfx: 'pen' },
+          W('o2m0w', 'm = 0', GN.cx - 205, GN.cy + 70, 40, T.M0L),
+          { type: 'scribe', id: 'o2m0t', text: '：只剩中心 1 个', x: GN.cx - 205 + writeWidth('m = 0', 40) + 8, y: GN.cy + 90, size: 40, t0: T.M0L + 0.3, cps: 16, z: Z.annot, sfx: 'pen' },
         ] },
         WF('o2chk', CHK, SQB[0], 588, 36, T.CHECK, T.CHECK_DUR, { anchor: 'middle', color: 'red' }),
       ] },

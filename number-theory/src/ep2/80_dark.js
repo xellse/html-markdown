@@ -198,7 +198,7 @@
 
   /* ---------------- "还没找到 / 根本没有"两格（缩小）：红章盖"根本没有"，锁牌亮一下 ---------------- */
   const PS = 0.58, PX = 188, PY = 388;
-  const panels = { type: 'n2_panels', id: 'd2pn', t0: T.PANELS, xf: [[0, [PX, PY, PS]]], stamp: T.STAMP, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.CLR2 };
+  const panels = { type: 'n2_panels', id: 'd2pn', t0: T.PANELS, xf: [[0, [PX, PY, PS]]], stamp: T.STAMP, lock: T.LOCK, lockOut: T.LOCK_OUT, lockAt: [1520, 260], lockAbs: 0.9, t1: T.CLR2 };
 
   /* ---------------- 引用②：倒扣的杯子、变色龙 → "不变的东西" ---------------- */
   const CUPX = [200, 290, 380, 470, 560], CUPY = 450, FLIPC = [1, 3, 0, 1, 4];
