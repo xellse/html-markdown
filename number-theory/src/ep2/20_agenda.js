@@ -33,7 +33,7 @@
     LANES_OUT: 15.7, DESK_OUT: 15.7,
     CANDY: 16.3, CANDY_NAME: 17.9, CLUMP: 19.1, FRAMES: [19.5, 19.7, 19.9, 20.1], CANDY_OUT: 21.0,
     PN: 21.4, PN_GROW: 21.75, LOCK: 23.25, LOCK_OUT: 25.9, PN_SHRINK: 26.0,
-    QM: 26.1, HOP1: 26.35, SIGN1: 26.55, DET1: 28.05, HOP2: 28.2, SIGN2: 28.35, DET2: 29.45, DET_DUR: 0.4,
+    QM: 26.1, HOP1: 26.35, SIGN1: 26.55, DET1: 27.3, HOP2: 27.45, SIGN2: 27.6, DET2: 28.4, DET_DUR: 0.35, Y2: 26.6,
     TO_BAR: 30.3, BAR_DUR: 0.35, AGENDA: 30.45, QM_EXIT: 30.25, DUR: 31.0,
   };
 
@@ -201,7 +201,7 @@
 
   /* ---------------- 引用①后半：两格小卡放大，"根本没有"旁挂锁牌；然后三块牌缩成议程条 ---------------- */
   const PS = 0.9, PTX = 800 - (90 + 1420) / 2 * PS, PTY = 200 - 172 * PS;            // big: panels + lock board
-  const QS = 0.65, QTX = 740 - 650 * QS, QTY = 330 - 172 * QS;                         // one of three boards
+  const QS = 0.65, QTX = 740 - 650 * QS, QTY = 350 - 172 * QS;                         // one of three boards
   const [AG2x, AG2y] = N2.HUD_GEO.ag(2), BS3 = 0.07;
   const panels = {
     type: 'n2_panels', id: 'g2pn', t0: T.PN, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.TO_BAR + 0.08,
@@ -210,10 +210,10 @@
   };
   // the two boards ① ② the little question mark holds up, then hangs in the row; all three fly into the agenda bar
   const QM_AT = [1420, FL], QMS = 150 / 200, QSIGN = 52;
-  const BOARDS = [{ s: N2.AGENDA[0], det: T.DET1, at: [500, 252] }, { s: N2.AGENDA[1], det: T.DET2, at: [960, 252] }];
+  const BOARDS = [{ s: N2.AGENDA[0], det: T.DET1, at: [500, 240] }, { s: N2.AGENDA[1], det: T.DET2, at: [960, 240] }];
   COMP.g2_boards = {
     draw(fx, t) {
-      if (t < T.DET1) return;
+      if (t < Math.min(T.DET1, T.Y2)) return;
       const k = fx.id, n0 = DL.items.length, fo = clamp((t - T.TO_BAR - 0.08) / 0.25); if (fo >= 1) return;
       BOARDS.forEach((B, i) => {
         if (t < B.det) return;
@@ -229,11 +229,18 @@
         const nu = clamp((t - B.det - T.DET_DUR) / 0.25) * (1 - clamp((t - T.TO_BAR) / 0.1));
         if (nu > 0) text(`${k}.n${i}`, N2.CIRC[i], B.at[0] - tw / 2 - 30, B.at[1] - 26, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: nu, scale: lerp(0.5, 1, EASE.back(nu)) });
       });
-      const nu = clamp((t - T.DET2 - 0.2) / 0.25) * (1 - clamp((t - T.TO_BAR) / 0.1));
-      if (nu > 0) text(k + '.n2', N2.CIRC[2], QTX + 90 * QS - 32, QTY + 172 * QS + 34, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: nu, scale: lerp(0.5, 1, EASE.back(nu)) });
+      // ③ = "余2：" over the two panels (the question from the start of the episode); it flies into the bar with them
+      const yu = clamp((t - T.Y2) / 0.3), bu3 = EASE.in(clamp((t - T.TO_BAR) / T.BAR_DUR));
+      if (yu > 0) {
+        const [ax, ay] = N2.HUD_GEO.ag(2), p = lerp2([QTX + 90 * QS + 4, QTY + 172 * QS - 34], [ax, ay], bu3), s = lerp(1, 0.1, bu3);
+        DL.save(); DL.translate(p[0], p[1]); DL.scale(Math.max(0.01, s));
+        text(k + '.n2', N2.CIRC[2], 0, 0, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: yu * (1 - clamp((t - T.TO_BAR) / 0.1)), scale: lerp(0.5, 1, EASE.back(yu)) });
+        text(k + '.y2', '余2：', 30, 0, { size: 46, color: C.red, z: Z.annot, anchor: 'start', opacity: yu });
+        DL.restore();
+      }
       if (fo > 0) N2.fadeFrom(n0, 1 - fo);
     },
-    cues: () => [[T.DET1, 'whoosh'], [T.DET2, 'whoosh'], [T.TO_BAR, 'swish']],
+    cues: () => [[T.Y2, 'pen'], [T.DET1, 'whoosh'], [T.DET2, 'whoosh'], [T.TO_BAR, 'swish']],
   };
 
   /* ---------------- 小问号：连跳两下，举出两块牌 ---------------- */

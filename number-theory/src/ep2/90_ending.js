@@ -4,6 +4,7 @@
 // 开场：只有顶栏 + 议程条；结尾：全部淡出（顶栏 out）。
 (() => {
   const FL = N2.FL;
+  Object.assign(POSE, { h2_ptL: { armScale: 1.5, armL: [80, 8], armR: [16, 10] } });   // kidPoint, pointing left
   const T = {
     HALF: 1.6, FLAG: 2.3, SPLIT: 3.4,            // L1 这级台阶……为余2亮了
     SIGN: 6.2,                                   // L2 除不尽
@@ -36,10 +37,10 @@
     tracks: {
       kid: {
         enter: 10.1,
-        pos: [[0, [960, FL]], [22.3, [960, FL]], [22.35, [1760, FL], 0.85, 'in']],
-        pose: [[0, 'stand'], [10.25, 'kidCheer', 0.15, 'out'], [13.6, 'stand', 0.2], [15.4, 'kidPoint', 0.2], [18.8, 'stand', 0.2], [22.35, makeWalk(22.35, 23.2, 5.2)]],
+        pos: [[0, [1500, FL]], [22.3, [1500, FL]], [22.35, [1760, FL], 0.55, 'in']],
+        pose: [[0, 'stand'], [10.25, 'kidCheer', 0.15, 'out'], [13.6, 'stand', 0.2], [15.4, 'h2_ptL', 0.2], [18.8, 'stand', 0.2], [22.35, makeWalk(22.35, 22.9, 5.2)]],
         face: [[0, 'smile'], [10.25, 'joy', 0.05], [13.6, 'smile', 0.1], [15.4, 'focus', 0.1], [20.4, 'idea', 0.06]],
-        turn: [[0, -0.5], [22.3, 0.8, 0.1]],
+        turn: [[0, -0.6], [22.3, 0.8, 0.1]],
         gaze: [[0, 'viewer'], [15.4, 'doorL'], [20.6, 'viewer']],
       },
     },
@@ -87,7 +88,12 @@
       // 余 0 ?: a dashed line to the factor door
       { type: 'n2_fn', id: 'ds', t0: T.DASH, fn: (t, lt, k) => {
         const o = 1 - clamp((t - T.OUT) / 0.4); if (o <= 0) return;
-        N2.dash(k + '.d', [1260, 494], [DOOR_L[0] + 70, DOOR_L[1] + 40], { draw: EASE.out(clamp(lt / 0.8)), color: C.red, w: 3.5, z: Z.annot, opacity: o, step: 26, on: 14 });
+        // around the map, not through 余2 or the remainder door: down from 余0, left under the map frame, up its left side, into the factor door
+        const P = [[1350, 506], [1350, 618], [52, 618], [52, DOOR_L[1]], [DOOR_L[0] - 62, DOOR_L[1]]];
+        const L = P.slice(1).map((q, i) => dist(P[i], q)), tot = L.reduce((a, b) => a + b, 0);
+        let left = EASE.out(clamp(lt / 1.2)) * tot;
+        P.slice(1).forEach((q, i) => { if (left <= 0) return; const u = Math.min(1, left / L[i]); N2.dash(`${k}.d${i}`, P[i], lerp2(P[i], q, u), { color: C.red, w: 3.5, z: Z.annot, opacity: o, step: 26, on: 14 }); left -= L[i]; });
+        if (left > 0) stroke(k + '.ah', [[DOOR_L[0] - 80, DOOR_L[1] - 14], [DOOR_L[0] - 62, DOOR_L[1], 1], [DOOR_L[0] - 80, DOOR_L[1] + 14]], { z: Z.annot, w: 3.5, color: C.red, opacity: o });
       } },
     ],
     subs: [
