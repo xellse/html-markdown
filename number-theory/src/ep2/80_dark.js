@@ -33,12 +33,15 @@
     MINI_PULSE: 20.0, MINI_OUT: 23.1,
     REW: 23.6, REW_D: 0.8,                                  // the tape whooshes back to its start
     TAG: 24.4, SWAP: 26.7, CARD: 27.3,                       // the old tag stands ~1.8 s before it is torn off (on "每一个")
-    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, TAPE_OUT: 30.95, PANELS: 31.5,   // tape + tag leave before the panels come in STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,
+    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, TAPE_OUT: 30.95, PANELS: 31.5, STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,   // tape + tag leave before the panels come in
     CLR2: 33.9, WALK: 33.8,
     CUPS: 34.6, FLIPS: [36.9, 37.5, 38.1, 40.2, 41.6], CHAM: 39.0, BOXT: 41.0, ARR: [41.5, 41.85], ICONS_OUT: 43.45,
     FLASH1: 43.9, GRP: 44.15, REMHI: 44.7, REMARR: 45.1, GIN1: 45.9, GOUT: 46.6, GIN2: 47.25, REMPULSE: 47.8,
     END: 48.4, DUR: 49.0,
   };
+
+  for (const [k, v] of Object.entries(T)) if (!(typeof v === 'number' || (Array.isArray(v) && v.every(x => typeof x === 'number')))) console.error('d2_dark: bad timing', k, v);
+  ['STAMP', 'LOCK', 'LOCK_OUT', 'TAPE_OUT', 'PANELS'].forEach(k => { if (typeof T[k] !== 'number') console.error('d2_dark: missing timing', k); });
 
   /* ---------------- how many bricks have gone out by time t (continuous, never stops growing) ---------------- */
   const herm = (u, p0, p1, m0, m1) => { const u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * p0 + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * p1 + (u3 - u2) * m1; };
