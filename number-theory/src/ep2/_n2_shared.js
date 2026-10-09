@@ -49,6 +49,8 @@ N2.dash = (k, p, q, o = {}) => {
     stroke(`${k}.${d}`, [lerp2(p, q, u0), lerp2(p, q, u1)], { z: o.z ?? Z.board, w: o.w || 3, color: o.color || C.ink, opacity: o.opacity, boil: 0.4 });
   }
 };
+/** FONT_MIX 里一段字的实际宽度（实测：汉字 ≈ 0.95 em，拉丁字母和符号 ≈ 0.36 em，空格 ≈ 0.22 em；textWidth 把拉丁算成 0.5 em，偏宽） */
+N2.mixW = (str, size) => { let w = 0; for (const ch of str) w += size * (ch.charCodeAt(0) > 0x2E80 ? 0.95 : ch === ' ' ? 0.22 : 0.36); return w; };
 /** 红笔圈（手绘椭圆） */
 N2.ring = (k, cx, cy, rx, ry, o = {}) => stroke(k, ringPts(k + '.p', cx, cy, rx, ry, { n: o.n || 16, a0: -130, sweep: 385, rv: 0.05 }), { z: o.z ?? Z.annot, w: o.w || 4.5, color: o.color || C.red, draw: o.draw ?? 1, opacity: o.opacity });
 
@@ -365,7 +367,7 @@ COMP.n2_tag = {
 N2.STACK = [
   '假设：a² − b² = 6',        // 0  proof
   '两个零头：0 或 1',          // 1  proof
-  '相减：0、1，或借一组得 3',   // 2  borrow
+  '相减：0、1，借一组得 3',     // 2  borrow
   '组够减',                    // 3  borrow
   '要借时，借得到',             // 4  borrow
   '相减的零头：0、1、3',        // 5  wall
@@ -388,10 +390,13 @@ COMP.n2_stack = {
       const isCur = i === cur && !all, col = isCur || all ? C.ink : C.pencil;
       if (isCur) stroke(`${k}.hi${i}`, [[x - 6, y + 3], [x + Math.min(380, textWidth(s, size) * 0.95) + 6, y + 3]], { z: Z.hi, w: size * 1.05, color: C.hi, draw: u, opacity: 0.9 });
       text(`${k}.t${i}`, s, x, y, { size, z: Z.annot - 1, anchor: 'start', font: CFG.FONT_MIX, color: col, opacity: u });
-      if (boxed && s0.includes('6')) { const bu = clamp((t - fx.box) / 0.3); if (bu < 1) stroke(`${k}.bx${i}`, ringPts(`${k}.bxp${i}`, x + 20, y, 26, 26, { n: 10 }), { z: Z.annot, w: 3.5, color: C.red, closed: true, opacity: 1 - bu }); }
+      if (boxed && s0.includes('6')) {   // a red ring flashes where the 6 was (CJK ≈ 0.93 em, Latin/digits ≈ 0.5 em in FONT_MIX)
+        const bu = clamp((t - fx.box) / 0.4), j = s0.indexOf('6'), off = N2.mixW(s0.slice(0, j), size) + size * 0.36;
+        if (bu < 1) stroke(`${k}.bx${i}`, ringPts(`${k}.bxp${i}`, x + off, y, 24, 26, { n: 10 }), { z: Z.annot, w: 3.5, color: C.red, closed: true, opacity: 1 - bu });
+      }
       if (i === 6 && fx.glow !== undefined && t >= fx.glow) {
-        const g = clamp((t - fx.glow) / 0.3), off = textWidth(s.slice(0, s.indexOf('余')), size) * 0.93;
-        stroke(`${k}.gl`, ringPts(`${k}.glp`, x + off + 44, y, 50, 26, { n: 14 }), { z: Z.annot, w: 5, color: C.red, closed: true, draw: g });
+        const g = clamp((t - fx.glow) / 0.3), off = N2.mixW(s.slice(0, s.indexOf('余')), size);
+        stroke(`${k}.gl`, ringPts(`${k}.glp`, x + off + 40, y, 44, 26, { n: 14 }), { z: Z.annot, w: 5, color: C.red, closed: true, draw: g });
       }
       if (fx.ok !== undefined && t >= fx.ok + i * 0.08 && !s0.includes('6')) text(`${k}.ok${i}`, '✓', x + 392, y - 2, { size: 40, color: C.red, z: Z.annot, anchor: 'middle', font: CFG.FONT_MIX });
       F.targets[`${k}.l${i}`] = [x, y];

@@ -317,7 +317,7 @@
         const i = Math.min(7, Math.floor(lt / SCAN_DT)), y = SY(i);
         stroke(k + '.p', [[SX - 76, y - 13], [SX - 44, y, 1], [SX - 76, y + 13, 1], [SX - 76, y - 13, 1]], { z: Z.annot, w: 3, color: C.red, fill: C.red, opacity: o });
       }
-      [0, 7].forEach(i => {   // n2_stack rings every □ at the left end of its line; these two □ sit further right
+      [].forEach(i => {   // (n2_stack now rings each □ where it is; the extra rings are no longer needed)
         const u = clamp((t - T.BOX) / 0.3), v = 1 - clamp((t - T.BOX - 1.0) / 0.4); if (u <= 0 || v <= 0) return;
         stroke(`${k}.r${i}`, ringPts(`${k}.rp${i}`, boxAt(i), SY(i), 24, 24, { n: 10 }), { z: Z.annot, w: 3.5, color: C.red, closed: true, draw: u, opacity: v });
       });

@@ -80,7 +80,7 @@
   const pickT = k => (k < 3 ? T.GRAB[k] : T.FAST + (k - 3) * T.FAST_DT);
   // result columns, the signs (same places as in squares), the card
   const COLX = 900, COLY = k => 312 + 64 * k, LEFTX = 1110;
-  const OB = [1180, 450], NB = [1400, 290], JX = 1480, GRIP = [NB[0], 590];
+  const OB = [1180, 480], NB = [1400, 320], JX = 1480, GRIP = [NB[0], 590];
   const SW = 300, SH = 130, SS = 42, STK = [1, 4, 9, 16, 25];
   if (STK.map(v => v % 4).join() !== '1,0,1,0,1') console.error('o2_odd: sticker remainders');
   const CARD = [680, 330], EQX = 690, EQS = 44, EQY1 = 618, EQY2 = 680;
@@ -140,7 +140,7 @@
         if (t < T.PIECE[q]) return;
         pieceBox(`${k}.p${q}`, Q, PB[q], g, g * 0.38, EASE.out(clamp((t - T.PIECE[q]) / 0.35)));
         const corner = [[0, 0], [0, 6], [6, 6], [6, 0]][q], cp = Q(...corner), sx = corner[1] ? 1 : -1, sy = corner[0] ? 1 : -1;
-        text(`${k}.pn${q}`, N2.CIRC[q], cp[0] + sx * 0.95 * g, cp[1] + sy * 0.95 * g, { size: 40, color: C.red, z: Z.annot, anchor: 'middle', scale: lerp(0.5, 1, EASE.back(clamp((t - T.PIECE[q] - 0.15) / 0.2))) });
+        if (t >= T.PIECE[q] + 0.15) text(`${k}.pn${q}`, N2.CIRC[q], cp[0] + sx * 0.95 * g, cp[1] + sy * 0.95 * g, { size: 40, color: C.red, z: Z.annot, anchor: 'middle', scale: lerp(0.8, 1, EASE.back(clamp((t - T.PIECE[q] - 0.15) / 0.2))) });
       });
       F.targets[k + '.c'] = [cx, cy];
     },
@@ -313,7 +313,7 @@
       });
       if (fx.sticker !== undefined && t >= fx.sticker) {
         const v = EASE.back(clamp((t - fx.sticker) / 0.3)), m0 = DL.items.length;
-        DL.save(); DL.translate(cx, bot + 125); DL.rotate(-3); DL.scale(Math.max(0.01, v));
+        DL.save(); DL.translate(cx, bot + 140); DL.rotate(-3); DL.scale(Math.max(0.01, v));
         stroke(k + '.sk', N2.box(-125, -42, 125, 42), { z: z + 0.3, w: 3, fill: '#FFFFFF' });
         dot(k + '.pin', [0, -36], 7, C.red, z + 0.45);
         [-92, -48, -4, 42, 90].forEach((x, i) => {
@@ -325,9 +325,9 @@
       }
       if (fx.qmark !== undefined && t >= fx.qmark) {
         const qt = t - fx.qmark, v = EASE.back(clamp(qt / 0.3)), sw = 14 * Math.sin(qt * 5) * Math.exp(-qt * 0.9);
-        DL.save(); DL.translate(cx + 112, bot); DL.rotate(sw);
-        stroke(k + '.qs', [[0, 0], [0, 26 * v]], { z: z + 0.3, w: 2.5, color: C.red });
-        text(k + '.qq', '?', 0, 62, { size: 76 * Math.max(0.01, v), font: CFG.FONT_MIX, color: C.red, z: z + 0.4, anchor: 'middle' });
+        DL.save(); DL.translate(cx + 138, bot); DL.rotate(sw);
+        stroke(k + '.qs', [[0, 0], [0, 18 * v]], { z: z + 0.3, w: 2.5, color: C.red });
+        text(k + '.qq', '?', 0, 54, { size: 76 * Math.max(0.01, v), font: CFG.FONT_MIX, color: C.red, z: z + 0.4, anchor: 'middle' });
         DL.restore();
       }
       F.targets[k + '.c'] = [cx, cy];
@@ -354,7 +354,7 @@
         pos: [[0, [1080, FL]], [T.KID_MOVE, [JX, FL], T.KID_AT - T.KID_MOVE, 'lin'], [T.KID_OUT, [1720, FL], T.KID_GONE - T.KID_OUT, 'lin']],
         pose: [[0, 'stand'], [0.6, 'o2_ptL', 0.12, 'back'], [T.CUT_H - 0.25, 'o2_chopU', 0.1], [T.CUT_H, 'o2_chopD', 0.1], [T.CUT_V - 0.25, 'o2_chopU', 0.1], [T.CUT_V, 'o2_chopD', 0.1],
           [T.SPLIT + 0.3, 'stand', 0.15], [T.SCRATCH, 'scratchStand', 0.15, 'back'], [T.JOIN, 'stand', 0.15], [T.KID_MOVE, moveWalk, 0.08],
-          [T.SEAM[0], 'thinkStand', 0.15, 'back'], [T.HEAD, 'stand', 0.15], [T.RES + 0.1, 'kidCheer', 0.12, 'back'], [T.RES + 1.2, 'stand', 0.15],
+          [T.SEAM[0], 'thinkStand', 0.15, 'back'], [T.HEAD, 'stand', 0.15], [T.RES + 0.1, 'akimbo', 0.12, 'back'], [T.RES + 1.2, 'stand', 0.15],
           [T.NEW - 0.15, 'o2_hold', 0.15, 'back'], [T.KID_OUT, exitWalk, 0.08]],
         face: [[0, 'proudGrin'], [T.SPLIT, 'focus', 0.1], [T.EXTRA, 'surprised', 0.08], [T.SCRATCH, 'puzzled', 0.1], [T.GEN, 'focus', 0.1], [T.PIECE[0], 'idea', 0.1],
           [T.OUTER[0], 'focus', 0.1], [T.RES, 'joy', 0.08], [T.EQ1, 'smile', 0.1], [T.CARD, 'focus', 0.1], [T.SWAP, 'joy', 0.08], [T.STRIKE[0] - 0.4, 'laugh', 0.08], [T.KID_OUT, 'smile', 0.1]],
@@ -362,7 +362,7 @@
         gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [640, 400]], [T.PIECE[0], [220, 400]],
           [T.GPIECE, [640, 400]], [T.EACH, [980, 400]], [T.OUTER[0], [640, 240]], [T.OUTER[1], [820, 400]], [T.OUTER[2], [640, 570]], [T.OUTER[3], [470, 400]],
           [T.SEAM[0], [640, 400]], [T.INN[0], [1000, 400]], [T.GRAB[0], [700, 360]], [T.WIG, [640, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 660]], [T.CHECK, [220, 620]],
-          [T.CARD, [CARD[0], CARD[1]]], [T.SWAP, [NB[0] - 110, NB[1] - 70]], [T.DOCK, [868, 118]], [T.STRIKE[0] - 0.3, [OB[0], OB[1]]], [T.KID_OUT, 'viewer']],
+          [T.CARD, [CARD[0], CARD[1]]], [T.SWAP, [NB[0] - 120, NB[1] - 107]], [T.DOCK, [868, 118]], [T.STRIKE[0] - 0.3, [OB[0], OB[1]]], [T.KID_OUT, 'viewer']],
       },
     },
     steps: [{ t0: T.KID_MOVE, t1: T.KID_AT, hz: 5.4 }, { t0: T.KID_OUT, t1: T.KID_GONE, hz: 5.6 }],
@@ -410,7 +410,7 @@
         { type: 'strike', id: 'o2st2', rect: [OB[0] - 104, OB[1] + 27 - 24, 208, 48], t0: T.STRIKE[1], dur: 0.25 },
       ] },
       { type: 'o2_sign', id: 'o2new', at: NB, lines: ['偶 → 余 0，', '奇 → 余 1？'], t0: T.NEW, qErase: T.SWAP, t1: T.END },
-      { type: 'n2_tag', id: 'o2tag', at: [NB[0] - SW / 2 + 40, NB[1] - SH / 2 - 4], rot: -6, size: 40, t0: T.TAG, swap: T.SWAP, t1: T.END },
+      { type: 'n2_tag', id: 'o2tag', at: [NB[0] - SW / 2 + 30, NB[1] - SH / 2 - 42], rot: -6, size: 40, t0: T.TAG, swap: T.SWAP, t1: T.END },
     ],
     subs: [
       {"t0": 0.6, "t1": 6.06, "text": "“奇数边也从中间切！咦，多出一排一列？”", "voice": "kid", "say": "奇数边也从中间切！咦，多出一排一列？"},

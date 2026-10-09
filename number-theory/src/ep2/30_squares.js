@@ -63,7 +63,7 @@
   });
   if (ITEMS.filter(it => it.r === 0).map(it => it.n).join() !== LANE0.join() || ITEMS.filter(it => it.r === 1).map(it => it.n).join() !== LANE1.join()) console.error('s2_squares: lane order');
   // the signs (both scenes squares and odd use the same places)
-  const OB = [1180, 450], NB = [1400, 290], JX = 1480, GRIP = [NB[0], 590];
+  const OB = [1180, 480], NB = [1400, 320], JX = 1480, GRIP = [NB[0], 590];
   const QX = 900;   // 小问号 stands on the top edge of lane 0
 
   /* ---------------- helpers ---------------- */
@@ -163,7 +163,7 @@
       // the little card from episode 1 on the pole: 1, 4, 9, 16, 25 and a remainder swatch under each
       if (fx.sticker !== undefined && t >= fx.sticker) {
         const v = EASE.back(clamp((t - fx.sticker) / 0.3)), m0 = DL.items.length;
-        DL.save(); DL.translate(cx, bot + 125); DL.rotate(-3); DL.scale(Math.max(0.01, v));
+        DL.save(); DL.translate(cx, bot + 140); DL.rotate(-3); DL.scale(Math.max(0.01, v));
         stroke(k + '.sk', N2.box(-125, -42, 125, 42), { z: z + 0.3, w: 3, fill: '#FFFFFF' });
         dot(k + '.pin', [0, -36], 7, C.red, z + 0.45);
         [-92, -48, -4, 42, 90].forEach((x, i) => {
@@ -176,9 +176,9 @@
       // a red ? hanging from the board's lower right corner, swinging (not crossed out: 11 examples cannot overturn it)
       if (fx.qmark !== undefined && t >= fx.qmark) {
         const qt = t - fx.qmark, v = EASE.back(clamp(qt / 0.3)), sw = 14 * Math.sin(qt * 5) * Math.exp(-qt * 0.9);
-        DL.save(); DL.translate(cx + 112, bot); DL.rotate(sw);
-        stroke(k + '.qs', [[0, 0], [0, 26 * v]], { z: z + 0.3, w: 2.5, color: C.red });
-        text(k + '.qq', '?', 0, 62, { size: 76 * Math.max(0.01, v), font: CFG.FONT_MIX, color: C.red, z: z + 0.4, anchor: 'middle' });
+        DL.save(); DL.translate(cx + 138, bot); DL.rotate(sw);
+        stroke(k + '.qs', [[0, 0], [0, 18 * v]], { z: z + 0.3, w: 2.5, color: C.red });
+        text(k + '.qq', '?', 0, 54, { size: 76 * Math.max(0.01, v), font: CFG.FONT_MIX, color: C.red, z: z + 0.4, anchor: 'middle' });
         DL.restore();
       }
       F.targets[k + '.c'] = [cx, cy];
@@ -205,8 +205,8 @@
         face: [[0, 'smile'], [T.OLD, 'proudGrin', 0.08], [T.ROW, 'focus', 0.1], [T.ZERO2 - 0.3, 'surprised', 0.08], [T.QMARK + 0.1, 'puzzled', 0.1],
           [T.NEW - 0.1, 'idea', 0.08], [T.TAG + 0.3, 'smile', 0.1], [T.QM + 0.2, 'puzzled', 0.1], [T.KID_OUT, 'smile', 0.1]],
         turn: [[0, -0.4], [T.KID_OUT - 0.05, 0.5, 0.1]],
-        gaze: [[0, [OB[0], OB[1]]], [T.STICK, [OB[0], 640]], [T.ROW, [560, 290]], [T.LIT0[0], [420, 300]], [T.LIT0[3], [600, 420]], [T.HEAD0, [110, 440]],
-          [T.LIT1[0], [420, 300]], [T.LIT1[3], [620, 520]], [T.ZERO2 - 0.3, [520, 670]], [T.QMARK, [OB[0] + 112, OB[1] + 130]], [T.NEW, 'viewer'],
+        gaze: [[0, [OB[0], OB[1]]], [T.STICK, [OB[0], OB[1] + 205]], [T.ROW, [560, 290]], [T.LIT0[0], [420, 300]], [T.LIT0[3], [600, 420]], [T.HEAD0, [110, 440]],
+          [T.LIT1[0], [420, 300]], [T.LIT1[3], [620, 520]], [T.ZERO2 - 0.3, [520, 670]], [T.QMARK, [OB[0] + 138, OB[1] + 120]], [T.NEW, 'viewer'],
           [T.QM, [QX, 300]], [T.ELL, [900, 480]], [T.KID_OUT, 'viewer']],
       },
     },
@@ -244,7 +244,7 @@
       { type: 's2_sign', id: 's2old', at: OB, plant: true, lines: ['大的会', '剩 2、3？'], t0: T.OLD, sticker: T.STICK, qmark: T.QMARK, t1: T.OUT },
       // the new sign, held up in his left hand, and its red "猜想" tag
       { type: 's2_sign', id: 's2new', at: NB, lines: ['偶 → 余 0，', '奇 → 余 1？'], t0: T.NEW, t1: T.SIGN_OUT },
-      { type: 'n2_tag', id: 's2tag', at: [NB[0] - SW / 2 + 40, NB[1] - SH / 2 - 4], rot: -6, size: 40, t0: T.TAG, t1: T.SIGN_OUT },
+      { type: 'n2_tag', id: 's2tag', at: [NB[0] - SW / 2 + 30, NB[1] - SH / 2 - 42], rot: -6, size: 40, t0: T.TAG, t1: T.SIGN_OUT },
 
       // 小问号 hops onto lane 0: 第 100 个？
       { type: 'n2_grp', id: 's2qg', out: T.OUT, dur: 0.4, inner: { type: 'qm', id: 's2qm', size: 130, t0: T.QM, burst: true, signSide: 'left', signSize: 56,
