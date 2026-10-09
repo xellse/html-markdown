@@ -79,7 +79,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"ZCOOL KuaiLe","P
     <p class="kicker">一道题长大了 · 数论动画</p>
   </header>
 
-  <div id="stage" role="img" aria-label="【待填写】">
+  <div id="stage" role="img" aria-label="动画第2集：小问号重问上集的空格"还没找到，还是根本没有？"；9 个点四个四个分，剩下的零头就是余数，只能是 0 到 3；所有数轮着排进四条跑道（余 0 实心、余 1 斜线、余 2 网点、余 3 空心），这扇看"剩几个"的门叫余数门；空格 2、6、10、14 全在余 2；余 1、余 3 是奇数，上集已证全有小拐角；0² 到 10² 只落在余 0 和余 1，Jasper 的猜想先变可疑；偶数边切成 4 块一样的，奇数边用风车切法剩中心 1 个，证明每个平方除以 4 只余 0 或 1；风车还能先报商：37² ÷ 4 = 342 余 1；假设 6 能写成两个平方相减，像竖式借位那样记账，零头相减只有 0、1、借一组得 3 四种，组够减、要借时一定借得到，所以差只余 0、1、3，6 在余 2 撞墙，这叫反证法；证明只用到"6 余 2"，余 2 的整条跑道熄灭，包括 2026；2021 过了"平方只余 0 或 1"这关却不是平方：余数门能判"一定不是"，判不了"是"；余 0 那条要等下一集的因子门。">
     <svg id="svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <rect width="1600" height="900" fill="#FBF8F1"/>
       <g id="layer"></g>
@@ -1769,7 +1769,7 @@ function wavBytes(ab) {
   return new Uint8Array(data.buffer);
 }
 
-EP.series = "一道题长大了"; EP.poster = 0;
+EP.series = "一道题长大了"; EP.poster = 185.3;
 EP.music = {"title": "main", "lanes": "main", "why4": "calm", "agenda": "calm", "squares": "calm", "even": "calm", "odd": "calm", "predict": "chip", "proof": "sneaky", "borrow": "sneaky", "wall": "sneaky", "dark": "turn", "enough": "calm", "ending": "turn", "end": "turn"}; EP.think = null;
 /* ---- _n1_shared.js ---- */
 /* 第 1 集共用素材（主持人独占；场景代理只读）
@@ -2700,7 +2700,7 @@ COMP.n2_map = {
     R9: [28.3, 28.55, 28.8], R9_OUT: 29.5, G9_OUT: 29.6,
     HOP0: 30.1, HOP_DT: 0.1, SIX: 32.0, VEIL: 32.2, VEIL_OFF: 33.65, SIX_OFF: 33.8, QM_EXIT: 33.3,
     FLIP: 34.3, FLIP_DUR: 0.9, OLD_OUT: 34.95,
-    MAP: 35.1, DOOR: 35.55, OPEN: 36.05, LABEL: 36.85, FLY: 37.85, STRIP: 38.4, MAP_OUT: 38.25, DUR: 39.4,
+    MAP: 35.1, DOOR: 35.55, OPEN: 36.05, LABEL: 36.3, FLY: 38.6, STRIP: 39.0, MAP_OUT: 38.9, DUR: 39.4,
   };
   const landT = n => T.BRICK0 + n * T.BRICK_DT + T.DROP + T.SLIDE;
   const ROUND_T = [0, 1, 2, 3].map(j => landT(4 * j + 3));   // a round is full when its 4th brick lands
@@ -2860,7 +2860,7 @@ COMP.n2_map = {
   COMP.l2_fly = {
     draw(fx, t) {
       if (t < T.FLY) return;
-      const o = 1 - clamp((t - T.STRIP - 0.05) / 0.3); if (o <= 0) return;
+      const o = 1 - clamp((t - T.STRIP) / 0.3); if (o <= 0) return;
       const u = EASE.io(clamp((t - T.FLY) / (T.STRIP - T.FLY))), k = fx.id, [sx0, sy0, sx1] = N2.HUD_GEO.strip;
       for (let r = 0; r < 4; r++) {
         const a = [1219, 370 + r * 62, 1381, 416 + r * 62], b = [sx0, sy0 + r * 20, sx1, sy0 + r * 20 + 15];
@@ -2913,7 +2913,7 @@ COMP.n2_map = {
 // 第 15 场 · 为什么偏偏按 4 分（why4）
 // 小问号举牌"为什么是 4？"。第 1 集 1–16 的两行表回来，空格 2、6、10、14 依次闪，之间画红弧"隔 4"。
 // 下面一小堆：2 个点（黄色荧光笔垫着）；左边一个一个加上红色 4 点方框：6、10、14，零头那 2 个点始终不动。
-// 表里的 2、6、10、14 变成数字砖，一起落进余 2 跑道。卡①"多一整组或拿走一整组，零头不变"写出来，飞进顶栏。
+// 卡①"多一整组或拿走一整组，零头不变"写出来，Jasper 进场前飞进顶栏。
 // Jasper 走进来举牌"两个两个分！"。画面换成两堆：偶数堆、奇数堆；4（┐）和 6（红色 ?）挤在偶数堆里，红笔"分不开"。
 // 换回四条跑道：4、8、12 落进余 0（带 ┐），2、6、10、14 落进余 2（红 ?）。Jasper 走出左边。
 // 开场：只有顶栏细跑道条；结尾：只剩顶栏（细跑道条 + 卡①）。
@@ -2939,9 +2939,9 @@ COMP.n2_map = {
   const T = {
     QM: 0.15, QSIGN: 0.7, QSIGN_OFF: 3.95, QM_MOVE: 3.95, QM_EXIT: 8.9,
     GRID: 4.15, NUM: 4.3, TICK: 4.6, FLASH: [5.5, 5.95, 6.45, 6.95], ARC: [7.8, 8.2, 8.6],
-    PILE: 9.85, HI: 10.3, BOX: [10.9, 11.35, 11.8], KEEP: 12.15, LANE: 12.45, FLY0: 12.95, FLY_DT: 0.12, FLY_DUR: 0.55,
-    TB_OUT: 13.4, PILE_OUT: 13.9, CARD: 13.75, DOCK: 16.6,
-    KID_IN: 14.0, KID_AT: 14.8, SIGN: 15.0, SIGN_OFF: 18.3, LANE_OUT: 18.2,
+    PILE: 9.85, HI: 10.1, BOX: [10.5, 11.3, 12.1], KEEP: 12.45,
+    TB_OUT: 12.2, CARD: 12.55, PILE_OUT: 14.0, DOCK: 14.55,
+    KID_IN: 14.4, KID_AT: 14.95, SIGN: 15.2, SIGN_OFF: 18.3,
     HEAPS: 18.5, MARK4: 19.9, Q6: 21.3, SQUEEZE: 23.4, APART: 25.1, HEAPS_OUT: 26.3, ROW: 26.6,
     LANES: 26.85, DROP0: [28.0, 28.4, 28.8], DROP2: [30.0, 30.3, 30.6, 30.9], DROP_DUR: 0.4,
     KID_OUT: 31.4, KID_GONE: 32.35, END_OUT: 31.95, DUR: 32.7,
@@ -3011,24 +3011,6 @@ COMP.n2_map = {
       if (out > 0) N2.fadeFrom(n0, 1 - out);
     },
     cues: () => [[T.PILE, 'pop'], [T.HI, 'swish'], ...T.BOX.map(b => [b + 0.2, 'tap']), [T.KEEP, 'pen']],
-  };
-
-  /* ---------------- 余 2 跑道（只画这一条）：表里的 2、6、10、14 一起落进来 ---------------- */
-  const L1 = { x: 850, y: 520 - 2 * 92, W: 640, H: 76, gap: 16, head: 70, cell: 110 };
-  const lane2 = { type: 'n2_lanes', id: 'w2l2', ...L1, lanes: [2], t0: T.LANE, t1: T.LANE_OUT };
-  COMP.w2_fly4 = {
-    draw(fx, t) {
-      if (t < T.FLY0) return;
-      const out = clamp((t - T.LANE_OUT) / 0.35); if (out >= 1) return;
-      const k = fx.id, n0 = DL.items.length;
-      TO2.forEach((n, i) => {
-        const u = clamp((t - T.FLY0 - i * T.FLY_DT) / T.FLY_DUR); if (u <= 0) return;
-        const a = [tcx(n), tNY], b = N2.laneXY(L1, n), e = EASE.io(u), p = lerp2(a, b, e);
-        N2.brick(`${k}.b${n}`, p[0], p[1] - 90 * Math.sin(Math.PI * e), n, 2, { scale: lerp(0.62, 1, e) });
-      });
-      if (out > 0) N2.fadeFrom(n0, 1 - out);
-    },
-    cues: () => TO2.map((n, i) => [T.FLY0 + i * T.FLY_DT + T.FLY_DUR, 'tap']),
   };
 
   /* ---------------- 卡①：多一整组或拿走一整组，零头不变（写完飞进顶栏） ---------------- */
@@ -3139,7 +3121,6 @@ COMP.n2_map = {
       { type: 'n2_hud', id: 'hud', at: 'why4', dock: [[T.DOCK, 1]] },
       table,
       { type: 'w2_pile', id: 'w2pile' },
-      lane2, { type: 'w2_fly4', id: 'w2fly' },
       card1,
       sign,
       { type: 'w2_heaps', id: 'w2hp' },
@@ -3194,7 +3175,7 @@ COMP.n2_map = {
     LANES_OUT: 15.7, DESK_OUT: 15.7,
     CANDY: 16.3, CANDY_NAME: 17.9, CLUMP: 19.1, FRAMES: [19.5, 19.7, 19.9, 20.1], CANDY_OUT: 21.0,
     PN: 21.4, PN_GROW: 21.75, LOCK: 23.25, LOCK_OUT: 25.9, PN_SHRINK: 26.0,
-    QM: 26.1, HOP1: 26.35, SIGN1: 26.55, DET1: 28.05, HOP2: 28.2, SIGN2: 28.35, DET2: 29.45, DET_DUR: 0.4,
+    QM: 26.1, HOP1: 26.35, SIGN1: 26.55, DET1: 27.3, HOP2: 27.45, SIGN2: 27.6, DET2: 28.4, DET_DUR: 0.35, Y2: 26.6,
     TO_BAR: 30.3, BAR_DUR: 0.35, AGENDA: 30.45, QM_EXIT: 30.25, DUR: 31.0,
   };
 
@@ -3362,24 +3343,24 @@ COMP.n2_map = {
 
   /* ---------------- 引用①后半：两格小卡放大，"根本没有"旁挂锁牌；然后三块牌缩成议程条 ---------------- */
   const PS = 0.9, PTX = 800 - (90 + 1420) / 2 * PS, PTY = 200 - 172 * PS;            // big: panels + lock board
-  const QS = 0.65, QTX = 740 - 650 * QS, QTY = 330 - 172 * QS;                         // one of three boards
+  const QS = 0.65, QTX = 740 - 650 * QS, QTY = 350 - 172 * QS;                         // one of three boards
   const [AG2x, AG2y] = N2.HUD_GEO.ag(2), BS3 = 0.07;
   const panels = {
-    type: 'n2_panels', id: 'g2pn', t0: T.PN, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.TO_BAR + 0.08,
+    type: 'n2_panels', id: 'g2pn', t0: T.PN, lock: T.LOCK, lockOut: T.LOCK_OUT, t1: T.TO_BAR + 0.12,
     xf: [[0, [800 - 650 * 0.3, 430 - 431 * 0.3, 0.3]], [T.PN_GROW, [PTX, PTY, PS], 0.6, 'io'], [T.PN_SHRINK, [QTX, QTY, QS], 0.5, 'io'],
-      [T.TO_BAR, [AG2x - 650 * BS3, AG2y - 431 * BS3, BS3], T.BAR_DUR, 'in']],
+      [T.TO_BAR, [AG2x - 650 * BS3, AG2y - 431 * BS3, BS3], T.BAR_DUR, 'out']],
   };
   // the two boards ① ② the little question mark holds up, then hangs in the row; all three fly into the agenda bar
   const QM_AT = [1420, FL], QMS = 150 / 200, QSIGN = 52;
-  const BOARDS = [{ s: N2.AGENDA[0], det: T.DET1, at: [500, 252] }, { s: N2.AGENDA[1], det: T.DET2, at: [960, 252] }];
+  const BOARDS = [{ s: N2.AGENDA[0], det: T.DET1, at: [500, 240] }, { s: N2.AGENDA[1], det: T.DET2, at: [960, 240] }];
   COMP.g2_boards = {
     draw(fx, t) {
-      if (t < T.DET1) return;
-      const k = fx.id, n0 = DL.items.length, fo = clamp((t - T.TO_BAR - 0.08) / 0.25); if (fo >= 1) return;
+      if (t < Math.min(T.DET1, T.Y2)) return;
+      const k = fx.id, n0 = DL.items.length, fo = clamp((t - T.TO_BAR - 0.15) / 0.2); if (fo >= 1) return;
       BOARDS.forEach((B, i) => {
         if (t < B.det) return;
         const size = 40, tw = textWidth(B.s, size) + 40, from = [QM_AT[0] - 70 * QMS, QM_AT[1] - 262 * QMS], fs = (textWidth(B.s, QSIGN) + 40) * QMS / tw;
-        const u = EASE.io(clamp((t - B.det) / T.DET_DUR)), bu = EASE.in(clamp((t - T.TO_BAR) / T.BAR_DUR)), [ax, ay] = N2.HUD_GEO.ag(i);
+        const u = EASE.io(clamp((t - B.det) / T.DET_DUR)), bu = EASE.out(clamp((t - T.TO_BAR) / T.BAR_DUR)), [ax, ay] = N2.HUD_GEO.ag(i);
         // up first, then across: the board never passes over the two panels below the row
         let p = [lerp(from[0], B.at[0], EASE.io(u)), lerp(from[1], B.at[1], EASE.out(clamp(u * 1.8)))], s = lerp(fs, 1, u);
         if (bu > 0) { p = lerp2(B.at, [ax, ay], bu); s = lerp(1, 0.1, bu); }
@@ -3390,11 +3371,18 @@ COMP.n2_map = {
         const nu = clamp((t - B.det - T.DET_DUR) / 0.25) * (1 - clamp((t - T.TO_BAR) / 0.1));
         if (nu > 0) text(`${k}.n${i}`, N2.CIRC[i], B.at[0] - tw / 2 - 30, B.at[1] - 26, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: nu, scale: lerp(0.5, 1, EASE.back(nu)) });
       });
-      const nu = clamp((t - T.DET2 - 0.2) / 0.25) * (1 - clamp((t - T.TO_BAR) / 0.1));
-      if (nu > 0) text(k + '.n2', N2.CIRC[2], QTX + 90 * QS - 32, QTY + 172 * QS + 34, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: nu, scale: lerp(0.5, 1, EASE.back(nu)) });
+      // ③ = "余2：" over the two panels (the question from the start of the episode); it flies into the bar with them
+      const yu = clamp((t - T.Y2) / 0.3), bu3 = EASE.out(clamp((t - T.TO_BAR) / T.BAR_DUR));
+      if (yu > 0) {
+        const [ax, ay] = N2.HUD_GEO.ag(2), p = lerp2([QTX + 90 * QS + 4, QTY + 172 * QS - 34], [ax, ay], bu3), s = lerp(1, 0.1, bu3);
+        DL.save(); DL.translate(p[0], p[1]); DL.scale(Math.max(0.01, s));
+        text(k + '.n2', N2.CIRC[2], 0, 0, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', opacity: yu * (1 - clamp((t - T.TO_BAR) / 0.1)), scale: lerp(0.5, 1, EASE.back(yu)) });
+        text(k + '.y2', '余2：', 30, 0, { size: 46, color: C.red, z: Z.annot, anchor: 'start', opacity: yu });
+        DL.restore();
+      }
       if (fo > 0) N2.fadeFrom(n0, 1 - fo);
     },
-    cues: () => [[T.DET1, 'whoosh'], [T.DET2, 'whoosh'], [T.TO_BAR, 'swish']],
+    cues: () => [[T.Y2, 'pen'], [T.DET1, 'whoosh'], [T.DET2, 'whoosh'], [T.TO_BAR, 'swish']],
   };
 
   /* ---------------- 小问号：连跳两下，举出两块牌 ---------------- */
@@ -3974,8 +3962,8 @@ COMP.n2_map = {
     // B: the windmill
     GEN: 7.2, TOP: [8.2, 8.55, 8.9], LEFT: 9.4, CENTER: 11.0, PIECE: [12.1, 12.5, 12.9, 13.3], GPIECE: 13.8, P34: 14.9, EACH: 15.9, LAB_OUT: 18.05,
     // C: outer ring, inner ring
-    OUTER: [18.6, 19.7, 20.8, 21.9], OUTER_OUT: 23.25,
-    SEAM: [23.9, 24.5, 25.1, 25.7], INN: [24.1, 25.0, 26.6], CRING: 26.2, INNER_OUT: 28.2,
+    OUTER: [18.45, 19.2, 19.95, 20.7], OUTER_OUT: 23.25,
+    SEAM: [23.9, 24.5, 25.1, 25.7], INN: [24.1, 25.0, 25.9], CRING: 26.2, INNER_OUT: 28.2,
     // D: take them away the same way
     HEAD: 28.6, GRAB: [28.9, 29.5, 30.05], FAST: 30.5, FAST_DT: 0.13, WIG: 31.45, LEFT1: 31.9, RES: 32.35,
     // E: the equation, m = 0, the check
@@ -3985,6 +3973,7 @@ COMP.n2_map = {
     END: 43.45, KID_OUT: 43.55, KID_GONE: 44.3, DUR: 44.4,
   };
 
+  { const done = T.INN[2] + [...'不重叠、不留缝，只空出中心'].length / 20; if (T.INNER_OUT - done < 1.5 || T.OUTER_OUT - (T.OUTER[3] + 0.9) < 1.5) console.error('o2_odd: inner/outer conclusions not on screen long enough'); }
   /* ---------------- layout ---------------- */
   const WM = windmill(3), PIECES = WM.P, rot = WM.rot, rotInv = ([i, j]) => [6 - j, i];
   const pieceOf = new Map(); PIECES.forEach((c, q) => c.forEach(([i, j]) => pieceOf.set(i + ',' + j, q)));
@@ -3994,7 +3983,7 @@ COMP.n2_map = {
   const SQA = [700, 430, 50], SQB = [220, 400, 40];
   const sqAt = t => evalTrack([[0, SQA], [T.S_MOVE, SQB, 0.6, 'io']], t);
   // the general square: 7 places a side, places 1 and 5 drawn as ellipses
-  const GN = { cx: 640, cy: 400, g: 44 }, ELL = new Set([1, 5]);
+  const GN = { cx: 710, cy: 400, g: 44 }, ELL = new Set([1, 5]);
   const gP = (i, j) => [GN.cx + (j - 3) * GN.g, GN.cy + (i - 3) * GN.g];
   const G0 = GN.cx - 3 * GN.g, G1 = GN.cx + 3 * GN.g, GT = GN.cy - 3 * GN.g, GB = GN.cy + 3 * GN.g;   // outermost dot rows / columns
   // picks, in piece ① coordinates (its drawn dots: rows 0, 2 × columns 0, 2, 3), nearest the centre first
@@ -4002,7 +3991,7 @@ COMP.n2_map = {
   if (PK.some(([i, j]) => ELL.has(i) || ELL.has(j) || pieceOf.get(i + ',' + j) !== 0) || PIECES[0].filter(([i, j]) => !ELL.has(i) && !ELL.has(j)).length !== PK.length) console.error('o2_odd: picks are the drawn dots of piece ①');
   const pickT = k => (k < 3 ? T.GRAB[k] : T.FAST + (k - 3) * T.FAST_DT);
   // result columns, the signs (same places as in squares), the card
-  const COLX = 900, COLY = k => 312 + 64 * k, LEFTX = 1110;
+  const COLX = 950, COLY = k => 312 + 64 * k, LEFTX = 1160;
   const OB = [1180, 480], NB = [1400, 320], JX = 1480, GRIP = [NB[0], 590];
   const SW = 300, SH = 130, SS = 42, STK = [1, 4, 9, 16, 25];
   if (STK.map(v => v % 4).join() !== '1,0,1,0,1') console.error('o2_odd: sticker remainders');
@@ -4202,8 +4191,8 @@ COMP.n2_map = {
   } };
   const innerText = [
     { type: 'scribe', id: 'o2i1', text: '长边 m + 1', x: G1 + 60, y: 350, size: 40, color: 'red', t0: T.INN[0], cps: 12, z: Z.annot, sfx: 'pen' },
-    { type: 'scribe', id: 'o2i2', text: '= 短边 m + 中心 1 个', x: G1 + 60, y: 412, size: 40, color: 'red', t0: T.INN[1], cps: 12, z: Z.annot, sfx: 'pen' },
-    { type: 'scribe', id: 'o2i3', text: '不重叠、不留缝，只空出中心', x: G1 + 60, y: 490, size: 36, color: 'red', t0: T.INN[2], cps: 12, z: Z.annot, sfx: 'pen' },
+    { type: 'scribe', id: 'o2i2', text: '= 短边 m + 中心 1 个', x: G1 + 60, y: 412, size: 40, color: 'red', t0: T.INN[1], cps: 16, z: Z.annot, sfx: 'pen' },
+    { type: 'scribe', id: 'o2i3', text: '不重叠、不留缝，只空出中心', x: G1 + 60, y: 490, size: 36, color: 'red', t0: T.INN[2], cps: 20, z: Z.annot, sfx: 'pen' },
   ];
 
   /* ---------------- D: 组 | 零头 ---------------- */
@@ -4282,9 +4271,9 @@ COMP.n2_map = {
         face: [[0, 'proudGrin'], [T.SPLIT, 'focus', 0.1], [T.EXTRA, 'surprised', 0.08], [T.SCRATCH, 'puzzled', 0.1], [T.GEN, 'focus', 0.1], [T.PIECE[0], 'idea', 0.1],
           [T.OUTER[0], 'focus', 0.1], [T.RES, 'joy', 0.08], [T.EQ1, 'smile', 0.1], [T.CARD, 'focus', 0.1], [T.SWAP, 'joy', 0.08], [T.STRIKE[0] - 0.4, 'laugh', 0.08], [T.KID_OUT, 'smile', 0.1]],
         turn: [[0, -0.4], [T.KID_OUT - 0.05, 0.5, 0.1]],
-        gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [640, 400]], [T.PIECE[0], [220, 400]],
-          [T.GPIECE, [640, 400]], [T.EACH, [980, 400]], [T.OUTER[0], [640, 240]], [T.OUTER[1], [820, 400]], [T.OUTER[2], [640, 570]], [T.OUTER[3], [470, 400]],
-          [T.SEAM[0], [640, 400]], [T.INN[0], [1000, 400]], [T.GRAB[0], [700, 360]], [T.WIG, [640, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 690]], [T.CHECK, [220, 606]],
+        gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [GN.cx, 400]], [T.PIECE[0], [220, 400]],
+          [T.GPIECE, [GN.cx, 400]], [T.EACH, [G1 + 200, 400]], [T.OUTER[0], [GN.cx, 240]], [T.OUTER[1], [G1 + 50, 400]], [T.OUTER[2], [GN.cx, 570]], [T.OUTER[3], [G0 - 50, 400]],
+          [T.SEAM[0], [GN.cx, 400]], [T.INN[0], [G1 + 200, 400]], [T.GRAB[0], [GN.cx + 60, 360]], [T.WIG, [GN.cx, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 690]], [T.CHECK, [220, 606]],
           [T.CARD, [CARD[0], CARD[1]]], [T.SWAP, [NB[0] - 120, NB[1] - 107]], [T.DOCK, [868, 118]], [T.STRIKE[0] - 0.3, [OB[0], OB[1]]], [T.KID_OUT, 'viewer']],
       },
     },
@@ -4408,7 +4397,8 @@ COMP.n2_map = {
   const A18R = lay(W('p2a18R', String(M), MX + A + CC + A / 2, 190, 40, T.tk[2], { anchor: 'middle' }));
   const AMUL = lay(W('p2aMul', `${M} × ${M + 1}`, P3C, 484, 40, T.mul, { anchor: 'middle' }));
   const AEQ = lay(W('p2aEq', `= ${PIECE}`, P3C, 548, 40, T.eq, { anchor: 'middle' }));
-  const APLUS = lay(W('p2aPlus', '+1', CTR[0] + 56, CTR[1] - 62, 36, T.plus1, { color: 'red', anchor: 'middle' }));
+  // "中心 +1" sits below the square (outside every piece), with a thin red leader up the cut between ④ and ③ to the centre dot
+  const PLUS = { x: MX + A, y: MY + S + 32, ty: 742 };   // label centre; ty = the prediction line below it
   // Jasper's notebook, part 1
   const W1A = lay(W('p2aW1a', `${SIDE} × ${SIDE} = `, PG.x0 + 28, 236, 48, T.w1a, { speed: 2000 }));
   const W1B = lay(W('p2aW1b', String(SQ), W1A.xEnd, 236, 48, T.w1b, { speed: 2200 }));
@@ -4477,6 +4467,16 @@ COMP.n2_map = {
       }
     },
     cues: () => [[T.sq, 'pen'], [T.ctr, 'plip'], ...T.pc.map(tt => [tt, 'pen']), [T.plus1, 'boop']],
+  };
+  /** "中心 +1": red label under the square, leader line running up the gap between pieces ④ and ③ into the centre cell */
+  COMP.p2_plus1 = {
+    draw(fx, t) {
+      if (t < T.plus1 || t >= T.clrA + 0.4) return;
+      const k = fx.id, u = EASE.out(clamp((t - T.plus1) / 0.35)), x = MX + A, y0 = PLUS.y - 26;
+      stroke(k + '.ld', [[x, y0], [x, CTR[1] + 22, 1], [CTR[0] - 8, CTR[1] + 14]], { z: Z.annot, w: 3, color: C.red, draw: u });
+      text(k + '.t', '中心 +1', x, PLUS.y, { size: 36, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - T.plus1 - 0.2) / 0.2) });
+    },
+    cues: () => [[T.plus1 + 0.05, 'pen']],
   };
   /** Jasper's notebook page, zoomed: a sheet with a tail down to the open book on the desk (z 11: under the highlighter) */
   COMP.p2_page = {
@@ -4568,7 +4568,7 @@ COMP.n2_map = {
       },
     },
     targets: () => ({
-      mill: CTR, top: [MX + S / 2, 210], piece3: [P3C, 540], pred: [MX + S / 2, 694], nb: NB, page: [840, 330], quot: QUOT,
+      mill: CTR, top: [MX + S / 2, 210], piece3: [P3C, 540], pred: [MX + S / 2, PLUS.ty], nb: NB, page: [840, 330], quot: QUOT,
       table: [290, 360], stop: [840, 330], rem: [TB.rx, 330], grp: [250, 440], note: NOTE.c,
     }),
     set: [{ type: 'floor', t0: T.desk, t1: T.end + 0.4 }],
@@ -4582,8 +4582,9 @@ COMP.n2_map = {
 
       // ---- L1–L3: the windmill of 37 (left)
       { type: 'p2_mill', id: 'p2aMill' },
-      ...[A37, A18L, A1, A18R, AMUL, AEQ, APLUS].map(f => ({ ...f, t1: T.clrA + 0.4 })),
-      { type: 'scribe', id: 'p2aPred', text: `应该：商 ${PIECE}，余 ${SQ - 4 * PIECE}`, x: MX + S / 2, y: 694, size: 40, cps: 9, color: 'red', anchor: 'middle', t0: T.pred, t1: T.clrA + 0.4 },
+      ...[A37, A18L, A1, A18R, AMUL, AEQ].map(f => ({ ...f, t1: T.clrA + 0.4 })),
+      { type: 'p2_plus1', id: 'p2aPlus' },
+      { type: 'scribe', id: 'p2aPred', text: `应该：商 ${PIECE}，余 ${SQ - 4 * PIECE}`, x: MX + S / 2, y: PLUS.ty, size: 40, cps: 9, color: 'red', anchor: 'middle', t0: T.pred, t1: T.clrA + 0.4 },
 
       // ---- L4–L5: 37 × 37 = 1369, 1369 ÷ 4 = 342 … 1, the red arrow from the piece's 342 to the quotient, ✓
       ...[W1A, W1B, W2A, W2B, ATK].map(f => ({ ...f, t1: T.clrA + 0.4 })),
@@ -5270,8 +5271,10 @@ COMP.n2_map = {
 //        红字"空"，顶栏跑道条余 2 那条红圈；空格下面立起一面墙。
 //   L4–L5 一个小火柴人推着 6 的砖（网点）从左边走来；6 的花纹签和空格的花纹签一起红圈（6 只在余 2 那条）；
 //        证明栈第 6 行；小人轻轻撞上墙、弹回来，冒出红色小星。
-//   L6   表、结果行、墙、小人淡出；卡③"大平方减小平方 ÷ 4：只余 0、1、3"写出来，下面钉范围卡；证明栈第 7 行。
-//   L7   卡③和范围卡一起缩进顶栏；议程 ② 打勾；红笔顺着证明栈从"假设"一路画到"撞墙"，整列亮起；"这叫反证法"时盖章。
+//   L6   表和四块砖淡出（25.0）；"6根本没有"时 6 旁边盖一张白卡"6 / ✗ 没有小拐角"（dark 场 2026 卡的画法）；证明栈第 7 行；
+//        6、墙、小人、结果行一直留到 29.0 才淡出。卡③"大平方减小平方 ÷ 4：只余 0、1、3"从 28.4 起写在左上（原来表的位置）。
+//   L7   范围卡钉在卡③下面（30.3）；卡③和范围卡一起缩进顶栏（30.9）；议程 ② 打勾（31.5）；红笔顺着证明栈从"假设"一路画到"撞墙"，
+//        整列亮起；"这叫反证法"时盖章（33.3）。
 // 开场 = 顶栏收起 + 议程条 + 证明栈 0–4 行（第 4 行当前）+ 范围卡；
 // 结尾 = 顶栏展开（卡①②③）+ 议程条（①②打勾）+ 证明栈 0–7 行全亮、盖章 + 范围卡（dark 场接着用）。
 (() => {
@@ -5288,7 +5291,8 @@ COMP.n2_map = {
     // L4–L5: the little stick figure with the 6
     mini: 16.1, ring6: 16.4, ring6Out: 17.9, w1: [16.1, 17.3], w2: [18.3, 20.4], w3: [21.1, 23.6], bonk: 23.6, st6: 22.3,
     // L6–L7
-    clear: 25.0, card: 25.6, st7: 27.3, scope: 27.45, dock: 29.55, tick: 30.15, trace: 30.85, all: 31.1, stamp: 33.3, traceOut: 33.85,
+    // clear: the table and the four bricks go (frees the upper area); xcard: "6 根本没有" stamps ✗ next to the 6; clear2: the 6, the wall, the figure, the result row go
+    clear: 25.0, xcard: 26.9, st7: 27.3, card: 28.4, clear2: 29.0, scope: 30.3, dock: 30.9, tick: 31.5, trace: 30.85, all: 31.1, stamp: 33.3, traceOut: 33.85,
   };
 
   /* ---------------- self-check ---------------- */
@@ -5438,9 +5442,10 @@ COMP.n2_map = {
   };
 
   /* ---------------- L6–L7: card ③ and its scope card ---------------- */
-  const CARD3 = { at: [560, 345], w: 640 };
-  const SC3 = { at: [560, 548], w: 470, h: 140, size: 36, lines: ['两个数从 0、1、2……里挑，', '叫 a、b，a > b'] };
+  const CARD3 = { at: [450, 300], w: 560 };   // upper-left, where the table was
+  const SC3 = { at: [450, 480], w: 470, h: 140, size: 36, lines: ['两个数从 0、1、2……里挑，', '叫 a、b，a > b'] };
   const HUD3 = N2.HUD_GEO.card(3);
+  const XC = [300, 705];                      // the ✗ card, left of the dazed figure, under the result row
 
   /** fades (over d s from t0) every item already drawn this frame whose key starts with one of `keys`: keep these at the end of fx */
   COMP.q2_fade = {
@@ -5462,7 +5467,7 @@ COMP.n2_map = {
         pose: [[0, miniPose]],
         face: [[0, 'focus'], [T.ring6, 'smile', 0.1], [T.w3[0], 'effort', 0.1], [T.bonk, 'jaw', 0.04], [T.bonk + 0.6, 'sheepish', 0.15]],
         turn: [[0, 0.35]],
-        gaze: [[0, [800, 700]], [T.bonk + 0.6, 'viewer']],
+        gaze: [[0, [800, 700]], [T.bonk + 0.6, 'viewer'], [T.xcard + 0.1, XC]],
         squash: [[0, 1], [T.bonk, 0.86, 0.05], [T.bonk + 0.05, 1, 0.3, 'back']],
       },
     },
@@ -5488,8 +5493,18 @@ COMP.n2_map = {
         N2.fadeFrom(n0, o);
       } },
       { type: 'n2_grp', id: 'q2flG', out: T.clear, inner: [{ type: 'q2_fly', id: 'q2fl' }, ...TICKS] },
-      { type: 'n2_grp', id: 'q2rwG', out: T.clear, inner: [{ type: 'q2_row', id: 'q2rw' }, { type: 'q2_wall', id: 'q2wl' }] },
-      { type: 'n2_grp', id: 'q2cyG', out: T.clear, inner: { type: 'q2_carry', id: 'q2cy' } },
+      { type: 'n2_grp', id: 'q2rwG', out: T.clear2, inner: [{ type: 'q2_row', id: 'q2rw' }, { type: 'q2_wall', id: 'q2wl' }] },
+      { type: 'n2_grp', id: 'q2cyG', out: T.clear2, inner: { type: 'q2_carry', id: 'q2cy' } },
+      // L6 "6根本没有小拐角": a white card stamped next to the 6 (the look of dark's 2026 card)
+      { type: 'n2_grp', id: 'q2xcG', out: T.clear2, inner: { type: 'n2_fn', id: 'q2xc', t0: T.xcard, cues: [[T.xcard, 'stamp']], fn: (t, lt, k) => {
+        const n0 = DL.items.length, s = lerp(1.6, 1, EASE.back(clamp(lt / 0.22)));
+        DL.save(); DL.translate(XC[0], XC[1]); DL.rotate(-4); DL.scale(s);
+        stroke(k + '.bk', N2.box(-150, -65, 150, 65), { z: Z.annot + 2, w: 4, fill: '#FFFFFF' });
+        text(k + '.n', '6', 0, -30, { size: 40, z: Z.annot + 2.2, font: CFG.FONT_MIX });
+        text(k + '.x', '✗', -112, 30, { size: 50, color: C.red, z: Z.annot + 2.2, font: CFG.FONT_MIX });
+        text(k + '.t', '没有小拐角', 22, 30, { size: 40, z: Z.annot + 2.2 });
+        DL.restore(); N2.fadeFrom(n0, clamp(lt * 6));
+      } } },
       { type: 'n2_star', id: 'q2star', at: [BX - 70 + 4, FL - 150], r: 20, t0: T.bonk + 0.05, dur: 1.4 },
 
       // L6–L7: card ③ with its scope card, both fly into the top bar
@@ -5505,7 +5520,7 @@ COMP.n2_map = {
       } },
 
       // exits that must stay last
-      { type: 'q2_fade', t0: T.clear, keys: ['q2m.'] },
+      { type: 'q2_fade', t0: T.clear2, keys: ['q2m.'] },
     ],
     subs: [
       { t0: 0.6, t1: 5.89, text: '所以两个平方相减，零头只能是0、1、3：', say: '所以两个平方相减，零头只能是零、一、三：' },
@@ -5554,13 +5569,16 @@ COMP.n2_map = {
     A: 14.6, K250: 15.9, K507: 16.7, NOTE: 18.4,             // speed-up; 998 (and the 1000 flash); 2026; "……没有尽头"
     MINI_PULSE: 20.0, MINI_OUT: 23.1,
     REW: 23.6, REW_D: 0.8,                                  // the tape whooshes back to its start
-    TAG: 24.5, SWAP: 25.9, CARD: 26.9,
-    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, PANELS: 31.5, STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,
+    TAG: 24.4, SWAP: 26.7, CARD: 27.3,                       // the old tag stands ~1.8 s before it is torn off (on "每一个")
+    CNT_OUT: 28.05, KID: 28.3, B26: 28.7, FLIP: 30.6, TAPE_OUT: 30.95, PANELS: 31.5, STAMP: 32.4, LOCK: 32.8, LOCK_OUT: 33.8,   // tape + tag leave before the panels come in
     CLR2: 33.9, WALK: 33.8,
     CUPS: 34.6, FLIPS: [36.9, 37.5, 38.1, 40.2, 41.6], CHAM: 39.0, BOXT: 41.0, ARR: [41.5, 41.85], ICONS_OUT: 43.45,
     FLASH1: 43.9, GRP: 44.15, REMHI: 44.7, REMARR: 45.1, GIN1: 45.9, GOUT: 46.6, GIN2: 47.25, REMPULSE: 47.8,
     END: 48.4, DUR: 49.0,
   };
+
+  for (const [k, v] of Object.entries(T)) if (!(typeof v === 'number' || (Array.isArray(v) && v.every(x => typeof x === 'number')))) console.error('d2_dark: bad timing', k, v);
+  ['STAMP', 'LOCK', 'LOCK_OUT', 'TAPE_OUT', 'PANELS'].forEach(k => { if (typeof T[k] !== 'number') console.error('d2_dark: missing timing', k); });
 
   /* ---------------- how many bricks have gone out by time t (continuous, never stops growing) ---------------- */
   const herm = (u, p0, p1, m0, m1) => { const u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * p0 + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * p1 + (u3 - u2) * m1; };
@@ -5589,12 +5607,12 @@ COMP.n2_map = {
   const blurAt = t => clamp((Math.abs(vel(t)) - 10) / 20);
   const brickX = (k, off) => BX0 + CW * (k + 0.5 - off);
 
-  const lane = { type: 'n2_lanes', id: 'd2ln', x: LN.x, y: LN.y - 2 * (LN.H + 16), W: 1520, H: LN.H, gap: 16, head: LN.head, lanes: [2], labelSize: 44, t0: T.LANE, t1: T.CLR2 };
+  const lane = { type: 'n2_lanes', id: 'd2ln', x: LN.x, y: LN.y - 2 * (LN.H + 16), W: 1520, H: LN.H, gap: 16, head: LN.head, lanes: [2], labelSize: 44, t0: T.LANE, t1: T.TAPE_OUT };
   const tape = {
     type: 'n2_fn', id: 'd2tp', t0: T.BRICKS,
     cues: [[T.BRICKS, 'pop'], ...OUT5.slice(0, 5).map(x => [x - 0.05, 'tap']), [T.A + 0.3, 'whoosh'], [T.REW, 'swish'], [T.REW + 0.2, 'whoosh']],
     fn: (t, lt, k) => {
-      const op = 1 - clamp((t - T.CLR2) / 0.35); if (op <= 0) return;
+      const op = 1 - clamp((t - T.TAPE_OUT) / 0.35); if (op <= 0) return;
       const off = OFF(t), b = blurAt(t), Kt = K(t), n0 = DL.items.length;
       // crisp bricks (they fade into the blur as the tape speeds up, and back out of it when the rewind stops)
       if (b < 1) {
@@ -5692,7 +5710,7 @@ COMP.n2_map = {
 
   /* ---------------- 第 1 集表上的"猜想（还没证明）"标签：飞回来贴在 2 上方，撕下换成"证明了 ✓"；旁边钉范围卡 ---------------- */
   const B0X = brickX(0, 0);
-  const tag = { type: 'n2_tag', id: 'd2tag', text: '猜想（还没证明）', size: 50, rot: -3, t0: T.TAG, pos: [[0, [-260, 150]], [T.TAG, [B0X, 326], 0.5, 'out']], swap: T.SWAP, t1: T.CLR2 };
+  const tag = { type: 'n2_tag', id: 'd2tag', text: '猜想（还没证明）', size: 50, rot: -3, t0: T.TAG, pos: [[0, [-260, 150]], [T.TAG, [B0X, 326], 0.5, 'out']], swap: T.SWAP, t1: T.TAPE_OUT };
   const SCOPE2 = { at: [790, 305], w: 446, h: 110 };
   const scope2 = { type: 'n2_grp', id: 'd2scG', out: T.CLR2, inner: { type: 'prop', kind: 'n1_card', id: 'd2sc', at: SCOPE2.at, w: SCOPE2.w, h: SCOPE2.h, size: 36, lines: ['两个数从 0、1、2……里挑'], t0: T.CARD, sfxAt: [[T.CARD, 'paper']] } };
 
@@ -5947,7 +5965,7 @@ COMP.n2_map = {
 
   /* ---------------- 平方检查站（一张单独的白卡，不带跑道花纹）---------------- */
   const CARD = [300, 190, 1160, 575], MID = 730, GATE = 470, FLOOR = 548, BRY = 504, BS = 1.3;
-  const ST_UP = [215, -44], ST_DN = [215, 26];          // stamps, relative to their brick
+  const ST_UP = [185, -44], ST_DN = [185, 26];          // close to their own brick: 2025's group and 2021's group stay ≥ 60 px apart
   const red = (k, s, x, y, size, o = {}) => text(k, s, x, y, { size, color: C.red, z: Z.annot, ...o });
   /** a red rubber stamp: slams in at t0 */
   const stamp = (k, s, cx, cy, t0, t, op = 1) => {
@@ -6016,13 +6034,19 @@ COMP.n2_map = {
   ] };
 
   /* ---------------- 2021、2025 两块白砖（r = null：不刷花纹）和它们的章 ---------------- */
+  const X21R = 870;                                     // 2021's place after 2025 arrives
   const X21 = t => {
     let x = lerp(120, GATE, EASE.out(clamp((t - T.B21) / 0.7)));
-    x += (850 - GATE) * EASE.io(clamp((t - T.MOVE) / 0.6));
+    x += (X21R - GATE) * EASE.io(clamp((t - T.MOVE) / 0.6));
     return lerp(x, MID, EASE.io(clamp((t - T.SPLIT - 0.1) / 0.6)));
   };
   const Y21 = t => lerp(BRY, 450, EASE.io(clamp((t - T.SPLIT - 0.1) / 0.6)));
   const X25 = t => lerp(120, GATE, EASE.out(clamp((t - T.B25) / 0.7)));
+  {
+    const half = (str) => (textWidth(str, 38) * 0.95 + 34) / 2 + 4, bw = 96 * BS / 2;   // stamp half-width (+ rotation slack), brick half-width
+    const r25 = GATE + ST_UP[0] + Math.max(half('0 或 1 ✓'), half('是平方')), l21 = X21R - bw, r21 = X21R + ST_DN[0] + Math.max(half('0 或 1 ✓'), half('不是平方'));
+    if (l21 - r25 < 60 || r21 > CARD[2] - 6) console.error('n2x_enough: stamp groups crowd each other or leave the card', r25, l21, r21);
+  }
   const bricks = {
     type: 'n2_fn', id: 'n2xbr', t0: T.B21,
     cues: [[T.B21, 'whoosh'], [T.ST21, 'stamp'], [T.NOT, 'stamp'], [T.MOVE, 'swish'], [T.B25, 'whoosh'], [T.IS, 'stamp'], [T.ST25, 'stamp'], [T.MARK, 'pen']],
@@ -6038,7 +6062,7 @@ COMP.n2_map = {
         stamp(k + '.a2', '不是平方', x + ST_DN[0], y + ST_DN[1], T.NOT, t);
         N2.fadeFrom(m0, prep);
       }
-      if (t >= T.MARK) { DL.save(); DL.translate(x + 82, y - 52); PROPS.n1_mark({ id: k + '.am', size: 40 }, t, t - T.MARK, EASE.out(clamp((t - T.MARK) / 0.35))); DL.restore(); }
+      if (t >= T.MARK) { DL.save(); DL.translate(x + 78, y - 54); PROPS.n1_mark({ id: k + '.am', size: 40 }, t, t - T.MARK, EASE.out(clamp((t - T.MARK) / 0.35))); DL.restore(); }
       // 2025
       if (t >= T.B25 && prep > 0) {
         const m0 = DL.items.length, x5 = X25(t);
@@ -6218,6 +6242,7 @@ COMP.n2_map = {
 // 开场：只有顶栏 + 议程条；结尾：全部淡出（顶栏 out）。
 (() => {
   const FL = N2.FL;
+  Object.assign(POSE, { h2_ptL: { armScale: 1.5, armL: [80, 8], armR: [16, 10] } });   // kidPoint, pointing left
   const T = {
     HALF: 1.6, FLAG: 2.3, SPLIT: 3.4,            // L1 这级台阶……为余2亮了
     SIGN: 6.2,                                   // L2 除不尽
@@ -6250,10 +6275,10 @@ COMP.n2_map = {
     tracks: {
       kid: {
         enter: 10.1,
-        pos: [[0, [960, FL]], [22.3, [960, FL]], [22.35, [1760, FL], 0.85, 'in']],
-        pose: [[0, 'stand'], [10.25, 'kidCheer', 0.15, 'out'], [13.6, 'stand', 0.2], [15.4, 'kidPoint', 0.2], [18.8, 'stand', 0.2], [22.35, makeWalk(22.35, 23.2, 5.2)]],
+        pos: [[0, [1500, FL]], [22.3, [1500, FL]], [22.35, [1760, FL], 0.55, 'in']],
+        pose: [[0, 'stand'], [10.25, 'kidCheer', 0.15, 'out'], [13.6, 'stand', 0.2], [15.4, 'h2_ptL', 0.2], [18.8, 'stand', 0.2], [22.35, makeWalk(22.35, 22.9, 5.2)]],
         face: [[0, 'smile'], [10.25, 'joy', 0.05], [13.6, 'smile', 0.1], [15.4, 'focus', 0.1], [20.4, 'idea', 0.06]],
-        turn: [[0, -0.5], [22.3, 0.8, 0.1]],
+        turn: [[0, -0.6], [22.3, 0.8, 0.1]],
         gaze: [[0, 'viewer'], [15.4, 'doorL'], [20.6, 'viewer']],
       },
     },
@@ -6301,7 +6326,12 @@ COMP.n2_map = {
       // 余 0 ?: a dashed line to the factor door
       { type: 'n2_fn', id: 'ds', t0: T.DASH, fn: (t, lt, k) => {
         const o = 1 - clamp((t - T.OUT) / 0.4); if (o <= 0) return;
-        N2.dash(k + '.d', [1260, 494], [DOOR_L[0] + 70, DOOR_L[1] + 40], { draw: EASE.out(clamp(lt / 0.8)), color: C.red, w: 3.5, z: Z.annot, opacity: o, step: 26, on: 14 });
+        // around the map, not through 余2 or the remainder door: down from 余0, left under the map frame, up its left side, into the factor door
+        const P = [[1350, 506], [1350, 618], [52, 618], [52, DOOR_L[1]], [DOOR_L[0] - 62, DOOR_L[1]]];
+        const L = P.slice(1).map((q, i) => dist(P[i], q)), tot = L.reduce((a, b) => a + b, 0);
+        let left = EASE.out(clamp(lt / 1.2)) * tot;
+        P.slice(1).forEach((q, i) => { if (left <= 0) return; const u = Math.min(1, left / L[i]); N2.dash(`${k}.d${i}`, P[i], lerp2(P[i], q, u), { color: C.red, w: 3.5, z: Z.annot, opacity: o, step: 26, on: 14 }); left -= L[i]; });
+        if (left > 0) stroke(k + '.ah', [[DOOR_L[0] - 80, DOOR_L[1] - 14], [DOOR_L[0] - 62, DOOR_L[1], 1], [DOOR_L[0] - 80, DOOR_L[1] + 14]], { z: Z.annot, w: 3.5, color: C.red, opacity: o });
       } },
     ],
     subs: [
