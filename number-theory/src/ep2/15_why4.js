@@ -1,7 +1,7 @@
 // 第 15 场 · 为什么偏偏按 4 分（why4）
 // 小问号举牌"为什么是 4？"。第 1 集 1–16 的两行表回来，空格 2、6、10、14 依次闪，之间画红弧"隔 4"。
 // 下面一小堆：2 个点（黄色荧光笔垫着）；左边一个一个加上红色 4 点方框：6、10、14，零头那 2 个点始终不动。
-// 表里的 2、6、10、14 变成数字砖，一起落进余 2 跑道。卡①"多一整组或拿走一整组，零头不变"写出来，飞进顶栏。
+// 卡①"多一整组或拿走一整组，零头不变"写出来，Jasper 进场前飞进顶栏。
 // Jasper 走进来举牌"两个两个分！"。画面换成两堆：偶数堆、奇数堆；4（┐）和 6（红色 ?）挤在偶数堆里，红笔"分不开"。
 // 换回四条跑道：4、8、12 落进余 0（带 ┐），2、6、10、14 落进余 2（红 ?）。Jasper 走出左边。
 // 开场：只有顶栏细跑道条；结尾：只剩顶栏（细跑道条 + 卡①）。
@@ -27,9 +27,9 @@
   const T = {
     QM: 0.15, QSIGN: 0.7, QSIGN_OFF: 3.95, QM_MOVE: 3.95, QM_EXIT: 8.9,
     GRID: 4.15, NUM: 4.3, TICK: 4.6, FLASH: [5.5, 5.95, 6.45, 6.95], ARC: [7.8, 8.2, 8.6],
-    PILE: 9.85, HI: 10.3, BOX: [10.9, 11.35, 11.8], KEEP: 12.15, LANE: 12.45, FLY0: 12.95, FLY_DT: 0.12, FLY_DUR: 0.55,
-    TB_OUT: 13.4, PILE_OUT: 13.9, CARD: 13.75, DOCK: 16.6,
-    KID_IN: 14.0, KID_AT: 14.8, SIGN: 15.0, SIGN_OFF: 18.3, LANE_OUT: 18.2,
+    PILE: 9.85, HI: 10.1, BOX: [10.5, 11.3, 12.1], KEEP: 12.45,
+    TB_OUT: 12.2, CARD: 12.55, PILE_OUT: 14.0, DOCK: 14.55,
+    KID_IN: 14.4, KID_AT: 14.95, SIGN: 15.2, SIGN_OFF: 18.3,
     HEAPS: 18.5, MARK4: 19.9, Q6: 21.3, SQUEEZE: 23.4, APART: 25.1, HEAPS_OUT: 26.3, ROW: 26.6,
     LANES: 26.85, DROP0: [28.0, 28.4, 28.8], DROP2: [30.0, 30.3, 30.6, 30.9], DROP_DUR: 0.4,
     KID_OUT: 31.4, KID_GONE: 32.35, END_OUT: 31.95, DUR: 32.7,
@@ -99,24 +99,6 @@
       if (out > 0) N2.fadeFrom(n0, 1 - out);
     },
     cues: () => [[T.PILE, 'pop'], [T.HI, 'swish'], ...T.BOX.map(b => [b + 0.2, 'tap']), [T.KEEP, 'pen']],
-  };
-
-  /* ---------------- 余 2 跑道（只画这一条）：表里的 2、6、10、14 一起落进来 ---------------- */
-  const L1 = { x: 850, y: 520 - 2 * 92, W: 640, H: 76, gap: 16, head: 70, cell: 110 };
-  const lane2 = { type: 'n2_lanes', id: 'w2l2', ...L1, lanes: [2], t0: T.LANE, t1: T.LANE_OUT };
-  COMP.w2_fly4 = {
-    draw(fx, t) {
-      if (t < T.FLY0) return;
-      const out = clamp((t - T.LANE_OUT) / 0.35); if (out >= 1) return;
-      const k = fx.id, n0 = DL.items.length;
-      TO2.forEach((n, i) => {
-        const u = clamp((t - T.FLY0 - i * T.FLY_DT) / T.FLY_DUR); if (u <= 0) return;
-        const a = [tcx(n), tNY], b = N2.laneXY(L1, n), e = EASE.io(u), p = lerp2(a, b, e);
-        N2.brick(`${k}.b${n}`, p[0], p[1] - 90 * Math.sin(Math.PI * e), n, 2, { scale: lerp(0.62, 1, e) });
-      });
-      if (out > 0) N2.fadeFrom(n0, 1 - out);
-    },
-    cues: () => TO2.map((n, i) => [T.FLY0 + i * T.FLY_DT + T.FLY_DUR, 'tap']),
   };
 
   /* ---------------- 卡①：多一整组或拿走一整组，零头不变（写完飞进顶栏） ---------------- */
@@ -227,7 +209,6 @@
       { type: 'n2_hud', id: 'hud', at: 'why4', dock: [[T.DOCK, 1]] },
       table,
       { type: 'w2_pile', id: 'w2pile' },
-      lane2, { type: 'w2_fly4', id: 'w2fly' },
       card1,
       sign,
       { type: 'w2_heaps', id: 'w2hp' },

@@ -31,7 +31,7 @@
     R9: [28.3, 28.55, 28.8], R9_OUT: 29.5, G9_OUT: 29.6,
     HOP0: 30.1, HOP_DT: 0.1, SIX: 32.0, VEIL: 32.2, VEIL_OFF: 33.65, SIX_OFF: 33.8, QM_EXIT: 33.3,
     FLIP: 34.3, FLIP_DUR: 0.9, OLD_OUT: 34.95,
-    MAP: 35.1, DOOR: 35.55, OPEN: 36.05, LABEL: 36.85, FLY: 37.85, STRIP: 38.4, MAP_OUT: 38.25, DUR: 39.4,
+    MAP: 35.1, DOOR: 35.55, OPEN: 36.05, LABEL: 36.3, FLY: 38.6, STRIP: 39.0, MAP_OUT: 38.9, DUR: 39.4,
   };
   const landT = n => T.BRICK0 + n * T.BRICK_DT + T.DROP + T.SLIDE;
   const ROUND_T = [0, 1, 2, 3].map(j => landT(4 * j + 3));   // a round is full when its 4th brick lands
@@ -191,7 +191,7 @@
   COMP.l2_fly = {
     draw(fx, t) {
       if (t < T.FLY) return;
-      const o = 1 - clamp((t - T.STRIP - 0.05) / 0.3); if (o <= 0) return;
+      const o = 1 - clamp((t - T.STRIP) / 0.3); if (o <= 0) return;
       const u = EASE.io(clamp((t - T.FLY) / (T.STRIP - T.FLY))), k = fx.id, [sx0, sy0, sx1] = N2.HUD_GEO.strip;
       for (let r = 0; r < 4; r++) {
         const a = [1219, 370 + r * 62, 1381, 416 + r * 62], b = [sx0, sy0 + r * 20, sx1, sy0 + r * 20 + 15];

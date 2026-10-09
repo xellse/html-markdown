@@ -51,8 +51,8 @@
     // B: the windmill
     GEN: 7.2, TOP: [8.2, 8.55, 8.9], LEFT: 9.4, CENTER: 11.0, PIECE: [12.1, 12.5, 12.9, 13.3], GPIECE: 13.8, P34: 14.9, EACH: 15.9, LAB_OUT: 18.05,
     // C: outer ring, inner ring
-    OUTER: [18.6, 19.7, 20.8, 21.9], OUTER_OUT: 23.25,
-    SEAM: [23.9, 24.5, 25.1, 25.7], INN: [24.1, 25.0, 26.6], CRING: 26.2, INNER_OUT: 28.2,
+    OUTER: [18.45, 19.2, 19.95, 20.7], OUTER_OUT: 23.25,
+    SEAM: [23.9, 24.5, 25.1, 25.7], INN: [24.1, 25.0, 25.9], CRING: 26.2, INNER_OUT: 28.2,
     // D: take them away the same way
     HEAD: 28.6, GRAB: [28.9, 29.5, 30.05], FAST: 30.5, FAST_DT: 0.13, WIG: 31.45, LEFT1: 31.9, RES: 32.35,
     // E: the equation, m = 0, the check
@@ -62,6 +62,7 @@
     END: 43.45, KID_OUT: 43.55, KID_GONE: 44.3, DUR: 44.4,
   };
 
+  { const done = T.INN[2] + [...'不重叠、不留缝，只空出中心'].length / 20; if (T.INNER_OUT - done < 1.5 || T.OUTER_OUT - (T.OUTER[3] + 0.9) < 1.5) console.error('o2_odd: inner/outer conclusions not on screen long enough'); }
   /* ---------------- layout ---------------- */
   const WM = windmill(3), PIECES = WM.P, rot = WM.rot, rotInv = ([i, j]) => [6 - j, i];
   const pieceOf = new Map(); PIECES.forEach((c, q) => c.forEach(([i, j]) => pieceOf.set(i + ',' + j, q)));
@@ -71,7 +72,7 @@
   const SQA = [700, 430, 50], SQB = [220, 400, 40];
   const sqAt = t => evalTrack([[0, SQA], [T.S_MOVE, SQB, 0.6, 'io']], t);
   // the general square: 7 places a side, places 1 and 5 drawn as ellipses
-  const GN = { cx: 640, cy: 400, g: 44 }, ELL = new Set([1, 5]);
+  const GN = { cx: 710, cy: 400, g: 44 }, ELL = new Set([1, 5]);
   const gP = (i, j) => [GN.cx + (j - 3) * GN.g, GN.cy + (i - 3) * GN.g];
   const G0 = GN.cx - 3 * GN.g, G1 = GN.cx + 3 * GN.g, GT = GN.cy - 3 * GN.g, GB = GN.cy + 3 * GN.g;   // outermost dot rows / columns
   // picks, in piece ① coordinates (its drawn dots: rows 0, 2 × columns 0, 2, 3), nearest the centre first
@@ -79,7 +80,7 @@
   if (PK.some(([i, j]) => ELL.has(i) || ELL.has(j) || pieceOf.get(i + ',' + j) !== 0) || PIECES[0].filter(([i, j]) => !ELL.has(i) && !ELL.has(j)).length !== PK.length) console.error('o2_odd: picks are the drawn dots of piece ①');
   const pickT = k => (k < 3 ? T.GRAB[k] : T.FAST + (k - 3) * T.FAST_DT);
   // result columns, the signs (same places as in squares), the card
-  const COLX = 900, COLY = k => 312 + 64 * k, LEFTX = 1110;
+  const COLX = 950, COLY = k => 312 + 64 * k, LEFTX = 1160;
   const OB = [1180, 480], NB = [1400, 320], JX = 1480, GRIP = [NB[0], 590];
   const SW = 300, SH = 130, SS = 42, STK = [1, 4, 9, 16, 25];
   if (STK.map(v => v % 4).join() !== '1,0,1,0,1') console.error('o2_odd: sticker remainders');
@@ -279,8 +280,8 @@
   } };
   const innerText = [
     { type: 'scribe', id: 'o2i1', text: '长边 m + 1', x: G1 + 60, y: 350, size: 40, color: 'red', t0: T.INN[0], cps: 12, z: Z.annot, sfx: 'pen' },
-    { type: 'scribe', id: 'o2i2', text: '= 短边 m + 中心 1 个', x: G1 + 60, y: 412, size: 40, color: 'red', t0: T.INN[1], cps: 12, z: Z.annot, sfx: 'pen' },
-    { type: 'scribe', id: 'o2i3', text: '不重叠、不留缝，只空出中心', x: G1 + 60, y: 490, size: 36, color: 'red', t0: T.INN[2], cps: 12, z: Z.annot, sfx: 'pen' },
+    { type: 'scribe', id: 'o2i2', text: '= 短边 m + 中心 1 个', x: G1 + 60, y: 412, size: 40, color: 'red', t0: T.INN[1], cps: 16, z: Z.annot, sfx: 'pen' },
+    { type: 'scribe', id: 'o2i3', text: '不重叠、不留缝，只空出中心', x: G1 + 60, y: 490, size: 36, color: 'red', t0: T.INN[2], cps: 20, z: Z.annot, sfx: 'pen' },
   ];
 
   /* ---------------- D: 组 | 零头 ---------------- */
@@ -359,9 +360,9 @@
         face: [[0, 'proudGrin'], [T.SPLIT, 'focus', 0.1], [T.EXTRA, 'surprised', 0.08], [T.SCRATCH, 'puzzled', 0.1], [T.GEN, 'focus', 0.1], [T.PIECE[0], 'idea', 0.1],
           [T.OUTER[0], 'focus', 0.1], [T.RES, 'joy', 0.08], [T.EQ1, 'smile', 0.1], [T.CARD, 'focus', 0.1], [T.SWAP, 'joy', 0.08], [T.STRIKE[0] - 0.4, 'laugh', 0.08], [T.KID_OUT, 'smile', 0.1]],
         turn: [[0, -0.4], [T.KID_OUT - 0.05, 0.5, 0.1]],
-        gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [640, 400]], [T.PIECE[0], [220, 400]],
-          [T.GPIECE, [640, 400]], [T.EACH, [980, 400]], [T.OUTER[0], [640, 240]], [T.OUTER[1], [820, 400]], [T.OUTER[2], [640, 570]], [T.OUTER[3], [470, 400]],
-          [T.SEAM[0], [640, 400]], [T.INN[0], [1000, 400]], [T.GRAB[0], [700, 360]], [T.WIG, [640, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 690]], [T.CHECK, [220, 606]],
+        gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [GN.cx, 400]], [T.PIECE[0], [220, 400]],
+          [T.GPIECE, [GN.cx, 400]], [T.EACH, [G1 + 200, 400]], [T.OUTER[0], [GN.cx, 240]], [T.OUTER[1], [G1 + 50, 400]], [T.OUTER[2], [GN.cx, 570]], [T.OUTER[3], [G0 - 50, 400]],
+          [T.SEAM[0], [GN.cx, 400]], [T.INN[0], [G1 + 200, 400]], [T.GRAB[0], [GN.cx + 60, 360]], [T.WIG, [GN.cx, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 690]], [T.CHECK, [220, 606]],
           [T.CARD, [CARD[0], CARD[1]]], [T.SWAP, [NB[0] - 120, NB[1] - 107]], [T.DOCK, [868, 118]], [T.STRIKE[0] - 0.3, [OB[0], OB[1]]], [T.KID_OUT, 'viewer']],
       },
     },

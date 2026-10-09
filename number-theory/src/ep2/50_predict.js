@@ -56,7 +56,8 @@
   const A18R = lay(W('p2a18R', String(M), MX + A + CC + A / 2, 190, 40, T.tk[2], { anchor: 'middle' }));
   const AMUL = lay(W('p2aMul', `${M} × ${M + 1}`, P3C, 484, 40, T.mul, { anchor: 'middle' }));
   const AEQ = lay(W('p2aEq', `= ${PIECE}`, P3C, 548, 40, T.eq, { anchor: 'middle' }));
-  const APLUS = lay(W('p2aPlus', '+1', CTR[0] + 56, CTR[1] - 62, 36, T.plus1, { color: 'red', anchor: 'middle' }));
+  // "中心 +1" sits below the square (outside every piece), with a thin red leader up the cut between ④ and ③ to the centre dot
+  const PLUS = { x: MX + A, y: MY + S + 32, ty: 742 };   // label centre; ty = the prediction line below it
   // Jasper's notebook, part 1
   const W1A = lay(W('p2aW1a', `${SIDE} × ${SIDE} = `, PG.x0 + 28, 236, 48, T.w1a, { speed: 2000 }));
   const W1B = lay(W('p2aW1b', String(SQ), W1A.xEnd, 236, 48, T.w1b, { speed: 2200 }));
@@ -125,6 +126,16 @@
       }
     },
     cues: () => [[T.sq, 'pen'], [T.ctr, 'plip'], ...T.pc.map(tt => [tt, 'pen']), [T.plus1, 'boop']],
+  };
+  /** "中心 +1": red label under the square, leader line running up the gap between pieces ④ and ③ into the centre cell */
+  COMP.p2_plus1 = {
+    draw(fx, t) {
+      if (t < T.plus1 || t >= T.clrA + 0.4) return;
+      const k = fx.id, u = EASE.out(clamp((t - T.plus1) / 0.35)), x = MX + A, y0 = PLUS.y - 26;
+      stroke(k + '.ld', [[x, y0], [x, CTR[1] + 22, 1], [CTR[0] - 8, CTR[1] + 14]], { z: Z.annot, w: 3, color: C.red, draw: u });
+      text(k + '.t', '中心 +1', x, PLUS.y, { size: 36, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - T.plus1 - 0.2) / 0.2) });
+    },
+    cues: () => [[T.plus1 + 0.05, 'pen']],
   };
   /** Jasper's notebook page, zoomed: a sheet with a tail down to the open book on the desk (z 11: under the highlighter) */
   COMP.p2_page = {
@@ -216,7 +227,7 @@
       },
     },
     targets: () => ({
-      mill: CTR, top: [MX + S / 2, 210], piece3: [P3C, 540], pred: [MX + S / 2, 694], nb: NB, page: [840, 330], quot: QUOT,
+      mill: CTR, top: [MX + S / 2, 210], piece3: [P3C, 540], pred: [MX + S / 2, PLUS.ty], nb: NB, page: [840, 330], quot: QUOT,
       table: [290, 360], stop: [840, 330], rem: [TB.rx, 330], grp: [250, 440], note: NOTE.c,
     }),
     set: [{ type: 'floor', t0: T.desk, t1: T.end + 0.4 }],
@@ -230,8 +241,9 @@
 
       // ---- L1–L3: the windmill of 37 (left)
       { type: 'p2_mill', id: 'p2aMill' },
-      ...[A37, A18L, A1, A18R, AMUL, AEQ, APLUS].map(f => ({ ...f, t1: T.clrA + 0.4 })),
-      { type: 'scribe', id: 'p2aPred', text: `应该：商 ${PIECE}，余 ${SQ - 4 * PIECE}`, x: MX + S / 2, y: 694, size: 40, cps: 9, color: 'red', anchor: 'middle', t0: T.pred, t1: T.clrA + 0.4 },
+      ...[A37, A18L, A1, A18R, AMUL, AEQ].map(f => ({ ...f, t1: T.clrA + 0.4 })),
+      { type: 'p2_plus1', id: 'p2aPlus' },
+      { type: 'scribe', id: 'p2aPred', text: `应该：商 ${PIECE}，余 ${SQ - 4 * PIECE}`, x: MX + S / 2, y: PLUS.ty, size: 40, cps: 9, color: 'red', anchor: 'middle', t0: T.pred, t1: T.clrA + 0.4 },
 
       // ---- L4–L5: 37 × 37 = 1369, 1369 ÷ 4 = 342 … 1, the red arrow from the piece's 342 to the quotient, ✓
       ...[W1A, W1B, W2A, W2B, ATK].map(f => ({ ...f, t1: T.clrA + 0.4 })),
