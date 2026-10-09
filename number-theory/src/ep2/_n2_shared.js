@@ -184,13 +184,13 @@ N2.HUD_AT = {
   enough: { strip: 1, cards: 3, agenda: 1, ticks: [0, 1, 2] },
   ending: { strip: 1, cards: 4, agenda: 1, ticks: [0, 1, 2] },
 };
-N2.CARDS = { 1: '零头不变', 2: '平方：0或1', 3: '相减：0、1、3', 4: '只判"不是"' };
+N2.CARDS = { 1: '零头不变', 2: '平方：0或1', 3: '相减：0,1,3', 4: '只判"不是"' };
 N2.AGENDA = ['平方落哪几条？', '两个平方相减呢？', '余2：还没找到，还是根本没有？'];
 N2.CIRC = ['①', '②', '③', '④'];
 N2.HUD_GEO = {
   strip: [452, 80, 604, 156],                      // 细跑道条：四条，各高 15，间距 5
-  card: n => [636 + (n - 1) * 232, 118],           // 卡 n 的中心
-  cardWH: [218, 70],
+  card: n => [732 + (n - 1) * 230, 118],           // 卡 n 的中心（细跑道条右边起，四张排到 x 1542）
+  cardWH: [214, 70],
   ag: i => [78 + i * 118, 128],                    // 议程编号 i 的中心
 };
 COMP.n2_hud = {
@@ -234,8 +234,8 @@ COMP.n2_hud = {
       DL.save(); DL.translate(cx, cy); DL.scale(sc);
       if (glow > 0) stroke(`${k}.cg${n}`, N2.box(-cw / 2 - 6, -ch / 2 - 6, cw / 2 + 6, ch / 2 + 6), { z: Z.annot - 1.5, w: 14, color: C.hi, opacity: 0.85 * glow });
       stroke(`${k}.c${n}`, N2.box(-cw / 2, -ch / 2, cw / 2, ch / 2), { z: Z.annot - 1, w: 3, fill: '#FFFFFF', opacity: vis * fin });
-      text(`${k}.cn${n}`, N2.CIRC[n - 1], -cw / 2 + 24, 1, { size: 34, color: C.red, z: Z.annot - 0.8, anchor: 'middle', opacity: vis * fin });
-      text(`${k}.ct${n}`, N2.CARDS[n], -cw / 2 + 46, 1, { size: 32, z: Z.annot - 0.8, anchor: 'start', font: CFG.FONT_MIX, opacity: vis * fin });
+      text(`${k}.cn${n}`, N2.CIRC[n - 1], -cw / 2 + 20, 1, { size: 32, color: C.red, z: Z.annot - 0.8, anchor: 'middle', opacity: vis * fin });
+      text(`${k}.ct${n}`, N2.CARDS[n], -cw / 2 + 38, 1, { size: 30, z: Z.annot - 0.8, anchor: 'start', font: CFG.FONT_MIX, opacity: vis * fin });
       DL.restore();
     }
     // ---- agenda bar
@@ -519,7 +519,7 @@ PROPS.n2_c1card = (fx, t, lt, p) => {
 
 /* ---------------- 地图 n2_map：第 1 集的 n1_map 加本集的几样东西 ----------------
    n1_map 的参数照用（t0、t1、doorL、doorR、steps、lit、ticks、qs、fog），另加：
-     labelR: t / labelL: t     门楣上写出"余数门" / "因子门"（红字，门顶上方）
+     labelR: t / labelL: t     写出门的名字"余数门" / "因子门"（红字，门下方 y 664；门顶上方是雾里的路牌）
      openR: t                  右门打开（门板向右收窄 0.7 秒），门后是四条小跑道
      lightL: t                 左门开一条缝、透出黄光；门板上画第 1 集那个 6 = 2 × 3 的小长方形（2 行 3 列点）
      halfLit: [[t, i]]         第 i 级台阶只亮偶数那一半（右半边）
@@ -535,8 +535,8 @@ COMP.n2_map = {
     const k = fx.id + 'x', op = 1 - out, n0 = DL.items.length;
     const on = v => v !== undefined && t >= v;
     const sx = i => 520 + i * 112, sy = i => 700 - i * 92;
-    if (on(fx.labelR)) text(k + '.lr', '余数门', 1300, 282, { size: 52, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - fx.labelR) / 0.3), halo: true });
-    if (on(fx.labelL)) text(k + '.ll', '因子门', 300, 282, { size: 52, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - fx.labelL) / 0.3), halo: true });
+    if (on(fx.labelR)) text(k + '.lr', '余数门', 1300, 664, { size: 52, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - fx.labelR) / 0.3), halo: true });
+    if (on(fx.labelL)) text(k + '.ll', '因子门', 300, 664, { size: 52, color: C.red, z: Z.annot, anchor: 'middle', opacity: clamp((t - fx.labelL) / 0.3), halo: true });
     if (on(fx.openR)) {
       const u = EASE.io(clamp((t - fx.openR) / 0.7)), x0 = 1215, x1 = 1385, y0 = 350, y1 = 615;
       // behind the door: four little lanes
@@ -566,7 +566,7 @@ COMP.n2_map = {
       text(`${k}.sx${i}`, '✗', x + 13, y - 44, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', font: CFG.FONT_MIX, opacity: u });
       stroke(`${k}.sb${i}`, N2.box(x + 30, y - 74, x + 56, y - 14), { z: Z.annot - 0.2, w: 2.5, fill: '#FFFFFF', opacity: u });
       text(`${k}.sq${i}`, '?', x + 43, y - 44, { size: 44, color: C.red, z: Z.annot, anchor: 'middle', font: CFG.FONT_MIX, opacity: u });
-      text(`${k}.sl${i}`, '没有', x - 2, y + 40, { size: 32, color: C.red, z: Z.annot, anchor: 'middle', opacity: u });
+      text(`${k}.sl${i}`, '偶', sx(i) + 96, y + 40, { size: 36, color: C.red, z: Z.annot, anchor: 'middle', opacity: u });
     }
     if (op < 1) N2.fadeFrom(n0, op);
   },
