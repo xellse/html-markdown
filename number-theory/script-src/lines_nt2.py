@@ -32,7 +32,7 @@ TARGET = (215, 175)
 
 
 def clip(voices, voice, say):
-    vc = voices[voice]; h = hashlib.sha1(json.dumps([vc, say], ensure_ascii=False).encode()).hexdigest()[:16]
+    vc = {k: v for k, v in voices[voice].items() if k != 'pace'}; h = hashlib.sha1(json.dumps([vc, say], ensure_ascii=False).encode()).hexdigest()[:16]
     return f'{ROOT}/audio/voice/{h}.mp3'
 
 

@@ -101,7 +101,7 @@ def main():
         for s in sc['subs']:
             if not s['say']:
                 continue
-            vc = cfg['voices'][s['voice']]
+            vc = {k: v for k, v in cfg['voices'][s['voice']].items() if k != 'pace'}   # pace only tunes check_timing, not the voice
             h = hashlib.sha1(json.dumps([vc, s['say']], ensure_ascii=False).encode()).hexdigest()[:16]
             path = os.path.join(vdir, h + '.mp3')
             lines.append((sc, s, path))

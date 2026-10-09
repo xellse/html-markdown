@@ -1,0 +1,78 @@
+{
+  "series": "一道题长大了",
+  "title": "一道题长大了 第2集",
+  "desc": "第2集《不用试遍所有数》：把数四个四个分组，每个数只落进四条跑道中的一条。风车切法证明每个平方除以 4 只余 0 或 1；像竖式借位那样记账，用反证法证明大平方减小平方只余 0、1、3，于是余 2 的整条跑道（2、6、10……2026……）一个理由全部排除。可这扇\"余数门\"只能判\"一定不是\"，判不了\"是\"：余 0 那条还要等另一扇门。",
+  "h1": "第2集 · 不用试遍所有数",
+  "kicker": "一道题长大了 · 数论动画",
+  "aria": "【待填写】",
+  "poster_label": "播放 · 第2集（约 8 分 45 秒）",
+  "poster": 0,
+  "out": "episode-2.html",
+  "audio": {
+    "voices": {
+      "narr": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+15%",
+        "pitch": "+0Hz",
+        "pace": [
+          0.183,
+          0.732
+        ]
+      },
+      "kid": {
+        "voice": "zh-CN-YunxiaNeural",
+        "rate": "+0%",
+        "pitch": "+0Hz"
+      },
+      "qm": {
+        "voice": "zh-CN-YunxiNeural",
+        "rate": "+8%",
+        "pitch": "+30Hz"
+      }
+    },
+    "tracks": {
+      "main": {
+        "file": "Carefree.mp3",
+        "title": "Carefree",
+        "secs": 95
+      },
+      "chip": {
+        "file": "Bit Shift.mp3",
+        "title": "Bit Shift",
+        "secs": 70
+      },
+      "calm": {
+        "file": "Easy Lemon.mp3",
+        "title": "Easy Lemon",
+        "secs": 70
+      },
+      "sneaky": {
+        "file": "Investigations.mp3",
+        "title": "Investigations",
+        "secs": 94
+      },
+      "turn": {
+        "file": "Life of Riley.mp3",
+        "title": "Life of Riley",
+        "secs": 80
+      }
+    },
+    "music": {
+      "title": "main",
+      "lanes": "main",
+      "why4": "calm",
+      "agenda": "calm",
+      "squares": "calm",
+      "even": "calm",
+      "odd": "calm",
+      "predict": "chip",
+      "proof": "sneaky",
+      "borrow": "sneaky",
+      "wall": "sneaky",
+      "dark": "turn",
+      "enough": "calm",
+      "ending": "turn",
+      "end": "turn"
+    }
+  }
+}

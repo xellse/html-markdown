@@ -20,7 +20,7 @@ for n, voices in enumerate(sets):
         subs = d['subs']
         for i, s in enumerate(subs):
             say = (s.get('say') or s['text']).replace('\n', '')
-            vc = voices[s.get('voice', 'narr')]
+            vc = {k: v for k, v in voices[s.get('voice', 'narr')].items() if k != 'pace'}
             h = hashlib.sha1(json.dumps([vc, say], ensure_ascii=False).encode()).hexdigest()[:16]
             p = os.path.join(vdir, h + '.mp3')
             if n == 0: rows.append((sid, i, s, p, subs, d['dur']))
