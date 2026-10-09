@@ -56,9 +56,9 @@
     // D: take them away the same way
     HEAD: 28.6, GRAB: [28.9, 29.5, 30.05], FAST: 30.5, FAST_DT: 0.13, WIG: 31.45, LEFT1: 31.9, RES: 32.35,
     // E: the equation, m = 0, the check
-    EQ1: 32.65, EQ2: 33.5, CHECK: 34.2, M0: 34.5, M0L: 34.65, RES_OUT: 35.0,
+    EQ1: 32.65, EQ1_DUR: 0.8, EQ2: 33.5, EQ2_DUR: 0.65, CHECK: 34.15, CHECK_DUR: 0.75, M0: 34.55, M0L: 34.7, RES_OUT: 35.0,
     // F: the conclusion
-    SHRINK: 35.8, OLD: 35.5, NEW: 35.85, TAG: 36.05, CARD: 36.35, SWAP: 38.0, SCOPE: 38.6, DOCK: 40.3, TICK: 41.3, STRIKE: [42.3, 42.45],
+    SHRINK: 36.0, OLD: 35.5, NEW: 35.85, TAG: 36.05, CARD: 36.45, SWAP: 38.0, SCOPE: 38.6, DOCK: 40.3, TICK: 41.3, STRIKE: [42.3, 42.45],
     END: 43.45, KID_OUT: 43.55, KID_GONE: 44.3, DUR: 44.4,
   };
 
@@ -85,8 +85,7 @@
   if (STK.map(v => v % 4).join() !== '1,0,1,0,1') console.error('o2_odd: sticker remainders');
   const CARD = [680, 330], EQX = 690, EQS = 44, EQY1 = 618, EQY2 = 680;
   const EQ_A = '(m + 1 + m) × (m + 1 + m)', EQ_B = '= 4 × m × (m + 1) + 1';
-  const EQ1L = layoutWriting({ text: EQ_A, x: 0, y: 0, size: EQS, t0: T.EQ1, speed: 3600, gap: 0.02, glyphGap: 0.02 });
-  if (EQ1L.tEnd > T.EQ2) console.error('o2_odd: equation lines overlap in time', EQ1L.tEnd);
+  if (T.EQ1 + T.EQ1_DUR > T.EQ2 || T.EQ2 + T.EQ2_DUR > T.CHECK || T.CHECK + T.CHECK_DUR > T.SHRINK) console.error('o2_odd: writing overlaps');
   const CHK = '4 × 12 + 1 = 49 ✓';
   { const m = CHK.match(/\d+/g).map(Number); if (m[0] * m[1] + m[2] !== m[3]) console.error('o2_odd: the check line', CHK); }
 
@@ -94,6 +93,13 @@
   const dotO = (key, p, r, col, z, o = 1) => { if (r <= 0.05 || o <= 0.01) return; dot(key, p, r, col, z); if (o < 1) DL.items[DL.items.length - 1].attrs.opacity = +o.toFixed(3); };
   const dashRect = (key, x0, y0, x1, y1, o = {}) => { const P = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]; P.forEach((p, i) => N2.dash(`${key}${i}`, p, P[(i + 1) % 4], { step: o.step || 12, on: o.on || 6, w: o.w || 2.6, z: o.z ?? Z.front, color: o.color || C.pencil, opacity: o.opacity })); };
   const W = (id, s, x, y, size, t0, o = {}) => N2.W(id, s, x, y, size, t0, o);
+  /** hand-writing squeezed into `dur` seconds (write's strokes have a 0.06 s minimum each, too slow for a long line) */
+  COMP.o2_w = {
+    init(fx) { layoutWriting(fx); const k = fx.dur / Math.max(0.01, fx.tEnd - fx.t0); fx.strokes.forEach(s => { s.t0 = fx.t0 + (s.t0 - fx.t0) * k; s.dur *= k; }); fx.tEnd = fx.t0 + fx.dur; return fx; },
+    draw: (fx, t) => COMP.write.draw(fx, t),
+    cues: fx => fx.strokes.filter((s, i) => i % 3 === 0).map(s => [s.t0, fx.sfx || 'chalk']),
+  };
+  const WF = (id, s, x, y, size, t0, dur, o = {}) => ({ ...N2.W(id, s, x, y, size, t0, o), type: 'o2_w', dur });
   const pieceBox = (key, P, b, g, pad, d, o = {}) => {   // a piece's red outline round its cell box b = [i0, j0, i1, j1], P(i, j) → point
     const a = P(b[0], b[1]), c = P(b[2], b[3]);
     stroke(key, superPts((a[0] + c[0]) / 2, (a[1] + c[1]) / 2, c[0] - a[0] + 2 * pad, c[1] - a[1] + 2 * pad, 22, 6), { z: Z.annot - 3, w: o.w || 3, color: C.red, closed: true, draw: d, opacity: o.opacity });
@@ -377,7 +383,7 @@
           W('o2m0w', 'm = 0', GN.cx - 205, GB + 22, 40, T.M0L),
           { type: 'scribe', id: 'o2m0t', text: '：只剩中心 1 个', x: GN.cx - 205 + writeWidth('m = 0', 40) + 8, y: GB + 42, size: 40, t0: T.M0L + 0.3, cps: 16, z: Z.annot, sfx: 'pen' },
         ] },
-        W('o2chk', CHK, SQB[0], 600, 36, T.CHECK, { anchor: 'middle', color: 'red' }),
+        WF('o2chk', CHK, SQB[0], 600, 36, T.CHECK, T.CHECK_DUR, { anchor: 'middle', color: 'red' }),
       ] },
 
       // 组 | 零头 (part D), gone before the signs come
@@ -389,8 +395,8 @@
 
       // the equation (stays to the end)
       { type: 'n2_grp', id: 'o2eqG', out: T.END + 0.15, dur: 0.35, inner: [
-        W('o2eq1', EQ_A, EQX, EQY1, EQS, T.EQ1, { anchor: 'middle', speed: 3600 }),
-        W('o2eq2', EQ_B, EQX, EQY2, EQS, T.EQ2, { anchor: 'middle', speed: 3600 }),
+        WF('o2eq1', EQ_A, EQX, EQY1, EQS, T.EQ1, T.EQ1_DUR, { anchor: 'middle' }),
+        WF('o2eq2', EQ_B, EQX, EQY2, EQS, T.EQ2, T.EQ2_DUR, { anchor: 'middle' }),
       ] },
 
       // the conclusion card ② and its scope card

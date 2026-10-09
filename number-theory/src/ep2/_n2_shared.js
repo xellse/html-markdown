@@ -26,7 +26,7 @@ const N2 = {
   STACK_X: 1180,                    // 证明栈的左边
   STACK_Y: 340, STACK_LH: 58,       // 证明栈第 0 行的中心 y、行距
   // 证明栈上方钉的范围卡（proof 场钉上，borrow、wall、dark 场开场就在；用 PROPS.n1_card 画）
-  STACK_CARD: { at: [1370, 236], w: 392, h: 130, size: 30, lines: ['两个数从 0、1、2……里挑，', '叫 a、b，a > b'] },
+  STACK_CARD: { at: [1362, 236], w: 424, h: 130, size: 34, lines: ['a、b 从 0、1、2……里挑，', 'a > b'] },
 };
 
 /* ---------------- 小工具 ---------------- */
@@ -74,7 +74,7 @@ COMP.n2_fn = { draw(fx, t, F) { if (t < fx.t0) return; fx.fn(t, t - fx.t0, fx.id
    N2.fill(key, x0, y0, x1, y1, r, o)：在矩形里画余 r 的花纹（0 实心、1 斜线、2 网点、3 空心＝什么都不画）。
      o: { z, opacity, draw（0..1，从左往右画出多少）, step（斜线间距，默认 18）, dot（网点半径，默认 3.5） }
    N2.brick(key, cx, cy, n, r, o)：数字砖。左边一小条"花纹签"（余 r 的花纹），右边纸色底上写数字，所以花纹不会穿过数字。
-     r = null 表示白砖（不刷花纹，用在"平方检查站"）。o: { w: 96, h: 64, size, z, opacity, scale, dim（变灰 0..1）, color（数字颜色）, tab（花纹签宽，默认 w×0.28） }
+     r = null 表示白砖（不刷花纹，用在"平方检查站"）。o: { w: 96（四位数默认 132）, h: 64, size, z, opacity, scale, dim（变灰 0..1）, color（数字颜色）, tab（花纹签宽，默认 27） }
    本集的四种花纹只表示"余几"，别的东西（风车分片、借位、检查站）都不用它们。 */
 N2.fill = (k, x0, y0, x1, y1, r, o = {}) => {
   const z = o.z ?? Z.set + 0.2, op = o.opacity ?? 1, xe = x0 + (x1 - x0) * clamp(o.draw ?? 1);
@@ -102,14 +102,15 @@ N2.fill = (k, x0, y0, x1, y1, r, o = {}) => {
 };
 N2.brick = (k, cx, cy, n, r, o = {}) => {
   const s = o.scale ?? 1; if (s <= 0.01) return;
-  const w = (o.w || 96) * s, h = (o.h || 64) * s, z = o.z ?? Z.front, op = o.opacity ?? 1, tw = (o.tab ?? (o.w || 96) * 0.28) * s;
+  const wide = String(n).length >= 4, W0 = o.w || (wide ? 132 : 96);   // four-digit numbers get a wider brick so the digits stay ≥ 36
+  const w = W0 * s, h = (o.h || 64) * s, z = o.z ?? Z.front, op = o.opacity ?? 1, tw = (o.tab ?? Math.min(27, W0 * 0.28)) * s;
   const x0 = cx - w / 2, y0 = cy - h / 2, x1 = cx + w / 2, y1 = cy + h / 2, n0 = DL.items.length;
   stroke(k + '.b', N2.box(x0, y0, x1, y1), { z, w: 3.5, fill: '#FFFDF7', opacity: op });
   if (r !== null && r !== undefined) {
     N2.fill(k + '.f', x0 + 3, y0 + 3, x0 + tw, y1 - 3, r, { z: z + 0.1, opacity: op, step: 12 * s, dot: 2.6 * s });
     stroke(k + '.tl', [[x0 + tw, y0], [x0 + tw, y1]], { z: z + 0.15, w: 2.5, opacity: op });
   }
-  const str = String(n), fs = (o.size || (str.length >= 4 ? 30 : str.length === 3 ? 36 : 42)) * s;
+  const str = String(n), fs = (o.size || (str.length >= 4 ? 38 : str.length === 3 ? 38 : 42)) * s;
   const tx = r === null || r === undefined ? cx : (x0 + tw + x1) / 2;
   text(k + '.n', str, tx, cy + 1, { size: fs, font: CFG.FONT_MIX, z: z + 0.2, anchor: 'middle', color: o.color || C.ink, opacity: op });
   if (o.dim) N2.fadeFrom(n0, 1 - 0.65 * clamp(o.dim));
@@ -398,8 +399,8 @@ COMP.n2_stack = {
     if (fx.ok !== undefined && t >= fx.ok + 0.7) text(k + '.okt', '对任何 □ 都成立', x - 40, y0 + 3.5 * lh, { size: 36, color: C.red, z: Z.annot, anchor: 'end', font: CFG.FONT_MIX, opacity: clamp((t - fx.ok - 0.7) / 0.3) });
     if (any) stroke(k + '.rule', [[x - 24, y0 - 30], [x - 24, y0 + 7.6 * lh]], { z: Z.set, w: 2.5, color: C.pencil, opacity: 0.7 });
     if (fx.stamp !== undefined && t >= fx.stamp) {
-      const su = clamp((t - fx.stamp) / 0.2), sc = lerp(1.8, 1, EASE.back(su));
-      DL.save(); DL.translate(x + 270, y0 - 30); DL.rotate(-8); DL.scale(sc);
+      const su = clamp((t - fx.stamp) / 0.2), sc = 0.85 * lerp(1.8, 1, EASE.back(su));
+      DL.save(); DL.translate(x + 300, y0 + 3 * lh + 2); DL.rotate(-8); DL.scale(sc);   // right of the short row 3 (组够减), clear of the scope card
       stroke(k + '.st', N2.box(-92, -34, 92, 34), { z: Z.stamp, w: 5, color: C.red, opacity: clamp(su * 3) });
       text(k + '.stt', '反证法', 0, 2, { size: 44, color: C.red, z: Z.stamp, anchor: 'middle', opacity: clamp(su * 3) });
       DL.restore();

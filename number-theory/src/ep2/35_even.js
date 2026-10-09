@@ -23,7 +23,7 @@
     ROW: 0.9, ROW_DT: 0.13, ROW_LAB: 2.5, ROW_LDT: 0.16, ROW_OUT: 4.25,
     C6: 4.6, CUT_H: 5.05, CUT_V: 5.3, SPLIT: 5.6, EQ36: 6.0,
     GEN: 6.9, TOP: 7.75, LEFT: 8.3, ANY: 8.95,
-    GCUT_H: 11.0, GCUT_V: 11.45, MM: 12.3, MM_DT: 0.15, SAME: 14.75, EQ1: 13.25, EQ2: 14.1, MM_OUT: 15.25,
+    GCUT_H: 11.0, GCUT_V: 11.45, MM: 12.3, MM_DT: 0.15, SAME: 14.8, EQ1: 13.25, EQ1_DUR: 0.85, EQ2: 14.15, EQ2_DUR: 0.6, MM_OUT: 15.25,
     HEAD: 15.55, GRAB: [15.7, 16.35, 16.95], FAST: 17.45, FAST_DT: 0.11, EMPTY: 18.45, RES: 18.9,
     OUT: 20.15, DUR: 20.6,
   };
@@ -48,13 +48,19 @@
   const COLX = 1210, COLY = i => 312 + 64 * i, LEFTX = 1420;
   const EQY = 678, EQS = 44, EQ_ALL = '(m + m) × (m + m) = 4 × m × m', EQ_A = '(m + m) × (m + m)';
   const EQX = GN.cx - writeWidth(EQ_ALL, EQS) / 2, EQX2 = EQX + writeWidth(EQ_A + ' ', EQS) + 0.1 * EQS;
-  const EQ1L = layoutWriting({ text: EQ_A, x: EQX, y: EQY, size: EQS, t0: T.EQ1, speed: 3600, gap: 0.02, glyphGap: 0.02 });
-  if (EQ1L.tEnd > T.EQ2) console.error('e2_even: the two halves of the equation overlap', EQ1L.tEnd);
+  if (T.EQ1 + T.EQ1_DUR > T.EQ2 || T.EQ2 + T.EQ2_DUR > T.SAME) console.error('e2_even: the two halves of the equation overlap');
 
   /* ---------------- helpers ---------------- */
   const dotO = (key, p, r, col, z, o = 1) => { if (r <= 0.05 || o <= 0.01) return; dot(key, p, r, col, z); if (o < 1) DL.items[DL.items.length - 1].attrs.opacity = +o.toFixed(3); };
   const dashRect = (key, x0, y0, x1, y1, o = {}) => { const P = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]; P.forEach((p, i) => N2.dash(`${key}${i}`, p, P[(i + 1) % 4], { step: o.step || 12, on: o.on || 6, w: o.w || 2.6, z: o.z ?? Z.front, color: o.color || C.pencil })); };
   const W = (id, s, x, y, size, t0, o = {}) => N2.W(id, s, x, y, size, t0, o);
+  /** hand-writing squeezed into `dur` seconds (write's strokes have a 0.06 s minimum each, too slow for a long line) */
+  COMP.e2_w = {
+    init(fx) { layoutWriting(fx); const k = fx.dur / Math.max(0.01, fx.tEnd - fx.t0); fx.strokes.forEach(s => { s.t0 = fx.t0 + (s.t0 - fx.t0) * k; s.dur *= k; }); fx.tEnd = fx.t0 + fx.dur; return fx; },
+    draw: (fx, t) => COMP.write.draw(fx, t),
+    cues: fx => fx.strokes.filter((s, i) => i % 3 === 0).map(s => [s.t0, fx.sfx || 'chalk']),
+  };
+  const WF = (id, s, x, y, size, t0, dur, o = {}) => ({ ...N2.W(id, s, x, y, size, t0, o), type: 'e2_w', dur });
 
   /* ---------------- components ---------------- */
   /** the row of little squares 1..6, each labelled 奇 or 偶, and an ellipsis */
@@ -189,8 +195,8 @@
         ...sideLabels,
         { type: 'scribe', id: 'e2any', text: 'm = 0、1、2……都行', x: GN.cx, y: 638, size: 36, anchor: 'middle', t0: T.ANY, cps: 14, z: Z.annot, sfx: 'pen' },
         ...mmLabels,
-        W('e2eq1', EQ_A, EQX, EQY, EQS, T.EQ1, { speed: 3600 }),
-        W('e2eq2', '= 4 × m × m', EQX2, EQY, EQS, T.EQ2, { speed: 3600 }),
+        WF('e2eq1', EQ_A, EQX, EQY, EQS, T.EQ1, T.EQ1_DUR),
+        WF('e2eq2', '= 4 × m × m', EQX2, EQY, EQS, T.EQ2, T.EQ2_DUR),
       ] },
 
       // the result: 组 | 零头; the 零头 column stays empty → a solid brick 余0
