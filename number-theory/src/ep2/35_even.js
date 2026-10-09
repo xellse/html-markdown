@@ -141,7 +141,7 @@
       // the 组 column runs on: ⋮
       [0, 1, 2].forEach(q => { const a = EASE.back(clamp((t - T.FAST - 0.15 - q * 0.08) / 0.2)); if (a > 0) dot(`${k}.cm${q}`, [COLX, COLY(3) - 16 + q * 16], 5 * a, C.ink, Z.front); });
       // the two cuts (ink), across and down
-      const L = EDGE + 30;
+      const L = EDGE + 16;
       if (t >= T.GCUT_H) stroke(k + '.ch', [[GN.cx - L, GN.cy], [GN.cx + L, GN.cy]], { z: Z.board, w: 4.5, draw: EASE.out(clamp((t - T.GCUT_H) / 0.3)) });
       if (t >= T.GCUT_V) stroke(k + '.cv', [[GN.cx, GN.cy - L], [GN.cx, GN.cy + L]], { z: Z.board, w: 4.5, draw: EASE.out(clamp((t - T.GCUT_V) / 0.3)) });
       F.targets[k + '.c'] = [GN.cx, GN.cy];
@@ -152,9 +152,9 @@
 
   // the general square's labels: m + m along the top and down the left (hand-written)
   const sideLabels = [
-    W('e2tm1', 'm', GN.cx - BC, GN.cy - EDGE - 70, 44, T.TOP, { anchor: 'middle' }),
-    W('e2tp', '+', GN.cx, GN.cy - EDGE - 70, 44, T.TOP + 0.2, { anchor: 'middle' }),
-    W('e2tm2', 'm', GN.cx + BC, GN.cy - EDGE - 70, 44, T.TOP + 0.35, { anchor: 'middle' }),
+    W('e2tm1', 'm', GN.cx - BC, GN.cy - EDGE - 74, 44, T.TOP, { anchor: 'middle' }),
+    W('e2tp', '+', GN.cx, GN.cy - EDGE - 74, 44, T.TOP + 0.2, { anchor: 'middle' }),
+    W('e2tm2', 'm', GN.cx + BC, GN.cy - EDGE - 74, 44, T.TOP + 0.35, { anchor: 'middle' }),
     W('e2lm1', 'm', GN.cx - EDGE - 54, GN.cy - BC - 24, 44, T.LEFT, { anchor: 'middle' }),
     W('e2lp', '+', GN.cx - EDGE - 54, GN.cy - 24, 44, T.LEFT + 0.2, { anchor: 'middle' }),
     W('e2lm2', 'm', GN.cx - EDGE - 54, GN.cy + BC - 24, 44, T.LEFT + 0.35, { anchor: 'middle' }),

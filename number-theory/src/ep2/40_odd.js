@@ -83,7 +83,7 @@
   const OB = [1180, 480], NB = [1400, 320], JX = 1480, GRIP = [NB[0], 590];
   const SW = 300, SH = 130, SS = 42, STK = [1, 4, 9, 16, 25];
   if (STK.map(v => v % 4).join() !== '1,0,1,0,1') console.error('o2_odd: sticker remainders');
-  const CARD = [680, 330], EQX = 690, EQS = 44, EQY1 = 618, EQY2 = 680;
+  const CARD = [680, 330], EQX = 690, EQS = 44, EQY1 = 648, EQY2 = 710;
   const EQ_A = '(m + 1 + m) × (m + 1 + m)', EQ_B = '= 4 × m × (m + 1) + 1';
   if (T.EQ1 + T.EQ1_DUR > T.EQ2 || T.EQ2 + T.EQ2_DUR > T.CHECK || T.CHECK + T.CHECK_DUR > T.SHRINK) console.error('o2_odd: writing overlaps');
   const CHK = '4 × 12 + 1 = 49 ✓';
@@ -361,7 +361,7 @@
         turn: [[0, -0.4], [T.KID_OUT - 0.05, 0.5, 0.1]],
         gaze: [[0, [700, 430]], [T.CUT_H, [700, 455]], [T.EXTRA, [820, 420]], [T.SCRATCH, 'viewer'], [T.JOIN, [700, 430]], [T.GEN, [640, 400]], [T.PIECE[0], [220, 400]],
           [T.GPIECE, [640, 400]], [T.EACH, [980, 400]], [T.OUTER[0], [640, 240]], [T.OUTER[1], [820, 400]], [T.OUTER[2], [640, 570]], [T.OUTER[3], [470, 400]],
-          [T.SEAM[0], [640, 400]], [T.INN[0], [1000, 400]], [T.GRAB[0], [700, 360]], [T.WIG, [640, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 660]], [T.CHECK, [220, 620]],
+          [T.SEAM[0], [640, 400]], [T.INN[0], [1000, 400]], [T.GRAB[0], [700, 360]], [T.WIG, [640, 400]], [T.LEFT1, [LEFTX, 420]], [T.EQ1, [690, 690]], [T.CHECK, [220, 606]],
           [T.CARD, [CARD[0], CARD[1]]], [T.SWAP, [NB[0] - 120, NB[1] - 107]], [T.DOCK, [868, 118]], [T.STRIKE[0] - 0.3, [OB[0], OB[1]]], [T.KID_OUT, 'viewer']],
       },
     },
@@ -383,7 +383,7 @@
           W('o2m0w', 'm = 0', GN.cx - 205, GB + 22, 40, T.M0L),
           { type: 'scribe', id: 'o2m0t', text: '：只剩中心 1 个', x: GN.cx - 205 + writeWidth('m = 0', 40) + 8, y: GB + 42, size: 40, t0: T.M0L + 0.3, cps: 16, z: Z.annot, sfx: 'pen' },
         ] },
-        WF('o2chk', CHK, SQB[0], 600, 36, T.CHECK, T.CHECK_DUR, { anchor: 'middle', color: 'red' }),
+        WF('o2chk', CHK, SQB[0], 588, 36, T.CHECK, T.CHECK_DUR, { anchor: 'middle', color: 'red' }),
       ] },
 
       // 组 | 零头 (part D), gone before the signs come
